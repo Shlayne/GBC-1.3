@@ -8,10 +8,10 @@ public:
 	ImGuiWrapper(const Window& window);
 	~ImGuiWrapper();
 
-	void begin();
-	void end();
+	void Begin();
+	void End();
 private:
-	void init();
+	void Init();
 
 	const Window& window;
 };

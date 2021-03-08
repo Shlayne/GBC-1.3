@@ -2,7 +2,7 @@
 
 #include "Events/Event.h"
 #include "Util/TextureAtlas.h"
-#include "Util/Camera.h"
+#include "Util/PerspectiveCamera.h"
 #include "Util/CameraController3D.h"
 #include "Rendering/Basic/BasicModel.h"
 //#include "Rendering/Framebuffer.h"
@@ -13,15 +13,21 @@ public:
 	Sandbox();
 	~Sandbox();
 
-	void onUpdate(float deltaTime);
-	void onRender();
-	void onImGuiRender();
-	void onEvent(const Event& event);
+	void OnUpdate(float deltaTime);
+	void OnRender();
+	void OnImGuiRender();
+	void OnEvent(Event& event);
 private:
-	Camera camera;
+	PerspectiveCamera camera;
 	CameraController3D cameraController;
 	//std::unique_ptr<Framebuffer> framebuffer;
-	BasicModel model{4, 6};
+	BasicModel model{4, 6}; // Debug
 };
 
-// TODO: texture specifications
+// TODO: not in any particular order...
+// 1) texture specifications
+// 2) orthographic camera
+// 3) isometric camera ???
+// 4) render one of a framebuffers' color attachments
+// 5) logging
+// 6) precompiled headers

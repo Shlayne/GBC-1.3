@@ -5,5 +5,5 @@
 class FileIO
 {
 public:
-	static std::string readFile(const std::string& filePath);
+	static std::string ReadFile(const std::string& filePath);
 };

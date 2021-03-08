@@ -1,6 +1,5 @@
 #pragma once
 
-
 enum class Mousecode : unsigned short
 {
 	// Taken from glfw3.h and modified

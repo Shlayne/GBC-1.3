@@ -19,11 +19,11 @@ public:
 		: type(type) {}
 	virtual ~Event() = default;
 
-	inline EventType getType() const { return type; }
-	virtual std::string toString() const = 0;
+	inline EventType GetType() const { return type; }
+	virtual std::string ToString() const = 0;
 
-	inline bool isHandled() const { return handled; }
-	inline void handle() const { handled = true; }
+	inline bool IsHandled() const { return handled; }
+	inline void Handle() const { handled = true; }
 private:
 	EventType type;
 	mutable bool handled = false;

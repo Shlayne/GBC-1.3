@@ -6,9 +6,9 @@ class Context
 public:
 	Context(GLFWwindow* window);
 
-	void swapBuffers();
+	void SwapBuffers();
 
-	float getElapsedTime() const;
+	float GetElapsedTime() const;
 private:
 	GLFWwindow* window;
 	mutable float lastTime = 0.0f;

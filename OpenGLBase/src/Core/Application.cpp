@@ -1,5 +1,4 @@
 #include "Application.h"
-
 #include "Rendering/Renderer.h"
 #include "Events/WindowEvents.h"
 
@@ -12,11 +11,11 @@ Application::Application(const WindowSpecifications& windowSpecs)
 	instance = this;
 
 	window = new Window(windowSpecs);
-	window->setEventCallback(BIND_FUNC(onEvent));
+	window->SetEventCallback(BIND_FUNC(OnEvent));
 
 	imguiWrapper = new ImGuiWrapper(*window);
 
-	Renderer::init();
+	Renderer::Init();
 
 	sandbox = new Sandbox();
 }
@@ -26,70 +25,70 @@ Application::~Application()
 	delete sandbox;
 	delete imguiWrapper;
 
-	Renderer::shutdown();
+	Renderer::Shutdown();
 	delete window;
 }
 
-void Application::run()
+void Application::Run()
 {
 	while (running)
 	{
-		float deltaTime = window->getContext()->getElapsedTime();
-		sandbox->onUpdate(deltaTime);
+		float deltaTime = window->GetContext()->GetElapsedTime();
+		sandbox->OnUpdate(deltaTime);
 
 		if (rendering)
 		{
-			sandbox->onRender();
-			imguiWrapper->begin();
-			sandbox->onImGuiRender();
-			imguiWrapper->end();
+			sandbox->OnRender();
+			imguiWrapper->Begin();
+			sandbox->OnImGuiRender();
+			imguiWrapper->End();
 		}
 
-		window->pollEvents();
+		window->PollEvents();
 
 		if (rendering)
-			window->swapBuffers();
+			window->SwapBuffers();
 	}
 }
 
-void Application::terminate()
+void Application::Terminate()
 {
 	running = false;
 }
 
-void Application::onEvent(const Event& event)
+void Application::OnEvent(Event& event)
 {
-	switch (event.getType())
+	switch (event.GetType())
 	{
 		case EventType::WindowClose:
 		{
-			terminate();
-			event.handle();
+			Terminate();
+			event.Handle();
 			break;
 		}
 		case EventType::WindowResize:
 		{
 			const WindowResizeEvent& wre = (const WindowResizeEvent&)event;
-			if (wre.getWidth() == 0 || wre.getHeight() == 0)
+			if (wre.GetWidth() == 0 || wre.GetHeight() == 0)
 			{
 				rendering = false;
-				event.handle();
+				event.Handle();
 			}
 			else
 			{
 				rendering = true;
-				Renderer::onViewportResized(wre.getWidth(), wre.getHeight());
+				Renderer::OnViewportResized(wre.GetWidth(), wre.GetHeight());
 			}
 			break;
 		}
 		case EventType::WindowMinimize:
 		{
 			const WindowMinimizeEvent& wme = (const WindowMinimizeEvent&)event;
-			rendering = !wme.isMinimized();
+			rendering = !wme.IsMinimized();
 			break;
 		}
 	}
 
-	if (!event.isHandled())
-		sandbox->onEvent(event);
+	if (!event.IsHandled())
+		sandbox->OnEvent(event);
 }

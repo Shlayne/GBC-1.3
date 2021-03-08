@@ -1,7 +1,5 @@
 #include "Window.h"
-
 #include <glfw/glfw3.h>
-
 #include "Events/WindowEvents.h"
 #include "Events/KeyEvents.h"
 #include "Events/MouseEvents.h"
@@ -33,7 +31,7 @@ Window::Window(const WindowSpecifications& specs)
 
 	if (state.fullscreen)
 	{
-		saveDimensions();
+		SaveDimensions();
 		state.current.x = 0;
 		state.current.y = 0;
 		state.current.width = videoMode->width;
@@ -48,8 +46,8 @@ Window::Window(const WindowSpecifications& specs)
 	
 	context = new Context(window);
 
-	setVSync(specs.vsync);
-	setCaptureMouse(specs.captureMouse);
+	SetVSync(specs.vsync);
+	SetCaptureMouse(specs.captureMouse);
 
 	glfwSetWindowUserPointer(window, &state);
 	
@@ -57,56 +55,66 @@ Window::Window(const WindowSpecifications& specs)
 	glfwSetWindowCloseCallback(window, [](GLFWwindow* window)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.eventCallback(WindowCloseEvent());
+		WindowCloseEvent event;
+		state.eventCallback(event);
 	});
 	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int width, int height)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
 		state.current.width = width;
 		state.current.height = height;
-		state.eventCallback(WindowResizeEvent(width, height));
+		WindowResizeEvent event(width, height);
+		state.eventCallback(event);
 	});
 	glfwSetWindowPosCallback(window, [](GLFWwindow* window, int x, int y)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
 		state.current.x = x;
 		state.current.y = y;
-		state.eventCallback(WindowMoveEvent(x, y));
+		WindowMoveEvent event(x, y);
+		state.eventCallback(event);
 	});
 	glfwSetWindowFocusCallback(window, [](GLFWwindow* window, int focused)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.eventCallback(WindowFocusEvent(focused == GLFW_TRUE));
+		WindowFocusEvent event(focused == GLFW_TRUE);
+		state.eventCallback(event);
 	});
 	glfwSetWindowIconifyCallback(window, [](GLFWwindow* window, int iconified)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.eventCallback(WindowMinimizeEvent(iconified == GLFW_TRUE));
+		WindowMinimizeEvent event(iconified == GLFW_TRUE);
+		state.eventCallback(event);
 	});
 	glfwSetWindowMaximizeCallback(window, [](GLFWwindow* window, int maximized)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.eventCallback(WindowMaximizeEvent(maximized == GLFW_TRUE));
+		WindowMaximizeEvent event(maximized == GLFW_TRUE);
+		state.eventCallback(event);
 	});
 	glfwSetDropCallback(window, [](GLFWwindow* window, int pathCount, const char** paths)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.eventCallback(WindowDropEvent(pathCount, paths));
+		WindowDropEvent event(pathCount, paths);
+		state.eventCallback(event);
 	});
 	glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.eventCallback(WindowFramebufferResizeEvent(width, height));
+		WindowFramebufferResizeEvent event(width, height);
+		state.eventCallback(event);
 	});
 	glfwSetWindowContentScaleCallback(window, [](GLFWwindow* window, float scaleX, float scaleY)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.eventCallback(WindowContentScaleEvent(scaleX, scaleY));
+		WindowContentScaleEvent event(scaleX, scaleY);
+		state.eventCallback(event);
 	});
 	glfwSetWindowRefreshCallback(window, [](GLFWwindow* window)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.eventCallback(WindowRefreshEvent());
+		WindowRefreshEvent event;
+		state.eventCallback(event);
 	});
 
 	// Key Events
@@ -117,9 +125,24 @@ Window::Window(const WindowSpecifications& specs)
 		{
 			switch (action)
 			{
-				case GLFW_PRESS: state.eventCallback(KeyPressEvent(static_cast<Keycode>(keycode), mods)); break;
-				case GLFW_REPEAT: state.eventCallback(KeyRepeatEvent(static_cast<Keycode>(keycode), mods)); break;
-				case GLFW_RELEASE: state.eventCallback(KeyReleaseEvent(static_cast<Keycode>(keycode), mods)); break;
+				case GLFW_PRESS:
+				{
+					KeyPressEvent event(static_cast<Keycode>(keycode), mods);
+					state.eventCallback(event);
+					break;
+				}
+				case GLFW_REPEAT:
+				{
+					KeyRepeatEvent event(static_cast<Keycode>(keycode), mods);
+					state.eventCallback(event);
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					KeyReleaseEvent event(static_cast<Keycode>(keycode), mods);
+					state.eventCallback(event);
+					break;
+				}
 			}
 		}
 	});
@@ -127,7 +150,8 @@ Window::Window(const WindowSpecifications& specs)
 	glfwSetCharModsCallback(window, [](GLFWwindow* window, unsigned int codepoint, int mods)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.eventCallback(KeyCharEvent(codepoint, mods));
+		KeyCharEvent event(codepoint, mods);
+		state.eventCallback(event);
 	});
 
 	// Mouse Events
@@ -136,24 +160,37 @@ Window::Window(const WindowSpecifications& specs)
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
 		switch (action)
 		{
-			case GLFW_PRESS: state.eventCallback(MouseButtonPressEvent(static_cast<Mousecode>(button), mods)); break;
-			case GLFW_RELEASE: state.eventCallback(MouseButtonReleaseEvent(static_cast<Mousecode>(button), mods)); break;
+			case GLFW_PRESS:
+			{
+				MouseButtonPressEvent event(static_cast<Mousecode>(button), mods);
+				state.eventCallback(event);
+				break;
+			}
+			case GLFW_RELEASE:
+			{
+				MouseButtonReleaseEvent event(static_cast<Mousecode>(button), mods);
+				state.eventCallback(event);
+				break;
+			}
 		}
 	});
 	glfwSetCursorPosCallback(window, [](GLFWwindow* window, double x, double y)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.eventCallback(MouseMoveEvent((float)x, (float)y));
+		MouseMoveEvent event((float)x, (float)y);
+		state.eventCallback(event);
 	});
 	glfwSetScrollCallback(window, [](GLFWwindow* window, double offsetX, double offsetY)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.eventCallback(MouseScrollEvent((float)offsetX, (float)offsetY));
+		MouseScrollEvent event((float)offsetX, (float)offsetY);
+		state.eventCallback(event);
 	});
 	glfwSetCursorEnterCallback(window, [](GLFWwindow* window, int entered)
 	{
 		auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.eventCallback(MouseEnterEvent(entered == GLFW_TRUE));
+		MouseEnterEvent event(entered == GLFW_TRUE);
+		state.eventCallback(event);
 	});
 
 	//// Device Events
@@ -163,7 +200,8 @@ Window::Window(const WindowSpecifications& specs)
 	//	auto window = static_cast<GLFWwindow*>(Application::get().getWindow().getNativeWindow());
 	//	auto& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
 
-	//	state.eventCallback(JoystickConnectEvent(jid, event == GLFW_CONNECTED));
+	//	JoystickConnectEvent event(jid, event == GLFW_CONNECTED);
+	//	state.eventCallback(event);
 	//});
 
 	glfwShowWindow(window);
@@ -176,42 +214,42 @@ Window::~Window()
 	glfwTerminate();
 }
 
-void Window::pollEvents()
+void Window::PollEvents()
 {
 	glfwPollEvents();
 }
 
-void Window::swapBuffers()
+void Window::SwapBuffers()
 {
-	context->swapBuffers();
+	context->SwapBuffers();
 }
 
-void Window::setTitle(const char* title)
+void Window::SetTitle(const char* title)
 {
 	glfwSetWindowTitle(window, title);
 	state.title = title;
 }
 
-void Window::setVSync(bool vsync)
+void Window::SetVSync(bool vsync)
 {
 	glfwSwapInterval((int)vsync);
 	state.vsync = vsync;
 }
 
-void Window::setResizable(bool resizable)
+void Window::SetResizable(bool resizable)
 {
 	glfwSetWindowAttrib(window, GLFW_RESIZABLE, resizable);
 	state.resizable = resizable;
 }
 
-void Window::setFullscreen(bool fullscreen)
+void Window::SetFullscreen(bool fullscreen)
 {
 	if (fullscreen)
 	{
 		// Can change videomode while fullscreen
 		// Only cache this the first time
 		if (!state.fullscreen)
-			saveDimensions();
+			SaveDimensions();
 
 		// https://stackoverflow.com/questions/21421074/how-to-create-a-full-screen-window-on-the-current-monitor-with-glfw
 		// Get the monitor that most of the window is on
@@ -242,7 +280,7 @@ void Window::setFullscreen(bool fullscreen)
 		const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
 		glfwSetWindowMonitor(window, monitor, 0, 0, videoMode->width, videoMode->height, GLFW_DONT_CARE);
 
-		setVSync(getVSync());
+		SetVSync(GetVSync());
 	}
 	else
 		glfwSetWindowMonitor(window, nullptr, state.preFullscreen.x, state.preFullscreen.y, state.preFullscreen.width, state.preFullscreen.height, GLFW_DONT_CARE);
@@ -250,13 +288,13 @@ void Window::setFullscreen(bool fullscreen)
 	state.fullscreen = fullscreen;
 }
 
-void Window::setCaptureMouse(bool captureMouse)
+void Window::SetCaptureMouse(bool captureMouse)
 {
 	glfwSetInputMode(window, GLFW_CURSOR, captureMouse ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 	state.captureMouse = captureMouse;
 }
 
-void Window::saveDimensions()
+void Window::SaveDimensions()
 {
 	state.preFullscreen.x = state.current.x;
 	state.preFullscreen.y = state.current.y;

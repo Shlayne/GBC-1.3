@@ -7,7 +7,7 @@ WindowCloseEvent::WindowCloseEvent()
 
 }
 
-std::string WindowCloseEvent::toString() const
+std::string WindowCloseEvent::ToString() const
 {
 	return "WindowCloseEvent";
 }
@@ -18,7 +18,7 @@ WindowResizeEvent::WindowResizeEvent(int width, int height)
 
 }
 
-std::string WindowResizeEvent::toString() const
+std::string WindowResizeEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "WindowResizeEvent: width=" << width << " height=" << height;
@@ -32,7 +32,7 @@ WindowMoveEvent::WindowMoveEvent(int x, int y)
 
 }
 
-std::string WindowMoveEvent::toString() const
+std::string WindowMoveEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "WindowMoveEvent: x=" << x << " y=" << y;
@@ -45,7 +45,7 @@ WindowFocusEvent::WindowFocusEvent(bool focus)
 
 }
 
-std::string WindowFocusEvent::toString() const
+std::string WindowFocusEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "WindowFocusEvent: focused=" << focus;
@@ -58,7 +58,7 @@ WindowMinimizeEvent::WindowMinimizeEvent(bool minimize)
 
 }
 
-std::string WindowMinimizeEvent::toString() const
+std::string WindowMinimizeEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "WindowMinimizeEvent: minimized=" << minimize;
@@ -71,7 +71,7 @@ WindowMaximizeEvent::WindowMaximizeEvent(bool maximize)
 
 }
 
-std::string WindowMaximizeEvent::toString() const
+std::string WindowMaximizeEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "WindowMaximizeEvent: maximized=" << maximize;
@@ -96,7 +96,7 @@ WindowDropEvent::~WindowDropEvent()
 	delete[] paths;
 }
 
-std::string WindowDropEvent::toString() const
+std::string WindowDropEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "WindowDropEvent: pathCount=" << pathCount << " paths:";
@@ -111,7 +111,7 @@ WindowFramebufferResizeEvent::WindowFramebufferResizeEvent(int width, int height
 
 }
 
-std::string WindowFramebufferResizeEvent::toString() const
+std::string WindowFramebufferResizeEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "WindowFramebufferResizeEvent: width=" << width << " height=" << height;
@@ -124,7 +124,7 @@ WindowContentScaleEvent::WindowContentScaleEvent(float scaleX, float scaleY)
 
 }
 
-std::string WindowContentScaleEvent::toString() const
+std::string WindowContentScaleEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "WindowContentScaleEvent: scaleX=" << scaleX << " scaleY=" << scaleY;
@@ -137,7 +137,7 @@ WindowRefreshEvent::WindowRefreshEvent()
 
 }
 
-std::string WindowRefreshEvent::toString() const
+std::string WindowRefreshEvent::ToString() const
 {
 	return "WindowContentScaleEvent";
 }

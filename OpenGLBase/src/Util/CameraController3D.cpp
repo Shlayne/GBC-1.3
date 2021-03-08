@@ -11,21 +11,21 @@ CameraController3D::CameraController3D(float speed, float sensitivity)
 
 }
 
-void CameraController3D::onUpdate(float deltaTime)
+void CameraController3D::OnUpdate(float deltaTime)
 {
 	const float movementSpeed = speed * deltaTime;
 
 	const glm::vec3 forward = movementSpeed * glm::vec3(cosf(rotation.y), 0.0f, sinf(rotation.y));
 	const glm::vec3 left = glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f));
 
-	if (Input::isKeyPressed(Keycode::W)) { translation.z -= forward.x; translation.x -= forward.z; }
-	if (Input::isKeyPressed(Keycode::S)) { translation.z += forward.x; translation.x += forward.z; }
-	if (Input::isKeyPressed(Keycode::A)) { translation.x -= left.z; translation.z -= left.x; }
-	if (Input::isKeyPressed(Keycode::D)) { translation.x += left.z; translation.z += left.x; }
-	if (Input::isKeyPressed(Keycode::LeftShift)) translation.y -= movementSpeed;
-	if (Input::isKeyPressed(Keycode::Space)) translation.y += movementSpeed;
+	if (Input::IsKeyPressed(Keycode::W)) { translation.z -= forward.x; translation.x -= forward.z; }
+	if (Input::IsKeyPressed(Keycode::S)) { translation.z += forward.x; translation.x += forward.z; }
+	if (Input::IsKeyPressed(Keycode::A)) { translation.x -= left.z; translation.z -= left.x; }
+	if (Input::IsKeyPressed(Keycode::D)) { translation.x += left.z; translation.z += left.x; }
+	if (Input::IsKeyPressed(Keycode::LeftShift)) translation.y -= movementSpeed;
+	if (Input::IsKeyPressed(Keycode::Space)) translation.y += movementSpeed;
 
-	if (Input::isMouseButtonPressed(Mousecode::ButtonLeft))
+	if (Input::IsMouseButtonPressed(Mousecode::ButtonLeft))
 	{
 		const float rotationSpeed = sensitivity * deltaTime;
 
@@ -36,13 +36,13 @@ void CameraController3D::onUpdate(float deltaTime)
 	}
 }
 
-void CameraController3D::onEvent(const Event& event)
+void CameraController3D::OnEvent(Event& event)
 {
-	if (event.getType() == EventType::MouseMove)
+	if (event.GetType() == EventType::MouseMove)
 	{
 		const MouseMoveEvent& mme = (const MouseMoveEvent&)event;
-		float mouseX = mme.getX();
-		float mouseY = mme.getY();
+		float mouseX = mme.GetX();
+		float mouseY = mme.GetY();
 		mouseDX = mouseX - lastMouseX;
 		mouseDY = mouseY - lastMouseY;
 		lastMouseX = mouseX;
@@ -50,7 +50,7 @@ void CameraController3D::onEvent(const Event& event)
 	}
 }
 
-glm::mat4 CameraController3D::getTransform() const
+glm::mat4 CameraController3D::GetTransform() const
 {
 	return glm::translate(glm::mat4(1.0f), translation) * glm::toMat4(glm::quat(rotation));
 }

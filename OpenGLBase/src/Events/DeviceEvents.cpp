@@ -7,7 +7,7 @@ JoystickConnectEvent::JoystickConnectEvent(int jid, bool connect)
 
 }
 
-std::string JoystickConnectEvent::toString() const
+std::string JoystickConnectEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "JoystickConnectEvent: connected=" << connect;
@@ -20,7 +20,7 @@ MonitorConnectEvent::MonitorConnectEvent(bool connect)
 
 }
 
-std::string MonitorConnectEvent::toString() const
+std::string MonitorConnectEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "MonitorConnectEvent: connected=" << connect;

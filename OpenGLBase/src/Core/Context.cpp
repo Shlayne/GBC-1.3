@@ -1,5 +1,4 @@
 #include "Context.h"
-
 #include <gl/glew.h>
 #include <glfw/glfw3.h>
 
@@ -11,12 +10,12 @@ Context::Context(GLFWwindow* window)
 	//std::cout << glGetString(GL_VERSION) << '\n';
 }
 
-void Context::swapBuffers()
+void Context::SwapBuffers()
 {
 	glfwSwapBuffers(window);
 }
 
-float Context::getElapsedTime() const
+float Context::GetElapsedTime() const
 {
 	float time = (float)glfwGetTime();
 	float elapsedTime = time - lastTime;

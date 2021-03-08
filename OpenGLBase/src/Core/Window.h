@@ -1,7 +1,6 @@
 #pragma once
 
 #include <functional>
-
 #include "Context.h"
 #include "Events/Event.h"
 
@@ -23,38 +22,38 @@ public:
 	Window(const WindowSpecifications& specs = WindowSpecifications());
 	~Window();
 
-	void pollEvents();
-	void swapBuffers();
+	void PollEvents();
+	void SwapBuffers();
 	
-	inline int getWidth() const { return state.current.width; }
-	inline int getHeight() const { return state.current.height; }
+	inline int GetWidth() const { return state.current.width; }
+	inline int GetHeight() const { return state.current.height; }
 
-	const char* getTitle() const { return state.title; }
-	void setTitle(const char* title);
+	const char* GetTitle() const { return state.title; }
+	void SetTitle(const char* title);
 
-	inline bool getVSync() const { return state.vsync; }
-	void setVSync(bool vsync);
-	inline void toggleVSync() { setVSync(!getVSync()); }
+	inline bool GetVSync() const { return state.vsync; }
+	void SetVSync(bool vsync);
+	inline void ToggleVSync() { SetVSync(!GetVSync()); }
 
-	inline bool getResizable() const { return state.resizable; }
-	void setResizable(bool resizable);
-	inline void toggleResizable() { setResizable(!getResizable()); }
+	inline bool GetResizable() const { return state.resizable; }
+	void SetResizable(bool resizable);
+	inline void ToggleResizable() { SetResizable(!GetResizable()); }
 
-	inline bool getFullscreen() const { return state.fullscreen; }
-	void setFullscreen(bool fullscreen);
-	inline void toggleFullscreen() { setFullscreen(!getFullscreen()); }
+	inline bool GetFullscreen() const { return state.fullscreen; }
+	void SetFullscreen(bool fullscreen);
+	inline void ToggleFullscreen() { SetFullscreen(!GetFullscreen()); }
 
-	inline bool getCaptureMouse() const { return state.captureMouse; }
-	void setCaptureMouse(bool captureMouse);
-	inline void toggleCaptureMouse() { setCaptureMouse(!getCaptureMouse()); }
+	inline bool GetCaptureMouse() const { return state.captureMouse; }
+	void SetCaptureMouse(bool captureMouse);
+	inline void ToggleCaptureMouse() { SetCaptureMouse(!GetCaptureMouse()); }
 
-	inline GLFWwindow* getNativeWindow() const { return window; }
-	inline Context* getContext() const { return context; }
+	inline GLFWwindow* GetNativeWindow() const { return window; }
+	inline Context* GetContext() const { return context; }
 
-	using EventCallbackFunc = std::function<void(const Event&)>;
-	inline void setEventCallback(const EventCallbackFunc& callback) { state.eventCallback = callback; }
+	using EventCallbackFunc = std::function<void(Event&)>;
+	inline void SetEventCallback(const EventCallbackFunc& callback) { state.eventCallback = callback; }
 private:
-	void saveDimensions();
+	void SaveDimensions();
 
 	GLFWwindow* window = nullptr;
 	Context* context = nullptr;

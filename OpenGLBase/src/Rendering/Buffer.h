@@ -33,8 +33,8 @@ public:
 	BufferLayout() = default;
 	BufferLayout(std::initializer_list<BufferElement> elements);
 
-	inline const std::vector<BufferElement>& getElements() const { return elements; }
-	inline int getStride() const { return stride; }
+	inline const std::vector<BufferElement>& GetElements() const { return elements; }
+	inline int GetStride() const { return stride; }
 private:
 	std::vector<BufferElement> elements;
 	int stride = 0;
@@ -59,13 +59,13 @@ public:
 	VertexBuffer(unsigned int size, const void* data = nullptr, BufferUsage usage = BufferUsage::StaticDraw);
 	~VertexBuffer();
 
-	void bind() const;
-	void unbind() const;
+	void Bind() const;
+	void Unbind() const;
 
-	void setData(unsigned int size, const void* data);
+	void SetData(unsigned int size, const void* data);
 
-	inline const BufferLayout& getLayout() const { return layout; }
-	inline void setLayout(const BufferLayout& layout) { this->layout = layout; }
+	inline const BufferLayout& GetLayout() const { return layout; }
+	inline void SetLayout(const BufferLayout& layout) { this->layout = layout; }
 private:
 	unsigned int rendererID = 0;
 	BufferLayout layout;
@@ -77,12 +77,12 @@ public:
 	IndexBuffer(unsigned int count, const void* data = nullptr, BufferUsage usage = BufferUsage::StaticDraw);
 	~IndexBuffer();
 
-	void bind() const;
-	void unbind() const;
+	void Bind() const;
+	void Unbind() const;
 
-	void setData(unsigned int count, const void* data);
+	void SetData(unsigned int count, const void* data);
 
-	inline unsigned int getCount() const { return count; }
+	inline unsigned int GetCount() const { return count; }
 private:
 	unsigned int rendererID = 0;
 	unsigned int count = 0;

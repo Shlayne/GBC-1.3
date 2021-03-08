@@ -1,21 +1,20 @@
 #include "Texture.h"
-
 #include <stb/stb_image.h>
 #include <stb/stb_image_write.h>
 
 Texture::Texture(const std::string& filePath, int requiredChannels, bool flipVertically)
 {
-	readFile(filePath, requiredChannels, flipVertically);
+	ReadFile(filePath, requiredChannels, flipVertically);
 }
 
 Texture::Texture(int width, int height, int channels)
 {
-	create(width, height, channels);
+	Create(width, height, channels);
 }
 
 Texture::Texture(const Texture& texture)
 {
-	copy(texture);
+	Copy(texture);
 }
 
 Texture::~Texture()
@@ -23,7 +22,7 @@ Texture::~Texture()
 	delete[] data;
 }
 
-bool Texture::readFile(const std::string& filePath, int requiredChannels, bool flipVertically)
+bool Texture::ReadFile(const std::string& filePath, int requiredChannels, bool flipVertically)
 {
 	stbi_set_flip_vertically_on_load(flipVertically);
 	stbi_uc* stbiData = stbi_load(filePath.c_str(), &width, &height, &channels, requiredChannels);
@@ -41,14 +40,14 @@ bool Texture::readFile(const std::string& filePath, int requiredChannels, bool f
 	return false;
 }
 
-bool Texture::writeFile(const std::string& filePath, bool flipVertically)
+bool Texture::WriteFile(const std::string& filePath, bool flipVertically)
 {
 	stbi_flip_vertically_on_write(flipVertically);
 	// TODO: let the user decide the output file format
 	return data != nullptr && stbi_write_png(filePath.c_str(), width, height, channels, data, 0) != 0;
 }
 
-void Texture::create(int width, int height, int channels)
+void Texture::Create(int width, int height, int channels)
 {
 	if (data != nullptr)
 	{
@@ -63,7 +62,7 @@ void Texture::create(int width, int height, int channels)
 	this->channels = channels;
 }
 
-bool Texture::copy(const Texture& texture)
+bool Texture::Copy(const Texture& texture)
 {
 	if (texture)
 	{
@@ -83,7 +82,7 @@ bool Texture::copy(const Texture& texture)
 	return false;
 }
 
-bool Texture::setSubregion(const Texture& texture, int positionX, int positionY)
+bool Texture::SetSubregion(const Texture& texture, int positionX, int positionY)
 {
 	if (channels == texture.channels && positionX + texture.width <= width && positionX >= 0 && positionY + texture.height <= height && positionY >= 0)
 	{
@@ -99,7 +98,7 @@ bool Texture::setSubregion(const Texture& texture, int positionX, int positionY)
 	return false;
 }
 
-Texture* Texture::createMipmap()
+Texture* Texture::CreateMipmap()
 {
 	if (data != nullptr)
 	{

@@ -1,8 +1,7 @@
 #include "FileIO.h"
-
 #include <fstream>
 
-std::string FileIO::readFile(const std::string& filePath)
+std::string FileIO::ReadFile(const std::string& filePath)
 {
 	std::ifstream file(filePath);
 	if (file.is_open())

@@ -8,14 +8,14 @@ public:
 	OpenGLTexture(const Texture* texture);
 	~OpenGLTexture();
 
-	void bind(unsigned int slot = 0) const;
-	void unbind(unsigned int slot = 0) const;
+	void Bind(unsigned int slot = 0) const;
+	void Unbind(unsigned int slot = 0) const;
 
-	inline const Texture* getTexture() const { return texture; }
+	inline const Texture* GetTexture() const { return texture; }
 
 	// Call this when you want to update the internal
 	// texture after the the local texture has updated.
-	void update();
+	void Update();
 private:
 	// TODO: when a reference counting system is in place, change this to that
 	const Texture* texture;

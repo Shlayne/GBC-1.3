@@ -1,21 +1,20 @@
 #include "TextureAtlas.h"
-
 #include "Rendering/Renderer.h"
 
 TextureAtlas::TextureAtlas()
-	: maxTextureSize(Renderer::getMaxTextureSize()), root(new TextureNode(glm::ivec2(), maxTextureSize))
+	: maxTextureSize(Renderer::GetMaxTextureSize()), root(new TextureNode(glm::ivec2(), maxTextureSize))
 {
 
 }
 
-glm::ivec2 TextureAtlas::addTexture(std::shared_ptr<Texture> texture)
+glm::ivec2 TextureAtlas::AddTexture(std::shared_ptr<Texture> texture)
 {
-	glm::ivec2 textureSize = glm::ivec2(texture->getWidth(), texture->getHeight());
+	glm::ivec2 textureSize = glm::ivec2(texture->GetWidth(), texture->GetHeight());
 
 	while ((textureSize.x < atlasTextureSize.x || textureSize.y < atlasTextureSize.y) ||
 		(atlasTextureSize.x < maxTextureSize.x || atlasTextureSize.y < maxTextureSize.y))
 	{
-		TextureNode* node = addTexture(root.get(), texture, textureSize);
+		TextureNode* node = AddTexture(root.get(), texture, textureSize);
 		if (node != nullptr)
 			return node->position;
 		else
@@ -27,7 +26,7 @@ glm::ivec2 TextureAtlas::addTexture(std::shared_ptr<Texture> texture)
 }
 
 // From: https://straypixels.net/texture-packing-for-fonts/
-TextureAtlas::TextureNode* TextureAtlas::addTexture(TextureNode* node, const std::shared_ptr<Texture>& texture, const glm::ivec2& size)
+TextureAtlas::TextureNode* TextureAtlas::AddTexture(TextureNode* node, const std::shared_ptr<Texture>& texture, const glm::ivec2& size)
 {
 	// If the node has a texture, it can only be a leaf node, so don't bother
 	if (node->texture != nullptr)
@@ -37,8 +36,8 @@ TextureAtlas::TextureNode* TextureAtlas::addTexture(TextureNode* node, const std
 	// If the node has both children, search them for an opening
 	else if (node->left != nullptr && node->right != nullptr)
 	{
-		TextureNode* newLeftNode = addTexture(node->left.get(), texture, size);
-		return newLeftNode != nullptr ? newLeftNode : addTexture(node->right.get(), texture, size);
+		TextureNode* newLeftNode = AddTexture(node->left.get(), texture, size);
+		return newLeftNode != nullptr ? newLeftNode : AddTexture(node->right.get(), texture, size);
 	}
 	// If an opening has been found
 	else
@@ -76,23 +75,23 @@ TextureAtlas::TextureNode* TextureAtlas::addTexture(TextureNode* node, const std
 			TextureNode* right;
 			if (splitVertically)
 			{
-				left = new TextureNode(node->position, { node->size.x, size.y });
-				right = new TextureNode({ node->position.x, node->position.y + size.y }, { node->size.x, node->size.y - size.y });
+				left = new TextureNode(node->position, {node->size.x, size.y});
+				right = new TextureNode({node->position.x, node->position.y + size.y}, {node->size.x, node->size.y - size.y});
 			}
 			else
 			{
-				left = new TextureNode(node->position, { size.x, node->size.y });
-				right = new TextureNode({ node->position.x + size.x, node->position.y }, { node->size.x - size.x, node->size.y });
+				left = new TextureNode(node->position, {size.x, node->size.y});
+				right = new TextureNode({node->position.x + size.x, node->position.y}, {node->size.x - size.x, node->size.y});
 			}
 
 			node->left.reset(left);
 			node->right.reset(right);
-			return addTexture(node->left.get(), texture, size);
+			return AddTexture(node->left.get(), texture, size);
 		}
 	}
 }
 
-Texture** TextureAtlas::create(int mipmapLevels)
+Texture** TextureAtlas::Create(int mipmapLevels)
 {
 	Texture** atlasTextures = nullptr;
 	if (mipmapLevels > 0)
@@ -100,12 +99,12 @@ Texture** TextureAtlas::create(int mipmapLevels)
 		atlasTextures = new Texture*[mipmapLevels];
 		for (int i = 0; i < mipmapLevels; i++)
 			atlasTextures[i] = new Texture(atlasTextureSize.x >> i, atlasTextureSize.y >> i, 4);
-		putTexture(root.get(), atlasTextures, mipmapLevels);
+		PutTexture(root.get(), atlasTextures, mipmapLevels);
 	}
 	return atlasTextures;
 }
 
-void TextureAtlas::putTexture(TextureNode* node, Texture** atlasTextures, int mipmapLevels)
+void TextureAtlas::PutTexture(TextureNode* node, Texture** atlasTextures, int mipmapLevels)
 {
 	if (node != nullptr)
 	{
@@ -118,8 +117,8 @@ void TextureAtlas::putTexture(TextureNode* node, Texture** atlasTextures, int mi
 			for (int i = 0; i < mipmapLevels && texture != nullptr && texture; i++)
 			{
 				// This is... finally, where textures are copied
-				atlasTextures[i]->setSubregion(*texture, node->position.x >> i, node->position.y >> i);
-				Texture* newTexture = texture->createMipmap();
+				atlasTextures[i]->SetSubregion(*texture, node->position.x >> i, node->position.y >> i);
+				Texture* newTexture = texture->CreateMipmap();
 				delete texture;
 				texture = newTexture;
 			}
@@ -130,8 +129,8 @@ void TextureAtlas::putTexture(TextureNode* node, Texture** atlasTextures, int mi
 		// non-existent textures, because they themselves don't exist.
 		else
 		{
-			putTexture(node->left.get(), atlasTextures, mipmapLevels);
-			putTexture(node->right.get(), atlasTextures, mipmapLevels);
+			PutTexture(node->left.get(), atlasTextures, mipmapLevels);
+			PutTexture(node->right.get(), atlasTextures, mipmapLevels);
 		}
 	}
 }

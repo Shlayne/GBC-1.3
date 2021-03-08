@@ -26,18 +26,17 @@ public:
 	ShaderProgram(const std::vector<ShaderFile>& shaders);
 	~ShaderProgram();
 
-	void bind() const;
-	void unbind() const;
+	void Bind() const;
+	void Unbind() const;
 
 	template<typename T>
-	void setUniform(const std::string& name, const T& value) const;
-
+	void SetUniform(const std::string& name, const T& value) const;
 	template<typename T>
-	void setUniforms(const std::string& name, const T* values, int count) const;
+	void SetUniforms(const std::string& name, const T* values, int count) const;
 private:
-	bool linkAndValidate();
-	unsigned int compile(const ShaderFile& shader);
-	int getUniformLocation(const std::string& name) const;
+	bool LinkAndValidate();
+	unsigned int Compile(const ShaderFile& shader);
+	int GetUniformLocation(const std::string& name) const;
 
 	unsigned int rendererID = 0;
 	mutable std::unordered_map<std::string, int> uniformLocations;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Events/Event.h"
-
 #include <glm/glm.hpp>
 
 class CameraController3D
@@ -9,15 +8,15 @@ class CameraController3D
 public:
 	CameraController3D(float speed = 1.0f, float sensitivity = 0.2f);
 
-	void onUpdate(float deltaTime);
-	void onEvent(const Event& event);
+	void OnUpdate(float deltaTime);
+	void OnEvent(Event& event);
 
-	glm::mat4 getTransform() const;
+	glm::mat4 GetTransform() const;
 
-	inline const glm::vec3& getTranslation() const { return translation; }
-	inline void setTranslation(const glm::vec3& translation) { this->translation = translation; }
-	inline const glm::vec3& getRotation() const { return rotation; }
-	inline void setRotation(const glm::vec3& rotation) { this->rotation = rotation; }
+	inline const glm::vec3& GetTranslation() const { return translation; }
+	inline void SetTranslation(const glm::vec3& translation) { this->translation = translation; }
+	inline const glm::vec3& GetRotation() const { return rotation; }
+	inline void SetRotation(const glm::vec3& rotation) { this->rotation = rotation; }
 private:
 	float speed;
 	float sensitivity;

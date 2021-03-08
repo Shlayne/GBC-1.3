@@ -20,15 +20,15 @@ Sandbox::Sandbox()
 	model.indices[4] = 3;
 	model.indices[5] = 0;
 
-	cameraController.setTranslation({0.0f, 0.0f, 1.0f});
+	cameraController.SetTranslation({0.0f, 0.0f, 1.0f});
 
-	Window& window = Application::get().getWindow();
-	camera.onViewportResize(window.getWidth(), window.getHeight());
+	Window& window = Application::Get().GetWindow();
+	camera.OnViewportResize(window.GetWidth(), window.GetHeight());
 
 	//FramebufferSpecification framebufferSpecification;
 	//framebufferSpecification.attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth};
-	//framebufferSpecification.width = window.getWidth();
-	//framebufferSpecification.height = window.getHeight();
+	//framebufferSpecification.width = window.GetWidth();
+	//framebufferSpecification.height = window.GetHeight();
 	//framebuffer.reset(new Framebuffer(framebufferSpecification));
 }
 
@@ -37,29 +37,29 @@ Sandbox::~Sandbox()
 
 }
 
-void Sandbox::onUpdate(float deltaTime)
+void Sandbox::OnUpdate(float deltaTime)
 {
-	cameraController.onUpdate(deltaTime);
+	cameraController.OnUpdate(deltaTime);
 }
 
-void Sandbox::onRender()
+void Sandbox::OnRender()
 {
 	//framebuffer->Bind();
 	
-	Renderer::setClearColor({0.2f, 0.3f, 0.9f, 1.0f});
-	Renderer::clear();
+	Renderer::SetClearColor({0.2f, 0.3f, 0.9f, 1.0f});
+	Renderer::Clear();
 
-	BasicRenderer::beginScene(cameraController.getTransform(), camera.getProjection());
+	BasicRenderer::BeginScene(cameraController.GetTransform(), camera.GetProjection());
 
 	// Render here
-	BasicRenderer::submit(model);
+	BasicRenderer::Submit(model);
 
-	BasicRenderer::endScene();
+	BasicRenderer::EndScene();
 
 	//framebuffer->Unbind();
 }
 
-void Sandbox::onImGuiRender()
+void Sandbox::OnImGuiRender()
 {
 	//ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 	//ImGui::Begin("FramebufferTest");
@@ -68,16 +68,16 @@ void Sandbox::onImGuiRender()
 	//ImGui::PopStyleVar();
 }
 
-void Sandbox::onEvent(const Event& event)
+void Sandbox::OnEvent(Event& event)
 {
-	cameraController.onEvent(event);
+	cameraController.OnEvent(event);
 
-	switch (event.getType())
+	switch (event.GetType())
 	{
 		case EventType::WindowResize:
 		{
 			const WindowResizeEvent& wre = (const WindowResizeEvent&)event;
-			camera.onViewportResize(wre.getWidth(), wre.getHeight());
+			camera.OnViewportResize(wre.GetWidth(), wre.GetHeight());
 			break;
 		}
 	}

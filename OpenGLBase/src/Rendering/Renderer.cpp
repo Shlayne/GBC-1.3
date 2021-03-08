@@ -1,26 +1,25 @@
 #include "Renderer.h"
+#include <gl/glew.h>
 #include "Basic/BasicRenderer.h"
 
-#include <gl/glew.h>
-
-void Renderer::init()
+void Renderer::Init()
 {
-	BasicRenderer::init();
+	BasicRenderer::Init();
 }
 
-void Renderer::shutdown()
+void Renderer::Shutdown()
 {
-	BasicRenderer::shutdown();
+	BasicRenderer::Shutdown();
 }
 
-int Renderer::getMaxTextureSlots()
+int Renderer::GetMaxTextureSlots()
 {
 	int maxTextureSlots = 0;
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureSlots);
 	return maxTextureSlots;
 }
 
-int Renderer::getMaxTextureSize()
+int Renderer::GetMaxTextureSize()
 {
 	int maxTextureSize = 0;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
@@ -43,41 +42,41 @@ int Renderer::GetMaxFramebufferColorAttachments()
 	return maxFramebufferColorAttachments;
 }
 
-void Renderer::onViewportResized(int width, int height)
+void Renderer::OnViewportResized(int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
 
-void Renderer::setClearColor(const glm::vec4& color)
+void Renderer::SetClearColor(const glm::vec4& color)
 {
 	glClearColor(color.r, color.g, color.b, color.a);
 }
 
-void Renderer::clear()
+void Renderer::Clear()
 {
 	// TODO: abstract this
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Renderer::enableDepthTest(bool enable)
+void Renderer::EnableDepthTest(bool enable)
 {
 	if (enable) glEnable(GL_DEPTH_TEST);
 	else glDisable(GL_DEPTH_TEST);
 }
 
-void Renderer::enableDepthMask(bool enable)
+void Renderer::EnableDepthMask(bool enable)
 {
 	if (enable) glDepthMask(GL_TRUE);
 	else glDepthMask(GL_FALSE);
 }
 
-void Renderer::enableCullFace(bool enable)
+void Renderer::EnableCullFace(bool enable)
 {
 	if (enable) glEnable(GL_CULL_FACE);
 	else glDisable(GL_CULL_FACE);
 }
 
-void Renderer::enableBlending(bool enable)
+void Renderer::EnableBlending(bool enable)
 {
 	if (enable)
 	{
@@ -89,11 +88,11 @@ void Renderer::enableBlending(bool enable)
 		glDisable(GL_BLEND);
 }
 
-void Renderer::drawIndexed(const VertexArray& vertexArray, const IndexBuffer& indexBuffer, unsigned int maxIndexCount)
+void Renderer::DrawIndexed(const VertexArray& vertexArray, const IndexBuffer& indexBuffer, unsigned int maxIndexCount)
 {
-	vertexArray.bind();
-	indexBuffer.bind();
-	int indexCount = maxIndexCount != 0 ? maxIndexCount : indexBuffer.getCount();
+	vertexArray.Bind();
+	indexBuffer.Bind();
+	int indexCount = maxIndexCount != 0 ? maxIndexCount : indexBuffer.GetCount();
 
 	// TODO: if unsigned shorts or chars are supported, that should be stored in IndexBuffer
 	// TODO: support other primitive types, ex: GL_LINES_ADJACENCY

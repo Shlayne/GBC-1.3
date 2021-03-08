@@ -1,24 +1,20 @@
 #include "Shader.h"
-
 #include <gl/glew.h>
-
 #include <iostream> // TODO: logging
-
 #include <glm/gtc/type_ptr.hpp>
 
 ShaderProgram::ShaderProgram(const std::vector<ShaderFile>& shaders)
 {
 	rendererID = glCreateProgram();
-	// No one in the right mind would make over 2 billion shaders for a single shader program.
 	int shaderCount = (int)shaders.size();
 	unsigned int* shaderIDs = (unsigned int*)alloca(shaderCount * sizeof(unsigned int));
 	for (int i = 0; i < shaderCount; i++)
 	{
-		shaderIDs[i] = compile(shaders[i]);
+		shaderIDs[i] = Compile(shaders[i]);
 		glAttachShader(rendererID, shaderIDs[i]);
 	}
 	
-	bool success = linkAndValidate();
+	bool success = LinkAndValidate();
 	
 	// Do this regardles of success
 	for (int i = 0; i < shaderCount; i++)
@@ -39,17 +35,17 @@ ShaderProgram::~ShaderProgram()
 	glDeleteProgram(rendererID);
 }
 
-void ShaderProgram::bind() const
+void ShaderProgram::Bind() const
 {
 	glUseProgram(rendererID);
 }
 
-void ShaderProgram::unbind() const
+void ShaderProgram::Unbind() const
 {
 	glUseProgram(0);
 }
 
-bool ShaderProgram::linkAndValidate()
+bool ShaderProgram::LinkAndValidate()
 {
 	// Link
 	glLinkProgram(rendererID);
@@ -82,7 +78,7 @@ bool ShaderProgram::linkAndValidate()
 	return true;
 }
 
-static GLuint getGLType(ShaderType type)
+static GLuint GetGLType(ShaderType type)
 {
 	switch (type)
 	{
@@ -96,7 +92,7 @@ static GLuint getGLType(ShaderType type)
 	}
 }
 
-static const char* getName(ShaderType type)
+static const char* GetName(ShaderType type)
 {
 	switch (type)
 	{
@@ -110,9 +106,9 @@ static const char* getName(ShaderType type)
 	}
 }
 
-unsigned int ShaderProgram::compile(const ShaderFile& shader)
+unsigned int ShaderProgram::Compile(const ShaderFile& shader)
 {
-	unsigned int id = glCreateShader(getGLType(shader.type));
+	unsigned int id = glCreateShader(GetGLType(shader.type));
 	const char* source = shader.source.c_str();
 	glShaderSource(id, 1, &source, nullptr);
 	glCompileShader(id);
@@ -125,7 +121,7 @@ unsigned int ShaderProgram::compile(const ShaderFile& shader)
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 		char* message = (char*)alloca(length * sizeof(char));
 		glGetShaderInfoLog(id, length, &length, message);
-		std::cerr << "Failed to compile " << getName(shader.type) << " shader:\n" << message << '\n';
+		std::cerr << "Failed to compile " << GetName(shader.type) << " shader:\n" << message << '\n';
 		glDeleteShader(id);
 		return 0;
 	}
@@ -133,7 +129,7 @@ unsigned int ShaderProgram::compile(const ShaderFile& shader)
 	return id;
 }
 
-int ShaderProgram::getUniformLocation(const std::string& name) const
+int ShaderProgram::GetUniformLocation(const std::string& name) const
 {
 	auto it = uniformLocations.find(name);
 	if (it != uniformLocations.end())
@@ -144,53 +140,53 @@ int ShaderProgram::getUniformLocation(const std::string& name) const
 	return location;
 }
 
-template<> void ShaderProgram::setUniform<float>(const std::string& name, const float& value) const
+template<> void ShaderProgram::SetUniform<float>(const std::string& name, const float& value) const
 {
-	int location = getUniformLocation(name);
+	int location = GetUniformLocation(name);
 	if (location != -1) glUniform1fv(location, 1, &value);
 }
-template<> void ShaderProgram::setUniform<glm::vec2>(const std::string& name, const glm::vec2& value) const
+template<> void ShaderProgram::SetUniform<glm::vec2>(const std::string& name, const glm::vec2& value) const
 {
-	int location = getUniformLocation(name);
+	int location = GetUniformLocation(name);
 	if (location != -1) glUniform2fv(location, 1, glm::value_ptr(value));
 }
-template<> void ShaderProgram::setUniform<glm::vec3>(const std::string& name, const glm::vec3& value) const
+template<> void ShaderProgram::SetUniform<glm::vec3>(const std::string& name, const glm::vec3& value) const
 {
-	int location = getUniformLocation(name);
+	int location = GetUniformLocation(name);
 	if (location != -1) glUniform3fv(location, 1, glm::value_ptr(value));
 }
-template<> void ShaderProgram::setUniform<glm::vec4>(const std::string& name, const glm::vec4& value) const
+template<> void ShaderProgram::SetUniform<glm::vec4>(const std::string& name, const glm::vec4& value) const
 {
-	int location = getUniformLocation(name);
+	int location = GetUniformLocation(name);
 	if (location != -1) glUniform4fv(location, 1, glm::value_ptr(value));
 }
 
-template<> void ShaderProgram::setUniform<int>(const std::string& name, const int& value) const
+template<> void ShaderProgram::SetUniform<int>(const std::string& name, const int& value) const
 {
-	int location = getUniformLocation(name);
+	int location = GetUniformLocation(name);
 	if (location != -1) glUniform1iv(location, 1, &value);
 }
-template<> void ShaderProgram::setUniform<unsigned int>(const std::string& name, const unsigned int& value) const
+template<> void ShaderProgram::SetUniform<unsigned int>(const std::string& name, const unsigned int& value) const
 {
-	int location = getUniformLocation(name);
+	int location = GetUniformLocation(name);
 	if (location != -1) glUniform1uiv(location, 1, &value);
 }
 
-template<> void ShaderProgram::setUniform<glm::mat4>(const std::string& name, const glm::mat4x4& value) const
+template<> void ShaderProgram::SetUniform<glm::mat4>(const std::string& name, const glm::mat4x4& value) const
 {
-	int location = getUniformLocation(name);
+	int location = GetUniformLocation(name);
 	if (location != -1) glUniformMatrix4fv(location, 1, false, glm::value_ptr(value));
 }
 
 
-template<> void ShaderProgram::setUniforms<int>(const std::string& name, const int* values, int count) const
+template<> void ShaderProgram::SetUniforms<int>(const std::string& name, const int* values, int count) const
 {
-	int location = getUniformLocation(name);
+	int location = GetUniformLocation(name);
 	if (location != -1) glUniform1iv(location, count, values);
 }
 
-template<> void ShaderProgram::setUniforms<unsigned int>(const std::string& name, const unsigned int* values, int count) const
+template<> void ShaderProgram::SetUniforms<unsigned int>(const std::string& name, const unsigned int* values, int count) const
 {
-	int location = getUniformLocation(name);
+	int location = GetUniformLocation(name);
 	if (location != -1) glUniform1uiv(location, count, values);
 }

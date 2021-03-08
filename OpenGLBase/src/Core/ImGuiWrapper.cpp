@@ -1,20 +1,16 @@
 #include "ImGuiWrapper.h"
-
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
-
 #include <glfw/glfw3.h>
-
-#include <iostream>
 
 ImGuiWrapper::ImGuiWrapper(const Window& window)
 	: window(window)
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	init();
-	ImGui_ImplGlfw_InitForOpenGL(window.getNativeWindow(), true);
+	Init();
+	ImGui_ImplGlfw_InitForOpenGL(window.GetNativeWindow(), true);
 	ImGui_ImplOpenGL3_Init("#version 460"); // TODO: this version should be gotten from the window
 }
 
@@ -25,14 +21,14 @@ ImGuiWrapper::~ImGuiWrapper()
 	ImGui::DestroyContext();
 }
 
-void ImGuiWrapper::begin()
+void ImGuiWrapper::Begin()
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 }
 
-void ImGuiWrapper::end()
+void ImGuiWrapper::End()
 {
 	ImGuiIO& io = ImGui::GetIO();
 
@@ -48,7 +44,7 @@ void ImGuiWrapper::end()
 	}
 }
 
-void ImGuiWrapper::init()
+void ImGuiWrapper::Init()
 {
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard

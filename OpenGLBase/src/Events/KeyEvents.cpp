@@ -7,7 +7,7 @@ KeyPressEvent::KeyPressEvent(Keycode keycode, int mods)
 
 }
 
-std::string KeyPressEvent::toString() const
+std::string KeyPressEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "KeyPressEvent: keycode=" << static_cast<unsigned short>(keycode) << " mods=" << mods;
@@ -20,7 +20,7 @@ KeyRepeatEvent::KeyRepeatEvent(Keycode keycode, int mods)
 
 }
 
-std::string KeyRepeatEvent::toString() const
+std::string KeyRepeatEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "KeyRepeatEvent: keycode=" << static_cast<unsigned short>(keycode) << " mods=" << mods;
@@ -33,7 +33,7 @@ KeyReleaseEvent::KeyReleaseEvent(Keycode keycode, int mods)
 
 }
 
-std::string KeyReleaseEvent::toString() const
+std::string KeyReleaseEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "KeyReleaseEvent: keycode=" << static_cast<unsigned short>(keycode) << " mods=" << mods;
@@ -46,7 +46,7 @@ KeyCharEvent::KeyCharEvent(unsigned int codepoint, int mods)
 
 }
 
-std::string KeyCharEvent::toString() const
+std::string KeyCharEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "KeyCharEvent: codepoint=" << codepoint << " mods=" << mods;

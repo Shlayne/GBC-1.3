@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Rendering/Texture.h"
-
 #include <memory>
-
 #include <glm/glm.hpp>
+#include "Rendering/Texture.h"
 
 class TextureAtlas
 {
@@ -18,15 +16,15 @@ public:
 	// After you have added all of your textures, before you even call create(),
 	// you can get normalized texture coordinates by dividing this return value
 	// by getTextureSize(). Don't forget to cast to a float or double!
-	glm::ivec2 addTexture(std::shared_ptr<Texture> texture);
+	glm::ivec2 AddTexture(std::shared_ptr<Texture> texture);
 
 	// Returns mipmapLevels number of textures in an array. Each texture has
 	// the smallest possible size that contains every texture provided through
 	// addTexture. The returned textures will have an aspect ratio of 1, and
 	// their size will be constrained to powers of 2, e.g.: 256x256, 512x512...
-	Texture** create(int mipmapLevels = 1);
+	Texture** Create(int mipmapLevels = 1);
 
-	inline const glm::ivec2& getTextureSize() const { return atlasTextureSize; }
+	inline const glm::ivec2& GetTextureSize() const { return atlasTextureSize; }
 private:
 	struct TextureNode
 	{
@@ -45,10 +43,10 @@ private:
 		std::unique_ptr<TextureNode> right;
 	};
 
-	TextureNode* addTexture(TextureNode* node, const std::shared_ptr<Texture>& texture, const glm::ivec2& size);
-	void putTexture(TextureNode* node, Texture** atlasTextures, int mipmapLevels);
+	TextureNode* AddTexture(TextureNode* node, const std::shared_ptr<Texture>& texture, const glm::ivec2& size);
+	void PutTexture(TextureNode* node, Texture** atlasTextures, int mipmapLevels);
 
 	glm::ivec2 maxTextureSize;
 	std::unique_ptr<TextureNode> root;
-	glm::ivec2 atlasTextureSize{ 256, 256 };
+	glm::ivec2 atlasTextureSize{256, 256};
 };

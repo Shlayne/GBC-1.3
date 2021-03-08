@@ -7,7 +7,7 @@ MouseButtonPressEvent::MouseButtonPressEvent(Mousecode button, int mods)
 
 }
 
-std::string MouseButtonPressEvent::toString() const
+std::string MouseButtonPressEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "MouseButtonPressEvent: button=" << static_cast<unsigned short>(button) << " mods=" << mods;
@@ -20,7 +20,7 @@ MouseButtonReleaseEvent::MouseButtonReleaseEvent(Mousecode button, int mods)
 
 }
 
-std::string MouseButtonReleaseEvent::toString() const
+std::string MouseButtonReleaseEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "MouseButtonReleaseEvent: button=" << static_cast<unsigned short>(button) << " mods=" << mods;
@@ -33,7 +33,7 @@ MouseMoveEvent::MouseMoveEvent(float x, float y)
 
 }
 
-std::string MouseMoveEvent::toString() const
+std::string MouseMoveEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "MouseMoveEvent: x=" << x << " y=" << y;
@@ -46,7 +46,7 @@ MouseScrollEvent::MouseScrollEvent(float offsetX, float offsetY)
 
 }
 
-std::string MouseScrollEvent::toString() const
+std::string MouseScrollEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "MouseScrollEvent: offsetX=" << offsetX << " offsetY=" << offsetY;
@@ -59,7 +59,7 @@ MouseEnterEvent::MouseEnterEvent(bool enter)
 
 }
 
-std::string MouseEnterEvent::toString() const
+std::string MouseEnterEvent::ToString() const
 {
 	std::stringstream stream;
 	stream << "MouseEnterEvent: enter=" << enter;

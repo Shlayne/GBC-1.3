@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-
 #include "Core/Window.h"
 #include "Core/ImGuiWrapper.h"
 #include "Sandbox/Sandbox.h"
@@ -12,14 +11,14 @@ public:
 	Application(const WindowSpecifications& windowSpecs = WindowSpecifications());
 	~Application();
 
-	inline static Application& get() { return *instance; }
-	inline Window& getWindow() const { return *window; }
-	inline Sandbox& getSandbox() const { return *sandbox; }
+	inline static Application& Get() { return *instance; }
+	inline Window& GetWindow() const { return *window; }
+	inline Sandbox& GetSandbox() const { return *sandbox; }
 
-	void run();
-	void terminate();
+	void Run();
+	void Terminate();
 private:
-	void onEvent(const Event& event);
+	void OnEvent(Event& event);
 
 	static Application* instance;
 

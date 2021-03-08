@@ -1,20 +1,19 @@
 #pragma once
 
 #include <utility>
-
 #include "Core/Keycodes.h"
 #include "Core/Mousecodes.h"
 
 class Input
 {
 public:
-	static bool isKeyPressed(Keycode keycode);
-	static bool isKeyReleased(Keycode keycode);
+	static bool IsKeyPressed(Keycode keycode);
+	static bool IsKeyReleased(Keycode keycode);
 
-	static bool isMouseButtonPressed(Mousecode button);
-	static bool isMouseButtonReleased(Mousecode button);
+	static bool IsMouseButtonPressed(Mousecode button);
+	static bool IsMouseButtonReleased(Mousecode button);
 
-	static std::pair<float, float> getMousePos();
-	static float getMousePosX();
-	static float getMousePosY();
+	static std::pair<float, float> GetMousePos();
+	static float GetMousePosX();
+	static float GetMousePosY();
 };

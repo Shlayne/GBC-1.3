@@ -3,46 +3,46 @@
 #include "Core/Application.h"
 #include <glfw/glfw3.h>
 
-bool Input::isKeyPressed(Keycode keycode)
+bool Input::IsKeyPressed(Keycode keycode)
 {
-    auto window = Application::get().getWindow().getNativeWindow();
+    auto window = Application::Get().GetWindow().GetNativeWindow();
     return glfwGetKey(window, static_cast<int>(keycode)) == GLFW_PRESS;
 }
 
-bool Input::isKeyReleased(Keycode keycode)
+bool Input::IsKeyReleased(Keycode keycode)
 {
-    auto window = Application::get().getWindow().getNativeWindow();
+    auto window = Application::Get().GetWindow().GetNativeWindow();
     return glfwGetKey(window, static_cast<int>(keycode)) == GLFW_RELEASE;
 }
 
-bool Input::isMouseButtonPressed(Mousecode button)
+bool Input::IsMouseButtonPressed(Mousecode button)
 {
-    auto window = Application::get().getWindow().getNativeWindow();
+    auto window = Application::Get().GetWindow().GetNativeWindow();
     return glfwGetMouseButton(window, static_cast<int>(button)) == GLFW_PRESS;
 }
 
-bool Input::isMouseButtonReleased(Mousecode button)
+bool Input::IsMouseButtonReleased(Mousecode button)
 {
-    auto window = Application::get().getWindow().getNativeWindow();
+    auto window = Application::Get().GetWindow().GetNativeWindow();
     return glfwGetMouseButton(window, static_cast<int>(button)) == GLFW_RELEASE;
 }
 
-std::pair<float, float> Input::getMousePos()
+std::pair<float, float> Input::GetMousePos()
 {
-    auto window = Application::get().getWindow().getNativeWindow();
+    auto window = Application::Get().GetWindow().GetNativeWindow();
     double x, y;
     glfwGetCursorPos(window, &x, &y);
     return { (float)x, (float)y };
 }
 
-float Input::getMousePosX()
+float Input::GetMousePosX()
 {
-    auto [x, y] = getMousePos();
+    auto [x, y] = GetMousePos();
     return x;
 }
 
-float Input::getMousePosY()
+float Input::GetMousePosY()
 {
-    auto [x, y] = getMousePos();
+    auto [x, y] = GetMousePos();
     return y;
 }

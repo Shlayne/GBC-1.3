@@ -3,7 +3,7 @@
 int main()
 {
 	Application* application = new Application();
-	application->run();
+	application->Run();
 	delete application;
 	return 0;
 }
