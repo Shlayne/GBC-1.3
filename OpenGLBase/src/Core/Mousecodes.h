@@ -4,14 +4,14 @@
 enum class Mousecode : unsigned short
 {
 	// Taken from glfw3.h and modified
-	MB1 = 0, MBLeft = MB1,
-	MB2 = 1, MBRight = MB2,
-	MB3 = 2, MBMiddle = MB3,
-	MB4 = 3,
-	MB5 = 4,
-	MB6 = 5,
-	MB7 = 6,
-	MB8 = 7,
+	Button1 = 0, ButtonLeft = Button1,
+	Button2 = 1, ButtonRight = Button2,
+	Button3 = 2, ButtonMiddle = Button3,
+	Button4 = 3,
+	Button5 = 4,
+	Button6 = 5,
+	Button7 = 6,
+	Button8 = 7,
 
 	Count
 };

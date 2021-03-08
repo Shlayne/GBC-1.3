@@ -8,10 +8,8 @@ OpenGLTexture::OpenGLTexture(const Texture* texture)
 	// TODO: this should be from texture specifications
 	switch (texture->getChannels())
 	{
-		case 1: internalFormat = GL_R8; localFormat = GL_R; break;
-		case 2: internalFormat = GL_RG8; localFormat = GL_RG; break;
-		case 3: internalFormat = GL_RGB8; localFormat = GL_RGB; break;
-		case 4: internalFormat = GL_RGBA8; localFormat = GL_RGBA; break;
+		case 3: internalFormat = GL_RGB8; format = GL_RGB; break;
+		case 4: internalFormat = GL_RGBA8; format = GL_RGBA; break;
 	}
 
 	glCreateTextures(GL_TEXTURE_2D, 1, &rendererID);
@@ -24,7 +22,7 @@ OpenGLTexture::OpenGLTexture(const Texture* texture)
 	glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	// TODO: this should be from texture specifications ---------------------------------------------VVVVVVVVVVVVVVVV
-	glTextureSubImage2D(rendererID, 0, 0, 0, texture->getWidth(), texture->getHeight(), localFormat, GL_UNSIGNED_BYTE, texture->getData());
+	glTextureSubImage2D(rendererID, 0, 0, 0, texture->getWidth(), texture->getHeight(), format, GL_UNSIGNED_BYTE, texture->getData());
 }
 
 OpenGLTexture::~OpenGLTexture()
@@ -45,5 +43,5 @@ void OpenGLTexture::unbind(unsigned int slot) const
 void OpenGLTexture::update()
 {
 	// TODO: this should be from texture specifications ---------------------------------------------VVVVVVVVVVVVVVVV
-	glTextureSubImage2D(rendererID, 0, 0, 0, texture->getWidth(), texture->getHeight(), localFormat, GL_UNSIGNED_BYTE, texture->getData());
+	glTextureSubImage2D(rendererID, 0, 0, 0, texture->getWidth(), texture->getHeight(), format, GL_UNSIGNED_BYTE, texture->getData());
 }

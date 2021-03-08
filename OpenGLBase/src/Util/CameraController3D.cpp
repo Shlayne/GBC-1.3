@@ -1,15 +1,19 @@
-#include "CameraController.h"
-
+#include "CameraController3D.h"
 #include "IO/Input.h"
 #include "Events/MouseEvents.h"
-
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-void CameraController::onUpdate(float deltaTime)
+CameraController3D::CameraController3D(float speed, float sensitivity)
+	: speed(speed), sensitivity(sensitivity)
 {
-	const float movementSpeed = 5.0f * deltaTime;
+
+}
+
+void CameraController3D::onUpdate(float deltaTime)
+{
+	const float movementSpeed = speed * deltaTime;
 
 	const glm::vec3 forward = movementSpeed * glm::vec3(cosf(rotation.y), 0.0f, sinf(rotation.y));
 	const glm::vec3 left = glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -21,9 +25,9 @@ void CameraController::onUpdate(float deltaTime)
 	if (Input::isKeyPressed(Keycode::LeftShift)) translation.y -= movementSpeed;
 	if (Input::isKeyPressed(Keycode::Space)) translation.y += movementSpeed;
 
-	if (Input::isMouseButtonPressed(Mousecode::MBLeft))
+	if (Input::isMouseButtonPressed(Mousecode::ButtonLeft))
 	{
-		const float rotationSpeed = 0.2f * deltaTime;
+		const float rotationSpeed = sensitivity * deltaTime;
 
 		rotation.y -= mouseDX * rotationSpeed;
 		rotation.x = std::min(std::max(rotation.x - mouseDY * rotationSpeed, minPitch), maxPitch);
@@ -32,7 +36,7 @@ void CameraController::onUpdate(float deltaTime)
 	}
 }
 
-void CameraController::onEvent(const Event& event)
+void CameraController3D::onEvent(const Event& event)
 {
 	if (event.getType() == EventType::MouseMove)
 	{
@@ -46,7 +50,7 @@ void CameraController::onEvent(const Event& event)
 	}
 }
 
-glm::mat4 CameraController::getTransform() const
+glm::mat4 CameraController3D::getTransform() const
 {
 	return glm::translate(glm::mat4(1.0f), translation) * glm::toMat4(glm::quat(rotation));
 }

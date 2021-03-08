@@ -5,9 +5,6 @@
 
 void Renderer::init()
 {
-	enableDepthTest();
-	//enableCullFace();
-	enableBlending();
 	BasicRenderer::init();
 }
 
@@ -28,6 +25,22 @@ int Renderer::getMaxTextureSize()
 	int maxTextureSize = 0;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 	return maxTextureSize;
+}
+
+int Renderer::GetMaxFramebufferSize()
+{
+	int maxFramebufferWidth = 0;
+	int maxFramebufferHeight = 0;
+	glGetIntegerv(GL_MAX_FRAMEBUFFER_WIDTH, &maxFramebufferWidth);
+	glGetIntegerv(GL_MAX_FRAMEBUFFER_HEIGHT, &maxFramebufferHeight);
+	return maxFramebufferWidth * maxFramebufferHeight;
+}
+
+int Renderer::GetMaxFramebufferColorAttachments()
+{
+	int maxFramebufferColorAttachments = 0;
+	glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxFramebufferColorAttachments);
+	return maxFramebufferColorAttachments;
 }
 
 void Renderer::onViewportResized(int width, int height)

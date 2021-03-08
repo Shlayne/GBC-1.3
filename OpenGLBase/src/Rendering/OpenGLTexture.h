@@ -22,5 +22,5 @@ private:
 
 	unsigned int rendererID = 0;
 	int internalFormat = 0; // how opengl will store the texture data
-	int localFormat = 0; // how the local copy of the texture data is stored
+	int format = 0; // how the local copy of the texture data is stored
 };

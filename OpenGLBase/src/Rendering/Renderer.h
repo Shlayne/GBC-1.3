@@ -16,6 +16,8 @@ public:
 	// TODO: these belong in an opengl context class
 	static int getMaxTextureSlots();
 	static int getMaxTextureSize();
+	static int GetMaxFramebufferSize();
+	static int GetMaxFramebufferColorAttachments();
 
 	// Event-based commands
 	static void onViewportResized(int width, int height);

@@ -20,7 +20,7 @@ public:
 
 	static void submit(const BasicModel& model, const glm::mat4& transform = glm::mat4(1.0f), const OpenGLTexture* texture = nullptr);
 private:
-	static bool ensureBatch(unsigned int vertexCount, unsigned int indexCount, unsigned int texIndex = 0);
+	static void ensureBatch(unsigned int vertexCount, unsigned int indexCount, unsigned int texIndex = 0);
 	static void reset();
 	static unsigned int getTextureIndex(const OpenGLTexture* texture);
 };

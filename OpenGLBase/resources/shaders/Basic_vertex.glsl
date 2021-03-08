@@ -7,7 +7,7 @@ layout(location = 3) in float texIndex;
 
 out vec2 _texCoord;
 out vec4 _tintColor;
-out float _texIndex;
+out flat float _texIndex;
 
 uniform mat4 projection;
 uniform mat4 cameraTransform;

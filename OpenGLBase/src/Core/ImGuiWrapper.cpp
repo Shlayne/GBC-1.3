@@ -51,7 +51,10 @@ void ImGuiWrapper::end()
 void ImGuiWrapper::init()
 {
 	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard
+				   | ImGuiConfigFlags_DockingEnable
+				   | ImGuiConfigFlags_ViewportsEnable;
+	io.ConfigWindowsMoveFromTitleBarOnly = true;
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.WindowRounding = 0.0f;

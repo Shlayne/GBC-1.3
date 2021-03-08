@@ -4,10 +4,10 @@
 
 #include <glm/glm.hpp>
 
-class CameraController
+class CameraController3D
 {
 public:
-	CameraController() = default;
+	CameraController3D(float speed = 1.0f, float sensitivity = 0.2f);
 
 	void onUpdate(float deltaTime);
 	void onEvent(const Event& event);
@@ -19,7 +19,8 @@ public:
 	inline const glm::vec3& getRotation() const { return rotation; }
 	inline void setRotation(const glm::vec3& rotation) { this->rotation = rotation; }
 private:
-	float speed = 1.0f;
+	float speed;
+	float sensitivity;
 
 	float lastMouseX = 0.0f;
 	float lastMouseY = 0.0f;
@@ -29,6 +30,6 @@ private:
 	const float maxPitch = glm::radians(90.0f);
 	const float minPitch = -maxPitch;
 
-	glm::vec3 translation{ 0.0f };
-	glm::vec3 rotation{ 0.0f };
+	glm::vec3 translation{0.0f};
+	glm::vec3 rotation{0.0f};
 };

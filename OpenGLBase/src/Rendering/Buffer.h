@@ -2,14 +2,17 @@
 
 #include <vector>
 
-enum class ElementType : int
+enum class ElementType : unsigned char
 {
 	// If more are added, just set them to something like this
-	// Int = 0x10000001
-	Float  = 0x00000001,
-	Float2 = 0x00000002,
-	Float3 = 0x00000003,
-	Float4 = 0x00000004
+	Int    = 0x81,
+	Int2   = 0x82,
+	Int3   = 0x83,
+	Int4   = 0x84,
+	Float  = 0x01,
+	Float2 = 0x02,
+	Float3 = 0x03,
+	Float4 = 0x04
 };
 
 struct BufferElement
@@ -28,7 +31,7 @@ class BufferLayout
 {
 public:
 	BufferLayout() = default;
-	BufferLayout(const std::vector<BufferElement>& elements);
+	BufferLayout(std::initializer_list<BufferElement> elements);
 
 	inline const std::vector<BufferElement>& getElements() const { return elements; }
 	inline int getStride() const { return stride; }

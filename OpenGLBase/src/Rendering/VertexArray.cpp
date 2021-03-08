@@ -34,7 +34,20 @@ void VertexArray::addVertexBuffer(const VertexBuffer* vertexBuffer)
 	{
 		const BufferElement& element = elements[i];
 		glEnableVertexAttribArray(i);
-		// TODO: not just floats, but the ints and the bools too
-		glVertexAttribPointer(i, element.count, GL_FLOAT, element.normalized, layout.getStride(), (const void*)((unsigned long long)element.offset));
+		switch (element.type)
+		{
+			case ElementType::Float:
+			case ElementType::Float2:
+			case ElementType::Float3:
+			case ElementType::Float4:
+				glVertexAttribPointer(i, element.count, GL_FLOAT, element.normalized ? GL_TRUE : GL_FALSE, layout.getStride(), (const void*)((size_t)element.offset));
+				break;
+			case ElementType::Int:
+			case ElementType::Int2:
+			case ElementType::Int3:
+			case ElementType::Int4:
+				glVertexAttribIPointer(i, element.count, GL_INT, layout.getStride(), (const void*)((size_t)element.offset));
+				break;
+		}
 	}
 }

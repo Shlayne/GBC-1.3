@@ -26,8 +26,8 @@ struct BasicRendererData
 	Vertex* localVertexBufferStart = nullptr;
 	Vertex* localVertexBufferCurrent = nullptr;
 
-	const OpenGLTexture** localTextures = nullptr;
-	unsigned int textureCount = 0;
+	const OpenGLTexture** textures = nullptr;
+	unsigned int textureCount = 1;
 
 	unsigned int maxVertices = 0;
 	unsigned int maxIndices = 0;
@@ -36,9 +36,13 @@ struct BasicRendererData
 
 void BasicRenderer::init()
 {
+	Renderer::enableDepthTest();
+	Renderer::enableBlending();
+	Renderer::enableCullFace();
+
 	// Setup texture slots
 	data.maxTextures = (unsigned int)Renderer::getMaxTextureSlots();
-	data.localTextures = new const OpenGLTexture*[data.maxTextures];
+	data.textures = new const OpenGLTexture*[data.maxTextures];
 
 	// Setup local buffers
 	data.maxVertices = 900000; // TODO: query drivers
@@ -50,12 +54,12 @@ void BasicRenderer::init()
 
 	// Setup internal buffers
 	data.vertexBuffer.reset(new VertexBuffer(data.maxVertices * sizeof(Vertex), nullptr, BufferUsage::DynamicDraw));
-	data.vertexBuffer->setLayout({{
+	data.vertexBuffer->setLayout({
 		{ ElementType::Float3 },
 		{ ElementType::Float4 },
 		{ ElementType::Float2 },
 		{ ElementType::Float  }
-	}});
+	});
 
 	data.vertexArray.reset(new VertexArray());
 	data.vertexArray->addVertexBuffer(data.vertexBuffer.get());
@@ -68,12 +72,17 @@ void BasicRenderer::init()
 		samplers[i] = i;
 
 	std::vector<ShaderFile> shaderFiles = {
-		{ ShaderType::Vertex, FileIO::readFile("resources/shaders/Basic_vertex.glsl") },
-		{ ShaderType::Fragment, FileIO::readFile("resources/shaders/Basic_fragment.glsl") }
+		{ShaderType::Vertex, FileIO::readFile("resources/shaders/Basic_vertex.glsl")},
+		{ShaderType::Fragment, FileIO::readFile("resources/shaders/Basic_fragment.glsl")}
 	};
 	data.shader.reset(new ShaderProgram(shaderFiles));
 	data.shader->bind();
 	data.shader->setUniforms("textures", samplers, data.maxTextures);
+
+	Texture whiteTexture(1, 1, 4);
+	unsigned int* whiteTextureData = (unsigned int*)whiteTexture.getData();
+	*whiteTextureData = 0xffffffff;
+	data.textures[0] = new OpenGLTexture(&whiteTexture);
 
 	delete[] samplers;
 }
@@ -82,7 +91,8 @@ void BasicRenderer::shutdown()
 {
 	delete[] data.localVertexBufferStart;
 	delete[] data.localIndexBufferStart;
-	delete[] data.localTextures;
+	delete data.textures[0];
+	delete[] data.textures;
 }
 
 void BasicRenderer::beginScene(const glm::mat4& cameraTransform, const glm::mat4& projection)
@@ -95,32 +105,31 @@ void BasicRenderer::beginScene(const glm::mat4& cameraTransform, const glm::mat4
 
 void BasicRenderer::endScene()
 {
-	// Copy local buffers to internal buffers
 	unsigned int vertexBufferSize = (unsigned int)(data.localVertexCount * sizeof(Vertex));
-	data.vertexBuffer->setData(vertexBufferSize, data.localVertexBufferStart);
-	
 	unsigned int indexBufferSize = (unsigned int)(data.localIndexCount * sizeof(unsigned int));
-	data.indexBuffer->setData(indexBufferSize, data.localIndexBufferStart);
 
-	// Bind textures
-	for (unsigned int i = 0; i < data.textureCount; i++)
-		data.localTextures[i]->bind(i);
+	if (vertexBufferSize != 0 && indexBufferSize != 0)
+	{
+		// Copy local buffers to internal buffers
+		data.vertexBuffer->setData(vertexBufferSize, data.localVertexBufferStart);
+		data.indexBuffer->setData(indexBufferSize, data.localIndexBufferStart);
 
-	// Actually render
-	Renderer::drawIndexed(*data.vertexArray, *data.indexBuffer, data.localIndexCount);
-	reset();
+		// Bind textures
+		for (unsigned int i = 0; i < data.textureCount; i++)
+			data.textures[i]->bind(i);
+
+		// Actually render
+		Renderer::drawIndexed(*data.vertexArray, *data.indexBuffer, data.localIndexCount);
+		reset();
+	}
 }
 
-bool BasicRenderer::ensureBatch(unsigned int vertexCount, unsigned int indexCount, unsigned int texIndex)
+void BasicRenderer::ensureBatch(unsigned int vertexCount, unsigned int indexCount, unsigned int texIndex)
 {
 	if (data.localVertexCount + vertexCount >= data.maxVertices ||
 		data.localIndexCount + indexCount >= data.maxIndices ||
 		texIndex >= data.maxTextures)
-	{
 		endScene();
-		return true;
-	}
-	return false;
 }
 
 void BasicRenderer::reset()
@@ -132,7 +141,7 @@ void BasicRenderer::reset()
 	data.localIndexCount = 0;
 	data.localIndexBufferCurrent = data.localIndexBufferStart;
 
-	data.textureCount = 0;
+	data.textureCount = 1;
 }
 
 unsigned int BasicRenderer::getTextureIndex(const OpenGLTexture* texture)
@@ -141,7 +150,7 @@ unsigned int BasicRenderer::getTextureIndex(const OpenGLTexture* texture)
 		return 0;
 
 	for (unsigned int i = 0; i < data.textureCount; i++)
-		if (*(texture->getTexture()) == *(data.localTextures[i]->getTexture()))
+		if (*(texture->getTexture()) == *(data.textures[i]->getTexture()))
 			return i;
 
 	return data.textureCount;
@@ -151,13 +160,9 @@ void BasicRenderer::submit(const BasicModel& model, const glm::mat4& transform, 
 {
 	// Handle textures
 	unsigned int texIndex = getTextureIndex(texture);
-	if (ensureBatch(model.vertexCount, model.indexCount, texIndex))
-		texIndex = 0;
-	if (texIndex == data.textureCount)
-	{
-		data.localTextures[texIndex] = texture;
-		data.textureCount++;
-	}
+	ensureBatch(model.vertexCount, model.indexCount, texIndex);
+	if (texIndex >= data.textureCount)
+		data.textures[data.textureCount++] = texture;
 
 	// Handle vertices
 	for (unsigned int i = 0; i < model.vertexCount; i++, data.localVertexBufferCurrent++)

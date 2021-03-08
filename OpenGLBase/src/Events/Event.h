@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <ostream>
 
 enum class EventType
 {
@@ -27,3 +28,5 @@ private:
 	EventType type;
 	mutable bool handled = false;
 };
+
+std::ostream& operator<<(std::ostream& ostr, const Event& event);

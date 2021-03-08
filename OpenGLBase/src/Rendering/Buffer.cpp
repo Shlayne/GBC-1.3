@@ -2,13 +2,13 @@
 
 #include <gl/glew.h>
 
-BufferLayout::BufferLayout(const std::vector<BufferElement>& elements)
+BufferLayout::BufferLayout(std::initializer_list<BufferElement> elements)
 	: elements(elements)
 {
 	for (BufferElement& element : this->elements)
 	{
 		element.offset = stride;
-		element.count = static_cast<int>(element.type) & 0x0000ffff;
+		element.count = static_cast<int>(element.type) & 0x000000ff;
 		element.size = 4 * element.count;
 		stride += element.size;
 	}

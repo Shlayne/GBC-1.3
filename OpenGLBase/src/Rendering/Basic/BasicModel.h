@@ -4,6 +4,8 @@
 
 struct BasicModel
 {
+	BasicModel() = default;
+	BasicModel(unsigned int vertexCount, unsigned int indexCount);
 	~BasicModel();
 
 	BasicVertex* vertices = nullptr;
