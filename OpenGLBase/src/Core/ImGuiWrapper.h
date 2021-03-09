@@ -1,13 +1,16 @@
 #pragma once
 
-class ImGuiWrapper
+namespace cbc
 {
-public:
-	ImGuiWrapper(void* window);
-	~ImGuiWrapper();
+	class ImGuiWrapper
+	{
+	public:
+		ImGuiWrapper(void* window);
+		~ImGuiWrapper();
 
-	void Begin();
-	void End();
-private:
-	void Init();
-};
+		void Begin();
+		void End();
+	private:
+		void Init();
+	};
+}

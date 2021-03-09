@@ -2,87 +2,88 @@
 #include "Rendering/Renderer.h"
 #include "Events/WindowEvents.h"
 
-#define BIND_FUNC(func) [this](auto&&... args) -> decltype(auto) { return this->func(std::forward<decltype(args)>(args)...); }
-
-Application* Application::instance = nullptr;
-
-Application::Application(const WindowSpecifications& windowSpecs)
+namespace cbc
 {
-	instance = this;
+	Application* Application::instance = nullptr;
 
-	window = Window::Create(windowSpecs);
-	window->SetEventCallback(BIND_FUNC(OnEvent));
-
-	imguiWrapper = CreateScope<ImGuiWrapper>(window->GetNativeWindow());
-	Renderer::Init();
-	sandbox = CreateScope<Sandbox>();
-}
-
-Application::~Application()
-{
-	Renderer::Shutdown();
-}
-
-void Application::Run()
-{
-	while (running)
+	Application::Application(const WindowSpecifications& windowSpecs)
 	{
-		float deltaTime = window->GetContext().GetElapsedTime();
-		sandbox->OnUpdate(deltaTime);
+		instance = this;
 
-		if (rendering)
-		{
-			sandbox->OnRender();
-			imguiWrapper->Begin();
-			sandbox->OnImGuiRender();
-			imguiWrapper->End();
-		}
+		window = Window::CreateScope(windowSpecs);
+		window->SetEventCallback(CBC_BIND_FUNC(OnEvent));
 
-		window->PollEvents();
-
-		if (rendering)
-			window->SwapBuffers();
+		imguiWrapper = CreateScope<ImGuiWrapper>(window->GetNativeWindow());
+		Renderer::Init();
+		sandbox = CreateScope<Sandbox>();
 	}
-}
 
-void Application::Terminate()
-{
-	running = false;
-}
-
-void Application::OnEvent(Event& event)
-{
-	switch (event.GetType())
+	Application::~Application()
 	{
-		case EventType::WindowClose:
+		Renderer::Shutdown();
+	}
+
+	void Application::Run()
+	{
+		while (running)
 		{
-			Terminate();
-			event.Handle();
-			break;
-		}
-		case EventType::WindowResize:
-		{
-			const WindowResizeEvent& wre = (const WindowResizeEvent&)event;
-			if (wre.GetWidth() == 0 || wre.GetHeight() == 0)
+			float deltaTime = window->GetContext().GetElapsedTime();
+			sandbox->OnUpdate(deltaTime);
+
+			if (rendering)
 			{
-				rendering = false;
+				sandbox->OnRender();
+				imguiWrapper->Begin();
+				sandbox->OnImGuiRender();
+				imguiWrapper->End();
+			}
+
+			window->PollEvents();
+
+			if (rendering)
+				window->SwapBuffers();
+		}
+	}
+
+	void Application::Terminate()
+	{
+		running = false;
+	}
+
+	void Application::OnEvent(Event& event)
+	{
+		switch (event.GetType())
+		{
+			case EventType::WindowClose:
+			{
+				Terminate();
 				event.Handle();
+				break;
 			}
-			else
+			case EventType::WindowResize:
 			{
-				rendering = true;
-				Renderer::SetViewport(0, 0, wre.GetWidth(), wre.GetHeight());
+				WindowResizeEvent& wre = (WindowResizeEvent&)event;
+				if (wre.GetWidth() == 0 || wre.GetHeight() == 0)
+				{
+					rendering = false;
+					event.Handle();
+				}
+				else
+				{
+					rendering = true;
+					Renderer::SetViewport(0, 0, wre.GetWidth(), wre.GetHeight());
+				}
+				break;
 			}
-			break;
+			case EventType::WindowMinimize:
+			{
+				WindowMinimizeEvent& wme = (WindowMinimizeEvent&)event;
+				rendering = !wme.IsMinimized();
+				break;
+			}
 		}
-		case EventType::WindowMinimize:
-		{
-			const WindowMinimizeEvent& wme = (const WindowMinimizeEvent&)event;
-			rendering = !wme.IsMinimized();
-			break;
-		}
-	}
 
-	if (!event.IsHandled())
-		sandbox->OnEvent(event);
+		if (!event.IsHandled())
+			sandbox->OnEvent(event);
+	}
 }

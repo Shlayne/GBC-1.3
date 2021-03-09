@@ -3,9 +3,11 @@
 #include "Events/Event.h"
 #include "Util/TextureAtlas.h"
 #include "Util/PerspectiveCamera.h"
-#include "Util/CameraController3D.h"
+#include "Util/PerspectiveCameraController.h"
 #include "Rendering/Basic/BasicModel.h"
 //#include "Rendering/Framebuffer.h"
+
+using namespace cbc;
 
 class Sandbox
 {
@@ -19,20 +21,16 @@ public:
 	void OnEvent(Event& event);
 private:
 	PerspectiveCamera camera;
-	CameraController3D cameraController;
+	PerspectiveCameraController cameraController;
 	//Scope<Framebuffer> framebuffer;
 	BasicModel model{4, 6}; // Debug
 };
 
 // TODO: not in any particular order...
-//  1) texture specifications
-//  2) orthographic camera
-//  3) isometric camera ???
-//  4) render one of a framebuffers' color attachments
-//  5) logging
-//  6) precompiled headers
-//  7) renderer capabilities
-//  8) assert macro
-//  9) add RendererID type
-// 10) profiler / renderer statistics + imgui panel for that
-// 11) ok so basically make this Hazel except don't focus on the editor https://github.com/TheCherno/Hazel
+// isometric camera ???
+// render one of a framebuffers' color attachments
+// logging
+// precompiled headers
+// profiler / renderer statistics + imgui panel for that
+// premake
+// ok so basically make this Hazel except don't focus on the editor https://github.com/TheCherno/Hazel

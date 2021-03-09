@@ -4,16 +4,19 @@
 #include "Core/Keycodes.h"
 #include "Core/Mousecodes.h"
 
-class Input
+namespace cbc
 {
-public:
-	static bool IsKeyPressed(Keycode keycode);
-	static bool IsKeyReleased(Keycode keycode);
+	class Input
+	{
+	public:
+		static bool IsKeyPressed(Keycode keycode);
+		static bool IsKeyReleased(Keycode keycode);
 
-	static bool IsMouseButtonPressed(Mousecode button);
-	static bool IsMouseButtonReleased(Mousecode button);
+		static bool IsMouseButtonPressed(Mousecode button);
+		static bool IsMouseButtonReleased(Mousecode button);
 
-	static std::pair<float, float> GetMousePos();
-	static float GetMousePosX();
-	static float GetMousePosY();
-};
+		static std::pair<float, float> GetMousePos();
+		static float GetMousePosX();
+		static float GetMousePosY();
+	};
+}

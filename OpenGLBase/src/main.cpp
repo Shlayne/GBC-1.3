@@ -2,7 +2,7 @@
 
 int main()
 {
-	Application* application = new Application();
+	cbc::Application* application = new cbc::Application();
 	application->Run();
 	delete application;
 	return 0;

@@ -2,8 +2,11 @@
 
 #include <string>
 
-class FileIO
+namespace cbc
 {
-public:
-	static std::string ReadFile(const std::string& filePath);
-};
+	class FileIO
+	{
+	public:
+		static std::string ReadFile(const std::string& filePath);
+	};
+}

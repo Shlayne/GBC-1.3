@@ -4,10 +4,9 @@
 #include "Events/WindowEvents.h"
 #include "Events/MouseEvents.h"
 #include "Core/Application.h"
-#include "imgui/imgui.h"
+//#include "imgui/imgui.h"
 
 Sandbox::Sandbox()
-	: camera(glm::radians(90.0f), 0.01f, 1000.0f)
 {
 	model.vertices[0] = {{-0.5f, -0.5f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
 	model.vertices[1] = {{ 0.5f, -0.5f, 0.0f}, {1.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
@@ -29,7 +28,7 @@ Sandbox::Sandbox()
 	//framebufferSpecification.attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth};
 	//framebufferSpecification.width = window.GetWidth();
 	//framebufferSpecification.height = window.GetHeight();
-	//framebuffer = Framebuffer::Create(framebufferSpecification);
+	//framebuffer = Framebuffer::CreateScope(framebufferSpecification);
 }
 
 Sandbox::~Sandbox()
@@ -76,7 +75,7 @@ void Sandbox::OnEvent(Event& event)
 	{
 		case EventType::WindowResize:
 		{
-			const WindowResizeEvent& wre = (const WindowResizeEvent&)event;
+			WindowResizeEvent& wre = (WindowResizeEvent&)event;
 			camera.OnViewportResize(wre.GetWidth(), wre.GetHeight());
 			break;
 		}

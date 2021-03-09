@@ -4,11 +4,11 @@
 
 namespace cbc
 {
-	class PerspectiveCamera
+	class OrthographicCamera
 	{
 	public:
-		PerspectiveCamera() = default;
-		PerspectiveCamera(float fov, float nearClip, float farClip);
+		OrthographicCamera() = default;
+		OrthographicCamera(float size, float nearClip, float farClip);
 
 		inline const glm::mat4& GetProjection() const { return projection; }
 
@@ -16,9 +16,9 @@ namespace cbc
 	private:
 		void Recalculate();
 
-		float fov = glm::radians(90.0f);
-		float nearClip = 0.001f;
-		float farClip = 1000.0f;
+		float size = 2.0f;
+		float nearClip = -1.0f;
+		float farClip = 1.0f;
 		float aspectRatio = 1.0f;
 		glm::mat4 projection{1.0f};
 	};

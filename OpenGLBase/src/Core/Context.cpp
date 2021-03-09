@@ -1,24 +1,29 @@
 #include "Context.h"
+#include "Core.h"
 #include <gl/glew.h>
 #include <glfw/glfw3.h>
 
-Context::Context(GLFWwindow* window)
-	: window(window)
+namespace cbc
 {
-	glfwMakeContextCurrent(window);
-	if (glewInit() != GLEW_OK) return;
-	//std::cout << glGetString(GL_VERSION) << '\n';
-}
+	Context::Context(GLFWwindow* window)
+		: window(window)
+	{
+		glfwMakeContextCurrent(window);
+		int initStatus = glewInit();
+		CBC_ASSERT(initStatus == GLEW_OK, "Failed to initialize GLEW!");
+		//std::cout << glGetString(GL_VERSION) << '\n';
+	}
 
-void Context::SwapBuffers()
-{
-	glfwSwapBuffers(window);
-}
+	void Context::SwapBuffers()
+	{
+		glfwSwapBuffers(window);
+	}
 
-float Context::GetElapsedTime() const
-{
-	float time = (float)glfwGetTime();
-	float elapsedTime = time - lastTime;
-	lastTime = time;
-	return elapsedTime;
+	float Context::GetElapsedTime() const
+	{
+		float time = (float)glfwGetTime();
+		float elapsedTime = time - lastTime;
+		lastTime = time;
+		return elapsedTime;
+	}
 }

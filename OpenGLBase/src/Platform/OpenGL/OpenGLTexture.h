@@ -2,24 +2,27 @@
 
 #include "Rendering/Texture.h"
 
-class OpenGLTexture : public Texture
+namespace cbc
 {
-public:
-	OpenGLTexture(Ref<LocalTexture2D> texture);
-	virtual ~OpenGLTexture();
+	class OpenGLTexture : public Texture
+	{
+	public:
+		OpenGLTexture(TextureSpecification specification);
+		virtual ~OpenGLTexture();
 
-	virtual void Bind(unsigned int slot = 0) const override;
-	virtual void Unbind(unsigned int slot = 0) const override;
+		virtual void Bind(unsigned int slot = 0) const override;
+		virtual void Unbind(unsigned int slot = 0) const override;
 
-	virtual const Ref<LocalTexture2D>& GetTexture() const override { return texture; }
+		virtual const Ref<LocalTexture2D>& GetTexture() const override { return specification.texture; }
+		virtual const TextureSpecification& GetSpecification() const override { return specification; }
 
-	// Call this when you want to update the internal
-	// texture after the the local texture has updated.
-	virtual void Update() override;
-private:
-	Ref<LocalTexture2D> texture;
+		virtual void Update() override;
+	private:
+		TextureSpecification specification;
 
-	unsigned int rendererID = 0;
-	int internalFormat = 0;
-	int format = 0;
-};
+		RendererID rendererID = 0;
+		unsigned int internalFormat = 0;
+		unsigned int format = 0;
+		unsigned int type = 0;
+	};
+}
