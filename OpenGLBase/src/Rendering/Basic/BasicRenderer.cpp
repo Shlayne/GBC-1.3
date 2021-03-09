@@ -1,5 +1,5 @@
+#include "cbcpch.h"
 #include "BasicRenderer.h"
-#include <vector>
 #include "IO/FileIO.h"
 #include "Rendering/Renderer.h"
 #include "Rendering/Shader.h"
@@ -126,8 +126,8 @@ namespace cbc
 
 	void BasicRenderer::EnsureBatch(unsigned int vertexCount, unsigned int indexCount, unsigned int texIndex)
 	{
-		if (data.localVertexCount + vertexCount >= data.maxVertices ||
-			data.localIndexCount + indexCount >= data.maxIndices ||
+		if (data.localVertexCount + vertexCount > data.maxVertices ||
+			data.localIndexCount + indexCount > data.maxIndices ||
 			texIndex >= data.maxTextures)
 			EndScene();
 	}
@@ -152,20 +152,20 @@ namespace cbc
 		if (texture == nullptr)
 			return 0;
 
-		for (unsigned int i = 0; i < data.textureCount; i++)
+		for (unsigned int i = 1; i < data.textureCount; i++)
 			if (*(texture->GetTexture()) == *(data.textures[i]->GetTexture()))
 				return i;
 
 		return data.textureCount;
 	}
 
-	void BasicRenderer::Submit(const BasicModel& model, const glm::mat4& transform, const Ref<Texture>& texture)
+	void BasicRenderer::Submit(const BasicModel& model, const glm::mat4& transform, Ref<Texture> texture)
 	{
 		// Handle textures
 		unsigned int texIndex = GetTextureIndex(texture);
 		EnsureBatch(model.vertexCount, model.indexCount, texIndex);
 		if (texIndex >= data.textureCount)
-			data.textures[data.textureCount++] = texture;
+			data.textures[texIndex = data.textureCount++] = texture;
 
 		// Handle vertices
 		for (unsigned int i = 0; i < model.vertexCount; i++, data.localVertexBufferCurrent++)

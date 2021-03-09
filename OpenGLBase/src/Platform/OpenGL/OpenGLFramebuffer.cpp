@@ -1,3 +1,4 @@
+#include "cbcpch.h"
 #include "OpenGLFramebuffer.h"
 #include <gl/glew.h>
 #include "Rendering/Renderer.h"
@@ -184,7 +185,7 @@ namespace cbc
 		int maxColorAttachments = Renderer::GetMaxFramebufferColorAttachments();
 		if (colorAttachments.size() > 1)
 		{
-			// assert colorAttachments.size() <= maxColorAttachments
+			CBC_ASSERT(colorAttachments.size() <= maxColorAttachments, "Too many Framebuffer color attachments!");
 			GLenum* buffers = (GLenum*)alloca(colorAttachments.size() * sizeof(GLenum));
 			for (size_t i = 0; i < colorAttachments.size(); i++)
 				buffers[i] = (GLenum)(GL_COLOR_ATTACHMENT0 + i);
@@ -196,10 +197,8 @@ namespace cbc
 			// Only depth-pass
 			glDrawBuffer(GL_NONE);
 		}
-	
-		//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		//	__debugbreak();
-		// assert glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE
+
+		CBC_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer incomplete!");
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}

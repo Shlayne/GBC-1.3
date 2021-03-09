@@ -1,5 +1,6 @@
 #pragma once
 
+#if CBC_PLATFORM_WINDOWS
 #include "Core/Window.h"
 
 struct GLFWwindow;
@@ -63,3 +64,4 @@ namespace cbc
 		} state;
 	};
 }
+#endif

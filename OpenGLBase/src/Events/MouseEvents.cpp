@@ -1,5 +1,5 @@
+#include "cbcpch.h"
 #include "MouseEvents.h"
-#include <sstream>
 
 namespace cbc
 {

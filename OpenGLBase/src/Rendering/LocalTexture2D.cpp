@@ -1,6 +1,7 @@
+#include "cbcpch.h"
 #include "LocalTexture2D.h"
-#include <stb/stb_image.h>
-#include <stb/stb_image_write.h>
+#include "stb/stb_image.h"
+#include "stb/stb_image_write.h"
 
 namespace cbc
 {

@@ -1,3 +1,4 @@
+#include "cbcpch.h"
 #include "BasicModel.h"
 
 namespace cbc

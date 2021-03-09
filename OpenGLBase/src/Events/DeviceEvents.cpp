@@ -1,5 +1,5 @@
+#include "cbcpch.h"
 #include "DeviceEvents.h"
-#include <sstream>
 
 namespace cbc
 {

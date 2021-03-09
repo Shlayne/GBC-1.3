@@ -1,6 +1,6 @@
+#include "cbcpch.h"
 #include "OpenGLShader.h"
 #include <gl/glew.h>
-#include <iostream> // TODO: logging
 #include <glm/gtc/type_ptr.hpp>
 
 namespace cbc
@@ -28,6 +28,7 @@ namespace cbc
 
 		if (!success)
 		{
+			CBC_CORE_WARN("Failed to create shader.");
 			glDeleteProgram(rendererID);
 			rendererID = 0;
 		}
@@ -60,7 +61,7 @@ namespace cbc
 			glGetProgramiv(rendererID, GL_INFO_LOG_LENGTH, &length);
 			char* message = new char[length];
 			glGetProgramInfoLog(rendererID, length, &length, message);
-			std::cerr << "Failed to link program:\n" << message << '\n';
+			CBC_CORE_WARN("Failed to link program: {0}", message);
 			delete[] message;
 			return false;
 		}
@@ -75,7 +76,7 @@ namespace cbc
 			glGetProgramiv(rendererID, GL_INFO_LOG_LENGTH, &length);
 			char* message = new char[length];
 			glGetProgramInfoLog(rendererID, length, &length, message);
-			std::cerr << "Failed to validate program:\n" << message << '\n';
+			CBC_CORE_WARN("Failed to validate program: {0}", message);
 			delete[] message;
 			return false;
 		}
@@ -93,8 +94,10 @@ namespace cbc
 			case ShaderType::Geometry:              return GL_GEOMETRY_SHADER;
 			case ShaderType::Fragment:              return GL_FRAGMENT_SHADER;
 			case ShaderType::Compute:               return GL_COMPUTE_SHADER;
-			default:                                return 0;
 		}
+
+		CBC_ASSERT(false, "Unknown Shader Type!");
+		return 0;
 	}
 
 	static const char* GetName(ShaderType type)
@@ -107,8 +110,10 @@ namespace cbc
 			case ShaderType::Geometry:              return "geometry";
 			case ShaderType::Fragment:              return "fragment";
 			case ShaderType::Compute:               return "compute";
-			default:                                return "unknown";
 		}
+
+		CBC_ASSERT(false, "Unknown Shader Type!");
+		return "unknown";
 	}
 
 	unsigned int OpenGLShader::Compile(const ShaderFile& shader)
@@ -126,7 +131,7 @@ namespace cbc
 			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 			char* message = new char[length];
 			glGetShaderInfoLog(id, length, &length, message);
-			std::cerr << "Failed to compile " << GetName(shader.type) << " shader:\n" << message << '\n';
+			CBC_CORE_WARN("Failed to compile {0} shader: {1}", GetName(shader.type), message);
 			delete[] message;
 			glDeleteShader(id);
 			return 0;
@@ -142,6 +147,11 @@ namespace cbc
 			return it->second;
 
 		int location = glGetUniformLocation(rendererID, name.c_str());
+
+#if CBC_ENABLE_LOGGING // remove the if (location == -1) when logging is disabled
+		if (location == -1)
+			CBC_CORE_WARN("Unused shader uniform: {0}", name);
+#endif
 		uniformLocations[name] = location;
 		return location;
 	}

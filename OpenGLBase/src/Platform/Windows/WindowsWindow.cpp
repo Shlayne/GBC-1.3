@@ -1,3 +1,5 @@
+#include "cbcpch.h"
+#if CBC_PLATFORM_WINDOWS
 #include "WindowsWindow.h"
 #include <glfw/glfw3.h>
 #include "Events/WindowEvents.h"
@@ -7,6 +9,12 @@
 
 namespace cbc
 {
+	Ref<Window> Window::CreateRef(const WindowSpecifications& specs)
+	{ return cbc::CreateRef<WindowsWindow>(specs); }
+
+	Scope<Window> Window::CreateScope(const WindowSpecifications& specs)
+	{ return cbc::CreateScope<WindowsWindow>(specs); }
+
 	WindowsWindow::WindowsWindow(const WindowSpecifications& specs)
 	{
 		int initState = glfwInit();
@@ -301,3 +309,4 @@ namespace cbc
 		state.preFullscreen.height = state.current.height;
 	}
 }
+#endif

@@ -14,24 +14,18 @@
 #endif
 
 #if CBC_ENABLE_ASSERTS
-#define CBC_ASSERT(cond, ...) if (!(cond)) { __debugbreak(); }
+#define CBC_ASSERT(cond, ...) if (!(cond)) { __debugbreak(); CBC_CORE_FATAL(__VA_ARGS__); }
 #else
 #define CBC_ASSERT(cond, ...)
 #endif
 
-#if CBC_ENABLE_LOGGING
-
-#else
-
-#endif
-
 #define CBC_BIND_FUNC(func) [this](auto&&... args) -> decltype(auto) { return this->func(std::forward<decltype(args)>(args)...); }
 
-// Ref and Scope
 #include <memory>
 
 namespace cbc
 {
+	// Ref and Scope
 	template<typename T>
 	using Ref = std::shared_ptr<T>;
 	template<typename T, typename... Args>
@@ -43,7 +37,7 @@ namespace cbc
 	template<typename T, typename... Args>
 	constexpr Scope<T> CreateScope(Args&&... args)
 	{ return std::make_unique<T>(std::forward<Args>(args)...); }
-}
 
-// RendererID
-using RendererID = unsigned int;
+	// RendererID
+	using RendererID = unsigned int;
+}

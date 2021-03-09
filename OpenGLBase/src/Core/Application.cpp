@@ -1,3 +1,4 @@
+#include "cbcpch.h"
 #include "Application.h"
 #include "Rendering/Renderer.h"
 #include "Events/WindowEvents.h"
@@ -9,6 +10,7 @@ namespace cbc
 	Application::Application(const WindowSpecifications& windowSpecs)
 	{
 		instance = this;
+		Logger::Init();
 
 		window = Window::CreateScope(windowSpecs);
 		window->SetEventCallback(CBC_BIND_FUNC(OnEvent));

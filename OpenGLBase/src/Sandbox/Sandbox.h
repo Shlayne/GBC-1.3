@@ -27,10 +27,10 @@ private:
 };
 
 // TODO: not in any particular order...
-// isometric camera ???
 // render one of a framebuffers' color attachments
 // logging
 // precompiled headers
 // profiler / renderer statistics + imgui panel for that
 // premake
 // ok so basically make this Hazel except don't focus on the editor https://github.com/TheCherno/Hazel
+// rename the git repository to C++BaseCode

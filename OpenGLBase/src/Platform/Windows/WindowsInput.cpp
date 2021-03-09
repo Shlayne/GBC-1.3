@@ -1,3 +1,4 @@
+#include "cbcpch.h"
 #if CBC_PLATFORM_WINDOWS
 #include "Core/Input.h"
 #include <glfw/glfw3.h>
@@ -34,7 +35,7 @@ namespace cbc
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		double x, y;
 		glfwGetCursorPos(window, &x, &y);
-		return { (float)x, (float)y };
+		return {(float)x, (float)y};
 	}
 
 	float Input::GetMousePosX()
