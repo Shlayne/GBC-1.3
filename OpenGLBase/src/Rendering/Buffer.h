@@ -1,10 +1,10 @@
 #pragma once
 
 #include <vector>
+#include "Core/RefScope.h"
 
-enum class ElementType : unsigned char
+enum class BufferElementType : unsigned char
 {
-	// If more are added, just set them to something like this
 	Int    = 0x81,
 	Int2   = 0x82,
 	Int3   = 0x83,
@@ -17,10 +17,10 @@ enum class ElementType : unsigned char
 
 struct BufferElement
 {
-	BufferElement(ElementType type, bool normalized = false)
+	BufferElement(BufferElementType type, bool normalized = false)
 		: type(type), normalized(normalized) {}
 
-	ElementType type;
+	BufferElementType type;
 	bool normalized;
 	int size = 0;
 	int count = 0;
@@ -56,34 +56,30 @@ enum class BufferUsage
 class VertexBuffer
 {
 public:
-	VertexBuffer(unsigned int size, const void* data = nullptr, BufferUsage usage = BufferUsage::StaticDraw);
-	~VertexBuffer();
+	virtual ~VertexBuffer() = default;
 
-	void Bind() const;
-	void Unbind() const;
+	virtual void Bind() const = 0;
+	virtual void Unbind() const = 0;
 
-	void SetData(unsigned int size, const void* data);
+	virtual void SetData(unsigned int size, const void* data) = 0;
 
-	inline const BufferLayout& GetLayout() const { return layout; }
-	inline void SetLayout(const BufferLayout& layout) { this->layout = layout; }
-private:
-	unsigned int rendererID = 0;
-	BufferLayout layout;
+	virtual const BufferLayout& GetLayout() const = 0;
+	virtual void SetLayout(const BufferLayout& layout) = 0;
+
+	static Ref<VertexBuffer> Create(unsigned int size, const void* data = nullptr, BufferUsage usage = BufferUsage::StaticDraw);
 };
 
 class IndexBuffer
 {
 public:
-	IndexBuffer(unsigned int count, const void* data = nullptr, BufferUsage usage = BufferUsage::StaticDraw);
-	~IndexBuffer();
+	virtual ~IndexBuffer() = default;
 
-	void Bind() const;
-	void Unbind() const;
+	virtual void Bind() const = 0;
+	virtual void Unbind() const = 0;
 
-	void SetData(unsigned int count, const void* data);
+	virtual void SetData(unsigned int count, const void* data) = 0;
 
-	inline unsigned int GetCount() const { return count; }
-private:
-	unsigned int rendererID = 0;
-	unsigned int count = 0;
+	virtual unsigned int GetCount() const = 0;
+
+	static Ref<IndexBuffer> Create(unsigned int count, const void* data = nullptr, BufferUsage usage = BufferUsage::StaticDraw);
 };

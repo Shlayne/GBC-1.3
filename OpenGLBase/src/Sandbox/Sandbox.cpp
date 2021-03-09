@@ -1,9 +1,9 @@
 #include "Sandbox.h"
 #include "Rendering/Basic/BasicRenderer.h"
+#include "Rendering/Renderer.h"
 #include "Events/WindowEvents.h"
 #include "Events/MouseEvents.h"
 #include "Core/Application.h"
-#include <iostream>
 #include "imgui/imgui.h"
 
 Sandbox::Sandbox()
@@ -29,7 +29,7 @@ Sandbox::Sandbox()
 	//framebufferSpecification.attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth};
 	//framebufferSpecification.width = window.GetWidth();
 	//framebufferSpecification.height = window.GetHeight();
-	//framebuffer.reset(new Framebuffer(framebufferSpecification));
+	//framebuffer = Framebuffer::Create(framebufferSpecification);
 }
 
 Sandbox::~Sandbox()

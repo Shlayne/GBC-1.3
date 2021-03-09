@@ -7,7 +7,7 @@ TextureAtlas::TextureAtlas()
 
 }
 
-glm::ivec2 TextureAtlas::AddTexture(std::shared_ptr<Texture> texture)
+glm::ivec2 TextureAtlas::AddTexture(std::shared_ptr<LocalTexture2D> texture)
 {
 	glm::ivec2 textureSize = glm::ivec2(texture->GetWidth(), texture->GetHeight());
 
@@ -26,7 +26,7 @@ glm::ivec2 TextureAtlas::AddTexture(std::shared_ptr<Texture> texture)
 }
 
 // From: https://straypixels.net/texture-packing-for-fonts/
-TextureAtlas::TextureNode* TextureAtlas::AddTexture(TextureNode* node, const std::shared_ptr<Texture>& texture, const glm::ivec2& size)
+TextureAtlas::TextureNode* TextureAtlas::AddTexture(TextureNode* node, const std::shared_ptr<LocalTexture2D>& texture, const glm::ivec2& size)
 {
 	// If the node has a texture, it can only be a leaf node, so don't bother
 	if (node->texture != nullptr)
@@ -91,20 +91,20 @@ TextureAtlas::TextureNode* TextureAtlas::AddTexture(TextureNode* node, const std
 	}
 }
 
-Texture** TextureAtlas::Create(int mipmapLevels)
+LocalTexture2D** TextureAtlas::Create(int mipmapLevels)
 {
-	Texture** atlasTextures = nullptr;
+	LocalTexture2D** atlasTextures = nullptr;
 	if (mipmapLevels > 0)
 	{
-		atlasTextures = new Texture*[mipmapLevels];
+		atlasTextures = new LocalTexture2D *[mipmapLevels];
 		for (int i = 0; i < mipmapLevels; i++)
-			atlasTextures[i] = new Texture(atlasTextureSize.x >> i, atlasTextureSize.y >> i, 4);
+			atlasTextures[i] = new LocalTexture2D(atlasTextureSize.x >> i, atlasTextureSize.y >> i, 4);
 		PutTexture(root.get(), atlasTextures, mipmapLevels);
 	}
 	return atlasTextures;
 }
 
-void TextureAtlas::PutTexture(TextureNode* node, Texture** atlasTextures, int mipmapLevels)
+void TextureAtlas::PutTexture(TextureNode* node, LocalTexture2D** atlasTextures, int mipmapLevels)
 {
 	if (node != nullptr)
 	{
@@ -112,13 +112,13 @@ void TextureAtlas::PutTexture(TextureNode* node, Texture** atlasTextures, int mi
 		{
 			// Yes, copying the original texture is a waste of memory,
 			// but it makes coding it easier.
-			Texture* texture = new Texture(*(node->texture));
+			LocalTexture2D* texture = new LocalTexture2D(*(node->texture));
 
 			for (int i = 0; i < mipmapLevels && texture != nullptr && texture; i++)
 			{
 				// This is... finally, where textures are copied
 				atlasTextures[i]->SetSubregion(*texture, node->position.x >> i, node->position.y >> i);
-				Texture* newTexture = texture->CreateMipmap();
+				LocalTexture2D* newTexture = texture->CreateMipmap();
 				delete texture;
 				texture = newTexture;
 			}

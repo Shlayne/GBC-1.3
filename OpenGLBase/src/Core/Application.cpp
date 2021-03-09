@@ -10,30 +10,24 @@ Application::Application(const WindowSpecifications& windowSpecs)
 {
 	instance = this;
 
-	window = new Window(windowSpecs);
+	window = Window::Create(windowSpecs);
 	window->SetEventCallback(BIND_FUNC(OnEvent));
 
-	imguiWrapper = new ImGuiWrapper(*window);
-
+	imguiWrapper = CreateScope<ImGuiWrapper>(window->GetNativeWindow());
 	Renderer::Init();
-
-	sandbox = new Sandbox();
+	sandbox = CreateScope<Sandbox>();
 }
 
 Application::~Application()
 {
-	delete sandbox;
-	delete imguiWrapper;
-
 	Renderer::Shutdown();
-	delete window;
 }
 
 void Application::Run()
 {
 	while (running)
 	{
-		float deltaTime = window->GetContext()->GetElapsedTime();
+		float deltaTime = window->GetContext().GetElapsedTime();
 		sandbox->OnUpdate(deltaTime);
 
 		if (rendering)
@@ -77,7 +71,7 @@ void Application::OnEvent(Event& event)
 			else
 			{
 				rendering = true;
-				Renderer::OnViewportResized(wre.GetWidth(), wre.GetHeight());
+				Renderer::SetViewport(0, 0, wre.GetWidth(), wre.GetHeight());
 			}
 			break;
 		}

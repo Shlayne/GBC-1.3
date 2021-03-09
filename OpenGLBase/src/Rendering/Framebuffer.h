@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <initializer_list>
+#include "Core/RefScope.h"
 
 enum class FramebufferTextureFormat
 {
@@ -18,6 +19,16 @@ enum class FramebufferTextureFormat
 	Color = RGBA8,
 	Depth = Depth24Stencil8
 };
+
+static bool IsDepthFormat(FramebufferTextureFormat format)
+{
+	switch (format)
+	{
+		case FramebufferTextureFormat::Depth24Stencil8:
+			return true;
+		default: return false;
+	}
+}
 
 enum class FramebufferFilterMode
 {
@@ -66,31 +77,20 @@ struct FramebufferSpecification
 class Framebuffer
 {
 public:
-	Framebuffer(FramebufferSpecification specification);
-	~Framebuffer();
+	virtual ~Framebuffer() = default;
 
-	void Bind();
-	void Unbind();
+	virtual void Bind() = 0;
+	virtual void Unbind() = 0;
 
-	void OnViewportResize(int width, int height);
-	const FramebufferSpecification& GetSpecification() const { return specification; }
+	virtual void OnViewportResize(int width, int height) = 0;
+	virtual const FramebufferSpecification& GetSpecification() const = 0;
 
-	unsigned int GetColorAttachment(unsigned int index = 0) const { return index < colorAttachments.size() ? colorAttachments[index] : 0; }
-	unsigned int GetDepthAttachment() const { return depthAttachment; }
+	virtual unsigned int GetColorAttachment(unsigned int index) const = 0;
+	virtual unsigned int GetDepthAttachment() const = 0;
 
-	bool GetColorPixel(void* pixel, int x, int y, unsigned int index = 0) const;
+	virtual bool GetColorPixel(void* pixel, int x, int y, unsigned int index) const = 0;
 
-	void ClearColorAttachment(const void* value, unsigned int index = 0);
-private:
-	void Recreate();
-	void Clear();
+	virtual void ClearColorAttachment(const void* value, unsigned int index) = 0;
 
-	FramebufferSpecification specification;
-	unsigned int rendererID = 0;
-
-	std::vector<FramebufferTextureSpecification> colorAttachmentSpecifications;
-	FramebufferTextureSpecification depthAttachmentSpecification;
-
-	std::vector<unsigned int> colorAttachments;
-	unsigned int depthAttachment = 0;
+	static Ref<Framebuffer> Create(FramebufferSpecification specification);
 };

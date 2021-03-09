@@ -1,38 +1,21 @@
 #pragma once
 
-#include <string>
+#include "Rendering/LocalTexture2D.h"
+#include "Core/RefScope.h"
 
 class Texture
 {
 public:
-	Texture() = default;
-	Texture(const std::string& filePath, int requiredChannels = 0, bool flipVertically = false);
-	Texture(int width, int height, int channels);
-	Texture(const Texture& texture);
-	~Texture();
+	virtual ~Texture() = default;
 
-	bool ReadFile(const std::string& filePath, int requiredChannels = 0, bool flipVertically = false);
-	bool WriteFile(const std::string& filePath, bool flipVertically = false);
-	void Create(int width, int height, int channels);
-	bool Copy(const Texture& texture);
+	virtual void Bind(unsigned int slot) const = 0;
+	virtual void Unbind(unsigned int slot) const = 0;
 
-	bool SetSubregion(const Texture& texture, int positionX, int positionY);
+	virtual const Ref<LocalTexture2D>& GetTexture() const = 0;
 
-	Texture* CreateMipmap();
+	// Call this when you want to update the internal
+	// texture after the the local texture has updated.
+	virtual void Update() = 0;
 
-	inline const std::string& GetFilePath() const { return filePath; }
-	inline int GetWidth() const { return width; }
-	inline int GetHeight() const { return height; }
-	inline int GetChannels() const { return channels; }
-	inline unsigned char* GetData() const { return data; }
-
-	inline operator bool() const { return data != nullptr; }
-	inline bool operator==(const Texture& texture) const { return data == texture.data; }
-private:
-	std::string filePath;
-
-	int width = 0;
-	int height = 0;
-	int channels = 0;
-	unsigned char* data = nullptr;
+	static Ref<Texture> Create(Ref<LocalTexture2D> texture);
 };

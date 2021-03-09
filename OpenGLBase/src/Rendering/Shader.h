@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
 #include <string>
-#include <unordered_map>
+#include <glm/glm.hpp>
+#include "Core/RefScope.h"
 
 enum class ShaderType
 {
@@ -20,35 +20,41 @@ struct ShaderFile
 	std::string source;
 };
 
-class ShaderProgram
-{
-public:
-	ShaderProgram(const std::vector<ShaderFile>& shaders);
-	~ShaderProgram();
-
-	void Bind() const;
-	void Unbind() const;
-
-	template<typename T>
-	void SetUniform(const std::string& name, const T& value) const;
-	template<typename T>
-	void SetUniforms(const std::string& name, const T* values, int count) const;
-private:
-	bool LinkAndValidate();
-	unsigned int Compile(const ShaderFile& shader);
-	int GetUniformLocation(const std::string& name) const;
-
-	unsigned int rendererID = 0;
-	mutable std::unordered_map<std::string, int> uniformLocations;
-};
-
 class Shader
 {
 public:
 	virtual ~Shader() = default;
 
-	virtual void bind() const = 0;
-	virtual void unbind() const = 0;
-protected:
-	ShaderProgram* program = nullptr;
+	virtual void Bind() const = 0;
+	virtual void Unbind() const = 0;
+
+	virtual void SetUniform (const std::string& name, float              value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::vec2&   value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::vec3&   value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::vec4&   value) = 0;
+	virtual void SetUniform (const std::string& name, int                value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::ivec2&  value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::ivec3&  value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::ivec4&  value) = 0;
+	virtual void SetUniform (const std::string& name, unsigned int       value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::uvec2&  value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::uvec3&  value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::uvec4&  value) = 0;
+	virtual void SetUniform (const std::string& name, bool               value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::bvec2&  value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::bvec3&  value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::bvec4&  value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::mat2&   value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::mat2x3& value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::mat2x4& value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::mat3x2& value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::mat3&   value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::mat3x4& value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::mat4x2& value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::mat4x3& value) = 0;
+	virtual void SetUniform (const std::string& name, const glm::mat4&   value) = 0;
+	virtual void SetUniforms(const std::string& name, const int*          values, int count) = 0;
+	virtual void SetUniforms(const std::string& name, const unsigned int* values, int count) = 0;
+
+	static Ref<Shader> Create(std::initializer_list<ShaderFile> shaders);
 };

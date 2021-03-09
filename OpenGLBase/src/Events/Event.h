@@ -23,10 +23,10 @@ public:
 	virtual std::string ToString() const = 0;
 
 	inline bool IsHandled() const { return handled; }
-	inline void Handle() const { handled = true; }
+	inline void Handle() { handled = true; }
 private:
 	EventType type;
-	mutable bool handled = false;
+	bool handled = false;
 };
 
 std::ostream& operator<<(std::ostream& ostr, const Event& event);

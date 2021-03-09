@@ -1,8 +1,9 @@
 #pragma once
 
 #include <functional>
-#include "Context.h"
 #include "Events/Event.h"
+#include "Core/RefScope.h"
+#include "Context.h"
 
 struct WindowSpecifications
 {
@@ -15,65 +16,37 @@ struct WindowSpecifications
 	bool captureMouse = false;
 };
 
-struct GLFWwindow;
 class Window
 {
 public:
-	Window(const WindowSpecifications& specs = WindowSpecifications());
-	~Window();
+	virtual ~Window() = default;
 
-	void PollEvents();
-	void SwapBuffers();
+	virtual void PollEvents() = 0;
+	virtual void SwapBuffers() = 0;
 	
-	inline int GetWidth() const { return state.current.width; }
-	inline int GetHeight() const { return state.current.height; }
+	virtual int GetWidth() const = 0;
+	virtual int GetHeight() const = 0;
 
-	const char* GetTitle() const { return state.title; }
-	void SetTitle(const char* title);
+	virtual const char* GetTitle() const = 0;
+	virtual void SetTitle(const char* title) = 0;
 
-	inline bool GetVSync() const { return state.vsync; }
-	void SetVSync(bool vsync);
-	inline void ToggleVSync() { SetVSync(!GetVSync()); }
+	virtual bool IsVSync() const = 0;
+	virtual void SetVSync(bool vsync) = 0;
 
-	inline bool GetResizable() const { return state.resizable; }
-	void SetResizable(bool resizable);
-	inline void ToggleResizable() { SetResizable(!GetResizable()); }
+	virtual bool IsResizable() const = 0;
+	virtual void SetResizable(bool resizable) = 0;
 
-	inline bool GetFullscreen() const { return state.fullscreen; }
-	void SetFullscreen(bool fullscreen);
-	inline void ToggleFullscreen() { SetFullscreen(!GetFullscreen()); }
+	virtual bool IsFullscreen() const = 0;
+	virtual void SetFullscreen(bool fullscreen) = 0;
 
-	inline bool GetCaptureMouse() const { return state.captureMouse; }
-	void SetCaptureMouse(bool captureMouse);
-	inline void ToggleCaptureMouse() { SetCaptureMouse(!GetCaptureMouse()); }
+	virtual bool IsCaptureMouse() const = 0;
+	virtual void SetCaptureMouse(bool captureMouse) = 0;
 
-	inline GLFWwindow* GetNativeWindow() const { return window; }
-	inline Context* GetContext() const { return context; }
+	virtual void* GetNativeWindow() const = 0;
+	virtual Context& GetContext() const = 0;
 
 	using EventCallbackFunc = std::function<void(Event&)>;
-	inline void SetEventCallback(const EventCallbackFunc& callback) { state.eventCallback = callback; }
-private:
-	void SaveDimensions();
+	virtual void SetEventCallback(const EventCallbackFunc& callback) = 0;
 
-	GLFWwindow* window = nullptr;
-	Context* context = nullptr;
-
-	struct WindowState
-	{
-		struct
-		{
-			int x = 0;
-			int y = 0;
-			int width = 0;
-			int height = 0;
-		} current, preFullscreen;
-
-		const char* title = nullptr;
-		bool vsync = false;
-		bool resizable = false;
-		bool fullscreen = false;
-		bool captureMouse = false;
-
-		EventCallbackFunc eventCallback;
-	} state;
+	static Scope<Window> Create(const WindowSpecifications& specs = WindowSpecifications());
 };

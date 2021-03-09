@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include "Core/Window.h"
 #include "Core/ImGuiWrapper.h"
 #include "Sandbox/Sandbox.h"
@@ -25,8 +24,7 @@ private:
 	bool running = true;
 	bool rendering = true;
 
-	// Window needs to be deleted after everything else
-	Window* window;
-	ImGuiWrapper* imguiWrapper;
-	Sandbox* sandbox;
+	Scope<Window> window;
+	Scope<ImGuiWrapper> imguiWrapper;
+	Scope<Sandbox> sandbox;
 };

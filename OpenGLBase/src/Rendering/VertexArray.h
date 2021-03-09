@@ -6,15 +6,13 @@
 class VertexArray
 {
 public:
-	VertexArray();
-	~VertexArray();
+	virtual ~VertexArray() = default;
 
-	void Bind() const;
-	void Unbind() const;
+	virtual void Bind() const = 0;
+	virtual void Unbind() const = 0;
 
-	void AddVertexBuffer(const VertexBuffer* vertexBuffer);
-	inline const std::vector<const VertexBuffer*>& GetVertexBuffers() { return vertexBuffers; }
-private:
-	unsigned int rendererID = 0;
-	std::vector<const VertexBuffer*> vertexBuffers;
+	virtual void AddVertexBuffer(const VertexBuffer* vertexBuffer) = 0;
+	virtual const std::vector<const VertexBuffer*>& GetVertexBuffers() = 0;
+
+	static Ref<VertexArray> Create();
 };

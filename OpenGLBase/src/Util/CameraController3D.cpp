@@ -1,5 +1,5 @@
 #include "CameraController3D.h"
-#include "IO/Input.h"
+#include "Core/Input.h"
 #include "Events/MouseEvents.h"
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL

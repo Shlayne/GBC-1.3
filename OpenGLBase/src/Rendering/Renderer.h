@@ -2,35 +2,34 @@
 
 #include <glm/glm.hpp>
 #include "VertexArray.h"
-#include "Buffer.h"
+#include "RendererAPI.h"
 
 class Renderer
 {
-private:
+public:
 	static void Init();
 	static void Shutdown();
-	friend class Application;
-public:
-	// Query commands
-	// TODO: these belong in an opengl context class
+
+	static void EnableDepthTest();
+	static void DisableDepthTest();
+	static void EnableBlending();
+	static void DisableBlending();
+	static void EnableCullFace();
+	static void DisableCullFace();
+
+	// TODO: render capabilities
 	static int GetMaxTextureSlots();
 	static int GetMaxTextureSize();
-	static int GetMaxFramebufferSize();
+	static int GetMaxFramebufferWidth();
+	static int GetMaxFramebufferHeight();
 	static int GetMaxFramebufferColorAttachments();
 
-	// Event-based commands
-	static void OnViewportResized(int width, int height);
+	static void SetViewport(int x, int y, int width, int height);
 
-	// General commands
-	static void SetClearColor(const glm::vec4& color);
 	static void Clear();
+	static void SetClearColor(const glm::vec4& color);
 
-	// Enable/disable commands
-	static void EnableDepthTest(bool enable = true);
-	static void EnableDepthMask(bool enable = true);
-	static void EnableCullFace(bool enable = true);
-	static void EnableBlending(bool enable = true);
-	
-	// Rendering commands
-	static void DrawIndexed(const VertexArray& vertexArray, const IndexBuffer& indexBuffer, unsigned int maxIndexCount = 0);
+	static void DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, unsigned int count = 0);
+private:
+	static Scope<RendererAPI> api;
 };

@@ -1,6 +1,8 @@
 #include "BasicRenderer.h"
 #include <vector>
 #include "IO/FileIO.h"
+#include "Rendering/Renderer.h"
+#include "Rendering/Shader.h"
 
 struct Vertex
 {
@@ -12,10 +14,10 @@ struct Vertex
 
 struct BasicRendererData
 {
-	std::unique_ptr<ShaderProgram> shader;
-	std::unique_ptr<VertexArray> vertexArray;
-	std::unique_ptr<VertexBuffer> vertexBuffer;
-	std::unique_ptr<IndexBuffer> indexBuffer;
+	Ref<Shader> shader;
+	Ref<VertexArray> vertexArray;
+	Ref<VertexBuffer> vertexBuffer;
+	Ref<IndexBuffer> indexBuffer;
 
 	unsigned int localIndexCount = 0;
 	unsigned int* localIndexBufferStart = nullptr;
@@ -24,13 +26,14 @@ struct BasicRendererData
 	Vertex* localVertexBufferStart = nullptr;
 	Vertex* localVertexBufferCurrent = nullptr;
 
-	const OpenGLTexture** textures = nullptr;
+	Ref<Texture>* textures = nullptr;
 	unsigned int textureCount = 1;
 
 	unsigned int maxVertices = 0;
 	unsigned int maxIndices = 0;
 	unsigned int maxTextures = 0;
-} data;
+};
+static BasicRendererData data;
 
 void BasicRenderer::Init()
 {
@@ -40,7 +43,7 @@ void BasicRenderer::Init()
 
 	// Setup texture slots
 	data.maxTextures = (unsigned int)Renderer::GetMaxTextureSlots();
-	data.textures = new const OpenGLTexture*[data.maxTextures];
+	data.textures = new Ref<Texture>[data.maxTextures];
 
 	// Setup local buffers
 	data.maxVertices = 900000; // TODO: query drivers
@@ -51,45 +54,42 @@ void BasicRenderer::Init()
 	data.localIndexBufferCurrent = data.localIndexBufferStart;
 
 	// Setup internal buffers
-	data.vertexBuffer.reset(new VertexBuffer(data.maxVertices * sizeof(Vertex), nullptr, BufferUsage::DynamicDraw));
+	data.vertexBuffer = VertexBuffer::Create(data.maxVertices * sizeof(Vertex), nullptr, BufferUsage::DynamicDraw);
 	data.vertexBuffer->SetLayout({
-		{ ElementType::Float3 },
-		{ ElementType::Float4 },
-		{ ElementType::Float2 },
-		{ ElementType::Float  }
+		{BufferElementType::Float3},
+		{BufferElementType::Float4},
+		{BufferElementType::Float2},
+		{BufferElementType::Float }
 	});
 
-	data.vertexArray.reset(new VertexArray());
+	data.vertexArray = VertexArray::Create();
 	data.vertexArray->AddVertexBuffer(data.vertexBuffer.get());
 
-	data.indexBuffer.reset(new IndexBuffer(data.maxIndices, nullptr, BufferUsage::DynamicDraw));
+	data.indexBuffer = IndexBuffer::Create(data.maxIndices, nullptr, BufferUsage::DynamicDraw);
 
 	// Setup shader
+	data.shader = Shader::Create({
+		{ShaderType::Vertex, FileIO::ReadFile("resources/shaders/Basic_vertex.glsl")},
+		{ShaderType::Fragment, FileIO::ReadFile("resources/shaders/Basic_fragment.glsl")}
+	});
+
+	data.shader->Bind();
 	int* samplers = new int[data.maxTextures];
 	for (unsigned int i = 0; i < data.maxTextures; i++)
 		samplers[i] = i;
-
-	std::vector<ShaderFile> shaderFiles = {
-		{ShaderType::Vertex, FileIO::ReadFile("resources/shaders/Basic_vertex.glsl")},
-		{ShaderType::Fragment, FileIO::ReadFile("resources/shaders/Basic_fragment.glsl")}
-	};
-	data.shader.reset(new ShaderProgram(shaderFiles));
-	data.shader->Bind();
 	data.shader->SetUniforms("textures", samplers, data.maxTextures);
-
-	Texture whiteTexture(1, 1, 4);
-	unsigned int* whiteTextureData = (unsigned int*)whiteTexture.GetData();
-	*whiteTextureData = 0xffffffff;
-	data.textures[0] = new OpenGLTexture(&whiteTexture);
-
 	delete[] samplers;
+
+	// Setup white texture
+	Ref<LocalTexture2D> whiteTexture = CreateRef<LocalTexture2D>(1, 1, 4);
+	*(unsigned int*)whiteTexture->GetData() = 0xffffffff;
+	data.textures[0] = Texture::Create(whiteTexture);
 }
 
 void BasicRenderer::Shutdown()
 {
 	delete[] data.localVertexBufferStart;
 	delete[] data.localIndexBufferStart;
-	delete data.textures[0];
 	delete[] data.textures;
 }
 
@@ -117,7 +117,7 @@ void BasicRenderer::EndScene()
 			data.textures[i]->Bind(i);
 
 		// Actually render
-		Renderer::DrawIndexed(*data.vertexArray, *data.indexBuffer, data.localIndexCount);
+		Renderer::DrawIndexed(data.vertexArray, data.indexBuffer, data.localIndexCount);
 		Reset();
 	}
 }
@@ -139,10 +139,13 @@ void BasicRenderer::Reset()
 	data.localIndexCount = 0;
 	data.localIndexBufferCurrent = data.localIndexBufferStart;
 
+	// Remove the references once the textures has been rendered
+	for (unsigned int i = 1; i < data.textureCount; i++)
+		data.textures[i] = nullptr;
 	data.textureCount = 1;
 }
 
-unsigned int BasicRenderer::GetTextureIndex(const OpenGLTexture* texture)
+unsigned int BasicRenderer::GetTextureIndex(const Ref<Texture>& texture)
 {
 	if (texture == nullptr)
 		return 0;
@@ -154,7 +157,7 @@ unsigned int BasicRenderer::GetTextureIndex(const OpenGLTexture* texture)
 	return data.textureCount;
 }
 
-void BasicRenderer::Submit(const BasicModel& model, const glm::mat4& transform, const OpenGLTexture* texture)
+void BasicRenderer::Submit(const BasicModel& model, const glm::mat4& transform, const Ref<Texture>& texture)
 {
 	// Handle textures
 	unsigned int texIndex = GetTextureIndex(texture);
@@ -175,6 +178,7 @@ void BasicRenderer::Submit(const BasicModel& model, const glm::mat4& transform, 
 	for (unsigned int i = 0; i < model.indexCount; i++, data.localIndexBufferCurrent++)
 		*data.localIndexBufferCurrent = data.localVertexCount + model.indices[i];
 
+	// Update local counts
 	data.localVertexCount += model.vertexCount;
 	data.localIndexCount += model.indexCount;
 }

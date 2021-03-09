@@ -1,20 +1,35 @@
 #include "Buffer.h"
-#include <gl/glew.h>
+#include "Platform/OpenGL/OpenGLBuffer.h"
 
-static GLenum GetGLUsage(BufferUsage usage)
+static int GetElementCount(BufferElementType type)
 {
-	switch (usage)
+	switch (type)
 	{
-		case BufferUsage::StreamDraw:  return GL_STREAM_DRAW;
-		case BufferUsage::StreamRead:  return GL_STREAM_READ;
-		case BufferUsage::StreamCopy:  return GL_STREAM_COPY;
-		case BufferUsage::StaticDraw:  return GL_STATIC_DRAW;
-		case BufferUsage::StaticRead:  return GL_STATIC_READ;
-		case BufferUsage::StaticCopy:  return GL_STATIC_COPY;
-		case BufferUsage::DynamicDraw: return GL_DYNAMIC_DRAW;
-		case BufferUsage::DynamicRead: return GL_DYNAMIC_READ;
-		case BufferUsage::DynamicCopy: return GL_DYNAMIC_COPY;
-		default: return 0;
+		case BufferElementType::Int:   	return 1;
+		case BufferElementType::Int2:  	return 2;
+		case BufferElementType::Int3:  	return 3;
+		case BufferElementType::Int4:  	return 4;
+		case BufferElementType::Float:  return 1;
+		case BufferElementType::Float2: return 2;
+		case BufferElementType::Float3: return 3;
+		case BufferElementType::Float4: return 4;
+		default: return 0; // TODO: assert
+	}
+}
+
+static int GetElementSize(BufferElementType type)
+{
+	switch (type)
+	{
+		case BufferElementType::Int:   	return 4 * 1;
+		case BufferElementType::Int2:  	return 4 * 2;
+		case BufferElementType::Int3:  	return 4 * 3;
+		case BufferElementType::Int4:  	return 4 * 4;
+		case BufferElementType::Float:  return 4 * 1;
+		case BufferElementType::Float2: return 4 * 2;
+		case BufferElementType::Float3: return 4 * 3;
+		case BufferElementType::Float4: return 4 * 4;
+		default: return 0; // TODO: assert
 	}
 }
 
@@ -24,65 +39,18 @@ BufferLayout::BufferLayout(std::initializer_list<BufferElement> elements)
 	for (BufferElement& element : this->elements)
 	{
 		element.offset = stride;
-		element.count = static_cast<int>(element.type) & 0x000000ff;
-		element.size = 4 * element.count;
+		element.count = GetElementCount(element.type);
+		element.size = GetElementSize(element.type);
 		stride += element.size;
 	}
 }
 
-VertexBuffer::VertexBuffer(unsigned int size, const void* data, BufferUsage usage)
+Ref<VertexBuffer> VertexBuffer::Create(unsigned int size, const void* data, BufferUsage usage)
 {
-	glCreateBuffers(1, &rendererID);
-	glBindBuffer(GL_ARRAY_BUFFER, rendererID);
-	glBufferData(GL_ARRAY_BUFFER, size, data, GetGLUsage(usage));
+	return CreateRef<OpenGLVertexBuffer>(size, data, usage);
 }
 
-VertexBuffer::~VertexBuffer()
+Ref<IndexBuffer> IndexBuffer::Create(unsigned int count, const void* data, BufferUsage usage)
 {
-	glDeleteBuffers(1, &rendererID);
-}
-
-void VertexBuffer::Bind() const
-{
-	glBindBuffer(GL_ARRAY_BUFFER, rendererID);
-}
-
-void VertexBuffer::Unbind() const
-{
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-void VertexBuffer::SetData(unsigned int size, const void* data)
-{
-	glBindBuffer(GL_ARRAY_BUFFER, rendererID);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
-}
-
-IndexBuffer::IndexBuffer(unsigned int count, const void* data, BufferUsage usage)
-	: count(count)
-{
-	glCreateBuffers(1, &rendererID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GetGLUsage(usage));
-}
-
-IndexBuffer::~IndexBuffer()
-{
-	glDeleteBuffers(1, &rendererID);
-}
-
-void IndexBuffer::Bind() const
-{
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID);
-}
-
-void IndexBuffer::Unbind() const
-{
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-void IndexBuffer::SetData(unsigned int count, const void* data)
-{
-	glBindBuffer(GL_ARRAY_BUFFER, rendererID);
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, count * sizeof(unsigned int), data);
+	return CreateRef<OpenGLIndexBuffer>(count, data, usage);
 }

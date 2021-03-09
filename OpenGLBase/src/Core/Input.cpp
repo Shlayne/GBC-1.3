@@ -5,31 +5,31 @@
 
 bool Input::IsKeyPressed(Keycode keycode)
 {
-    auto window = Application::Get().GetWindow().GetNativeWindow();
+    auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
     return glfwGetKey(window, static_cast<int>(keycode)) == GLFW_PRESS;
 }
 
 bool Input::IsKeyReleased(Keycode keycode)
 {
-    auto window = Application::Get().GetWindow().GetNativeWindow();
+    auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
     return glfwGetKey(window, static_cast<int>(keycode)) == GLFW_RELEASE;
 }
 
 bool Input::IsMouseButtonPressed(Mousecode button)
 {
-    auto window = Application::Get().GetWindow().GetNativeWindow();
+    auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
     return glfwGetMouseButton(window, static_cast<int>(button)) == GLFW_PRESS;
 }
 
 bool Input::IsMouseButtonReleased(Mousecode button)
 {
-    auto window = Application::Get().GetWindow().GetNativeWindow();
+    auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
     return glfwGetMouseButton(window, static_cast<int>(button)) == GLFW_RELEASE;
 }
 
 std::pair<float, float> Input::GetMousePos()
 {
-    auto window = Application::Get().GetWindow().GetNativeWindow();
+    auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
     double x, y;
     glfwGetCursorPos(window, &x, &y);
     return { (float)x, (float)y };

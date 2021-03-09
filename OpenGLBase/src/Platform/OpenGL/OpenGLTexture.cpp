@@ -1,8 +1,7 @@
 #include "OpenGLTexture.h"
-
 #include <gl/glew.h>
 
-OpenGLTexture::OpenGLTexture(const Texture* texture)
+OpenGLTexture::OpenGLTexture(Ref<LocalTexture2D> texture)
 	: texture(texture)
 {
 	// TODO: this should be from texture specifications
