@@ -1,1 +1,1 @@
-# OpenGLBase
+# GBC-1.3
