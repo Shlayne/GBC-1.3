@@ -11,13 +11,13 @@ namespace gbc
 
 	}
 
-	void OrthographicCameraController::OnUpdate(float deltaTime)
+	void OrthographicCameraController::OnUpdate(Timestep timestep)
 	{
-		float movementSpeed = speed * deltaTime;
+		float movementSpeed = speed * timestep;
 		if (Input::IsKeyPressed(Keycode::W)) translation += movementSpeed * forward;
 		if (Input::IsKeyPressed(Keycode::S)) translation -= movementSpeed * forward;
 
-		float rotationSpeed = sensitivity * deltaTime;
+		float rotationSpeed = sensitivity * timestep;
 		int rotationDirection = 0;
 		if (Input::IsKeyPressed(Keycode::A)) rotationDirection--;
 		if (Input::IsKeyPressed(Keycode::D)) rotationDirection++;

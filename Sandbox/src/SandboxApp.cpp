@@ -32,9 +32,9 @@ SandboxApp::~SandboxApp()
 
 }
 
-void SandboxApp::OnClientUpdate(float deltaTime)
+void SandboxApp::OnClientUpdate(Timestep timestep)
 {
-	cameraController.OnUpdate(deltaTime);
+	cameraController.OnUpdate(timestep);
 }
 
 void SandboxApp::OnClientRender()

@@ -1,6 +1,6 @@
 #include "gbcpch.h"
 #include "OpenGLTexture.h"
-#include "gl/glew.h"
+#include "glad/glad.h"
 
 namespace gbc
 {

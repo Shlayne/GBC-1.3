@@ -1,6 +1,6 @@
 #include "gbcpch.h"
 #include "OpenGLVertexArray.h"
-#include "gl/glew.h"
+#include "glad/glad.h"
 
 namespace gbc
 {

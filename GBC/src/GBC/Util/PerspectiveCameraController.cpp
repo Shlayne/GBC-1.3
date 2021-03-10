@@ -14,9 +14,9 @@ namespace gbc
 
 	}
 
-	void PerspectiveCameraController::OnUpdate(float deltaTime)
+	void PerspectiveCameraController::OnUpdate(Timestep timestep)
 	{
-		float movementSpeed = speed * deltaTime;
+		float movementSpeed = speed * timestep;
 
 		glm::vec3 forward = movementSpeed * glm::vec3(cosf(rotation.y), 0.0f, sinf(rotation.y));
 		glm::vec3 left = glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -30,7 +30,7 @@ namespace gbc
 
 		if (Input::IsMouseButtonPressed(Mousecode::ButtonLeft))
 		{
-			float rotationSpeed = sensitivity * deltaTime;
+			float rotationSpeed = sensitivity * timestep;
 
 			rotation.y -= mouseDX * rotationSpeed;
 			rotation.x = std::min(std::max(rotation.x - mouseDY * rotationSpeed, minPitch), maxPitch);

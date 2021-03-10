@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Timestep.h"
+
 struct GLFWwindow;
 
 namespace gbc
@@ -11,7 +13,7 @@ namespace gbc
 
 		void SwapBuffers();
 
-		float GetElapsedTime() const;
+		Timestep GetElapsedTime() const;
 	private:
 		GLFWwindow* window;
 		mutable float lastTime = 0.0f;

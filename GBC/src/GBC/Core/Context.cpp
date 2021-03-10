@@ -1,6 +1,6 @@
 #include "gbcpch.h"
 #include "Context.h"
-#include "gl/glew.h"
+#include "glad/glad.h"
 #include "glfw/glfw3.h"
 
 namespace gbc
@@ -9,8 +9,8 @@ namespace gbc
 		: window(window)
 	{
 		glfwMakeContextCurrent(window);
-		int initStatus = glewInit();
-		GBC_ASSERT(initStatus == GLEW_OK, "Failed to initialize GLEW!");
+		int initStatus = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		GBC_ASSERT(initStatus != 0, "Failed to initialize glad!");
 		//std::cout << glGetString(GL_VERSION) << '\n';
 	}
 
@@ -19,7 +19,7 @@ namespace gbc
 		glfwSwapBuffers(window);
 	}
 
-	float Context::GetElapsedTime() const
+	Timestep Context::GetElapsedTime() const
 	{
 		float time = (float)glfwGetTime();
 		float elapsedTime = time - lastTime;

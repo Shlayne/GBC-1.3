@@ -1,6 +1,6 @@
 #include "gbcpch.h"
 #include "OpenGLFramebuffer.h"
-#include "gl/glew.h"
+#include "glad/glad.h"
 #include "GBC/Rendering/Renderer.h"
 
 namespace gbc

@@ -28,8 +28,8 @@ namespace gbc
 	{
 		while (running)
 		{
-			float deltaTime = window->GetContext().GetElapsedTime();
-			OnClientUpdate(deltaTime);
+			Timestep timestep = window->GetContext().GetElapsedTime();
+			OnClientUpdate(timestep);
 
 			if (rendering)
 			{

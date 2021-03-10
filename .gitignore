@@ -16,6 +16,6 @@ bin-int/
 bin-int/**
 
 **.obj
-**.exe
+#**.exe # so premake5.exe can be uploaded to git
 **.dll
 **.lib

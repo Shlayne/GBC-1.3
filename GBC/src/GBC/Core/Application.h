@@ -1,7 +1,8 @@
 #pragma once
 
-#include "GBC/Core/Window.h"
-#include "GBC/Core/ImGuiWrapper.h"
+#include "Window.h"
+#include "ImGuiWrapper.h"
+#include "Timestep.h"
 
 namespace gbc
 {
@@ -17,7 +18,7 @@ namespace gbc
 		void Run();
 		void Terminate();
 
-		virtual void OnClientUpdate(float deltaTime) = 0;
+		virtual void OnClientUpdate(Timestep timestep) = 0;
 		virtual void OnClientRender() = 0;
 		virtual void OnClientImGuiRender() = 0;
 		virtual void OnClientEvent(Event& event) = 0;

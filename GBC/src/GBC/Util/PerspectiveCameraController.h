@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GBC/Events/Event.h"
+#include "GBC/Core/Timestep.h"
 
 namespace gbc
 {
@@ -9,7 +10,7 @@ namespace gbc
 	public:
 		PerspectiveCameraController(float speed = 1.0f, float sensitivity = 0.2f);
 
-		void OnUpdate(float deltaTime);
+		void OnUpdate(Timestep timestep);
 		void OnEvent(Event& event);
 
 		glm::mat4 GetTransform() const;
