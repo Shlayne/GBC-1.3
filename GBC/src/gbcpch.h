@@ -18,9 +18,9 @@
 
 #include "glm/glm.hpp"
 
-#include "Core/Logger.h"
-#include "Core/Core.h"
+#include "GBC/Core/Logger.h"
+#include "GBC/Core/Core.h"
 
-#if CBC_PLATFORM_WINDOWS
-#include <Windows.h>
+#if GBC_PLATFORM_WINDOWS
+#include <windows.h>
 #endif
