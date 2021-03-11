@@ -4,7 +4,7 @@
 namespace gbc
 {
 	KeyPressEvent::KeyPressEvent(Keycode keycode, int mods)
-		: Event(EventType::KeyPress), keycode(keycode), mods(mods)
+		: keycode(keycode), mods(mods)
 	{
 
 	}
@@ -17,7 +17,7 @@ namespace gbc
 	}
 
 	KeyRepeatEvent::KeyRepeatEvent(Keycode keycode, int mods)
-		: Event(EventType::KeyRepeat), keycode(keycode), mods(mods)
+		: keycode(keycode), mods(mods)
 	{
 
 	}
@@ -30,7 +30,7 @@ namespace gbc
 	}
 
 	KeyReleaseEvent::KeyReleaseEvent(Keycode keycode, int mods)
-		: Event(EventType::KeyRelease), keycode(keycode), mods(mods)
+		: keycode(keycode), mods(mods)
 	{
 
 	}
@@ -43,7 +43,7 @@ namespace gbc
 	}
 
 	KeyCharEvent::KeyCharEvent(unsigned int codepoint, int mods)
-		: Event(EventType::KeyChar), codepoint(codepoint), mods(mods)
+		: codepoint(codepoint), mods(mods)
 	{
 
 	}

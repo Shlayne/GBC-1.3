@@ -3,19 +3,13 @@
 
 namespace gbc
 {
-	WindowCloseEvent::WindowCloseEvent()
-		: Event(EventType::WindowClose)
-	{
-
-	}
-
 	std::string WindowCloseEvent::ToString() const
 	{
 		return "WindowCloseEvent";
 	}
 
 	WindowResizeEvent::WindowResizeEvent(int width, int height)
-		: Event(EventType::WindowResize), width(width), height(height)
+		: width(width), height(height)
 	{
 
 	}
@@ -29,7 +23,7 @@ namespace gbc
 
 
 	WindowMoveEvent::WindowMoveEvent(int x, int y)
-		: Event(EventType::WindowMove), x(x), y(y)
+		: x(x), y(y)
 	{
 
 	}
@@ -42,7 +36,7 @@ namespace gbc
 	}
 
 	WindowFocusEvent::WindowFocusEvent(bool focus)
-		: Event(EventType::WindowFocus), focus(focus)
+		: focus(focus)
 	{
 
 	}
@@ -55,7 +49,7 @@ namespace gbc
 	}
 
 	WindowMinimizeEvent::WindowMinimizeEvent(bool minimize)
-		: Event(EventType::WindowMinimize), minimize(minimize)
+		: minimize(minimize)
 	{
 
 	}
@@ -68,7 +62,7 @@ namespace gbc
 	}
 
 	WindowMaximizeEvent::WindowMaximizeEvent(bool maximize)
-		: Event(EventType::WindowMaximize), maximize(maximize)
+		: maximize(maximize)
 	{
 
 	}
@@ -81,7 +75,7 @@ namespace gbc
 	}
 
 	WindowDropEvent::WindowDropEvent(int pathCount, const char** paths)
-		: Event(EventType::WindowDrop), pathCount(pathCount), paths(new char*[pathCount])
+		: pathCount(pathCount), paths(new char*[pathCount])
 	{
 		for (int i = 0; i < pathCount; i++)
 		{
@@ -108,7 +102,7 @@ namespace gbc
 	}
 
 	WindowFramebufferResizeEvent::WindowFramebufferResizeEvent(int width, int height)
-		: Event(EventType::WindowFramebufferResize), width(width), height(height)
+		: width(width), height(height)
 	{
 
 	}
@@ -121,7 +115,7 @@ namespace gbc
 	}
 
 	WindowContentScaleEvent::WindowContentScaleEvent(float scaleX, float scaleY)
-		: Event(EventType::WindowContentScale), scaleX(scaleX), scaleY(scaleY)
+		: scaleX(scaleX), scaleY(scaleY)
 	{
 
 	}
@@ -131,12 +125,6 @@ namespace gbc
 		std::stringstream stream;
 		stream << "WindowContentScaleEvent: scaleX=" << scaleX << " scaleY=" << scaleY;
 		return stream.str();
-	}
-
-	WindowRefreshEvent::WindowRefreshEvent()
-		: Event(EventType::WindowRefresh)
-	{
-
 	}
 
 	std::string WindowRefreshEvent::ToString() const

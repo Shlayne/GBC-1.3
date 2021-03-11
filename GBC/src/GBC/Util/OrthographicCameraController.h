@@ -2,6 +2,7 @@
 
 #include "GBC/Events/Event.h"
 #include "GBC/Core/Timestep.h"
+#include "glm/glm.hpp"
 
 namespace gbc
 {

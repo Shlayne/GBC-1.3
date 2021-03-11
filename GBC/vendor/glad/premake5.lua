@@ -13,7 +13,7 @@ project "glad"
 	}
 
 	includedirs {
-		"include"
+		"%{includedir.glad}"
 	}
 
 	filter "system:windows"

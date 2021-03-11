@@ -8,12 +8,16 @@ namespace gbc
 
 	void Renderer::Init()
 	{
+		GBC_PROFILE_FUNCTION();
+
 		BasicRenderer::Init();
 		api->Init();
 	}
 
 	void Renderer::Shutdown()
 	{
+		GBC_PROFILE_FUNCTION();
+
 		BasicRenderer::Shutdown();
 		api->Shutdown();
 	}

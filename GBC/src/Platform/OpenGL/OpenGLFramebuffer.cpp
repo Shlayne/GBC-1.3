@@ -13,7 +13,7 @@ namespace gbc
 			case FramebufferFilterMode::Nearest: return GL_NEAREST;
 		}
 
-		GBC_ASSERT(false, "Unknown Framebuffer Filter Mode!");
+		GBC_CORE_ASSERT(false, "Unknown Framebuffer Filter Mode!");
 		return 0;
 	}
 
@@ -25,7 +25,7 @@ namespace gbc
 			case FramebufferWrapMode::Repeat:      return GL_REPEAT;
 		}
 
-		GBC_ASSERT(false, "Unknown Framebuffer Wrap Mode!");
+		GBC_CORE_ASSERT(false, "Unknown Framebuffer Wrap Mode!");
 		return 0;
 	}
 
@@ -50,7 +50,7 @@ namespace gbc
 				return;
 		}
 
-		GBC_ASSERT(false, "Unknown Framebuffer Texture Format!");
+		GBC_CORE_ASSERT(false, "Unknown Framebuffer Texture Format!");
 	}
 
 	static GLenum GetTextureTarget(bool multisampled)
@@ -185,7 +185,7 @@ namespace gbc
 		int maxColorAttachments = Renderer::GetMaxFramebufferColorAttachments();
 		if (colorAttachments.size() > 1)
 		{
-			GBC_ASSERT(colorAttachments.size() <= maxColorAttachments, "Too many Framebuffer color attachments!");
+			GBC_CORE_ASSERT(colorAttachments.size() <= maxColorAttachments, "Too many Framebuffer color attachments!");
 			GLenum* buffers = (GLenum*)alloca(colorAttachments.size() * sizeof(GLenum));
 			for (size_t i = 0; i < colorAttachments.size(); i++)
 				buffers[i] = (GLenum)(GL_COLOR_ATTACHMENT0 + i);
@@ -198,7 +198,7 @@ namespace gbc
 			glDrawBuffer(GL_NONE);
 		}
 
-		GBC_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer incomplete!");
+		GBC_CORE_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer incomplete!");
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
@@ -230,7 +230,7 @@ namespace gbc
 
 	void OpenGLFramebuffer::OnViewportResize(int width, int height)
 	{
-		GBC_ASSERT(width <= Renderer::GetMaxFramebufferWidth() && height <= Renderer::GetMaxFramebufferHeight(), "Framebuffer too large!");
+		GBC_CORE_ASSERT(width <= Renderer::GetMaxFramebufferWidth() && height <= Renderer::GetMaxFramebufferHeight(), "Framebuffer too large!");
 		specification.width = width;
 		specification.height = height;
 		Recreate();

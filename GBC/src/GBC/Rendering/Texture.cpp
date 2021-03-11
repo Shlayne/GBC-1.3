@@ -1,7 +1,7 @@
 #include "gbcpch.h"
 #include "Texture.h"
 #include "RendererAPI.h"
-#include "GBC/Platform/OpenGL/OpenGLTexture.h"
+#include "Platform/OpenGL/OpenGLTexture.h"
 
 namespace gbc
 {
@@ -10,7 +10,7 @@ namespace gbc
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return gbc::CreateRef<OpenGLTexture>(specification);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLTexture>(specification);
 		}
 
 		GBC_ASSERT(false, "Unknown Renderer API!");
@@ -22,7 +22,7 @@ namespace gbc
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return gbc::CreateScope<OpenGLTexture>(specification);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLTexture>(specification);
 		}
 
 		GBC_ASSERT(false, "Unknown Renderer API!");

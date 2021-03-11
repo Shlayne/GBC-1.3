@@ -7,7 +7,7 @@ namespace gbc
 	class WindowCloseEvent : public Event
 	{
 	public:
-		WindowCloseEvent();
+		EVENT_CLASS_TYPE(WindowClose)
 
 		virtual std::string ToString() const override;
 	};
@@ -16,6 +16,7 @@ namespace gbc
 	{
 	public:
 		WindowResizeEvent(int width, int height);
+		EVENT_CLASS_TYPE(WindowResize)
 
 		inline int GetWidth() const { return width; }
 		inline int GetHeight() const { return height; }
@@ -30,6 +31,7 @@ namespace gbc
 	{
 	public:
 		WindowMoveEvent(int x, int y);
+		EVENT_CLASS_TYPE(WindowMove)
 
 		inline int GetX() const { return x; }
 		inline int GetY() const { return y; }
@@ -44,6 +46,7 @@ namespace gbc
 	{
 	public:
 		WindowFocusEvent(bool focus);
+		EVENT_CLASS_TYPE(WindowFocus)
 
 		inline bool IsFocused() const { return focus; }
 
@@ -56,6 +59,7 @@ namespace gbc
 	{
 	public:
 		WindowMinimizeEvent(bool minimize);
+		EVENT_CLASS_TYPE(WindowMinimize)
 
 		inline bool IsMinimized() const { return minimize; }
 
@@ -68,6 +72,7 @@ namespace gbc
 	{
 	public:
 		WindowMaximizeEvent(bool maximize);
+		EVENT_CLASS_TYPE(WindowMaximize)
 
 		inline bool IsMaximized() const { return maximize; }
 
@@ -81,6 +86,7 @@ namespace gbc
 	public:
 		WindowDropEvent(int pathCount, const char** paths);
 		~WindowDropEvent();
+		EVENT_CLASS_TYPE(WindowDrop)
 
 		inline int GetPathCount() const { return pathCount; }
 		inline char** GetPaths() const { return paths; }
@@ -95,6 +101,7 @@ namespace gbc
 	{
 	public:
 		WindowFramebufferResizeEvent(int width, int height);
+		EVENT_CLASS_TYPE(WindowFramebufferResize)
 
 		inline int GetWidth() const { return width; }
 		inline int GetHeight() const { return height; }
@@ -109,6 +116,7 @@ namespace gbc
 	{
 	public:
 		WindowContentScaleEvent(float scaleX, float scaleY);
+		EVENT_CLASS_TYPE(WindowContentScale)
 
 		inline float GetScaleX() const { return scaleX; }
 		inline float GetScaleY() const { return scaleY; }
@@ -122,7 +130,7 @@ namespace gbc
 	class WindowRefreshEvent : public Event
 	{
 	public:
-		WindowRefreshEvent();
+		EVENT_CLASS_TYPE(WindowRefresh)
 
 		virtual std::string ToString() const override;
 	};

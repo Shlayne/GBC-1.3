@@ -2,6 +2,7 @@
 
 #include "BasicModel.h"
 #include "GBC/Rendering/Texture.h"
+#include "glm/glm.hpp"
 
 namespace gbc
 {

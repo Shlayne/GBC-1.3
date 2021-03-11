@@ -1,7 +1,7 @@
 #include "gbcpch.h"
 #include "VertexArray.h"
 #include "RendererAPI.h"
-#include "GBC/Platform/OpenGL/OpenGLVertexArray.h"
+#include "Platform/OpenGL/OpenGLVertexArray.h"
 
 namespace gbc
 {
@@ -10,10 +10,10 @@ namespace gbc
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return gbc::CreateRef<OpenGLVertexArray>();
+			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLVertexArray>();
 		}
 
-		GBC_ASSERT(false, "Unknown Renderer API!");
+		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 
@@ -22,10 +22,10 @@ namespace gbc
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return gbc::CreateScope<OpenGLVertexArray>();
+			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLVertexArray>();
 		}
 
-		GBC_ASSERT(false, "Unknown Renderer API!");
+		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 }

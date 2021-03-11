@@ -1,7 +1,7 @@
 #include "gbcpch.h"
 #include "Buffer.h"
 #include "RendererAPI.h"
-#include "GBC/Platform/OpenGL/OpenGLBuffer.h"
+#include "Platform/OpenGL/OpenGLBuffer.h"
 
 namespace gbc
 {
@@ -19,7 +19,7 @@ namespace gbc
 			case BufferElementType::Float4: return 4;
 		}
 
-		GBC_ASSERT(false, "Unknown BufferElementType!");
+		GBC_CORE_ASSERT(false, "Unknown BufferElementType!");
 		return 0;
 	}
 
@@ -37,7 +37,7 @@ namespace gbc
 			case BufferElementType::Float4: return 4 * 4;
 		}
 
-		GBC_ASSERT(false, "Unknown BufferElementType!");
+		GBC_CORE_ASSERT(false, "Unknown BufferElementType!");
 		return 0;
 	}
 
@@ -58,10 +58,10 @@ namespace gbc
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return gbc::CreateRef<OpenGLVertexBuffer>(size, data, usage);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLVertexBuffer>(size, data, usage);
 		}
 
-		GBC_ASSERT(false, "Unknown Renderer API!");
+		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 
@@ -70,10 +70,10 @@ namespace gbc
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return gbc::CreateScope<OpenGLVertexBuffer>(size, data, usage);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLVertexBuffer>(size, data, usage);
 		}
 
-		GBC_ASSERT(false, "Unknown Renderer API!");
+		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 
@@ -82,10 +82,10 @@ namespace gbc
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return gbc::CreateRef<OpenGLIndexBuffer>(count, data, usage);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLIndexBuffer>(count, data, usage);
 		}
 
-		GBC_ASSERT(false, "Unknown Renderer API!");
+		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 
@@ -94,10 +94,10 @@ namespace gbc
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return gbc::CreateScope<OpenGLIndexBuffer>(count, data, usage);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLIndexBuffer>(count, data, usage);
 		}
 
-		GBC_ASSERT(false, "Unknown Renderer API!");
+		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 }

@@ -41,7 +41,6 @@ project "GBC"
 	}
 
 	filter "system:windows"
-		defines "GBC_PLATFORM_WINDOWS"
 		systemversion "latest"
 
 	filter "configurations:Debug"

@@ -1,25 +1,26 @@
 #pragma once
 
-// Macros
+#include "PlatformDetection.h"
+#include "Debugbreak.h"
+
 #if GBC_CONFIG_DEBUG
-#define GBC_ENABLE_ASSERTS 1
-#define GBC_ENABLE_LOGGING 1
-#define GBC_ENABLE_IMGUI 1
-#define GBC_ENABLE_STATS 1
+	#define GBC_ENABLE_ASSERTS 1
+	#define GBC_ENABLE_LOGGING 1
+	#define GBC_ENABLE_IMGUI 1
+	#define GBC_ENABLE_STATS 1
+	#define GBC_ENABLE_PROFILE 0
 #elif GBC_CONFIG_RELEASE
-#define GBC_ENABLE_IMGUI 1
-#define GBC_ENABLE_STATS 1
+	#define GBC_ENABLE_IMGUI 1
+	#define GBC_ENABLE_STATS 1
 #elif GBC_CONFIG_DIST
-
+	#define GBC_ENABLE_IMGUI 1
 #endif
 
-#if GBC_ENABLE_ASSERTS
-#define GBC_ASSERT(cond, ...) if (!(cond)) { __debugbreak(); GBC_CORE_FATAL(__VA_ARGS__); }
-#else
-#define GBC_ASSERT(cond, ...)
-#endif
-
+#define GBC_EXPAND_MACRO(x) x
+#define GBC_STRINGIFY_MACRO(x) #x
 #define GBC_BIND_FUNC(func) [this](auto&&... args) -> decltype(auto) { return this->func(std::forward<decltype(args)>(args)...); }
+
+#include <memory>
 
 namespace gbc
 {
@@ -39,3 +40,6 @@ namespace gbc
 	// RendererID
 	using RendererID = unsigned int;
 }
+
+#include "Logger.h"
+#include "Assert.h"

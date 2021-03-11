@@ -19,7 +19,7 @@ namespace gbc
 			case BufferUsage::DynamicCopy: return GL_DYNAMIC_COPY;
 		}
 
-		GBC_ASSERT(false, "Unknown Buffer Usage!");
+		GBC_CORE_ASSERT(false, "Unknown Buffer Usage!");
 		return 0;
 	}
 

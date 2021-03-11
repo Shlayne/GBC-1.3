@@ -34,8 +34,8 @@ namespace gbc
 		virtual bool IsCaptureMouse() const override { return state.captureMouse; }
 		virtual void SetCaptureMouse(bool captureMouse) override;
 
-		virtual void* GetNativeWindow() const override { return window; }
-		virtual Context& GetContext() const override { return *context; }
+		virtual void* GetNativeWindow() override { return window; }
+		virtual Context& GetContext() override { return *context; }
 
 		virtual void SetEventCallback(const EventCallbackFunc& callback) override { state.eventCallback = callback; }
 	private:

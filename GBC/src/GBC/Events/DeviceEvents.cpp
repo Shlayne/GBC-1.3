@@ -4,7 +4,7 @@
 namespace gbc
 {
 	JoystickConnectEvent::JoystickConnectEvent(int jid, bool connect)
-		: Event(EventType::JoystickConnect), jid(jid), connect(connect)
+		: jid(jid), connect(connect)
 	{
 
 	}
@@ -17,7 +17,7 @@ namespace gbc
 	}
 
 	MonitorConnectEvent::MonitorConnectEvent(bool connect)
-		: Event(EventType::MonitorConnect), connect(connect)
+		: connect(connect)
 	{
 
 	}

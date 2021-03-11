@@ -26,7 +26,7 @@ namespace gbc
 
 	void OpenGLVertexArray::AddVertexBuffer(Ref<VertexBuffer> vertexBuffer)
 	{
-		GBC_ASSERT(vertexBuffer != nullptr, "Vertex buffer is nullptr!");
+		GBC_CORE_ASSERT(vertexBuffer != nullptr, "Vertex buffer is nullptr!");
 
 		glBindVertexArray(rendererID);
 		vertexBuffer->Bind();

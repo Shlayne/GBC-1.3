@@ -15,12 +15,14 @@
 #include <utility>
 #include <cmath>
 #include <memory>
+#include <chrono>
 
 #include "glm/glm.hpp"
 
 #include "GBC/Core/Logger.h"
 #include "GBC/Core/Core.h"
+#include "GBC/Debug/Profiler.h"
 
 #if GBC_PLATFORM_WINDOWS
-#include <windows.h>
+	#include <windows.h>
 #endif

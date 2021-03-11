@@ -1,6 +1,6 @@
 #include "gbcpch.h"
 #include "RendererAPI.h"
-#include "GBC/Platform/OpenGL/OpenGLRendererAPI.h"
+#include "Platform/OpenGL/OpenGLRendererAPI.h"
 
 namespace gbc
 {
@@ -12,10 +12,10 @@ namespace gbc
 		switch (api)
 		{
 			case API::None:   return nullptr;
-			case API::OpenGL: return gbc::CreateScope<OpenGLRendererAPI>();
+			case API::OpenGL: return ::gbc::CreateScope<OpenGLRendererAPI>();
 		}
 
-		GBC_ASSERT(false, "Unknown Renderer API!");
+		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 }

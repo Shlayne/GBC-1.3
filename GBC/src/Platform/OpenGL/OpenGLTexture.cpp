@@ -12,7 +12,7 @@ namespace gbc
 			case TextureFilterMode::Nearest: return GL_NEAREST;
 		}
 
-		GBC_ASSERT(false, "Unknown Texture Filter Mode!");
+		GBC_CORE_ASSERT(false, "Unknown Texture Filter Mode!");
 		return 0;
 	}
 
@@ -24,7 +24,7 @@ namespace gbc
 			case TextureWrapMode::Repeat:      return GL_REPEAT;
 		}
 
-		GBC_ASSERT(false, "Unknown Texture Wrap Mode!");
+		GBC_CORE_ASSERT(false, "Unknown Texture Wrap Mode!");
 		return 0;
 	}
 
@@ -36,7 +36,7 @@ namespace gbc
 			case 4: return TextureFormat::RGBA8;
 		}
 
-		GBC_ASSERT(false, "Unconvertable number of channels!");
+		GBC_CORE_ASSERT(false, "Unconvertable number of channels!");
 		return TextureFormat::None;
 	}
 
@@ -56,7 +56,7 @@ namespace gbc
 				return;
 		}
 
-		GBC_ASSERT(false, "Unknown Texture Format!");
+		GBC_CORE_ASSERT(false, "Unknown Texture Format!");
 	}
 
 	OpenGLTexture::OpenGLTexture(TextureSpecification specification)

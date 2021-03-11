@@ -9,6 +9,7 @@ namespace gbc
 	{
 	public:
 		MouseButtonPressEvent(Mousecode button, int mods);
+		EVENT_CLASS_TYPE(MouseButtonPress)
 
 		inline Mousecode GetButton() const { return button; }
 		inline int GetMods() const { return mods; }
@@ -23,6 +24,7 @@ namespace gbc
 	{
 	public:
 		MouseButtonReleaseEvent(Mousecode button, int mods);
+		EVENT_CLASS_TYPE(MouseButtonRelease)
 
 		inline Mousecode GetButton() const { return button; }
 		inline int GetMods() const { return mods; }
@@ -37,6 +39,7 @@ namespace gbc
 	{
 	public:
 		MouseMoveEvent(float x, float y);
+		EVENT_CLASS_TYPE(MouseMove)
 
 		inline float GetX() const { return x; }
 		inline float GetY() const { return y; }
@@ -51,6 +54,7 @@ namespace gbc
 	{
 	public:
 		MouseScrollEvent(float offsetX, float offsetY);
+		EVENT_CLASS_TYPE(MouseScroll)
 
 		inline float GetOffsetX() const { return offsetX; }
 		inline float GetOffsetY() const { return offsetY; }
@@ -65,6 +69,7 @@ namespace gbc
 	{
 	public:
 		MouseEnterEvent(bool enter);
+		EVENT_CLASS_TYPE(MouseEnter)
 
 		inline bool HasEntered() const { return enter; }
 

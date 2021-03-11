@@ -14,11 +14,10 @@ project "Sandbox"
 
 	includedirs {
 		"src",
-		"%{wks.location}/GBC/vendor/spdlog/include",
 		"%{wks.location}/GBC/src",
-		"%{wks.location}/GBC/vendor",
 		"%{includedir.glm}",
-		"%{includedir.imgui}"
+		"%{includedir.imgui}",
+		"%{includedir.spdlog}"
 	}
 
 	links {
@@ -26,7 +25,6 @@ project "Sandbox"
 	}
 
 	filter "system:windows"
-		defines "GBC_PLATFORM_WINDOWS"
 		systemversion "latest"
 
 	filter "configurations:Debug"

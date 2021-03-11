@@ -9,18 +9,28 @@ namespace gbc
 
 	Application::Application(const WindowSpecifications& windowSpecs)
 	{
+		GBC_PROFILE_FUNCTION();
+
+		GBC_CORE_ASSERT(instance == nullptr, "Application already exists!");
 		instance = this;
-		Logger::Init();
 
 		window = Window::CreateScope(windowSpecs);
 		window->SetEventCallback(GBC_BIND_FUNC(OnEvent));
 
-		imguiWrapper = CreateScope<ImGuiWrapper>(window->GetNativeWindow());
+		imguiWrapper = CreateScope<ImGuiWrapper>();
 		Renderer::Init();
 	}
 
 	Application::~Application()
 	{
+		GBC_PROFILE_FUNCTION();
+
+		for (Layer* layer : layerStack)
+		{
+			layer->OnDetach();
+			delete layer;
+		}
+
 		Renderer::Shutdown();
 	}
 
@@ -28,14 +38,21 @@ namespace gbc
 	{
 		while (running)
 		{
+			GBC_PROFILE_SCOPE("RunLoop");
+
 			Timestep timestep = window->GetContext().GetElapsedTime();
-			OnClientUpdate(timestep);
+			
+			for (Layer* layer : layerStack)
+				layer->OnUpdate(timestep);
 
 			if (rendering)
 			{
-				OnClientRender();
+				for (Layer* layer : layerStack)
+					layer->OnRender();
+
 				imguiWrapper->Begin();
-				OnClientImGuiRender();
+				for (Layer* layer : layerStack)
+					layer->OnImGuiRender();
 				imguiWrapper->End();
 			}
 
@@ -51,40 +68,69 @@ namespace gbc
 		running = false;
 	}
 
+	void Application::PushLayer(Layer* layer)
+	{
+		layerStack.PushLayer(layer);
+		layer->OnAttach();
+	}
+
+	void Application::PushOverlay(Layer* overlay)
+	{
+		layerStack.PushLayer(overlay);
+		overlay->OnAttach();
+	}
+
+	void Application::PopLayer(Layer* layer)
+	{
+		if (layerStack.PopLayer(layer))
+			layer->OnDetach();
+	}
+
+	void Application::PopOverlay(Layer* overlay)
+	{
+		if (layerStack.PopLayer(overlay))
+			overlay->OnDetach();
+	}
+
 	void Application::OnEvent(Event& event)
 	{
-		switch (event.GetType())
-		{
-			case EventType::WindowClose:
-			{
-				Terminate();
-				event.Handle();
-				break;
-			}
-			case EventType::WindowResize:
-			{
-				WindowResizeEvent& wre = (WindowResizeEvent&)event;
-				if (wre.GetWidth() == 0 || wre.GetHeight() == 0)
-				{
-					rendering = false;
-					event.Handle();
-				}
-				else
-				{
-					rendering = true;
-					Renderer::SetViewport(0, 0, wre.GetWidth(), wre.GetHeight());
-				}
-				break;
-			}
-			case EventType::WindowMinimize:
-			{
-				WindowMinimizeEvent& wme = (WindowMinimizeEvent&)event;
-				rendering = !wme.IsMinimized();
-				break;
-			}
-		}
+		GBC_PROFILE_FUNCTION();
 
-		if (!event.IsHandled())
-			OnClientEvent(event);
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<WindowCloseEvent>(GBC_BIND_FUNC(Application::OnWindowCloseEvent));
+		dispatcher.Dispatch<WindowResizeEvent>(GBC_BIND_FUNC(Application::OnWindowResizeEvent));
+		dispatcher.Dispatch<WindowMinimizeEvent>(GBC_BIND_FUNC(Application::OnWindowMinimizeEvent));
+
+		for (auto it = layerStack.rbegin(); !event.handled && it != layerStack.rend(); ++it)
+			(*it)->OnEvent(event);
+	}
+
+	bool Application::OnWindowCloseEvent(WindowCloseEvent& event)
+	{
+		Terminate();
+		return true;
+	}
+
+	bool Application::OnWindowResizeEvent(WindowResizeEvent& event)
+	{
+		GBC_PROFILE_FUNCTION();
+
+		if (event.GetWidth() == 0 || event.GetHeight() == 0)
+		{
+			rendering = false;
+			return true;
+		}
+		else
+		{
+			rendering = true;
+			Renderer::SetViewport(0, 0, event.GetWidth(), event.GetHeight());
+			return false;
+		}
+	}
+
+	bool Application::OnWindowMinimizeEvent(WindowMinimizeEvent& event)
+	{
+		rendering = !event.IsMinimized();
+		return false;
 	}
 }

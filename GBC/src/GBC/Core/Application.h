@@ -3,6 +3,8 @@
 #include "Window.h"
 #include "ImGuiWrapper.h"
 #include "Timestep.h"
+#include "GBC/Events/WindowEvents.h"
+#include "LayerStack.h"
 
 namespace gbc
 {
@@ -10,19 +12,22 @@ namespace gbc
 	{
 	public:
 		Application(const WindowSpecifications& windowSpecs = WindowSpecifications());
-		~Application();
+		virtual ~Application();
 
 		inline static Application& Get() { return *instance; }
 		inline Window& GetWindow() const { return *window; }
 
 		void Run();
 		void Terminate();
-
-		virtual void OnClientUpdate(Timestep timestep) = 0;
-		virtual void OnClientRender() = 0;
-		virtual void OnClientImGuiRender() = 0;
-		virtual void OnClientEvent(Event& event) = 0;
+	protected:
+		void PushLayer(Layer* layer);
+		void PushOverlay(Layer* overlay);
+		void PopLayer(Layer* layer);
+		void PopOverlay(Layer* overlay);
 	private:
+		bool OnWindowCloseEvent(WindowCloseEvent& event);
+		bool OnWindowResizeEvent(WindowResizeEvent& event);
+		bool OnWindowMinimizeEvent(WindowMinimizeEvent& event);
 		void OnEvent(Event& event);
 
 		static Application* instance;
@@ -32,6 +37,7 @@ namespace gbc
 
 		Scope<Window> window;
 		Scope<ImGuiWrapper> imguiWrapper;
+		LayerStack layerStack;
 	};
 
 	Application* CreateApplication();

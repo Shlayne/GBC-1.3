@@ -1,7 +1,7 @@
 #include "gbcpch.h"
 #include "Shader.h"
 #include "RendererAPI.h"
-#include "GBC/Platform/OpenGL/OpenGLShader.h"
+#include "Platform/OpenGL/OpenGLShader.h"
 
 namespace gbc
 {
@@ -10,10 +10,10 @@ namespace gbc
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return gbc::CreateRef<OpenGLShader>(shaders);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLShader>(shaders);
 		}
 
-		GBC_ASSERT(false, "Unknown Renderer API!");
+		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 
@@ -22,10 +22,10 @@ namespace gbc
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return gbc::CreateScope<OpenGLShader>(shaders);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLShader>(shaders);
 		}
 
-		GBC_ASSERT(false, "Unknown Renderer API!");
+		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 }

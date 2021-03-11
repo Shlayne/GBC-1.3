@@ -3,7 +3,7 @@
 #include <functional>
 #include "Core.h"
 #include "GBC/Events/Event.h"
-#include "Context.h"
+#include "GBC/Rendering/Context.h"
 
 namespace gbc
 {
@@ -44,8 +44,8 @@ namespace gbc
 		virtual bool IsCaptureMouse() const = 0;
 		virtual void SetCaptureMouse(bool captureMouse) = 0;
 
-		virtual void* GetNativeWindow() const = 0;
-		virtual Context& GetContext() const = 0;
+		virtual void* GetNativeWindow() = 0;
+		virtual Context& GetContext() = 0;
 
 		using EventCallbackFunc = std::function<void(Event&)>;
 		virtual void SetEventCallback(const EventCallbackFunc& callback) = 0;

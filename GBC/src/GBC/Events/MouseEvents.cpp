@@ -4,7 +4,7 @@
 namespace gbc
 {
 	MouseButtonPressEvent::MouseButtonPressEvent(Mousecode button, int mods)
-		: Event(EventType::MouseButtonPress), button(button), mods(mods)
+		: button(button), mods(mods)
 	{
 
 	}
@@ -17,7 +17,7 @@ namespace gbc
 	}
 
 	MouseButtonReleaseEvent::MouseButtonReleaseEvent(Mousecode button, int mods)
-		: Event(EventType::MouseButtonRelease), button(button), mods(mods)
+		: button(button), mods(mods)
 	{
 
 	}
@@ -30,7 +30,7 @@ namespace gbc
 	}
 
 	MouseMoveEvent::MouseMoveEvent(float x, float y)
-		: Event(EventType::MouseMove), x(x), y(y)
+		: x(x), y(y)
 	{
 
 	}
@@ -43,7 +43,7 @@ namespace gbc
 	}
 
 	MouseScrollEvent::MouseScrollEvent(float offsetX, float offsetY)
-		: Event(EventType::MouseScroll), offsetX(offsetX), offsetY(offsetY)
+		: offsetX(offsetX), offsetY(offsetY)
 	{
 
 	}
@@ -56,7 +56,7 @@ namespace gbc
 	}
 
 	MouseEnterEvent::MouseEnterEvent(bool enter)
-		: Event(EventType::MouseEnter), enter(enter)
+		: enter(enter)
 	{
 
 	}

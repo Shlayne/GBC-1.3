@@ -1,7 +1,7 @@
 #include "gbcpch.h"
 #include "Framebuffer.h"
 #include "RendererAPI.h"
-#include "GBC/Platform/OpenGL/OpenGLFramebuffer.h"
+#include "Platform/OpenGL/OpenGLFramebuffer.h"
 
 namespace gbc
 {
@@ -10,10 +10,10 @@ namespace gbc
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return gbc::CreateRef<OpenGLFramebuffer>(specification);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLFramebuffer>(specification);
 		}
 
-		GBC_ASSERT(false, "Unknown Renderer API!");
+		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 
@@ -22,10 +22,10 @@ namespace gbc
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return gbc::CreateScope<OpenGLFramebuffer>(specification);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLFramebuffer>(specification);
 		}
 
-		GBC_ASSERT(false, "Unknown Renderer API!");
+		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 }

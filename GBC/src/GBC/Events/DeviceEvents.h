@@ -8,6 +8,7 @@ namespace gbc
 	{
 	public:
 		JoystickConnectEvent(int jid, bool connect);
+		EVENT_CLASS_TYPE(JoystickConnect)
 
 		inline bool GetJID() const { return jid; }
 		inline bool HasConnected() const { return connect; }
@@ -22,6 +23,7 @@ namespace gbc
 	{
 	public:
 		MonitorConnectEvent(bool connect);
+		EVENT_CLASS_TYPE(MonitorConnect)
 
 		inline bool HasConnected() const { return connect; }
 

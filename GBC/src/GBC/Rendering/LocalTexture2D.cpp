@@ -27,6 +27,8 @@ namespace gbc
 
 	bool LocalTexture2D::ReadFile(const std::string& filePath, int requiredChannels, bool flipVertically)
 	{
+		GBC_PROFILE_FUNCTION();
+
 		stbi_set_flip_vertically_on_load(flipVertically);
 		stbi_uc* stbiData = stbi_load(filePath.c_str(), &width, &height, &channels, requiredChannels);
 		if (stbiData != nullptr)
@@ -45,7 +47,9 @@ namespace gbc
 
 	bool LocalTexture2D::WriteFile(const std::string& filePath, bool flipVertically)
 	{
-		stbi_flip_vertically_on_write(flipVertically);
+		GBC_PROFILE_FUNCTION();
+
+		stbi_flip_vertically_on_write(flipVertically ? 1 : 0);
 		// TODO: let the user decide the output file format
 		return data != nullptr && stbi_write_png(filePath.c_str(), width, height, channels, data, 0) != 0;
 	}
@@ -103,6 +107,8 @@ namespace gbc
 
 	LocalTexture2D* LocalTexture2D::CreateMipmap()
 	{
+		GBC_PROFILE_FUNCTION();
+
 		if (data != nullptr)
 		{
 			LocalTexture2D* texture = new LocalTexture2D(width >> 1, height >> 1, channels);

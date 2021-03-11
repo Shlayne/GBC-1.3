@@ -13,21 +13,37 @@ namespace gbc
 		JoystickConnect, MonitorConnect
 	};
 
+#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::type; }\
+							   virtual EventType GetType() const override { return GetStaticType(); }
+
 	class Event
 	{
 	public:
-		Event(EventType type)
-			: type(type) {}
 		virtual ~Event() = default;
 
-		inline EventType GetType() const { return type; }
+		virtual EventType GetType() const = 0;
 		virtual std::string ToString() const = 0;
 
-		inline bool IsHandled() const { return handled; }
-		inline void Handle() { handled = true; }
-	private:
-		EventType type;
 		bool handled = false;
+	};
+
+	class EventDispatcher
+	{
+	public:
+		EventDispatcher(Event& event);
+
+		template<typename E, typename Fn>
+		bool Dispatch(const Fn& func)
+		{
+			if (event.GetType() == E::GetStaticType())
+			{
+				event.handled |= func(static_cast<E&>(event));
+				return true;
+			}
+			return false;
+		}
+	private:
+		Event& event;
 	};
 }
 

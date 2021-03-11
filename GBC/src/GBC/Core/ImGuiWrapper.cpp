@@ -4,15 +4,16 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include "glfw/glfw3.h"
+#include "Application.h"
 
 namespace gbc
 {
-	ImGuiWrapper::ImGuiWrapper(void* window)
+	ImGuiWrapper::ImGuiWrapper()
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		Init();
-		ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)window, true);
+		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), true);
 		ImGui_ImplOpenGL3_Init("#version 460"); // TODO: this version should be gotten from the window
 	}
 
@@ -33,6 +34,8 @@ namespace gbc
 	void ImGuiWrapper::End()
 	{
 		ImGuiIO& io = ImGui::GetIO();
+		Window& window = Application::Get().GetWindow();
+		io.DisplaySize = ImVec2((float)window.GetWidth(), (float)window.GetHeight());
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

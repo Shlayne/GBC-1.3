@@ -96,7 +96,7 @@ namespace gbc
 			case ShaderType::Compute:               return GL_COMPUTE_SHADER;
 		}
 
-		GBC_ASSERT(false, "Unknown Shader Type!");
+		GBC_CORE_ASSERT(false, "Unknown Shader Type!");
 		return 0;
 	}
 
@@ -112,7 +112,7 @@ namespace gbc
 			case ShaderType::Compute:               return "compute";
 		}
 
-		GBC_ASSERT(false, "Unknown Shader Type!");
+		GBC_CORE_ASSERT(false, "Unknown Shader Type!");
 		return "unknown";
 	}
 

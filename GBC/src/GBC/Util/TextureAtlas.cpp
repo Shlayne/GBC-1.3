@@ -12,6 +12,8 @@ namespace gbc
 
 	glm::ivec2 TextureAtlas::AddTexture(Ref<LocalTexture2D> texture)
 	{
+		GBC_PROFILE_FUNCTION();
+
 		glm::ivec2 textureSize = glm::ivec2(texture->GetWidth(), texture->GetHeight());
 
 		while ((textureSize.x < atlasTextureSize.x || textureSize.y < atlasTextureSize.y) ||
@@ -92,12 +94,15 @@ namespace gbc
 
 	LocalTexture2D** TextureAtlas::Create(int mipmapLevels)
 	{
+		GBC_PROFILE_FUNCTION();
+
 		LocalTexture2D** atlasTextures = nullptr;
 		if (mipmapLevels > 0)
 		{
-			atlasTextures = new LocalTexture2D *[mipmapLevels];
+			atlasTextures = new LocalTexture2D*[mipmapLevels];
 			for (int i = 0; i < mipmapLevels; i++)
 				atlasTextures[i] = new LocalTexture2D(atlasTextureSize.x >> i, atlasTextureSize.y >> i, 4);
+			GBC_PROFILE_SCOPE("PutTexture - TextureAtlas::Create(int)");
 			PutTexture(root.get(), atlasTextures, mipmapLevels);
 		}
 		return atlasTextures;

@@ -5,7 +5,7 @@ namespace gbc
 	class ImGuiWrapper
 	{
 	public:
-		ImGuiWrapper(void* window);
+		ImGuiWrapper();
 		~ImGuiWrapper();
 
 		void Begin();

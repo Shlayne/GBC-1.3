@@ -1,11 +1,12 @@
 #pragma once
 
 // For use by client applications
-#include "GBC/Core/EntryPoint.h"
+#include "GBC/Core/Core.h"
 #include "GBC/Core/Application.h"
 #include "GBC/Core/Input.h"
 #include "GBC/Core/Logger.h"
 #include "GBC/Core/Window.h"
+#include "GBC/Debug/Profiler.h"
 #include "GBC/Events/WindowEvents.h"
 #include "GBC/Events/KeyEvents.h"
 #include "GBC/Events/MouseEvents.h"
