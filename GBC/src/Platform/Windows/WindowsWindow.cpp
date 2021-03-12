@@ -10,6 +10,9 @@
 
 namespace gbc
 {
+	static int glfwWindowCount = 0;
+	static bool glfwInitialized = false;
+
 	Ref<Window> Window::CreateRef(const WindowSpecifications& specs)
 	{ return ::gbc::CreateRef<WindowsWindow>(specs); }
 
@@ -20,7 +23,6 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		static bool glfwInitialized = false;
 		if (!glfwInitialized)
 		{
 			int initState = glfwInit();
@@ -87,6 +89,7 @@ namespace gbc
 
 		window = glfwCreateWindow(state.current.width, state.current.height, state.title, state.fullscreen ? primaryMonitor : nullptr, nullptr);
 		GBC_CORE_ASSERT(window != nullptr, "Failed to create window!");
+		glfwWindowCount++;
 
 		glfwSetWindowPos(window, state.current.x, state.current.y);
 		glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
@@ -249,13 +252,19 @@ namespace gbc
 		GBC_PROFILE_FUNCTION();
 
 		glfwDestroyWindow(window);
-		glfwTerminate();
+
+		if (--glfwWindowCount == 0)
+		{
+			glfwTerminate();
+			glfwInitialized = false;
+		}
 	}
 
 	void WindowsWindow::PollEvents()
 	{
 		GBC_PROFILE_FUNCTION();
 
+		// Only call on thread that called glfwInit and once per all windows
 		glfwPollEvents();
 	}
 

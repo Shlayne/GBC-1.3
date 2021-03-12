@@ -11,7 +11,6 @@ namespace gbc
 		PerspectiveCameraController(float speed = 1.0f, float sensitivity = 0.2f);
 
 		void OnUpdate(Timestep timestep);
-		void OnEvent(Event& event);
 
 		glm::mat4 GetTransform() const;
 
@@ -22,11 +21,6 @@ namespace gbc
 	private:
 		float speed;
 		float sensitivity;
-
-		float lastMouseX = 0.0f;
-		float lastMouseY = 0.0f;
-		float mouseDX = 0.0f;
-		float mouseDY = 0.0f;
 
 		const float maxPitch = glm::radians(90.0f);
 		const float minPitch = -maxPitch;

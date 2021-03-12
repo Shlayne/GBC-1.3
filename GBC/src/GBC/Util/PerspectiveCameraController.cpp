@@ -9,10 +9,7 @@
 namespace gbc
 {
 	PerspectiveCameraController::PerspectiveCameraController(float speed, float sensitivity)
-		: speed(speed), sensitivity(sensitivity)
-	{
-
-	}
+		: speed(speed), sensitivity(sensitivity) {}
 
 	void PerspectiveCameraController::OnUpdate(Timestep timestep)
 	{
@@ -28,28 +25,17 @@ namespace gbc
 		if (Input::IsKeyPressed(Keycode::LeftShift)) translation.y -= movementSpeed;
 		if (Input::IsKeyPressed(Keycode::Space)) translation.y += movementSpeed;
 
+		static glm::vec2 mouseDPos, lastMousePos = Input::GetMousePos();
+		glm::vec2 mousePos = Input::GetMousePos();
+		mouseDPos = mousePos - lastMousePos;
+		lastMousePos = mousePos;
+
 		if (Input::IsMouseButtonPressed(Mousecode::ButtonLeft))
 		{
 			float rotationSpeed = sensitivity * timestep;
 
-			rotation.y -= mouseDX * rotationSpeed;
-			rotation.x = std::min(std::max(rotation.x - mouseDY * rotationSpeed, minPitch), maxPitch);
-			mouseDX = 0.0f;
-			mouseDY = 0.0f;
-		}
-	}
-
-	void PerspectiveCameraController::OnEvent(Event& event)
-	{
-		if (event.GetType() == EventType::MouseMove)
-		{
-			MouseMoveEvent& mme = (MouseMoveEvent&)event;
-			float mouseX = mme.GetX();
-			float mouseY = mme.GetY();
-			mouseDX = mouseX - lastMouseX;
-			mouseDY = mouseY - lastMouseY;
-			lastMouseX = mouseX;
-			lastMouseY = mouseY;
+			rotation.y -= mouseDPos.x * rotationSpeed;
+			rotation.x = std::min(std::max(rotation.x - mouseDPos.y * rotationSpeed, minPitch), maxPitch);
 		}
 	}
 

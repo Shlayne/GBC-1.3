@@ -27,6 +27,8 @@ project "GBC"
 		"%{includedir.glm}",
 		"%{includedir.imgui}",
 		"%{includedir.spdlog}",
+
+		"%{includedir.entt}",
 		"%{includedir.siv}",
 		"%{includedir.stb}"
 	}

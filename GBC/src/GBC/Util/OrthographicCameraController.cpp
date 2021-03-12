@@ -6,10 +6,7 @@
 namespace gbc
 {
 	OrthographicCameraController::OrthographicCameraController(float speed, float sensitivity)
-		: speed(speed), sensitivity(sensitivity)
-	{
-
-	}
+		: speed(speed), sensitivity(sensitivity) {}
 
 	void OrthographicCameraController::OnUpdate(Timestep timestep)
 	{

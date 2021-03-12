@@ -4,22 +4,6 @@
 
 namespace gbc
 {
-	enum class ShaderType
-	{
-		Vertex,
-		TessolationControl,
-		TessolationEvaluation,
-		Geometry,
-		Fragment,
-		Compute
-	};
-
-	struct ShaderFile
-	{
-		ShaderType type;
-		std::string source;
-	};
-
 	class Shader
 	{
 	public:
@@ -56,7 +40,7 @@ namespace gbc
 		virtual void SetUniforms(const std::string& name, const int*          values, int count) = 0;
 		virtual void SetUniforms(const std::string& name, const unsigned int* values, int count) = 0;
 
-		static Ref<Shader> CreateRef(std::initializer_list<ShaderFile> shaders);
-		static Scope<Shader> CreateScope(std::initializer_list<ShaderFile> shaders);
+		static Ref<Shader> CreateRef(const std::string& filepath);
+		static Scope<Shader> CreateScope(const std::string& filepath);
 	};
 }

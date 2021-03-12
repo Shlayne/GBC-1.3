@@ -6,10 +6,7 @@
 namespace gbc
 {
 	OpenGLContext::OpenGLContext(void* nativeContext)
-		: window(static_cast<GLFWwindow*>(nativeContext))
-	{
-
-	}
+		: window(static_cast<GLFWwindow*>(nativeContext)) {}
 
 	void OpenGLContext::Init()
 	{

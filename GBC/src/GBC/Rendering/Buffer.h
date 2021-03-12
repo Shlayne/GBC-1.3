@@ -1,28 +1,25 @@
 #pragma once
 
+#include <string>
+
 namespace gbc
 {
 	enum class BufferElementType : unsigned char
 	{
-		Int    = 0x81,
-		Int2   = 0x82,
-		Int3   = 0x83,
-		Int4   = 0x84,
-		Float  = 0x01,
-		Float2 = 0x02,
-		Float3 = 0x03,
-		Float4 = 0x04
+		Int, Int2, Int3, Int4,
+		UInt, UInt2, UInt3, UInt4,
+		Float, Float2, Float3, Float4
 	};
 
 	struct BufferElement
 	{
-		BufferElement(BufferElementType type, bool normalized = false)
-			: type(type), normalized(normalized) {}
+		BufferElement(BufferElementType type, const std::string& name, bool normalized = false);
 
 		BufferElementType type;
+		std::string name;
 		bool normalized;
-		int size = 0;
-		int count = 0;
+		int count;
+		int size;
 		int offset = 0;
 	};
 

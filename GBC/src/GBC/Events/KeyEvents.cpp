@@ -4,10 +4,7 @@
 namespace gbc
 {
 	KeyPressEvent::KeyPressEvent(Keycode keycode, int mods)
-		: keycode(keycode), mods(mods)
-	{
-
-	}
+		: keycode(keycode), mods(mods) {}
 
 	std::string KeyPressEvent::ToString() const
 	{
@@ -17,10 +14,7 @@ namespace gbc
 	}
 
 	KeyRepeatEvent::KeyRepeatEvent(Keycode keycode, int mods)
-		: keycode(keycode), mods(mods)
-	{
-
-	}
+		: keycode(keycode), mods(mods) {}
 
 	std::string KeyRepeatEvent::ToString() const
 	{
@@ -30,10 +24,7 @@ namespace gbc
 	}
 
 	KeyReleaseEvent::KeyReleaseEvent(Keycode keycode, int mods)
-		: keycode(keycode), mods(mods)
-	{
-
-	}
+		: keycode(keycode), mods(mods) {}
 
 	std::string KeyReleaseEvent::ToString() const
 	{
@@ -43,10 +34,7 @@ namespace gbc
 	}
 
 	KeyCharEvent::KeyCharEvent(unsigned int codepoint, int mods)
-		: codepoint(codepoint), mods(mods)
-	{
-
-	}
+		: codepoint(codepoint), mods(mods) {}
 
 	std::string KeyCharEvent::ToString() const
 	{

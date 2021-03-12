@@ -9,7 +9,8 @@ namespace gbc
 	{
 	public:
 		KeyPressEvent(Keycode keycode, int mods);
-		EVENT_CLASS_TYPE(KeyPress)
+		EVENT_CLASS_TYPE(EventType::KeyPress)
+		EVENT_CLASS_CATEGORY(EventCategory_Keyboard)
 
 		inline Keycode GetKeycode() const { return keycode; }
 		inline int GetMods() const { return mods; }
@@ -24,7 +25,8 @@ namespace gbc
 	{
 	public:
 		KeyRepeatEvent(Keycode keycode, int mods);
-		EVENT_CLASS_TYPE(KeyRepeat)
+		EVENT_CLASS_TYPE(EventType::KeyRepeat)
+		EVENT_CLASS_CATEGORY(EventCategory_Keyboard)
 
 		inline Keycode GetKeycode() const { return keycode; }
 		inline int GetMods() const { return mods; }
@@ -39,7 +41,8 @@ namespace gbc
 	{
 	public:
 		KeyReleaseEvent(Keycode keycode, int mods);
-		EVENT_CLASS_TYPE(KeyRelease)
+		EVENT_CLASS_TYPE(EventType::KeyRelease)
+		EVENT_CLASS_CATEGORY(EventCategory_Keyboard)
 
 		inline Keycode GetKeycode() const { return keycode; }
 		inline int GetMods() const { return mods; }
@@ -54,7 +57,8 @@ namespace gbc
 	{
 	public:
 		KeyCharEvent(unsigned int codepoint, int mods);
-		EVENT_CLASS_TYPE(KeyChar)
+		EVENT_CLASS_TYPE(EventType::KeyChar)
+		EVENT_CLASS_CATEGORY(EventCategory_Keyboard)
 
 		inline unsigned int GetCodepoint() const { return codepoint; }
 		inline int GetMods() const { return mods; }

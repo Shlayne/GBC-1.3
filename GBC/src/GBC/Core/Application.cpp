@@ -17,7 +17,9 @@ namespace gbc
 		window = Window::CreateScope(windowSpecs);
 		window->SetEventCallback(GBC_BIND_FUNC(OnEvent));
 
+#if GBC_ENABLE_IMGUI
 		imguiWrapper = CreateScope<ImGuiWrapper>();
+#endif
 		Renderer::Init();
 	}
 
@@ -36,12 +38,14 @@ namespace gbc
 
 	void Application::Run()
 	{
+		Timestep timestep;
+
 		while (running)
 		{
 			GBC_PROFILE_SCOPE("RunLoop");
 
-			Timestep timestep = window->GetContext().GetElapsedTime();
-			
+			timestep = window->GetContext().GetElapsedTime();
+
 			for (Layer* layer : layerStack)
 				layer->OnUpdate(timestep);
 
@@ -50,10 +54,12 @@ namespace gbc
 				for (Layer* layer : layerStack)
 					layer->OnRender();
 
+#if GBC_ENABLE_IMGUI
 				imguiWrapper->Begin();
 				for (Layer* layer : layerStack)
 					layer->OnImGuiRender();
 				imguiWrapper->End();
+#endif
 			}
 
 			window->PollEvents();
@@ -67,6 +73,18 @@ namespace gbc
 	{
 		running = false;
 	}
+
+#if GBC_ENABLE_IMGUI
+	bool Application::IsImGuiUsingKeyEvents() const
+	{
+		return imguiWrapper->IsUsingKeyEvents();
+	}
+
+	bool Application::IsImGuiUsingMouseEvents() const
+	{
+		return imguiWrapper->IsUsingMouseEvents();
+	}
+#endif
 
 	void Application::PushLayer(Layer* layer)
 	{
@@ -100,6 +118,11 @@ namespace gbc
 		dispatcher.Dispatch<WindowCloseEvent>(GBC_BIND_FUNC(Application::OnWindowCloseEvent));
 		dispatcher.Dispatch<WindowResizeEvent>(GBC_BIND_FUNC(Application::OnWindowResizeEvent));
 		dispatcher.Dispatch<WindowMinimizeEvent>(GBC_BIND_FUNC(Application::OnWindowMinimizeEvent));
+
+#if GBC_ENABLE_IMGUI
+		event.handled |= imguiWrapper->IsUsingKeyEvents() && event.IsInCategory(EventCategory_Keyboard) ||
+						 imguiWrapper->IsUsingMouseEvents() && event.IsInCategory(EventCategory_Mouse);
+#endif
 
 		for (auto it = layerStack.rbegin(); !event.handled && it != layerStack.rend(); ++it)
 			(*it)->OnEvent(event);

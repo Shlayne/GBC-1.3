@@ -21,6 +21,7 @@ includedir["glm"] = "%{wks.location}/GBC/vendor/glm/include"
 includedir["imgui"] = "%{wks.location}/GBC/vendor/imgui/include"
 includedir["spdlog"] = "%{wks.location}/GBC/vendor/spdlog/include"
 -- Header-only; they don't have their own project
+includedir["entt"] = "%{wks.location}/GBC/vendor/entt/include"
 includedir["siv"] = "%{wks.location}/GBC/vendor/siv/include"
 includedir["stb"] = "%{wks.location}/GBC/vendor/stb/include"
 

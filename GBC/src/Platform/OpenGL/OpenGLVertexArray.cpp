@@ -52,6 +52,12 @@ namespace gbc
 				case BufferElementType::Int4:
 					glVertexAttribIPointer(i, element.count, GL_INT, layout.GetStride(), (const void*)((size_t)element.offset));
 					break;
+				case BufferElementType::UInt:
+				case BufferElementType::UInt2:
+				case BufferElementType::UInt3:
+				case BufferElementType::UInt4:
+					glVertexAttribIPointer(i, element.count, GL_UNSIGNED_INT, layout.GetStride(), (const void*)((size_t)element.offset));
+					break;
 			}
 		}
 	}

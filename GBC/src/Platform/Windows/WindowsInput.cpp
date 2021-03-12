@@ -8,46 +8,65 @@ namespace gbc
 {
 	bool Input::IsKeyPressed(Keycode keycode)
 	{
-		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		Application& application = Application::Get();
+#if GBC_ENABLE_IMGUI
+		if (application.IsImGuiUsingKeyEvents()) return false;
+#endif
+		auto window = static_cast<GLFWwindow*>(application.GetWindow().GetNativeWindow());
 		return glfwGetKey(window, static_cast<int>(keycode)) == GLFW_PRESS;
 	}
 
 	bool Input::IsKeyReleased(Keycode keycode)
 	{
-		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		Application& application = Application::Get();
+#if GBC_ENABLE_IMGUI
+		if (application.IsImGuiUsingKeyEvents()) return false;
+#endif
+		auto window = static_cast<GLFWwindow*>(application.GetWindow().GetNativeWindow());
 		return glfwGetKey(window, static_cast<int>(keycode)) == GLFW_RELEASE;
 	}
 
 	bool Input::IsMouseButtonPressed(Mousecode button)
 	{
-		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		Application& application = Application::Get();
+#if GBC_ENABLE_IMGUI
+		if (application.IsImGuiUsingMouseEvents()) return false;
+#endif
+		auto window = static_cast<GLFWwindow*>(application.GetWindow().GetNativeWindow());
 		return glfwGetMouseButton(window, static_cast<int>(button)) == GLFW_PRESS;
 	}
 
 	bool Input::IsMouseButtonReleased(Mousecode button)
 	{
-		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		Application& application = Application::Get();
+#if GBC_ENABLE_IMGUI
+		if (application.IsImGuiUsingMouseEvents()) return false;
+#endif
+		auto window = static_cast<GLFWwindow*>(application.GetWindow().GetNativeWindow());
 		return glfwGetMouseButton(window, static_cast<int>(button)) == GLFW_RELEASE;
 	}
 
-	std::pair<float, float> Input::GetMousePos()
+	glm::vec2 Input::GetMousePos()
 	{
-		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		double x, y;
+		static double x = 0.0, y = 0.0;
+
+		Application& application = Application::Get();
+#if GBC_ENABLE_IMGUI
+		if (application.IsImGuiUsingMouseEvents()) return {(float)x, (float)y};
+#endif
+		auto window = static_cast<GLFWwindow*>(application.GetWindow().GetNativeWindow());
 		glfwGetCursorPos(window, &x, &y);
 		return {(float)x, (float)y};
 	}
 
 	float Input::GetMousePosX()
 	{
-		auto [x, y] = GetMousePos();
-		return x;
+		return GetMousePos().x;
 	}
 
 	float Input::GetMousePosY()
 	{
-		auto [x, y] = GetMousePos();
-		return y;
+		return GetMousePos().y;
 	}
 }
 #endif

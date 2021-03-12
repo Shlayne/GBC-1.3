@@ -5,10 +5,7 @@
 namespace gbc
 {
 	OrthographicCamera::OrthographicCamera(float size, float nearClip, float farClip)
-		: size(size), nearClip(nearClip), farClip(farClip)
-	{
-
-	}
+		: size(size), nearClip(nearClip), farClip(farClip) {}
 
 	void OrthographicCamera::OnViewportResize(int width, int height)
 	{

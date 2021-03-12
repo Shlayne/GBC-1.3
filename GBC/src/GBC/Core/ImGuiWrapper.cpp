@@ -1,4 +1,5 @@
 #include "gbcpch.h"
+#if GBC_ENABLE_IMGUI
 #include "ImGuiWrapper.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -10,6 +11,8 @@ namespace gbc
 {
 	ImGuiWrapper::ImGuiWrapper()
 	{
+		GBC_PROFILE_FUNCTION();
+
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		Init();
@@ -19,6 +22,8 @@ namespace gbc
 
 	ImGuiWrapper::~ImGuiWrapper()
 	{
+		GBC_PROFILE_FUNCTION();
+
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
@@ -26,6 +31,8 @@ namespace gbc
 
 	void ImGuiWrapper::Begin()
 	{
+		GBC_PROFILE_FUNCTION();
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -33,6 +40,8 @@ namespace gbc
 
 	void ImGuiWrapper::End()
 	{
+		GBC_PROFILE_FUNCTION();
+
 		ImGuiIO& io = ImGui::GetIO();
 		Window& window = Application::Get().GetWindow();
 		io.DisplaySize = ImVec2((float)window.GetWidth(), (float)window.GetHeight());
@@ -93,4 +102,15 @@ namespace gbc
 		colors[ImGuiCol_TitleBgActive] = {0.15f, 0.155f, 0.16f, 1.0f};
 		colors[ImGuiCol_TitleBgCollapsed] = {0.15f, 0.155f, 0.16f, 1.0f};
 	}
+
+	bool ImGuiWrapper::IsUsingKeyEvents() const
+	{
+		return ImGui::GetIO().WantCaptureKeyboard;
+	}
+
+	bool ImGuiWrapper::IsUsingMouseEvents() const
+	{
+		return ImGui::GetIO().WantCaptureMouse;
+	}
 }
+#endif

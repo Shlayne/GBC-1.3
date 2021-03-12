@@ -4,10 +4,7 @@
 namespace gbc
 {
 	MouseButtonPressEvent::MouseButtonPressEvent(Mousecode button, int mods)
-		: button(button), mods(mods)
-	{
-
-	}
+		: button(button), mods(mods) {}
 
 	std::string MouseButtonPressEvent::ToString() const
 	{
@@ -17,10 +14,7 @@ namespace gbc
 	}
 
 	MouseButtonReleaseEvent::MouseButtonReleaseEvent(Mousecode button, int mods)
-		: button(button), mods(mods)
-	{
-
-	}
+		: button(button), mods(mods) {}
 
 	std::string MouseButtonReleaseEvent::ToString() const
 	{
@@ -30,10 +24,7 @@ namespace gbc
 	}
 
 	MouseMoveEvent::MouseMoveEvent(float x, float y)
-		: x(x), y(y)
-	{
-
-	}
+		: x(x), y(y) {}
 
 	std::string MouseMoveEvent::ToString() const
 	{
@@ -43,10 +34,7 @@ namespace gbc
 	}
 
 	MouseScrollEvent::MouseScrollEvent(float offsetX, float offsetY)
-		: offsetX(offsetX), offsetY(offsetY)
-	{
-
-	}
+		: offsetX(offsetX), offsetY(offsetY) {}
 
 	std::string MouseScrollEvent::ToString() const
 	{
@@ -56,10 +44,7 @@ namespace gbc
 	}
 
 	MouseEnterEvent::MouseEnterEvent(bool enter)
-		: enter(enter)
-	{
-
-	}
+		: enter(enter) {}
 
 	std::string MouseEnterEvent::ToString() const
 	{

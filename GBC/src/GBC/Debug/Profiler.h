@@ -8,7 +8,6 @@
 #include <thread>
 #include <mutex>
 #include <sstream>
-#include "GBC/Core/Core.h"
 
 namespace gbc
 {
@@ -33,17 +32,16 @@ namespace gbc
 	class Profiler
 	{
 	public:
+		Profiler() = default;
 		Profiler(const Profiler&) = delete;
 		Profiler(Profiler&&) = delete;
 		static Profiler& Get();
+		~Profiler();
 
 		void BeginSession(const std::string& name, const std::string& filepath = "results.json");
 		void EndSession();
 		void WriteProfile(const ProfileResult& result);
 	private:
-		Profiler();
-		~Profiler();
-
 		void WriteHeader();
 		void WriteFooter();
 
@@ -51,7 +49,7 @@ namespace gbc
 		void InternalEndSession();
 	private:
 		std::mutex mutex;
-		InstrumentationSession* currentSession;
+		InstrumentationSession* currentSession = nullptr;
 		std::ofstream outputStream;
 	};
 
@@ -69,14 +67,25 @@ namespace gbc
 	};
 }
 
-#if GBC_ENABLE_PROFILE
-#define GBC_PROFILE_BEGIN(name, filePath) ::gbc::Profiler::Get().BeginSession(name, filePath)
-#define GBC_PROFILE_END() ::gbc::Profiler::Get().EndSession()
-#define GBC_PROFILE_SCOPE(name) ::gbc::ProfilerTimer timer##__LINE__(name)
-#define GBC_PROFILE_FUNCTION() GBC_PROFILE_SCOPE(__FUNCSIG__)
+#if GBC_ENABLE_PROFILE_RUNTIME
+	#define GBC_PROFILE_BEGIN_RUNTIME(name, filePath) ::gbc::Profiler::Get().BeginSession(name, filePath)
+	#define GBC_PROFILE_END_RUNTIME() ::gbc::Profiler::Get().EndSession()
+	#define GBC_PROFILE_BEGIN(name, filePath)
+	#define GBC_PROFILE_END()
+	#define GBC_PROFILE_SCOPE(name) ::gbc::ProfilerTimer timer##__LINE__(name)
+	#define GBC_PROFILE_FUNCTION() GBC_PROFILE_SCOPE(__FUNCSIG__)
+#elif GBC_ENABLE_PROFILE
+	#define GBC_PROFILE_BEGIN_RUNTIME(name, filePath)
+	#define GBC_PROFILE_END_RUNTIME()
+	#define GBC_PROFILE_BEGIN(name, filePath) ::gbc::Profiler::Get().BeginSession(name, filePath)
+	#define GBC_PROFILE_END() ::gbc::Profiler::Get().EndSession()
+	#define GBC_PROFILE_SCOPE(name) ::gbc::ProfilerTimer timer##__LINE__(name)
+	#define GBC_PROFILE_FUNCTION() GBC_PROFILE_SCOPE(__FUNCSIG__)
 #else
-#define GBC_PROFILE_BEGIN(name, filePath)
-#define GBC_PROFILE_END()
-#define GBC_PROFILE_SCOPE(name)
-#define GBC_PROFILE_FUNCTION()
+	#define GBC_PROFILE_BEGIN_RUNTIME(name, filePath)
+	#define GBC_PROFILE_END_RUNTIME()
+	#define GBC_PROFILE_BEGIN(name, filePath)
+	#define GBC_PROFILE_END()
+	#define GBC_PROFILE_SCOPE(name)
+	#define GBC_PROFILE_FUNCTION()
 #endif

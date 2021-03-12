@@ -19,6 +19,11 @@ namespace gbc
 
 		void Run();
 		void Terminate();
+
+#if GBC_ENABLE_IMGUI
+		bool IsImGuiUsingKeyEvents() const;
+		bool IsImGuiUsingMouseEvents() const;
+#endif
 	protected:
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
@@ -36,7 +41,9 @@ namespace gbc
 		bool rendering = true;
 
 		Scope<Window> window;
+#if GBC_ENABLE_IMGUI
 		Scope<ImGuiWrapper> imguiWrapper;
+#endif
 		LayerStack layerStack;
 	};
 

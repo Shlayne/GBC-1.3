@@ -2,16 +2,96 @@
 #include "OpenGLShader.h"
 #include "glad/glad.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "GBC/IO/FileIO.h"
 
 namespace gbc
 {
-	OpenGLShader::OpenGLShader(std::initializer_list<ShaderFile> shaders)
+	static ShaderType GetType(const std::string& type)
+	{
+		
+		if (type == "vertex")                 return ShaderType::Vertex;
+		if (type == "tessolation control")    return ShaderType::TessolationControl;
+		if (type == "tessolation evaluation") return ShaderType::TessolationEvaluation;
+		if (type == "geometry")               return ShaderType::Geometry;
+		if (type == "fragment")               return ShaderType::Fragment;
+		if (type == "compute")                return ShaderType::Compute;
+
+		GBC_CORE_ASSERT(false, "Unknown Shader Type!");
+		return ShaderType::None;
+	}
+
+	static GLenum GetOpenGLType(ShaderType type)
+	{
+		switch (type)
+		{
+			case ShaderType::Vertex:                return GL_VERTEX_SHADER;
+			case ShaderType::TessolationControl:    return GL_TESS_CONTROL_SHADER;
+			case ShaderType::TessolationEvaluation: return GL_TESS_EVALUATION_SHADER;
+			case ShaderType::Geometry:              return GL_GEOMETRY_SHADER;
+			case ShaderType::Fragment:              return GL_FRAGMENT_SHADER;
+			case ShaderType::Compute:               return GL_COMPUTE_SHADER;
+		}
+
+		GBC_CORE_ASSERT(false, "Unknown Shader Type!");
+		return 0;
+	}
+
+	OpenGLShader::OpenGLShader(const std::string& filepath)
+	{
+		CreateProgram(ParseFile(filepath));
+	}
+
+	OpenGLShader::~OpenGLShader()
+	{
+		glDeleteProgram(rendererID);
+	}
+
+	void OpenGLShader::Bind() const
+	{
+		glUseProgram(rendererID);
+	}
+
+	void OpenGLShader::Unbind() const
+	{
+		glUseProgram(0);
+	}
+
+	std::vector<ShaderFile> OpenGLShader::ParseFile(const std::string& filepath)
+	{
+		std::vector<ShaderFile> shaders;
+
+		std::string file = FileIO::ReadFile(filepath);
+		GBC_CORE_ASSERT(!file.empty(), "Could not read shader file!");
+
+		static constexpr const char* typeToken = "#type";
+		static const size_t typeTokenLength = strlen(typeToken);
+		size_t position = file.find(typeToken, 0);
+
+		while (position != std::string::npos)
+		{
+			size_t lineEnd = file.find_first_of("\r\n", position);
+			GBC_CORE_ASSERT(lineEnd != std::string::npos, "Cannot have #type at the end of the file!");
+
+			size_t typeStart = position + typeTokenLength + 1;
+			std::string typeString = file.substr(typeStart, lineEnd - typeStart);
+			ShaderType type = GetType(typeString);
+
+			size_t nestLineStart = file.find_first_not_of("\r\n", lineEnd);
+			GBC_CORE_ASSERT(nestLineStart != std::string::npos, "Must include code for a shader!");
+			position = file.find(typeToken, nestLineStart);
+			shaders.push_back({type, position == std::string::npos ? file.substr(nestLineStart) : file.substr(nestLineStart, position - nestLineStart)});
+		}
+
+		return shaders;
+	}
+
+	void OpenGLShader::CreateProgram(const std::vector<ShaderFile>& shaders)
 	{
 		rendererID = glCreateProgram();
 		RendererID* shaderIDs = new RendererID[shaders.size()];
 		for (size_t i = 0; i < shaders.size(); i++)
 		{
-			shaderIDs[i] = Compile(*(shaders.begin() + i));
+			shaderIDs[i] = CompileShader(shaders[i]);
 			glAttachShader(rendererID, shaderIDs[i]);
 		}
 	
@@ -34,104 +114,22 @@ namespace gbc
 		}
 	}
 
-	OpenGLShader::~OpenGLShader()
+	RendererID OpenGLShader::CompileShader(const ShaderFile& shader)
 	{
-		glDeleteProgram(rendererID);
-	}
-
-	void OpenGLShader::Bind() const
-	{
-		glUseProgram(rendererID);
-	}
-
-	void OpenGLShader::Unbind() const
-	{
-		glUseProgram(0);
-	}
-
-	bool OpenGLShader::LinkAndValidate()
-	{
-		// Link
-		glLinkProgram(rendererID);
-		int link;
-		glGetProgramiv(rendererID, GL_LINK_STATUS, &link);
-		if (link == GL_FALSE)
-		{
-			int length;
-			glGetProgramiv(rendererID, GL_INFO_LOG_LENGTH, &length);
-			char* message = new char[length];
-			glGetProgramInfoLog(rendererID, length, &length, message);
-			GBC_CORE_WARN("Failed to link program: {0}", message);
-			delete[] message;
-			return false;
-		}
-
-		// Validate
-		glValidateProgram(rendererID);
-		int validate;
-		glGetProgramiv(rendererID, GL_VALIDATE_STATUS, &validate);
-		if (validate == GL_FALSE)
-		{
-			int length;
-			glGetProgramiv(rendererID, GL_INFO_LOG_LENGTH, &length);
-			char* message = new char[length];
-			glGetProgramInfoLog(rendererID, length, &length, message);
-			GBC_CORE_WARN("Failed to validate program: {0}", message);
-			delete[] message;
-			return false;
-		}
-
-		return true;
-	}
-
-	static GLuint GetGLType(ShaderType type)
-	{
-		switch (type)
-		{
-			case ShaderType::Vertex:                return GL_VERTEX_SHADER;
-			case ShaderType::TessolationControl:    return GL_TESS_CONTROL_SHADER;
-			case ShaderType::TessolationEvaluation: return GL_TESS_EVALUATION_SHADER;
-			case ShaderType::Geometry:              return GL_GEOMETRY_SHADER;
-			case ShaderType::Fragment:              return GL_FRAGMENT_SHADER;
-			case ShaderType::Compute:               return GL_COMPUTE_SHADER;
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Shader Type!");
-		return 0;
-	}
-
-	static const char* GetName(ShaderType type)
-	{
-		switch (type)
-		{
-			case ShaderType::Vertex:                return "vertex";
-			case ShaderType::TessolationControl:    return "tessolation control";
-			case ShaderType::TessolationEvaluation: return "tessolation evaluation";
-			case ShaderType::Geometry:              return "geometry";
-			case ShaderType::Fragment:              return "fragment";
-			case ShaderType::Compute:               return "compute";
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Shader Type!");
-		return "unknown";
-	}
-
-	unsigned int OpenGLShader::Compile(const ShaderFile& shader)
-	{
-		RendererID id = glCreateShader(GetGLType(shader.type));
-		const char* source = shader.source.c_str();
+		RendererID id = glCreateShader(GetOpenGLType(shader.type));
+		const GLchar* source = static_cast<const GLchar*>(shader.source.c_str());
 		glShaderSource(id, 1, &source, nullptr);
 		glCompileShader(id);
 
-		int compile;
+		GLint compile;
 		glGetShaderiv(id, GL_COMPILE_STATUS, &compile);
 		if (compile == GL_FALSE)
 		{
-			int length;
+			GLint length;
 			glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-			char* message = new char[length];
+			GLchar* message = new GLchar[length];
 			glGetShaderInfoLog(id, length, &length, message);
-			GBC_CORE_WARN("Failed to compile {0} shader: {1}", GetName(shader.type), message);
+			GBC_CORE_WARN("{0}", static_cast<char*>(message));
 			delete[] message;
 			glDeleteShader(id);
 			return 0;
@@ -140,17 +138,50 @@ namespace gbc
 		return id;
 	}
 
-	int OpenGLShader::GetUniformLocation(const std::string& name) const
+	bool OpenGLShader::LinkAndValidate()
+	{
+		// Link
+		glLinkProgram(rendererID);
+		GLint link;
+		glGetProgramiv(rendererID, GL_LINK_STATUS, &link);
+		if (link == GL_FALSE)
+		{
+			GLint length;
+			glGetProgramiv(rendererID, GL_INFO_LOG_LENGTH, &length);
+			GLchar* message = new GLchar[length];
+			glGetProgramInfoLog(rendererID, length, &length, message);
+			GBC_CORE_WARN("{0}", static_cast<char*>(message));
+			delete[] message;
+			return false;
+		}
+
+		// Validate
+		glValidateProgram(rendererID);
+		GLint validate;
+		glGetProgramiv(rendererID, GL_VALIDATE_STATUS, &validate);
+		if (validate == GL_FALSE)
+		{
+			GLint length;
+			glGetProgramiv(rendererID, GL_INFO_LOG_LENGTH, &length);
+			GLchar* message = new GLchar[length];
+			glGetProgramInfoLog(rendererID, length, &length, message);
+			GBC_CORE_WARN("{0}", static_cast<char*>(message));
+			delete[] message;
+			return false;
+		}
+
+		return true;
+	}
+
+	int OpenGLShader::GetUniformLocation(const std::string& name)
 	{
 		auto it = uniformLocations.find(name);
 		if (it != uniformLocations.end())
 			return it->second;
 
 		int location = glGetUniformLocation(rendererID, name.c_str());
-
-#if GBC_ENABLE_LOGGING // remove the if (location == -1) when logging is disabled
-		if (location == -1)
-			GBC_CORE_WARN("Unused shader uniform: {0}", name);
+#if GBC_ENABLE_LOGGING // to remove warning of empty if statement in release and dist
+		if (location == -1) GBC_CORE_WARN("Unused shader uniform: {0}", name);
 #endif
 		uniformLocations[name] = location;
 		return location;

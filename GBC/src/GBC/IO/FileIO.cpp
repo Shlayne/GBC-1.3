@@ -3,9 +3,9 @@
 
 namespace gbc
 {
-	std::string FileIO::ReadFile(const std::string& filePath)
+	std::string FileIO::ReadFile(const std::string& filepath)
 	{
-		std::ifstream file(filePath);
+		std::ifstream file(filepath);
 		if (file.is_open())
 		{
 			// Get the file size

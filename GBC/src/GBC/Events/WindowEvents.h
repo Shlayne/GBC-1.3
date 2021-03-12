@@ -7,7 +7,8 @@ namespace gbc
 	class WindowCloseEvent : public Event
 	{
 	public:
-		EVENT_CLASS_TYPE(WindowClose)
+		EVENT_CLASS_TYPE(EventType::WindowClose)
+		EVENT_CLASS_CATEGORY(EventCategory_Window | EventCategory_Application)
 
 		virtual std::string ToString() const override;
 	};
@@ -16,7 +17,8 @@ namespace gbc
 	{
 	public:
 		WindowResizeEvent(int width, int height);
-		EVENT_CLASS_TYPE(WindowResize)
+		EVENT_CLASS_TYPE(EventType::WindowResize)
+		EVENT_CLASS_CATEGORY(EventCategory_Window | EventCategory_Application)
 
 		inline int GetWidth() const { return width; }
 		inline int GetHeight() const { return height; }
@@ -31,7 +33,8 @@ namespace gbc
 	{
 	public:
 		WindowMoveEvent(int x, int y);
-		EVENT_CLASS_TYPE(WindowMove)
+		EVENT_CLASS_TYPE(EventType::WindowMove)
+		EVENT_CLASS_CATEGORY(EventCategory_Window)
 
 		inline int GetX() const { return x; }
 		inline int GetY() const { return y; }
@@ -46,7 +49,8 @@ namespace gbc
 	{
 	public:
 		WindowFocusEvent(bool focus);
-		EVENT_CLASS_TYPE(WindowFocus)
+		EVENT_CLASS_TYPE(EventType::WindowFocus)
+		EVENT_CLASS_CATEGORY(EventCategory_Window)
 
 		inline bool IsFocused() const { return focus; }
 
@@ -59,7 +63,8 @@ namespace gbc
 	{
 	public:
 		WindowMinimizeEvent(bool minimize);
-		EVENT_CLASS_TYPE(WindowMinimize)
+		EVENT_CLASS_TYPE(EventType::WindowMinimize)
+		EVENT_CLASS_CATEGORY(EventCategory_Window | EventCategory_Application)
 
 		inline bool IsMinimized() const { return minimize; }
 
@@ -72,7 +77,8 @@ namespace gbc
 	{
 	public:
 		WindowMaximizeEvent(bool maximize);
-		EVENT_CLASS_TYPE(WindowMaximize)
+		EVENT_CLASS_TYPE(EventType::WindowMaximize)
+		EVENT_CLASS_CATEGORY(EventCategory_Window)
 
 		inline bool IsMaximized() const { return maximize; }
 
@@ -86,7 +92,8 @@ namespace gbc
 	public:
 		WindowDropEvent(int pathCount, const char** paths);
 		~WindowDropEvent();
-		EVENT_CLASS_TYPE(WindowDrop)
+		EVENT_CLASS_TYPE(EventType::WindowDrop)
+		EVENT_CLASS_CATEGORY(EventCategory_Window | EventCategory_Application)
 
 		inline int GetPathCount() const { return pathCount; }
 		inline char** GetPaths() const { return paths; }
@@ -101,7 +108,8 @@ namespace gbc
 	{
 	public:
 		WindowFramebufferResizeEvent(int width, int height);
-		EVENT_CLASS_TYPE(WindowFramebufferResize)
+		EVENT_CLASS_TYPE(EventType::WindowFramebufferResize)
+		EVENT_CLASS_CATEGORY(EventCategory_Window)
 
 		inline int GetWidth() const { return width; }
 		inline int GetHeight() const { return height; }
@@ -116,7 +124,8 @@ namespace gbc
 	{
 	public:
 		WindowContentScaleEvent(float scaleX, float scaleY);
-		EVENT_CLASS_TYPE(WindowContentScale)
+		EVENT_CLASS_TYPE(EventType::WindowContentScale)
+		EVENT_CLASS_CATEGORY(EventCategory_Window)
 
 		inline float GetScaleX() const { return scaleX; }
 		inline float GetScaleY() const { return scaleY; }
@@ -130,7 +139,8 @@ namespace gbc
 	class WindowRefreshEvent : public Event
 	{
 	public:
-		EVENT_CLASS_TYPE(WindowRefresh)
+		EVENT_CLASS_TYPE(EventType::WindowRefresh)
+		EVENT_CLASS_CATEGORY(EventCategory_Window)
 
 		virtual std::string ToString() const override;
 	};

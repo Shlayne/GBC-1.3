@@ -4,9 +4,11 @@
 namespace gbc
 {
 	EventDispatcher::EventDispatcher(Event& event)
-		: event(event)
-	{
+		: event(event) {}
 
+	bool Event::IsInCategory(EventCategory category) const
+	{
+		return GetCategoryFlags() & category;
 	}
 }
 

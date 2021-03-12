@@ -5,10 +5,7 @@
 namespace gbc
 {
 	PerspectiveCamera::PerspectiveCamera(float fov, float nearClip, float farClip)
-		: fov(fov), nearClip(nearClip), farClip(farClip)
-	{
-	
-	}
+		: fov(fov), nearClip(nearClip), farClip(farClip) {}
 
 	void PerspectiveCamera::OnViewportResize(int width, int height)
 	{

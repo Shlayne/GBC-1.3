@@ -9,10 +9,14 @@ namespace gbc
 	{
 		switch (type)
 		{
-			case BufferElementType::Int:   	return 1;
-			case BufferElementType::Int2:  	return 2;
-			case BufferElementType::Int3:  	return 3;
-			case BufferElementType::Int4:  	return 4;
+			case BufferElementType::Int:    return 1;
+			case BufferElementType::Int2:   return 2;
+			case BufferElementType::Int3:   return 3;
+			case BufferElementType::Int4:   return 4;
+			case BufferElementType::UInt:   return 1;
+			case BufferElementType::UInt2:  return 2;
+			case BufferElementType::UInt3:  return 3;
+			case BufferElementType::UInt4:  return 4;
 			case BufferElementType::Float:  return 1;
 			case BufferElementType::Float2: return 2;
 			case BufferElementType::Float3: return 3;
@@ -27,10 +31,14 @@ namespace gbc
 	{
 		switch (type)
 		{
-			case BufferElementType::Int:   	return 4 * 1;
-			case BufferElementType::Int2:  	return 4 * 2;
-			case BufferElementType::Int3:  	return 4 * 3;
-			case BufferElementType::Int4:  	return 4 * 4;
+			case BufferElementType::Int:    return 4 * 1;
+			case BufferElementType::Int2:   return 4 * 2;
+			case BufferElementType::Int3:   return 4 * 3;
+			case BufferElementType::Int4:   return 4 * 4;
+			case BufferElementType::UInt:   return 4 * 1;
+			case BufferElementType::UInt2:  return 4 * 2;
+			case BufferElementType::UInt3:  return 4 * 3;
+			case BufferElementType::UInt4:  return 4 * 4;
 			case BufferElementType::Float:  return 4 * 1;
 			case BufferElementType::Float2: return 4 * 2;
 			case BufferElementType::Float3: return 4 * 3;
@@ -41,14 +49,15 @@ namespace gbc
 		return 0;
 	}
 
+	BufferElement::BufferElement(BufferElementType type, const std::string& name, bool normalized)
+		: type(type), name(name), normalized(normalized), count(GetElementCount(type)), size(GetElementSize(type)) {}
+
 	BufferLayout::BufferLayout(std::initializer_list<BufferElement> elements)
 		: elements(elements)
 	{
 		for (BufferElement& element : this->elements)
 		{
 			element.offset = stride;
-			element.count = GetElementCount(element.type);
-			element.size = GetElementSize(element.type);
 			stride += element.size;
 		}
 	}

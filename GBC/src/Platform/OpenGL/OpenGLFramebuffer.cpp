@@ -228,6 +228,17 @@ namespace gbc
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	void OpenGLFramebuffer::BindColorTexture(unsigned int index, unsigned int slot)
+	{
+		GBC_CORE_ASSERT(index < colorAttachments.size());
+		glBindTextureUnit(slot, colorAttachments[index]);
+	}
+
+	void OpenGLFramebuffer::UnbindColorTexture(unsigned int slot)
+	{
+		glBindTextureUnit(slot, 0);
+	}
+
 	void OpenGLFramebuffer::OnViewportResize(int width, int height)
 	{
 		GBC_CORE_ASSERT(width <= Renderer::GetMaxFramebufferWidth() && height <= Renderer::GetMaxFramebufferHeight(), "Framebuffer too large!");

@@ -1,8 +1,34 @@
+#type vertex
+#version 460 core
+
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec4 tintColor;
+layout(location = 2) in vec2 texCoord;
+layout(location = 3) in uint texIndex;
+
+out vec2 _texCoord;
+out vec4 _tintColor;
+out flat uint _texIndex;
+
+uniform mat4 projection;
+uniform mat4 cameraTransform;
+
+void main()
+{
+	mat4 view = inverse(cameraTransform);
+	
+	gl_Position = projection * view * vec4(position, 1.0);
+	_texCoord = texCoord;
+	_tintColor = tintColor;
+	_texIndex = texIndex;
+}
+
+#type fragment
 #version 460 core
 
 in vec2 _texCoord;
 in vec4 _tintColor;
-in flat float _texIndex;
+in flat uint _texIndex;
 
 layout(location = 0) out vec4 outColor;
 
@@ -10,7 +36,7 @@ uniform sampler2D textures[32];
 
 vec4 GetTextureColor()
 {
-	switch (int(_texIndex))
+	switch (_texIndex)
 	{
 		case  0: return texture(textures[ 0], _texCoord);
 		case  1: return texture(textures[ 1], _texCoord);
@@ -44,6 +70,7 @@ vec4 GetTextureColor()
 		case 29: return texture(textures[29], _texCoord);
 		case 30: return texture(textures[30], _texCoord);
 		case 31: return texture(textures[31], _texCoord);
+		default: return vec4(0.0);
 	}
 }
 

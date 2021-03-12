@@ -2,6 +2,7 @@
 
 #include "GBC/Core/Keycodes.h"
 #include "GBC/Core/Mousecodes.h"
+#include "glm/glm.hpp"
 
 namespace gbc
 {
@@ -14,7 +15,7 @@ namespace gbc
 		static bool IsMouseButtonPressed(Mousecode button);
 		static bool IsMouseButtonReleased(Mousecode button);
 
-		static std::pair<float, float> GetMousePos();
+		static glm::vec2 GetMousePos();
 		static float GetMousePosX();
 		static float GetMousePosY();
 	};

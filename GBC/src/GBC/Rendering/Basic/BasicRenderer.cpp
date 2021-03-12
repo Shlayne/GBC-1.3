@@ -11,8 +11,82 @@ namespace gbc
 		glm::vec3 position;
 		glm::vec4 tintColor;
 		glm::vec2 texCoord;
-		float texIndex;
+		unsigned int texIndex;
 	};
+
+	BasicRenderable::BasicRenderable(const Ref<Texture>& texture)
+		: type(Type::Texture), texture(texture) {}
+	BasicRenderable::BasicRenderable(const Ref<Framebuffer>& framebuffer, unsigned int attachmentIndex)
+		: type(Type::Framebuffer), framebuffer(framebuffer), attachmentIndex(attachmentIndex) {}
+
+	void BasicRenderable::Bind(unsigned int slot)
+	{
+		switch (type)
+		{
+			case Type::Texture:
+				(*texture)->Bind(slot);
+				return;
+			case Type::Framebuffer:
+				(*framebuffer)->BindColorTexture(attachmentIndex, slot);
+				return;
+		}
+
+		GBC_CORE_ASSERT(false, "Unknown Renderable Type!");
+	}
+
+	void BasicRenderable::Unbind(unsigned int slot)
+	{
+		switch (type)
+		{
+			case Type::Texture:
+				(*texture)->Unbind(slot);
+				return;
+			case Type::Framebuffer:
+				(*framebuffer)->UnbindColorTexture(slot);
+				return;
+		}
+
+		GBC_CORE_ASSERT(false, "Unknown Renderable Type!");
+	}
+
+	void BasicRenderable::Clear()
+	{
+		switch (type)
+		{
+			case Type::Texture:     texture = nullptr; break;
+			case Type::Framebuffer: framebuffer = nullptr; break;
+			case Type::None: return;
+		}
+		type = Type::None;
+	}
+
+	BasicRenderable::operator bool() const
+	{
+		switch (type)
+		{
+			case Type::None:        return false;
+			case Type::Texture:     return texture->operator bool();
+			case Type::Framebuffer: return framebuffer->operator bool();
+		}
+
+		GBC_CORE_ASSERT(false, "Unknown Renderable Type!");
+		return false;
+	}
+
+	bool BasicRenderable::operator==(const BasicRenderable& renderable) const
+	{
+		if (type != renderable.type || type == Type::None)
+			return false;
+
+		switch (type)
+		{
+			case Type::Texture:     return *texture == renderable.texture;
+			case Type::Framebuffer: return *framebuffer == renderable.framebuffer;
+		}
+
+		GBC_CORE_ASSERT(false, "Unknown Renderable Type!");
+		return false;
+	}
 
 	struct BasicRendererData
 	{
@@ -28,12 +102,16 @@ namespace gbc
 		Vertex* localVertexBufferStart = nullptr;
 		Vertex* localVertexBufferCurrent = nullptr;
 
-		Ref<Texture>* textures = nullptr;
-		unsigned int textureCount = 1;
+		BasicRenderable* renderables = nullptr;
+		unsigned int renderableCount = 1;
 
 		unsigned int maxVertices = 0;
 		unsigned int maxIndices = 0;
-		unsigned int maxTextures = 0;
+		unsigned int maxRenderables = 0;
+
+#if GBC_ENABLE_STATS
+		BasicRenderer::Statistics statistics;
+#endif
 	};
 	static BasicRendererData data;
 
@@ -44,8 +122,8 @@ namespace gbc
 		Renderer::EnableCullFace();
 
 		// Setup texture slots
-		data.maxTextures = (unsigned int)Renderer::GetMaxTextureSlots();
-		data.textures = new Ref<Texture>[data.maxTextures];
+		data.maxRenderables = (unsigned int)Renderer::GetMaxTextureSlots();
+		data.renderables = new BasicRenderable[data.maxRenderables];
 
 		// Setup local buffers
 		data.maxVertices = 900000; // TODO: query drivers
@@ -58,10 +136,10 @@ namespace gbc
 		// Setup internal buffers
 		data.vertexBuffer = VertexBuffer::CreateRef(data.maxVertices * sizeof(Vertex), nullptr, BufferUsage::DynamicDraw);
 		data.vertexBuffer->SetLayout({
-			{BufferElementType::Float3},
-			{BufferElementType::Float4},
-			{BufferElementType::Float2},
-			{BufferElementType::Float }
+			{BufferElementType::Float3, "position" },
+			{BufferElementType::Float4, "tintColor"},
+			{BufferElementType::Float2, "texCoord" },
+			{BufferElementType::UInt,   "texIndex" }
 		});
 
 		data.vertexArray = VertexArray::CreateRef();
@@ -70,29 +148,25 @@ namespace gbc
 		data.indexBuffer = IndexBuffer::CreateRef(data.maxIndices, nullptr, BufferUsage::DynamicDraw);
 
 		// Setup shader
-		data.shader = Shader::CreateRef({
-			{ShaderType::Vertex, FileIO::ReadFile("resources/shaders/Basic_vertex.glsl")},
-			{ShaderType::Fragment, FileIO::ReadFile("resources/shaders/Basic_fragment.glsl")}
-		});
-
+		data.shader = Shader::CreateRef("resources/shaders/BasicShader.glsl");
 		data.shader->Bind();
-		int* samplers = new int[data.maxTextures];
-		for (unsigned int i = 0; i < data.maxTextures; i++)
+		int* samplers = new int[data.maxRenderables];
+		for (unsigned int i = 0; i < data.maxRenderables; i++)
 			samplers[i] = i;
-		data.shader->SetUniforms("textures", samplers, data.maxTextures);
+		data.shader->SetUniforms("textures", samplers, data.maxRenderables);
 		delete[] samplers;
 
 		// Setup white texture
 		Ref<LocalTexture2D> whiteTexture = CreateRef<LocalTexture2D>(1, 1, 4);
 		*(unsigned int*)whiteTexture->GetData() = 0xffffffff;
-		data.textures[0] = Texture::CreateRef(whiteTexture);
+		data.renderables[0] = Texture::CreateRef(whiteTexture);
 	}
 
 	void BasicRenderer::Shutdown()
 	{
 		delete[] data.localVertexBufferStart;
 		delete[] data.localIndexBufferStart;
-		delete[] data.textures;
+		delete[] data.renderables;
 	}
 
 	void BasicRenderer::BeginScene(const glm::mat4& cameraTransform, const glm::mat4& projection)
@@ -114,13 +188,17 @@ namespace gbc
 			data.vertexBuffer->SetData(vertexBufferSize, data.localVertexBufferStart);
 			data.indexBuffer->SetData(indexBufferSize, data.localIndexBufferStart);
 
-			// Bind textures
-			for (unsigned int i = 0; i < data.textureCount; i++)
-				data.textures[i]->Bind(i);
+			// Bind renderables
+			for (unsigned int i = 0; i < data.renderableCount; i++)
+				data.renderables[i].Bind(i);
 
 			// Actually render
 			Renderer::DrawIndexed(data.vertexArray, data.indexBuffer, data.localIndexCount);
 			Reset();
+
+#if GBC_ENABLE_STATS
+			data.statistics.drawCalls++;
+#endif
 		}
 	}
 
@@ -128,7 +206,7 @@ namespace gbc
 	{
 		if (data.localVertexCount + vertexCount > data.maxVertices ||
 			data.localIndexCount + indexCount > data.maxIndices ||
-			texIndex >= data.maxTextures)
+			texIndex >= data.maxRenderables)
 			EndScene();
 	}
 
@@ -141,31 +219,36 @@ namespace gbc
 		data.localIndexCount = 0;
 		data.localIndexBufferCurrent = data.localIndexBufferStart;
 
-		// Remove the references once the textures has been rendered
-		for (unsigned int i = 1; i < data.textureCount; i++)
-			data.textures[i] = nullptr;
-		data.textureCount = 1;
+		// Remove the references once the renderables has been rendered
+		for (unsigned int i = 1; i < data.renderableCount; i++)
+			data.renderables[i].Clear();
+		data.renderableCount = 1;
 	}
 
-	unsigned int BasicRenderer::GetTextureIndex(const Ref<Texture>& texture)
+	unsigned int BasicRenderer::GetTexIndex(const BasicRenderable& renderable)
 	{
-		if (texture == nullptr)
+		if (!renderable)
 			return 0;
 
-		for (unsigned int i = 1; i < data.textureCount; i++)
-			if (*(texture->GetTexture()) == *(data.textures[i]->GetTexture()))
+		for (unsigned int i = 1; i < data.renderableCount; i++)
+			if (data.renderables[i] == renderable)
 				return i;
 
-		return data.textureCount;
+		return data.renderableCount;
 	}
 
-	void BasicRenderer::Submit(const BasicModel& model, const glm::mat4& transform, Ref<Texture> texture)
+	void BasicRenderer::Submit(const BasicModel& model, const glm::mat4& transform, const BasicRenderable& renderable)
 	{
-		// Handle textures
-		unsigned int texIndex = GetTextureIndex(texture);
+		// Handle renderable
+		unsigned int texIndex = GetTexIndex(renderable);
 		EnsureBatch(model.vertexCount, model.indexCount, texIndex);
-		if (texIndex >= data.textureCount)
-			data.textures[texIndex = data.textureCount++] = texture;
+		if (texIndex >= data.renderableCount)
+		{
+			data.renderables[texIndex = data.renderableCount++] = renderable;
+#if GBC_ENABLE_STATS
+			data.statistics.textureCount++;
+#endif
+		}
 
 		// Handle vertices
 		for (unsigned int i = 0; i < model.vertexCount; i++, data.localVertexBufferCurrent++)
@@ -173,7 +256,7 @@ namespace gbc
 			data.localVertexBufferCurrent->position = transform * glm::vec4(model.vertices[i].position, 1.0f);
 			data.localVertexBufferCurrent->texCoord = model.vertices[i].texCoord;
 			data.localVertexBufferCurrent->tintColor = model.vertices[i].tintColor;
-			data.localVertexBufferCurrent->texIndex = (float)texIndex;
+			data.localVertexBufferCurrent->texIndex = texIndex;
 		}
 
 		// Handle indices
@@ -183,5 +266,25 @@ namespace gbc
 		// Update local counts
 		data.localVertexCount += model.vertexCount;
 		data.localIndexCount += model.indexCount;
+
+#if GBC_ENABLE_STATS
+		data.statistics.indexCount += model.indexCount;
+		data.statistics.vertexCount += model.vertexCount;
+#endif
 	}
+
+#if GBC_ENABLE_STATS
+	const BasicRenderer::Statistics& BasicRenderer::GetStatistics()
+	{
+		return data.statistics;
+	}
+
+	void BasicRenderer::ResetStatistics()
+	{
+		data.statistics.drawCalls = 0;
+		data.statistics.indexCount = 0;
+		data.statistics.vertexCount = 0;
+		data.statistics.textureCount = 0;
+	}
+#endif
 }

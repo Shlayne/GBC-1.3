@@ -5,6 +5,6 @@ namespace gbc
 	class FileIO
 	{
 	public:
-		static std::string ReadFile(const std::string& filePath);
+		static std::string ReadFile(const std::string& filepath);
 	};
 }

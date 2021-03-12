@@ -9,10 +9,7 @@ namespace gbc
 	}
 
 	WindowResizeEvent::WindowResizeEvent(int width, int height)
-		: width(width), height(height)
-	{
-
-	}
+		: width(width), height(height) {}
 
 	std::string WindowResizeEvent::ToString() const
 	{
@@ -23,10 +20,7 @@ namespace gbc
 
 
 	WindowMoveEvent::WindowMoveEvent(int x, int y)
-		: x(x), y(y)
-	{
-
-	}
+		: x(x), y(y) {}
 
 	std::string WindowMoveEvent::ToString() const
 	{
@@ -36,10 +30,7 @@ namespace gbc
 	}
 
 	WindowFocusEvent::WindowFocusEvent(bool focus)
-		: focus(focus)
-	{
-
-	}
+		: focus(focus) {}
 
 	std::string WindowFocusEvent::ToString() const
 	{
@@ -49,10 +40,7 @@ namespace gbc
 	}
 
 	WindowMinimizeEvent::WindowMinimizeEvent(bool minimize)
-		: minimize(minimize)
-	{
-
-	}
+		: minimize(minimize) {}
 
 	std::string WindowMinimizeEvent::ToString() const
 	{
@@ -62,10 +50,7 @@ namespace gbc
 	}
 
 	WindowMaximizeEvent::WindowMaximizeEvent(bool maximize)
-		: maximize(maximize)
-	{
-
-	}
+		: maximize(maximize) {}
 
 	std::string WindowMaximizeEvent::ToString() const
 	{
@@ -102,10 +87,7 @@ namespace gbc
 	}
 
 	WindowFramebufferResizeEvent::WindowFramebufferResizeEvent(int width, int height)
-		: width(width), height(height)
-	{
-
-	}
+		: width(width), height(height) {}
 
 	std::string WindowFramebufferResizeEvent::ToString() const
 	{
@@ -115,10 +97,7 @@ namespace gbc
 	}
 
 	WindowContentScaleEvent::WindowContentScaleEvent(float scaleX, float scaleY)
-		: scaleX(scaleX), scaleY(scaleY)
-	{
-
-	}
+		: scaleX(scaleX), scaleY(scaleY) {}
 
 	std::string WindowContentScaleEvent::ToString() const
 	{

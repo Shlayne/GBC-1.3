@@ -10,18 +10,26 @@ public:
 	virtual void OnDetach() override;
 	virtual void OnUpdate(Timestep timestep) override;
 	virtual void OnRender() override;
+#if GBC_ENABLE_IMGUI
 	virtual void OnImGuiRender() override;
+#endif
 	virtual void OnEvent(Event& event) override;
 private:
 	bool OnWindowResizeEvent(WindowResizeEvent& event);
 
+	// TODO: remove
 	PerspectiveCamera camera;
 	PerspectiveCameraController cameraController;
-	//Scope<Framebuffer> framebuffer;
-	BasicModel model{4, 6}; // Debug
+
+	Scope<Scene> scene;
+
+	// Debug
+	BasicModel model{4, 6};
+	BasicRenderable renderable;
+
+#if GBC_ENABLE_STATS
+	BasicRenderer::Statistics statistics;
+#endif
 };
 
-// TODO: not in any particular order...
-// render one of a framebuffers' color attachments
-// renderer statistics + imgui panel for that
-// ok so basically make this Hazel except don't focus on the editor https://github.com/TheCherno/Hazel
+// https://www.youtube.com/watch?v=GfSzeAcsBb0&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT&index=80

@@ -5,24 +5,24 @@
 
 namespace gbc
 {
-	Ref<Shader> Shader::CreateRef(std::initializer_list<ShaderFile> shaders)
+	Ref<Shader> Shader::CreateRef(const std::string& filepath)
 	{
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLShader>(shaders);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLShader>(filepath);
 		}
 
 		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 
-	Scope<Shader> Shader::CreateScope(std::initializer_list<ShaderFile> shaders)
+	Scope<Shader> Shader::CreateScope(const std::string& filepath)
 	{
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLShader>(shaders);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLShader>(filepath);
 		}
 
 		GBC_CORE_ASSERT(false, "Unknown Renderer API!");

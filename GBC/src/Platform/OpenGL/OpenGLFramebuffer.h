@@ -12,6 +12,8 @@ namespace gbc
 
 		virtual void Bind() override;
 		virtual void Unbind() override;
+		virtual void BindColorTexture(unsigned int index = 0, unsigned int slot = 0) override;
+		virtual void UnbindColorTexture(unsigned int slot = 0) override;
 
 		virtual void OnViewportResize(int width, int height) override;
 		virtual const FramebufferSpecification& GetSpecification() const override { return specification; }

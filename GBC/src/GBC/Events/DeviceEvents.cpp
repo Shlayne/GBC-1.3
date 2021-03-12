@@ -4,10 +4,7 @@
 namespace gbc
 {
 	JoystickConnectEvent::JoystickConnectEvent(int jid, bool connect)
-		: jid(jid), connect(connect)
-	{
-
-	}
+		: jid(jid), connect(connect) {}
 
 	std::string JoystickConnectEvent::ToString() const
 	{
@@ -17,10 +14,7 @@ namespace gbc
 	}
 
 	MonitorConnectEvent::MonitorConnectEvent(bool connect)
-		: connect(connect)
-	{
-
-	}
+		: connect(connect) {}
 
 	std::string MonitorConnectEvent::ToString() const
 	{

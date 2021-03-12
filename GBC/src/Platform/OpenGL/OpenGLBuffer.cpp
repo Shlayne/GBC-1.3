@@ -4,7 +4,7 @@
 
 namespace gbc
 {
-	static GLenum GetGLUsage(BufferUsage usage)
+	static GLenum GetOpenGLUsage(BufferUsage usage)
 	{
 		switch (usage)
 		{
@@ -27,7 +27,7 @@ namespace gbc
 	{
 		glCreateBuffers(1, &rendererID);
 		glBindBuffer(GL_ARRAY_BUFFER, rendererID);
-		glBufferData(GL_ARRAY_BUFFER, size, data, GetGLUsage(usage));
+		glBufferData(GL_ARRAY_BUFFER, size, data, GetOpenGLUsage(usage));
 	}
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
@@ -56,7 +56,7 @@ namespace gbc
 	{
 		glCreateBuffers(1, &rendererID);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GetGLUsage(usage));
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GetOpenGLUsage(usage));
 	}
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()

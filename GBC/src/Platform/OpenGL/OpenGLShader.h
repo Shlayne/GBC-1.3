@@ -4,10 +4,27 @@
 
 namespace gbc
 {
+	enum class ShaderType
+	{
+		None = 0,
+		Vertex,
+		TessolationControl,
+		TessolationEvaluation,
+		Geometry,
+		Fragment,
+		Compute
+	};
+
+	struct ShaderFile
+	{
+		ShaderType type;
+		std::string source;
+	};
+
 	class OpenGLShader : public Shader
 	{
 	public:
-		OpenGLShader(std::initializer_list<ShaderFile> shaders);
+		OpenGLShader(const std::string& filepath);
 		virtual ~OpenGLShader();
 
 		virtual void Bind() const override;
@@ -41,11 +58,13 @@ namespace gbc
 		virtual void SetUniforms(const std::string& name, const int*          values, int count) override;
 		virtual void SetUniforms(const std::string& name, const unsigned int* values, int count) override;
 	private:
+		std::vector<ShaderFile> ParseFile(const std::string& filepath);
+		void CreateProgram(const std::vector<ShaderFile>& shaders);
+		RendererID CompileShader(const ShaderFile& shader);
 		bool LinkAndValidate();
-		RendererID Compile(const ShaderFile& shader);
-		int GetUniformLocation(const std::string& name) const;
+		int GetUniformLocation(const std::string& name);
 
 		RendererID rendererID = 0;
-		mutable std::unordered_map<std::string, int> uniformLocations;
+		std::unordered_map<std::string, int> uniformLocations;
 	};
 }

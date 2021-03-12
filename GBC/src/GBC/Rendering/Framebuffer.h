@@ -79,6 +79,8 @@ namespace gbc
 
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
+		virtual void BindColorTexture(unsigned int index = 0, unsigned int slot = 0) = 0;
+		virtual void UnbindColorTexture(unsigned int slot = 0) = 0;
 
 		virtual void OnViewportResize(int width, int height) = 0;
 		virtual const FramebufferSpecification& GetSpecification() const = 0;
