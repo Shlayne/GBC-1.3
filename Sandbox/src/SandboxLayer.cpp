@@ -6,6 +6,12 @@ void SandboxLayer::OnAttach()
 {
 	GBC_PROFILE_FUNCTION();
 
+	scene = CreateScope<Scene>();
+
+	Entity entity = scene->CreateEntity();
+	BasicModel& model = entity.Add<MeshComponent>(BasicModel(4, 6)).model;
+	entity.Add<RenderableComponent>(Texture::CreateRef(CreateRef<LocalTexture2D>("resources/textures/grass_side.png", 4, true)));
+
 	model.vertices[0] = {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
 	model.vertices[1] = {{ 0.5f, -0.5f, 0.0f}, {1.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
 	model.vertices[2] = {{ 0.5f,  0.5f, 0.0f}, {1.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
@@ -17,22 +23,20 @@ void SandboxLayer::OnAttach()
 	model.indices[4] = 3;
 	model.indices[5] = 0;
 
-	Window& window = Application::Get().GetWindow();
-	cameraController.SetTranslation({0.0f, 0.0f, 1.0f});
-	camera.OnViewportResize(window.GetWidth(), window.GetHeight());
+	Entity camera = scene->CreateEntity();
+	auto& cameraCameraComponent = camera.Add<CameraComponent>();
+	cameraCameraComponent.primary = true;
+	cameraCameraComponent.camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
+	camera.Add<NativeScriptComponent>().Bind<PerspectiveCameraControllerScript>();
 
-	renderable = Texture::CreateRef(CreateRef<LocalTexture2D>("resources/textures/grass_side.png", 4, true));
-
-	scene = CreateScope<Scene>();
-
-	Entity entity = scene->CreateEntity();
-	entity.Add<MeshComponent>((const BasicModel*)&model);
-	entity.Add<RenderableComponent>((const BasicRenderable*)&renderable);
+	scene->OnCreate();
 }
 
 void SandboxLayer::OnDetach()
 {
 	GBC_PROFILE_FUNCTION();
+
+	scene->OnDestroy();
 }
 
 void SandboxLayer::OnUpdate(Timestep timestep)
@@ -40,9 +44,6 @@ void SandboxLayer::OnUpdate(Timestep timestep)
 	GBC_PROFILE_FUNCTION();
 
 	scene->OnUpdate(timestep);
-
-	// TODO: remove
-	cameraController.OnUpdate(timestep);
 }
 
 void SandboxLayer::OnRender()
@@ -53,13 +54,7 @@ void SandboxLayer::OnRender()
 	BasicRenderer::ResetStatistics();
 #endif
 
-	// TODO: PerspectiveCameraComponent and OrthographicCameraComponent
-	// Camera controllers will be taken care of with script components
-	// Add camera to another entity and inside scene->OnRender(), get
-	// that camera to begin scene in there instead of out here.
-	BasicRenderer::BeginScene(cameraController.GetTransform(), camera.GetProjection());
 	scene->OnRender();
-	BasicRenderer::EndScene();
 
 #if GBC_ENABLE_STATS
 	statistics = BasicRenderer::GetStatistics();
@@ -100,14 +95,7 @@ void SandboxLayer::OnImGuiRender()
 
 void SandboxLayer::OnEvent(Event& event)
 {
-	EventDispatcher dispatcher(event);
-	dispatcher.Dispatch<WindowResizeEvent>(GBC_BIND_FUNC(SandboxLayer::OnWindowResizeEvent));
-}
-
-bool SandboxLayer::OnWindowResizeEvent(WindowResizeEvent& event)
-{
 	GBC_PROFILE_FUNCTION();
 
-	camera.OnViewportResize(event.GetWidth(), event.GetHeight());
-	return false;
+	scene->OnEvent(event);
 }

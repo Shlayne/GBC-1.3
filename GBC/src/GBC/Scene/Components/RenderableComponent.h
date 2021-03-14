@@ -8,11 +8,14 @@ namespace gbc
 	struct RenderableComponent
 	{
 		RenderableComponent() = default;
-		RenderableComponent(const RenderableComponent&) = default;
-		RenderableComponent(const BasicRenderable* renderable);
+		RenderableComponent(const BasicRenderable& renderable);
+		RenderableComponent(BasicRenderable&& renderable) noexcept;
+		RenderableComponent& operator=(const BasicRenderable& renderable);
+		RenderableComponent& operator=(BasicRenderable&& renderable) noexcept;
 
-		inline operator const BasicRenderable&() const { return *renderable; }
+		inline operator BasicRenderable&() { return renderable; }
+		inline operator const BasicRenderable&() const { return renderable; }
 
-		const BasicRenderable* renderable;
+		BasicRenderable renderable;
 	};
 }

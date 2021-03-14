@@ -7,12 +7,17 @@ namespace gbc
 	struct BasicModel
 	{
 		BasicModel() = default;
-		BasicModel(unsigned int vertexCount, unsigned int indexCount);
 		~BasicModel();
+		BasicModel(unsigned int vertexCount, unsigned int indexCount);
+		BasicModel(const BasicModel& model);
+		BasicModel(BasicModel&& model) noexcept;
+		BasicModel& operator=(BasicModel&& model) noexcept;
 
-		BasicVertex* vertices = nullptr;
+		void Create(unsigned int vertexCount, unsigned int indexCount);
+
 		unsigned int vertexCount = 0;
-		unsigned int* indices = nullptr;
 		unsigned int indexCount = 0;
+		BasicVertex* vertices = nullptr;
+		unsigned int* indices = nullptr;
 	};
 }

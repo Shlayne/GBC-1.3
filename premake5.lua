@@ -1,6 +1,6 @@
 workspace "GBC-1.3"
 	architecture "x86_64"
-	startproject "Sandbox"
+	startproject "Editor"
 
 	configurations {
 		"Debug",
@@ -35,3 +35,4 @@ group ""
 
 include "GBC"
 include "Sandbox"
+include "Editor"

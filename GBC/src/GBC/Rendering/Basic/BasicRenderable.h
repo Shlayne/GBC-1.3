@@ -16,8 +16,19 @@ namespace gbc
 		enum class Type { None = 0, Texture, Framebuffer };
 
 		BasicRenderable() = default;
+		BasicRenderable(const BasicRenderable& renderable);
+		BasicRenderable(BasicRenderable&& renderable) noexcept;
+		BasicRenderable& operator=(const BasicRenderable& renderable);
+		BasicRenderable& operator=(BasicRenderable&& renderable) noexcept;
+
 		BasicRenderable(const Ref<Texture>& texture);
 		BasicRenderable(const Ref<Framebuffer>& framebuffer, unsigned int attachmentIndex);
+		BasicRenderable(Ref<Texture>&& texture) noexcept;
+		BasicRenderable(Ref<Framebuffer>&& framebuffer, unsigned int attachmentIndex) noexcept;
+		//BasicRenderable& operator=(const Ref<Texture>& texture);
+		//BasicRenderable& operator=(const Ref<Framebuffer>& framebuffer, unsigned int attachmentIndex);
+		//BasicRenderable& operator=(Ref<Texture>&& texture) noexcept;
+		//BasicRenderable& operator=(Ref<Framebuffer>&& framebuffer, unsigned int attachmentIndex) noexcept;
 
 		void Bind(unsigned int slot);
 		void Unbind(unsigned int slot);

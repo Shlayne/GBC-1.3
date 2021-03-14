@@ -1,11 +1,10 @@
 #pragma once
 
 #include "entt/entt.hpp"
+#include "Scene.h"
 
 namespace gbc
 {
-	class Scene;
-
 	class Entity
 	{
 	public:
@@ -20,10 +19,10 @@ namespace gbc
 		}
 
 		template<typename T>
-		T& Remove()
+		void Remove()
 		{
 			GBC_CORE_ASSERT(Has<T>(), "Entity does not have component!");
-			return context->registry.remove<T>(handle);
+			context->registry.remove<T>(handle);
 		}
 
 		template<typename T>

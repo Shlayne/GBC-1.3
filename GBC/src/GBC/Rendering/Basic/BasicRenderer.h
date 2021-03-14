@@ -1,8 +1,9 @@
 #pragma once
 
+#include "glm/glm.hpp"
 #include "BasicModel.h"
 #include "BasicRenderable.h"
-#include "glm/glm.hpp"
+#include "GBC/Rendering/Camera.h"
 
 namespace gbc
 {
@@ -12,7 +13,7 @@ namespace gbc
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(const glm::mat4& cameraTransform, const glm::mat4& projection);
+		static void BeginScene(const Camera& camera, const glm::mat4& transform);
 		static void EndScene();
 
 		static void Submit(const BasicModel& model, const glm::mat4& transform = glm::mat4(1.0f), const BasicRenderable& renderable = {});

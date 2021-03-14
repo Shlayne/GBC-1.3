@@ -7,12 +7,15 @@ namespace gbc
 	struct MeshComponent
 	{
 		MeshComponent() = default;
-		MeshComponent(const MeshComponent&) = default;
-		MeshComponent(const BasicModel* model);
+		MeshComponent(MeshComponent&& mesh) noexcept;
+		MeshComponent& operator=(MeshComponent&& mesh) noexcept;
 
-		inline operator const BasicModel&() const { return *model; }
+		MeshComponent(const BasicModel& model);
+		MeshComponent(BasicModel&& model) noexcept;
 
-		const BasicModel* model;
+		inline operator BasicModel&() { return model; }
+		inline operator const BasicModel&() const { return model; }
+
+		BasicModel model;
 	};
-
 }

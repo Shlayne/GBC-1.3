@@ -1,14 +1,14 @@
 #include "gbcpch.h"
-#include "SandboxApp.h"
+#include "SandboxApplication.h"
 #include "SandboxLayer.h"
 #include "GBC/Core/EntryPoint.h"
 
-SandboxApp::SandboxApp()
+SandboxApplication::SandboxApplication()
 {
 	PushLayer(new SandboxLayer());
 }
 
 gbc::Application* gbc::CreateApplication()
 {
-	return new SandboxApp();
+	return new SandboxApplication();
 }

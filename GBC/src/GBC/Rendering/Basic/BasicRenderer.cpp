@@ -14,80 +14,6 @@ namespace gbc
 		unsigned int texIndex;
 	};
 
-	BasicRenderable::BasicRenderable(const Ref<Texture>& texture)
-		: type(Type::Texture), texture(texture) {}
-	BasicRenderable::BasicRenderable(const Ref<Framebuffer>& framebuffer, unsigned int attachmentIndex)
-		: type(Type::Framebuffer), framebuffer(framebuffer), attachmentIndex(attachmentIndex) {}
-
-	void BasicRenderable::Bind(unsigned int slot)
-	{
-		switch (type)
-		{
-			case Type::Texture:
-				(*texture)->Bind(slot);
-				return;
-			case Type::Framebuffer:
-				(*framebuffer)->BindColorTexture(attachmentIndex, slot);
-				return;
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Renderable Type!");
-	}
-
-	void BasicRenderable::Unbind(unsigned int slot)
-	{
-		switch (type)
-		{
-			case Type::Texture:
-				(*texture)->Unbind(slot);
-				return;
-			case Type::Framebuffer:
-				(*framebuffer)->UnbindColorTexture(slot);
-				return;
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Renderable Type!");
-	}
-
-	void BasicRenderable::Clear()
-	{
-		switch (type)
-		{
-			case Type::Texture:     texture = nullptr; break;
-			case Type::Framebuffer: framebuffer = nullptr; break;
-			case Type::None: return;
-		}
-		type = Type::None;
-	}
-
-	BasicRenderable::operator bool() const
-	{
-		switch (type)
-		{
-			case Type::None:        return false;
-			case Type::Texture:     return texture->operator bool();
-			case Type::Framebuffer: return framebuffer->operator bool();
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Renderable Type!");
-		return false;
-	}
-
-	bool BasicRenderable::operator==(const BasicRenderable& renderable) const
-	{
-		if (type != renderable.type || type == Type::None)
-			return false;
-
-		switch (type)
-		{
-			case Type::Texture:     return *texture == renderable.texture;
-			case Type::Framebuffer: return *framebuffer == renderable.framebuffer;
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Renderable Type!");
-		return false;
-	}
-
 	struct BasicRendererData
 	{
 		Ref<Shader> shader;
@@ -169,12 +95,12 @@ namespace gbc
 		delete[] data.renderables;
 	}
 
-	void BasicRenderer::BeginScene(const glm::mat4& cameraTransform, const glm::mat4& projection)
+	void BasicRenderer::BeginScene(const Camera& camera, const glm::mat4& transform)
 	{
 		// Set shader uniforms
 		data.shader->Bind();
-		data.shader->SetUniform("projection", projection);
-		data.shader->SetUniform("cameraTransform", cameraTransform);
+		data.shader->SetUniform("projection", camera.GetProjection());
+		data.shader->SetUniform("cameraTransform", transform);
 	}
 
 	void BasicRenderer::EndScene()

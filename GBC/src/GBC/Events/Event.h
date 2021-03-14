@@ -39,7 +39,6 @@ namespace gbc
 		virtual EventCategoryFlags GetCategoryFlags() const = 0;
 		bool IsInCategory(EventCategory category) const;
 
-		// Debug Only ???
 		virtual std::string ToString() const = 0;
 
 		bool handled = false;

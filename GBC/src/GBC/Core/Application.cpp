@@ -60,12 +60,11 @@ namespace gbc
 					layer->OnImGuiRender();
 				imguiWrapper->End();
 #endif
+
+				window->SwapBuffers();
 			}
 
 			window->PollEvents();
-
-			if (rendering)
-				window->SwapBuffers();
 		}
 	}
 
@@ -115,9 +114,9 @@ namespace gbc
 		GBC_PROFILE_FUNCTION();
 
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowCloseEvent>(GBC_BIND_FUNC(Application::OnWindowCloseEvent));
-		dispatcher.Dispatch<WindowResizeEvent>(GBC_BIND_FUNC(Application::OnWindowResizeEvent));
-		dispatcher.Dispatch<WindowMinimizeEvent>(GBC_BIND_FUNC(Application::OnWindowMinimizeEvent));
+		dispatcher.Dispatch<WindowCloseEvent>(GBC_BIND_FUNC(OnWindowCloseEvent));
+		dispatcher.Dispatch<WindowResizeEvent>(GBC_BIND_FUNC(OnWindowResizeEvent));
+		dispatcher.Dispatch<WindowMinimizeEvent>(GBC_BIND_FUNC(OnWindowMinimizeEvent));
 
 #if GBC_ENABLE_IMGUI
 		event.handled |= imguiWrapper->IsUsingKeyEvents() && event.IsInCategory(EventCategory_Keyboard) ||
