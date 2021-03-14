@@ -1,4 +1,3 @@
-#include "gbcpch.h"
 #include "EditorApplication.h"
 #include "EditorLayer.h"
 #include "GBC/Core/EntryPoint.h"

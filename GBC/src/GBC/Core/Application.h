@@ -15,7 +15,8 @@ namespace gbc
 		virtual ~Application();
 
 		inline static Application& Get() { return *instance; }
-		inline Window& GetWindow() const { return *window; }
+		inline Window& GetWindow() { return *window; }
+		inline ImGuiWrapper& GetImGuiWrapper() { return *imguiWrapper; }
 
 		void Run();
 		void Terminate();

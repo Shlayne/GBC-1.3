@@ -34,15 +34,19 @@ namespace gbc
 
 		virtual bool IsVSync() const = 0;
 		virtual void SetVSync(bool vsync) = 0;
+		inline void ToggleVSync() { SetVSync(!IsVSync()); }
 
 		virtual bool IsResizable() const = 0;
 		virtual void SetResizable(bool resizable) = 0;
+		inline void ToggleResizable() { SetResizable(!IsResizable()); }
 
 		virtual bool IsFullscreen() const = 0;
 		virtual void SetFullscreen(bool fullscreen) = 0;
+		inline void ToggleFullscreen() { SetFullscreen(!IsFullscreen()); }
 
 		virtual bool IsCaptureMouse() const = 0;
 		virtual void SetCaptureMouse(bool captureMouse) = 0;
+		inline void ToggleCaptureMouse() { SetCaptureMouse(!IsCaptureMouse()); }
 
 		virtual void* GetNativeWindow() = 0;
 		virtual Context& GetContext() = 0;

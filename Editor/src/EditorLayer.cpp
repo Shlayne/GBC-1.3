@@ -1,6 +1,7 @@
 #include "EditorLayer.h"
 #include "imgui/imgui.h"
-#include "glm/gtc/matrix_transform.hpp"
+#include "Panels/StasticsPanel.h"
+#include "Panels/ProfilingPanel.h"
 
 namespace gbc
 {
@@ -8,8 +9,25 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
+		Window& window = Application::Get().GetWindow();
+
+		FramebufferSpecification framebufferSpecification;
+		framebufferSpecification.width = window.GetWidth();
+		framebufferSpecification.height = window.GetHeight();
+		framebufferSpecification.attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth24Stencil8};
+		framebuffer = Framebuffer::CreateRef(framebufferSpecification);
+
+		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer);
+#if GBC_ENABLE_STATS
+		AddPanel<StatisticsPanel>("Statistics", BasicRenderer::GetStatistics());
+#endif
+#if GBC_ENABLE_PROFILE_RUNTIME
+		AddPanel<ProfilingPanel>("Profiling");
+#endif
+
 		scene = CreateScope<Scene>();
 
+		// TODO: Deserialize scene
 		Entity entity = scene->CreateEntity();
 		BasicModel& model = entity.Add<MeshComponent>(BasicModel(4, 6)).model;
 		entity.Add<RenderableComponent>(Texture::CreateRef(CreateRef<LocalTexture2D>("resources/textures/grass_side.png", 4, true)));
@@ -39,11 +57,20 @@ namespace gbc
 		GBC_PROFILE_FUNCTION();
 
 		scene->OnDestroy();
+
+		for (auto& [name, panel] : panels)
+			delete panel;
 	}
 
 	void EditorLayer::OnUpdate(Timestep timestep)
 	{
 		GBC_PROFILE_FUNCTION();
+		GBC_DEBUG("{0}", timestep);
+		if (sceneViewportPanel->HasViewportSizeChanged())
+		{
+			const glm::vec2& viewportSize = sceneViewportPanel->GetViewportSize();
+			scene->OnViewportResize((int)viewportSize.x, (int)viewportSize.y);
+		}
 
 		scene->OnUpdate(timestep);
 	}
@@ -56,49 +83,66 @@ namespace gbc
 		BasicRenderer::ResetStatistics();
 	#endif
 
+		framebuffer->Bind();
 		scene->OnRender();
-
-	#if GBC_ENABLE_STATS
-		statistics = BasicRenderer::GetStatistics();
-	#endif
+		framebuffer->Unbind();
 	}
 
-	#if GBC_ENABLE_IMGUI
+#if GBC_ENABLE_IMGUI
 	void EditorLayer::OnImGuiRender()
 	{
 		GBC_PROFILE_FUNCTION();
 
-	#if GBC_ENABLE_STATS
-		ImGui::Begin("Statistics");
-		ImGui::Text("Renderer");
-		ImGui::Indent();
-		ImGui::Text("Draw Calls:    %d", statistics.drawCalls);
-		ImGui::Text("Index Count:   %d", statistics.indexCount);
-		ImGui::Text("Vertex Count:  %d", statistics.vertexCount);
-		ImGui::Text("Texture Count: %d", statistics.textureCount);
-		ImGui::End();
-	#endif
+		ImGuiWindowFlags dockspaceFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking
+			| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
+			| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->GetWorkPos());
+		ImGui::SetNextWindowSize(viewport->GetWorkSize());
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+		ImGui::Begin("Dockspace", nullptr, dockspaceFlags);
+		ImGui::PopStyleVar(2);
+		ImGui::DockSpace(ImGui::GetID("Dockspace"));
 
-	#if GBC_ENABLE_PROFILE_RUNTIME
-		ImGui::Begin("Profiling");
-		static bool profiling = false;
-		static unsigned int profileCount = 0;
-		if (ImGui::Checkbox(profiling ? "Stop Profiling" : "Start Profiling", &profiling))
+		if (ImGui::BeginMenuBar())
 		{
-			if (profiling)
-				GBC_PROFILE_BEGIN_RUNTIME("Runtime", (std::string("ProfileSessions/GBCProfileRuntime") += std::to_string(++profileCount)) += ".json");
-			else
-				GBC_PROFILE_END_RUNTIME();
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("Exit"))
+					Application::Get().Terminate();
+
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("View"))
+			{
+				Window& window = Application::Get().GetWindow();
+				if (ImGui::MenuItem(window.IsFullscreen() ? "Windowed" : "Fullscreen"))
+					window.ToggleFullscreen();
+
+				ImGui::Separator();
+
+				for (auto& [name, panel] : panels)
+					if (ImGui::MenuItem(name.c_str()))
+						panel->ToggleEnabled();
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMenuBar();
 		}
 		ImGui::End();
-	#endif
+
+		for (auto& [name, panel] : panels)
+			panel->OnImGuiRender();
 	}
-	#endif
+#endif
 
 	void EditorLayer::OnEvent(Event& event)
 	{
 		GBC_PROFILE_FUNCTION();
-
-		scene->OnEvent(event);
 	}
 }

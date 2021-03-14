@@ -105,12 +105,12 @@ namespace gbc
 
 	bool ImGuiWrapper::IsUsingKeyEvents() const
 	{
-		return ImGui::GetIO().WantCaptureKeyboard;
+		return blockEvents && ImGui::GetIO().WantCaptureKeyboard;
 	}
 
 	bool ImGuiWrapper::IsUsingMouseEvents() const
 	{
-		return ImGui::GetIO().WantCaptureMouse;
+		return blockEvents && ImGui::GetIO().WantCaptureMouse;
 	}
 }
 #endif

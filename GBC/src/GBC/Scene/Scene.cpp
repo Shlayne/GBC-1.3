@@ -127,19 +127,10 @@ namespace gbc
 		}
 	}
 
-	void Scene::OnEvent(Event& event)
-	{
-		GBC_PROFILE_FUNCTION();
-
-		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowResizeEvent>(GBC_BIND_FUNC(OnWindowResizeEvent));
-	}
-
-	bool Scene::OnWindowResizeEvent(WindowResizeEvent& event)
+	void Scene::OnViewportResize(int width, int height)
 	{
 		shouldResizeCameras = true;
-		viewportSize.x = event.GetWidth();
-		viewportSize.y = event.GetHeight();
-		return false;
+		viewportSize.x = width;
+		viewportSize.y = height;
 	}
 }

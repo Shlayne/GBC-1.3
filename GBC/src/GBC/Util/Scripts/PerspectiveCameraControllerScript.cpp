@@ -47,7 +47,6 @@ namespace gbc
 		if (Input::IsMouseButtonPressed(Mousecode::ButtonLeft))
 		{
 			float rotationSpeed = sensitivity * timestep;
-
 			rotation.y -= mouseDPos.x * rotationSpeed;
 			rotation.x = std::min(std::max(rotation.x - mouseDPos.y * rotationSpeed, minPitch), maxPitch);
 		}

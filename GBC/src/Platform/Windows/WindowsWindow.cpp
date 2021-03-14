@@ -324,12 +324,12 @@ namespace gbc
 			}
 
 			const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
-			glfwSetWindowMonitor(window, monitor, 0, 0, videoMode->width, videoMode->height, GLFW_DONT_CARE);
-
-			SetVSync(IsVSync());
+			glfwSetWindowMonitor(window, monitor, 0, 0, videoMode->width, videoMode->height, videoMode->refreshRate);
 		}
 		else
 			glfwSetWindowMonitor(window, nullptr, state.preFullscreen.x, state.preFullscreen.y, state.preFullscreen.width, state.preFullscreen.height, GLFW_DONT_CARE);
+
+		SetVSync(IsVSync());
 
 		state.fullscreen = fullscreen;
 	}

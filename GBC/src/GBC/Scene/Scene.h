@@ -22,10 +22,9 @@ namespace gbc
 		void OnDestroy();
 		void OnUpdate(Timestep timestep);
 		void OnRender();
-		void OnEvent(Event& event);
-	private:
-		bool OnWindowResizeEvent(WindowResizeEvent& event);
 
+		void OnViewportResize(int width, int height);
+	private:
 		entt::registry registry;
 
 		bool shouldResizeCameras = true;

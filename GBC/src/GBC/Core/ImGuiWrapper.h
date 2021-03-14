@@ -16,8 +16,12 @@ namespace gbc
 
 		bool IsUsingKeyEvents() const;
 		bool IsUsingMouseEvents() const;
+
+		void SetBlockEvents(bool blockEvents) { this->blockEvents = blockEvents; }
 	private:
 		void Init();
+
+		bool blockEvents = false;
 	};
 }
 #endif
