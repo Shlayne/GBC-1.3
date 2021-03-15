@@ -13,11 +13,15 @@ namespace gbc
 
 		virtual void OnImGuiRender() override;
 
-		bool HasViewportSizeChanged() const { return viewportSizeChanged; }
-		const glm::vec2& GetViewportSize() const { return viewportSize; }
+		inline bool IsViewportFocused() const { return viewportFocused; }
+		inline bool IsViewportHovered() const { return viewportHovered; }
+		inline bool HasViewportSizeChanged() const { return viewportSizeChanged; }
+		inline const glm::vec2& GetViewportSize() const { return viewportSize; }
 	private:
 		Ref<Framebuffer> framebuffer;
 		glm::vec2 viewportSize{0.0f};
 		bool viewportSizeChanged = false;
+		bool viewportFocused = false;
+		bool viewportHovered = false;
 	};
 }

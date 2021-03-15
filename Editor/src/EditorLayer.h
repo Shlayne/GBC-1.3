@@ -2,6 +2,8 @@
 
 #include "gbc.h"
 #include "Panels/SceneViewportPanel.h"
+#include "Panels/SceneHierarchyPanel.h"
+#include "Panels/ScenePropertiesPanel.h"
 #include <map>
 
 namespace gbc
@@ -18,7 +20,7 @@ namespace gbc
 	#endif
 		virtual void OnEvent(Event& event) override;
 	private:
-		Scope<Scene> scene;
+		Ref<Scene> scene;
 		Ref<Framebuffer> framebuffer;
 
 		// Panels
@@ -32,12 +34,16 @@ namespace gbc
 
 		std::map<std::string, Panel*> panels;
 		SceneViewportPanel* sceneViewportPanel = nullptr;
+		SceneHierarchyPanel* sceneHierarchyPanel = nullptr;
+		ScenePropertiesPanel* scenePropertiesPanel = nullptr;
 	};
 }
 
-// TODO: After resizing viewport, camera controller rotation freaks out because mouse position has changed
+// TODO:
+// 1) After resizing viewport, camera controller rotation freaks out because mouse position has changed
 // when imgui wrapper was blocking events, so when clicking back into viewport, mouseDPos will be incorrect.
 // Same thing when going into and out of fullscreen.
-// TLDR: Figure out a way to make mouseDPos 0 on viewport resize.
+// TLDR: Figure out a way to make mouseDPos 0 on viewport/window focus.
+// 2) Add helper functions for imgui in "GBC/ImGui/ImGuiHelper"
 
-// https://www.youtube.com/watch?v=ETIhjdVBH-8&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT&index=74
+// 14:58 https://www.youtube.com/watch?v=NBpB0qscF3E&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT&index=86

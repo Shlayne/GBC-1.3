@@ -17,25 +17,17 @@ namespace gbc
 		framebufferSpecification.attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth24Stencil8};
 		framebuffer = Framebuffer::CreateRef(framebufferSpecification);
 
-		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer);
-#if GBC_ENABLE_STATS
-		AddPanel<StatisticsPanel>("Statistics", BasicRenderer::GetStatistics());
-#endif
-#if GBC_ENABLE_PROFILE_RUNTIME
-		AddPanel<ProfilingPanel>("Profiling");
-#endif
-
-		scene = CreateScope<Scene>();
+		scene = CreateRef<Scene>();
 
 		// TODO: Deserialize scene
-		Entity entity = scene->CreateEntity();
+		Entity entity = scene->CreateEntity("Textured Square");
 		BasicModel& model = entity.Add<MeshComponent>(BasicModel(4, 6)).model;
 		entity.Add<RenderableComponent>(Texture::CreateRef(CreateRef<LocalTexture2D>("resources/textures/grass_side.png", 4, true)));
 
-		model.vertices[0] = {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
-		model.vertices[1] = {{ 0.5f, -0.5f, 0.0f}, {1.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
-		model.vertices[2] = {{ 0.5f,  0.5f, 0.0f}, {1.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
-		model.vertices[3] = {{-0.5f,  0.5f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
+		model.vertices[0] = {{-0.5f, -0.5f, -1.0f}, {0.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
+		model.vertices[1] = {{ 0.5f, -0.5f, -1.0f}, {1.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
+		model.vertices[2] = {{ 0.5f,  0.5f, -1.0f}, {1.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
+		model.vertices[3] = {{-0.5f,  0.5f, -1.0f}, {0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
 		model.indices[0] = 0;
 		model.indices[1] = 1;
 		model.indices[2] = 2;
@@ -43,13 +35,23 @@ namespace gbc
 		model.indices[4] = 3;
 		model.indices[5] = 0;
 
-		Entity camera = scene->CreateEntity();
+		Entity camera = scene->CreateEntity("Temp Camera Controller");
 		auto& cameraCameraComponent = camera.Add<CameraComponent>();
 		cameraCameraComponent.primary = true;
 		cameraCameraComponent.camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
 		camera.Add<NativeScriptComponent>().Bind<PerspectiveCameraControllerScript>();
 
 		scene->OnCreate();
+
+		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer);
+		sceneHierarchyPanel = AddPanel<SceneHierarchyPanel>("Scene Hierarchy", scene);
+		scenePropertiesPanel = AddPanel<ScenePropertiesPanel>("Scene Properties", sceneHierarchyPanel->GetSelectedEntity());
+#if GBC_ENABLE_STATS
+		AddPanel<StatisticsPanel>("Statistics", BasicRenderer::GetStatistics());
+#endif
+#if GBC_ENABLE_PROFILE_RUNTIME
+		AddPanel<ProfilingPanel>("Profiling");
+#endif
 	}
 
 	void EditorLayer::OnDetach()
@@ -65,14 +67,21 @@ namespace gbc
 	void EditorLayer::OnUpdate(Timestep timestep)
 	{
 		GBC_PROFILE_FUNCTION();
-		GBC_DEBUG("{0}", timestep);
+
+		bool viewportFocused = sceneViewportPanel->IsViewportFocused();
+		bool viewportHovered = sceneViewportPanel->IsViewportHovered();
+		Application::Get().GetImGuiLayer().SetBlockEvents(!viewportFocused && !viewportHovered);
+
 		if (sceneViewportPanel->HasViewportSizeChanged())
 		{
 			const glm::vec2& viewportSize = sceneViewportPanel->GetViewportSize();
 			scene->OnViewportResize((int)viewportSize.x, (int)viewportSize.y);
 		}
 
-		scene->OnUpdate(timestep);
+		// TODO: Editor Camera
+
+		if (viewportFocused)
+			scene->OnUpdate(timestep);
 	}
 
 	void EditorLayer::OnRender()

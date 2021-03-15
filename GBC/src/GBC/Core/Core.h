@@ -1,6 +1,5 @@
 #pragma once
 
-#include "PlatformDetection.h"
 #include "Debugbreak.h"
 
 #if GBC_CONFIG_DEBUG

@@ -7,12 +7,14 @@
 
 namespace gbc
 {
-	TransformComponent::TransformComponent(const glm::mat4& transform)
-		: transform(transform) {}
-	TransformComponent& TransformComponent::operator=(const glm::mat4& transform)
+	TransformComponent::TransformComponent(const glm::vec3& translation)
+		: translation(translation) {}
+	
+	TransformComponent::operator glm::mat4() const
 	{
-		this->transform = transform;
-		return *this;
+		return glm::translate(glm::mat4(1.0f), translation) *
+			   glm::toMat4(glm::quat(rotation)) *
+			   glm::scale(glm::mat4(1.0f), scale);
 	}
 
 	TagComponent::TagComponent(const std::string& tag)

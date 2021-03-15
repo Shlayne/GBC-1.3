@@ -13,8 +13,6 @@ namespace gbc
 		float speed = 3.0f;
 		float sensitivity = 2.0f;
 
-		glm::vec2 forward{0.0f, 1.0f};
-		glm::vec2 translation{0.0f};
-		float rotation = 0.0f;
+		glm::vec3 forward{0.0f, 1.0f, 0.0f};
 	};
 }

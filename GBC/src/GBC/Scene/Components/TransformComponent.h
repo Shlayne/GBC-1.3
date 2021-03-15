@@ -7,12 +7,12 @@ namespace gbc
 	struct TransformComponent
 	{
 		TransformComponent() = default;
-		TransformComponent(const glm::mat4& transform);
-		TransformComponent& operator=(const glm::mat4& transform);
+		TransformComponent(const glm::vec3& translation);
 
-		inline operator glm::mat4&() { return transform; }
-		inline operator const glm::mat4&() const { return transform; }
+		operator glm::mat4() const;
 
-		glm::mat4 transform{1.0f};
+		glm::vec3 translation{0.0f};
+		glm::vec3 rotation{0.0f};
+		glm::vec3 scale{1.0f};
 	};
 }

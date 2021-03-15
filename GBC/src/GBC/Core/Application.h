@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Window.h"
-#include "ImGuiWrapper.h"
+#include "GBC/ImGui/ImGuiLayer.h"
 #include "Timestep.h"
 #include "GBC/Events/WindowEvents.h"
 #include "LayerStack.h"
@@ -16,15 +16,12 @@ namespace gbc
 
 		inline static Application& Get() { return *instance; }
 		inline Window& GetWindow() { return *window; }
-		inline ImGuiWrapper& GetImGuiWrapper() { return *imguiWrapper; }
+#if GBC_ENABLE_IMGUI
+		inline ImGuiLayer& GetImGuiLayer() { return *imguiLayer; }
+#endif
 
 		void Run();
 		void Terminate();
-
-#if GBC_ENABLE_IMGUI
-		bool IsImGuiUsingKeyEvents() const;
-		bool IsImGuiUsingMouseEvents() const;
-#endif
 	protected:
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
@@ -43,7 +40,7 @@ namespace gbc
 
 		Scope<Window> window;
 #if GBC_ENABLE_IMGUI
-		Scope<ImGuiWrapper> imguiWrapper;
+		ImGuiLayer* imguiLayer;
 #endif
 		LayerStack layerStack;
 	};

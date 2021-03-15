@@ -34,15 +34,17 @@ namespace gbc
 		void Unbind(unsigned int slot);
 
 		void Clear();
+		inline Type GetType() const { return type; }
+		inline void SetType(Type type) { Clear(); this->type = type; }
 
 		operator bool() const;
 		bool operator==(const BasicRenderable& renderable) const;
 	private:
 		Type type = Type::None;
 
-		std::optional<Ref<Texture>> texture;
+		std::optional<Ref<Texture>> texture = nullptr;
 
-		std::optional<Ref<Framebuffer>> framebuffer;
+		std::optional<Ref<Framebuffer>> framebuffer = nullptr;
 		unsigned int attachmentIndex = 0;
 	};
 }

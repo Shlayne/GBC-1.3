@@ -128,19 +128,22 @@ namespace gbc
 		glfwSetWindowFocusCallback(window, [](GLFWwindow* window, int focused)
 		{
 			WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-			WindowFocusEvent event(focused == GLFW_TRUE);
+			state.focused = focused == GLFW_TRUE;
+			WindowFocusEvent event(state.focused);
 			state.eventCallback(event);
 		});
 		glfwSetWindowIconifyCallback(window, [](GLFWwindow* window, int iconified)
 		{
 			WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-			WindowMinimizeEvent event(iconified == GLFW_TRUE);
+			state.minimized = iconified == GLFW_TRUE;
+			WindowMinimizeEvent event(state.minimized);
 			state.eventCallback(event);
 		});
 		glfwSetWindowMaximizeCallback(window, [](GLFWwindow* window, int maximized)
 		{
 			WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-			WindowMaximizeEvent event(maximized == GLFW_TRUE);
+			state.maximized = maximized == GLFW_TRUE;
+			WindowMaximizeEvent event(state.maximized);
 			state.eventCallback(event);
 		});
 		glfwSetDropCallback(window, [](GLFWwindow* window, int pathCount, const char** paths)
@@ -240,7 +243,8 @@ namespace gbc
 		glfwSetCursorEnterCallback(window, [](GLFWwindow* window, int entered)
 		{
 			WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-			MouseEnterEvent event(entered == GLFW_TRUE);
+			state.containsMouse = entered == GLFW_TRUE;
+			MouseEnterEvent event(state.containsMouse);
 			state.eventCallback(event);
 		});
 

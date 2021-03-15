@@ -35,6 +35,13 @@ namespace gbc
 		return entity;
 	}
 
+	void Scene::RemoveEntity(Entity entity)
+	{
+		GBC_PROFILE_FUNCTION();
+
+		registry.destroy(entity);
+	}
+
 	void Scene::OnCreate()
 	{
 		GBC_PROFILE_FUNCTION();
@@ -95,17 +102,17 @@ namespace gbc
 		Renderer::Clear();
 
 		// Get camera
-		glm::mat4* primaryCameraTransform = nullptr;
+		glm::mat4 primaryCameraTransform;
 		Camera* primaryCamera = nullptr;
 		{
-			auto group = registry.group<TransformComponent>(entt::get<CameraComponent>);
+			auto group = registry.group(entt::get<TransformComponent, CameraComponent>);
 			for (auto entity : group)
 			{
 				auto [transform, camera] = group.get<TransformComponent, CameraComponent>(entity);
 
 				if (camera.primary)
 				{
-					primaryCameraTransform = &transform.transform;
+					primaryCameraTransform = transform;
 					primaryCamera = &camera.camera;
 					break;
 				}
@@ -114,13 +121,13 @@ namespace gbc
 
 		if (primaryCamera != nullptr)
 		{
-			BasicRenderer::BeginScene(*primaryCamera, *primaryCameraTransform);
+			BasicRenderer::BeginScene(*primaryCamera, primaryCameraTransform);
 
-			auto group = registry.group<MeshComponent>(entt::get<RenderableComponent>);
+			auto group = registry.group(entt::get<MeshComponent, TransformComponent, RenderableComponent>);
 			for (auto entity : group)
 			{
-				auto [mesh, renderable] = group.get<MeshComponent, RenderableComponent>(entity);
-				BasicRenderer::Submit(mesh, glm::mat4(1.0f), renderable);
+				auto [mesh, transform, renderable] = group.get<MeshComponent, TransformComponent, RenderableComponent>(entity);
+				BasicRenderer::Submit(mesh, transform, renderable);
 			}
 
 			BasicRenderer::EndScene();
@@ -129,8 +136,11 @@ namespace gbc
 
 	void Scene::OnViewportResize(int width, int height)
 	{
-		shouldResizeCameras = true;
-		viewportSize.x = width;
-		viewportSize.y = height;
+		if (width > 0 && height > 0)
+		{
+			shouldResizeCameras = true;
+			viewportSize.x = width;
+			viewportSize.y = height;
+		}
 	}
 }

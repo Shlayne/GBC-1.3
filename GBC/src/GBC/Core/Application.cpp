@@ -17,10 +17,12 @@ namespace gbc
 		window = Window::CreateScope(windowSpecs);
 		window->SetEventCallback(GBC_BIND_FUNC(OnEvent));
 
-#if GBC_ENABLE_IMGUI
-		imguiWrapper = CreateScope<ImGuiWrapper>();
-#endif
 		Renderer::Init();
+
+#if GBC_ENABLE_IMGUI
+		imguiLayer = new ImGuiLayer();
+		PushOverlay(imguiLayer);
+#endif
 	}
 
 	Application::~Application()
@@ -55,10 +57,10 @@ namespace gbc
 					layer->OnRender();
 
 #if GBC_ENABLE_IMGUI
-				imguiWrapper->Begin();
+				imguiLayer->Begin();
 				for (Layer* layer : layerStack)
 					layer->OnImGuiRender();
-				imguiWrapper->End();
+				imguiLayer->End();
 #endif
 
 				window->SwapBuffers();
@@ -73,18 +75,6 @@ namespace gbc
 		running = false;
 	}
 
-#if GBC_ENABLE_IMGUI
-	bool Application::IsImGuiUsingKeyEvents() const
-	{
-		return imguiWrapper->IsUsingKeyEvents();
-	}
-
-	bool Application::IsImGuiUsingMouseEvents() const
-	{
-		return imguiWrapper->IsUsingMouseEvents();
-	}
-#endif
-
 	void Application::PushLayer(Layer* layer)
 	{
 		layerStack.PushLayer(layer);
@@ -93,7 +83,7 @@ namespace gbc
 
 	void Application::PushOverlay(Layer* overlay)
 	{
-		layerStack.PushLayer(overlay);
+		layerStack.PushOverlay(overlay);
 		overlay->OnAttach();
 	}
 
@@ -105,7 +95,7 @@ namespace gbc
 
 	void Application::PopOverlay(Layer* overlay)
 	{
-		if (layerStack.PopLayer(overlay))
+		if (layerStack.PopOverlay(overlay))
 			overlay->OnDetach();
 	}
 
@@ -117,11 +107,6 @@ namespace gbc
 		dispatcher.Dispatch<WindowCloseEvent>(GBC_BIND_FUNC(OnWindowCloseEvent));
 		dispatcher.Dispatch<WindowResizeEvent>(GBC_BIND_FUNC(OnWindowResizeEvent));
 		dispatcher.Dispatch<WindowMinimizeEvent>(GBC_BIND_FUNC(OnWindowMinimizeEvent));
-
-#if GBC_ENABLE_IMGUI
-		event.handled |= imguiWrapper->IsUsingKeyEvents() && event.IsInCategory(EventCategory_Keyboard) ||
-						 imguiWrapper->IsUsingMouseEvents() && event.IsInCategory(EventCategory_Mouse);
-#endif
 
 		for (auto it = layerStack.rbegin(); !event.handled && it != layerStack.rend(); ++it)
 			(*it)->OnEvent(event);

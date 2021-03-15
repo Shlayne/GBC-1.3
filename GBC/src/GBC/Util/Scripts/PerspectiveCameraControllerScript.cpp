@@ -12,12 +12,14 @@ namespace gbc
 
 	void PerspectiveCameraControllerScript::OnUpdate(Timestep timestep)
 	{
+		TransformComponent& transform = Get<TransformComponent>();
+
 		float movementSpeed = speed * timestep;
 
 		int movementForward = 0;
 		int movementRight = 0;
 		int movementUp = 0;
-		glm::vec3 forward = movementSpeed * glm::vec3(cosf(rotation.y), 0.0f, sinf(rotation.y));
+		glm::vec3 forward = movementSpeed * glm::vec3(cosf(transform.rotation.y), 0.0f, sinf(transform.rotation.y));
 		glm::vec3 right = glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f));
 
 		if (Input::IsKeyPressed(Keycode::W)) movementForward--;
@@ -29,29 +31,27 @@ namespace gbc
 
 		if (movementForward != 0)
 		{
-			translation.z += (float)movementForward * forward.x;
-			translation.x += (float)movementForward * forward.z;
+			transform.translation.z += (float)movementForward * forward.x;
+			transform.translation.x += (float)movementForward * forward.z;
 		}
 		if (movementRight != 0)
 		{
-			translation.x += (float)movementRight * right.z;
-			translation.z += (float)movementRight * right.x;
+			transform.translation.x += (float)movementRight * right.z;
+			transform.translation.z += (float)movementRight * right.x;
 		}
 		if (movementUp != 0)
-			translation.y += (float)movementUp * movementSpeed;
+			transform.translation.y += (float)movementUp * movementSpeed;
 
 		glm::vec2 mousePos = Input::GetMousePos();
 		glm::vec2 mouseDPos = mousePos - lastMousePos;
 		lastMousePos = mousePos;
 
+		// TODO: remove this check when editor camera is in place
 		if (Input::IsMouseButtonPressed(Mousecode::ButtonLeft))
 		{
 			float rotationSpeed = sensitivity * timestep;
-			rotation.y -= mouseDPos.x * rotationSpeed;
-			rotation.x = std::min(std::max(rotation.x - mouseDPos.y * rotationSpeed, minPitch), maxPitch);
+			transform.rotation.y -= mouseDPos.x * rotationSpeed;
+			transform.rotation.x = std::min(std::max(transform.rotation.x - mouseDPos.y * rotationSpeed, minPitch), maxPitch);
 		}
-
-		glm::mat4& transform = Get<TransformComponent>();
-		transform = glm::translate(glm::mat4(1.0f), translation) * glm::toMat4(glm::quat(rotation));
 	}
 }

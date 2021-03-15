@@ -18,8 +18,5 @@ namespace gbc
 		glm::vec2 lastMousePos{0.0f};
 		const float maxPitch = glm::radians(90.0f);
 		const float minPitch = -maxPitch;
-
-		glm::vec3 translation{0.0f};
-		glm::vec3 rotation{0.0f};
 	};
 }

@@ -47,5 +47,6 @@ namespace gbc
 	private:
 		entt::entity handle = entt::null;
 		Scene* context = nullptr;
+		friend class Scene;
 	};
 }

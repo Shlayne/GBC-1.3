@@ -2,6 +2,7 @@
 
 #include <string>
 #include "entt/entt.hpp"
+#include "glm/glm.hpp"
 #include "GBC/Core/Timestep.h"
 #include "GBC/Events/Event.h"
 #include "GBC/Events/WindowEvents.h"
@@ -17,6 +18,7 @@ namespace gbc
 		~Scene();
 
 		Entity CreateEntity(const std::string& tag = std::string());
+		void RemoveEntity(Entity entity);
 
 		void OnCreate();
 		void OnDestroy();
@@ -31,5 +33,6 @@ namespace gbc
 		glm::ivec2 viewportSize;
 
 		friend class Entity;
+		friend class SceneHierarchyPanel;
 	};
 }

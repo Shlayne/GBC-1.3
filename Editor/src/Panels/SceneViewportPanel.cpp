@@ -15,10 +15,10 @@ namespace gbc
 
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
 			ImGui::Begin(name.c_str(), &enabled);
+			ImGui::PopStyleVar();
 
-			bool sceneFocused = ImGui::IsWindowFocused();
-			bool sceneHovered = ImGui::IsWindowHovered();
-			Application::Get().GetImGuiWrapper().SetBlockEvents(!sceneFocused);
+			viewportFocused = ImGui::IsWindowFocused();
+			viewportHovered = ImGui::IsWindowHovered();
 
 			ImVec2 size = ImGui::GetContentRegionAvail();
 			viewportSizeChanged = size.x != viewportSize.x || size.y != viewportSize.y;
@@ -26,7 +26,6 @@ namespace gbc
 			ImGui::Image((void*)(size_t)framebuffer->GetColorAttachment(), size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 			
 			ImGui::End();
-			ImGui::PopStyleVar();
 		}
 	}
 }

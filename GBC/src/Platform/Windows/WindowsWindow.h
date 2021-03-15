@@ -19,6 +19,11 @@ namespace gbc
 		virtual int GetWidth() const override { return state.current.width; }
 		virtual int GetHeight() const override { return state.current.height; }
 
+		virtual bool IsFocused() const override { return state.focused; };
+		virtual bool ContainsMouse() const override { return state.containsMouse; }
+		virtual bool IsMinimized() const override { return state.minimized; }
+		virtual bool IsMaximized() const override { return state.maximized; }
+
 		virtual const char* GetTitle() const override { return state.title; }
 		virtual void SetTitle(const char* title) override;
 
@@ -59,6 +64,12 @@ namespace gbc
 			bool resizable = false;
 			bool fullscreen = false;
 			bool captureMouse = false;
+
+			// TODO: Should all be updated upon window creation
+			bool focused = true;
+			bool minimized = false;
+			bool maximized = false;
+			bool containsMouse = false;
 
 			EventCallbackFunc eventCallback;
 		} state;

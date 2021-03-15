@@ -28,6 +28,7 @@ project "Sandbox"
 
 	filter "system:windows"
 		systemversion "latest"
+		defines "GBC_PLATFORM_WINDOWS"
 
 	filter "configurations:Debug"
 		defines "GBC_CONFIG_DEBUG"

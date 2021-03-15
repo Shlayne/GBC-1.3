@@ -1,15 +1,15 @@
 #include "gbcpch.h"
 #if GBC_ENABLE_IMGUI
-#include "ImGuiWrapper.h"
+#include "ImGuiLayer.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include "glfw/glfw3.h"
-#include "Application.h"
+#include "GBC/Core/Application.h"
 
 namespace gbc
 {
-	ImGuiWrapper::ImGuiWrapper()
+	ImGuiLayer::ImGuiLayer()
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -20,7 +20,7 @@ namespace gbc
 		ImGui_ImplOpenGL3_Init("#version 460"); // TODO: this version should be gotten from the window
 	}
 
-	ImGuiWrapper::~ImGuiWrapper()
+	ImGuiLayer::~ImGuiLayer()
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -29,7 +29,7 @@ namespace gbc
 		ImGui::DestroyContext();
 	}
 
-	void ImGuiWrapper::Begin()
+	void ImGuiLayer::Begin()
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -38,7 +38,7 @@ namespace gbc
 		ImGui::NewFrame();
 	}
 
-	void ImGuiWrapper::End()
+	void ImGuiLayer::End()
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -58,7 +58,7 @@ namespace gbc
 		}
 	}
 
-	void ImGuiWrapper::Init()
+	void ImGuiLayer::Init()
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard
@@ -103,14 +103,14 @@ namespace gbc
 		colors[ImGuiCol_TitleBgCollapsed] = {0.15f, 0.155f, 0.16f, 1.0f};
 	}
 
-	bool ImGuiWrapper::IsUsingKeyEvents() const
+	void ImGuiLayer::OnEvent(Event& event)
 	{
-		return blockEvents && ImGui::GetIO().WantCaptureKeyboard;
-	}
-
-	bool ImGuiWrapper::IsUsingMouseEvents() const
-	{
-		return blockEvents && ImGui::GetIO().WantCaptureMouse;
+		if (blockEvents)
+		{
+			ImGuiIO& io = ImGui::GetIO();
+			event.handled |= event.IsInCategory(EventCategory_Keyboard) && io.WantCaptureKeyboard ||
+							 event.IsInCategory(EventCategory_Mouse) && io.WantCaptureMouse;
+		}
 	}
 }
 #endif
