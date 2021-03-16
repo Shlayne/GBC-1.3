@@ -2,6 +2,7 @@
 #include "imgui/imgui.h"
 #include "Panels/StasticsPanel.h"
 #include "Panels/ProfilingPanel.h"
+#include "GBC/Scene/SceneSerializer.h"
 
 namespace gbc
 {
@@ -21,25 +22,15 @@ namespace gbc
 
 		// TODO: Deserialize scene
 		Entity entity = scene->CreateEntity("Textured Square");
-		BasicModel& model = entity.Add<MeshComponent>(BasicModel(4, 6)).model;
-		entity.Add<RenderableComponent>(Texture::CreateRef(CreateRef<LocalTexture2D>("resources/textures/grass_side.png", 4, true)));
+		entity.AddComponent<MeshComponent>(CreateRef<BasicMesh>(OBJLoader::LoadOBJ("resources/models/square.obj")));
+		entity.AddComponent<RenderableComponent>(Texture::CreateRef(CreateRef<LocalTexture2D>("resources/textures/grass_side.png", 4, true)));
 
-		model.vertices[0] = {{-0.5f, -0.5f, -1.0f}, {0.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
-		model.vertices[1] = {{ 0.5f, -0.5f, -1.0f}, {1.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
-		model.vertices[2] = {{ 0.5f,  0.5f, -1.0f}, {1.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
-		model.vertices[3] = {{-0.5f,  0.5f, -1.0f}, {0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
-		model.indices[0] = 0;
-		model.indices[1] = 1;
-		model.indices[2] = 2;
-		model.indices[3] = 2;
-		model.indices[4] = 3;
-		model.indices[5] = 0;
-
+		// TODO: Editor Camera with required key press to activate
 		Entity camera = scene->CreateEntity("Temp Camera Controller");
-		auto& cameraCameraComponent = camera.Add<CameraComponent>();
+		auto& cameraCameraComponent = camera.AddComponent<CameraComponent>();
 		cameraCameraComponent.primary = true;
 		cameraCameraComponent.camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
-		camera.Add<NativeScriptComponent>().Bind<PerspectiveCameraControllerScript>();
+		camera.AddComponent<NativeScriptComponent>().Bind<PerspectiveCameraControllerScript>();
 
 		scene->OnCreate();
 
@@ -52,6 +43,9 @@ namespace gbc
 #if GBC_ENABLE_PROFILE_RUNTIME
 		AddPanel<ProfilingPanel>("Profiling");
 #endif
+
+		SceneSerializer serializer(scene);
+		serializer.Serialize("resources/scenes/scene.yaml");
 	}
 
 	void EditorLayer::OnDetach()
@@ -78,10 +72,7 @@ namespace gbc
 			scene->OnViewportResize((int)viewportSize.x, (int)viewportSize.y);
 		}
 
-		// TODO: Editor Camera
-
-		if (viewportFocused)
-			scene->OnUpdate(timestep);
+		scene->OnUpdate(timestep);
 	}
 
 	void EditorLayer::OnRender()
@@ -114,7 +105,12 @@ namespace gbc
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
 		ImGui::Begin("Dockspace", nullptr, dockspaceFlags);
 		ImGui::PopStyleVar(2);
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		float prevWindowMinWidth = style.WindowMinSize.x;
+		style.WindowMinSize.x = 200.0f;
 		ImGui::DockSpace(ImGui::GetID("Dockspace"));
+		style.WindowMinSize.x = prevWindowMinWidth;
 
 		if (ImGui::BeginMenuBar())
 		{

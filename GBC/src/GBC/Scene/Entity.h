@@ -12,28 +12,30 @@ namespace gbc
 		Entity(entt::entity handle, Scene* context);
 
 		template<typename T, typename... Args>
-		T& Add(Args&&... args)
+		T& AddComponent(Args&&... args)
 		{
-			GBC_CORE_ASSERT(!Has<T>(), "Entity already has component!");
-			return context->registry.emplace<T>(handle, std::forward<Args>(args)...);
+			GBC_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
+			T& component = context->registry.emplace<T>(handle, std::forward<Args>(args)...);
+			context->OnComponentAdded(*this, component);
+			return component;
 		}
 
 		template<typename T>
-		void Remove()
+		void RemoveComponent()
 		{
-			GBC_CORE_ASSERT(Has<T>(), "Entity does not have component!");
+			GBC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
 			context->registry.remove<T>(handle);
 		}
 
 		template<typename T>
-		T& Get()
+		T& GetComponent()
 		{
-			GBC_CORE_ASSERT(Has<T>(), "Entity does not have component!");
+			GBC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
 			return context->registry.get<T>(handle);
 		}
 
 		template<typename T>
-		bool Has()
+		bool HasComponent()
 		{
 			return context->registry.has<T>(handle);
 		}

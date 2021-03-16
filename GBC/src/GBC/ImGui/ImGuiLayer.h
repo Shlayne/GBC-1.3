@@ -18,8 +18,6 @@ namespace gbc
 
 		inline void SetBlockEvents(bool blockEvents) { this->blockEvents = blockEvents; }
 	private:
-		void Init();
-
 		bool blockEvents = false;
 	};
 }

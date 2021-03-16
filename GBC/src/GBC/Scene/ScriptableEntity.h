@@ -13,25 +13,25 @@ namespace gbc
 		template<typename T, typename... Args>
 		T& Add(Args&&... args)
 		{
-			return entity.Add<T>(std::forward<Args>(args)...);
+			return entity.AddComponent<T>(std::forward<Args>(args)...);
 		}
 
 		template<typename T>
 		void Remove()
 		{
-			entity.Remove<T>();
+			entity.RemoveComponent<T>();
 		}
 
 		template<typename T>
 		T& Get()
 		{
-			return entity.Get<T>();
+			return entity.GetComponent<T>();
 		}
 
 		template<typename T>
 		bool Has()
 		{
-			return entity.Has<T>();
+			return entity.HasComponent<T>();
 		}
 	protected:
 		virtual void OnCreate() {}

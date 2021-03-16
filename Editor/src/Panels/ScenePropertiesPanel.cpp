@@ -4,6 +4,7 @@
 #include "GBC/Scene/Components/TagComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
 #include "GBC/Scene/Components/CameraComponent.h"
+#include "GBC/Scene/Components/MeshComponent.h"
 #include "GBC/Scene/Components/RenderableComponent.h"
 
 namespace gbc
@@ -11,31 +12,26 @@ namespace gbc
 	template<typename T, typename Func>
 	static void DrawComponent(const std::string& label, Entity entity, bool removable, Func func)
 	{
-		if (entity.Has<T>())
+		if (entity.HasComponent<T>())
 		{
 			const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
 				ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
 
-			T& component = entity.Get<T>();
-
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 4.0f));
 
 			ImFont* font = ImGui::GetFont();
 			ImGuiStyle& style = ImGui::GetStyle();
 			float lineHeight = font->FontSize + style.FramePadding.y * 2.0f;
 
-			ImGui::Separator();
 			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), flags, label.c_str());
-			ImGui::PopStyleVar();
 
-			// TODO: this position is likely not right with other fonts
-			ImGui::SameLine(contentRegionAvailable.x - font->FontSize * 0.5f - style.FramePadding.y + 1.0f);
+			// TODO: This will eventually have more than just remove component, i.e. other settings.
+			ImGui::SameLine(contentRegionAvailable.x - lineHeight + style.FramePadding.x * 1.5f);
 			if (ImGui::Button("+", {lineHeight, lineHeight}))
-				ImGui::OpenPopup("RemoveComponent");
+				ImGui::OpenPopup("ComponentSettings");
 
 			bool removeComponent = false;
-			if (removable && ImGui::BeginPopup("RemoveComponent"))
+			if (removable && ImGui::BeginPopup("ComponentSettings"))
 			{
 				if (ImGui::MenuItem("Remove Component"))
 					removeComponent = true;
@@ -44,21 +40,22 @@ namespace gbc
 
 			if (open)
 			{
-				func(component);
+				func(entity.GetComponent<T>());
+				ImGui::Separator();
 				ImGui::TreePop();
 			}
 
 			if (removeComponent)
-				entity.Remove<T>();
+				entity.RemoveComponent<T>();
 		}
 	}
 
 	template<typename T>
 	static void DrawAddComponent(const std::string& label, Entity entity)
 	{
-		if (!entity.Has<T>() && ImGui::MenuItem(label.c_str()))
+		if (!entity.HasComponent<T>() && ImGui::MenuItem(label.c_str()))
 		{
-			entity.Add<T>();
+			entity.AddComponent<T>();
 			ImGui::CloseCurrentPopup();
 		}
 	}
@@ -76,75 +73,104 @@ namespace gbc
 			{
 				//if (selectedEntity.Has<TagComponent>())
 				{
-					std::string& tag = selectedEntity.Get<TagComponent>().tag;
+					std::string& tag = selectedEntity.GetComponent<TagComponent>().tag;
 
-					char buffer[256]{0};
+					static constexpr size_t bufferSize = 256;
+					char buffer[bufferSize]{0};
+					GBC_CORE_ASSERT(tag.size() < bufferSize);
 					strcpy_s(buffer, sizeof(buffer), tag.c_str());
 
-					if (ImGui::InputText("Tag", buffer, sizeof(buffer)))
+					if (ImGui::InputText("", buffer, sizeof(buffer)))
 						tag = buffer;
 				}
 
-				DrawComponent<TransformComponent>("Transform", selectedEntity, false, [](TransformComponent& component)
-				{
-					ImGuiHelper::DrawVec3Control("Translation", component.translation);
-					ImGuiHelper::DrawVec3Control("Rotation", component.rotation);
-					ImGuiHelper::DrawVec3Control("Scale", component.scale, 1.0f);
-				});
-
+				ImGui::SameLine();
+				ImGui::PushItemWidth(-1);
 				if (ImGui::Button("Add Component"))
 					ImGui::OpenPopup("AddComponent");
 				if (ImGui::BeginPopup("AddComponent"))
 				{
 					DrawAddComponent<TransformComponent>("Transform", selectedEntity);
 					DrawAddComponent<CameraComponent>("Camera", selectedEntity);
+					DrawAddComponent<MeshComponent>("Mesh", selectedEntity);
 					DrawAddComponent<RenderableComponent>("Renderable", selectedEntity);
 					ImGui::EndPopup();
 				}
+				ImGui::PopItemWidth();
+
+				DrawComponent<TransformComponent>("Transform", selectedEntity, true, [](TransformComponent& component)
+				{
+					ImGuiHelper::Float3Edit("Translation", &component.translation.x);
+					glm::vec3 rotation = glm::degrees(component.rotation);
+					if (ImGuiHelper::Float3Edit("Rotation", &rotation.x, 0.0f, 1.0f))
+						component.rotation = glm::radians(rotation);
+					ImGuiHelper::Float3Edit("Scale", &component.scale.x, 1.0f);
+				});
+
+				DrawComponent<CameraComponent>("Camera", selectedEntity, true, [](CameraComponent& component)
+				{
+					SceneCamera& camera = component.camera;
+
+					ImGuiHelper::Checkbox("Primary", &component.primary);
+
+					static constexpr const char* names[]{"Perspective", "Orthographic"};
+					int selectedItem = static_cast<int>(camera.GetProjectionType());
+					ImGuiHelper::Combo("Projection", &selectedItem, names, sizeof(names) / sizeof(const char*));
+
+					switch (selectedItem)
+					{
+						case 0:
+						{
+							component.camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
+
+							float perspectiveFOV = glm::degrees(camera.GetPerspectiveFOV());
+							if (ImGuiHelper::FloatEdit("Size", &perspectiveFOV), 1.0f)
+								camera.SetPerspectiveFOV(glm::radians(perspectiveFOV));
+
+							float perspectiveNearClip = camera.GetPerspectiveNearClip();
+							if (ImGuiHelper::FloatEdit("Near Clip", &perspectiveNearClip, 0.1f))
+								camera.SetPerspectiveNearClip(perspectiveNearClip);
+
+							float perspectiveFarClip = camera.GetPerspectiveFarClip();
+							if (ImGuiHelper::FloatEdit("Far Clip", &perspectiveFarClip, 0.1f))
+								camera.SetPerspectiveFarClip(perspectiveFarClip);
+							break;
+						}
+						case 1:
+						{
+							component.camera.SetProjectionType(SceneCamera::ProjectionType::Orthographic);
+
+							ImGuiHelper::Checkbox("Fixed Aspect", &component.fixedAspectRatio);
+
+							float orthographicSize = camera.GetOrthographicSize();
+							if (ImGuiHelper::FloatEdit("Size", &orthographicSize, 0.1f))
+								camera.SetOrthographicSize(orthographicSize);
+
+							float orthographicNearClip = camera.GetOrthographicNearClip();
+							if (ImGuiHelper::FloatEdit("Near Clip", &orthographicNearClip, 0.1f))
+								camera.SetOrthographicNearClip(orthographicNearClip);
+
+							float orthographicFarClip = camera.GetOrthographicFarClip();
+							if (ImGuiHelper::FloatEdit("Far Clip", &orthographicFarClip, 0.1f))
+								camera.SetOrthographicFarClip(orthographicFarClip);
+							break;
+						}
+					}
+				});
+
+				DrawComponent<MeshComponent>("Mesh", selectedEntity, true, [](MeshComponent& component)
+				{
+					ImGuiHelper::BeginColumns("Mesh");
+					ImGui::Text("%s", component.mesh != nullptr ? component.mesh->filepath.c_str() : "Unknown");
+					ImGuiHelper::EndColumns();
+				});
 
 				DrawComponent<RenderableComponent>("Renderable", selectedEntity, true, [](RenderableComponent& component)
 				{
-					constexpr const char* items[]{"None", "Texture", "Framebuffer"};
-					const char* name = "None";
-					int currentItem = 0;
-					switch (component.renderable.GetType())
-					{
-						case BasicRenderable::Type::Texture: name = "Texture"; currentItem = 1; break;
-						case BasicRenderable::Type::Framebuffer: name = "Framebuffer"; currentItem = 2; break;
-					}
-
-					int selectedItem = currentItem;
-					if (ImGui::BeginCombo("Type", name))
-					{
-						for (int i = 0; i < 3; i++)
-						{
-							bool selected = selectedItem == i;
-							if (ImGui::Selectable(items[i], selected))
-								selectedItem = i;
-							if (selected)
-								ImGui::SetItemDefaultFocus();
-						}
-						ImGui::EndCombo();
-					}
-
-					if (currentItem != selectedItem)
-					{
-						switch (selectedItem)
-						{
-							case 0: component.renderable.SetType(BasicRenderable::Type::None); break;
-							case 1: component.renderable.SetType(BasicRenderable::Type::Texture); break;
-							case 2: component.renderable.SetType(BasicRenderable::Type::Framebuffer); break;
-						}
-					}
-
-					// TODO: actually implement this
-					switch (component.renderable.GetType())
-					{
-						case BasicRenderable::Type::Texture:
-							break;
-						case BasicRenderable::Type::Framebuffer:
-							break;
-					}
+					ImGuiHelper::BeginColumns("Texture");
+					ImGui::Text("%s", component.texture != nullptr ? component.texture->GetTexture()->GetFilePath().c_str() : "Unknown");
+					ImGuiHelper::EndColumns();
+					ImGuiHelper::ColorEdit4("Tint Color", &component.tintColor.x);
 				});
 			}
 

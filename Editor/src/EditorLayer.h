@@ -44,6 +44,10 @@ namespace gbc
 // when imgui wrapper was blocking events, so when clicking back into viewport, mouseDPos will be incorrect.
 // Same thing when going into and out of fullscreen.
 // TLDR: Figure out a way to make mouseDPos 0 on viewport/window focus.
-// 2) Add helper functions for imgui in "GBC/ImGui/ImGuiHelper"
+// 2) Use "#if GBC_PROJECT_EDITOR" for editor-only code, e.g. entityIDs in BasicRender::Vertex
+// 3) BUGS in ScenePropertiesPanel.cpp:
+//		a) Tag component text edit box keeps getting deselected
+//		b) Cannot undock scene properties panel when selectedEntity is valid
+// 4) Editor camera
 
-// 14:58 https://www.youtube.com/watch?v=NBpB0qscF3E&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT&index=86
+// https://www.youtube.com/watch?v=zn7N7zHgCcs&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT&index=92

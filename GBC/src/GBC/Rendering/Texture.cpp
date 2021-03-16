@@ -28,4 +28,28 @@ namespace gbc
 		GBC_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
+
+	Ref<Texture> Texture::CreateRef(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
+	{
+		switch (RendererAPI::GetAPI())
+		{
+			case RendererAPI::API::None:   return nullptr;
+			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLTexture>(specification, framebuffer, attachmentIndex);
+		}
+
+		GBC_ASSERT(false, "Unknown Renderer API!");
+		return nullptr;
+	}
+
+	Scope<Texture> Texture::CreateScope(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
+	{
+		switch (RendererAPI::GetAPI())
+		{
+			case RendererAPI::API::None:   return nullptr;
+			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLTexture>(specification, framebuffer, attachmentIndex);
+		}
+
+		GBC_ASSERT(false, "Unknown Renderer API!");
+		return nullptr;
+	}
 }

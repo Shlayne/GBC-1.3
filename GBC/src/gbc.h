@@ -12,6 +12,7 @@
 #include "GBC/Events/MouseEvents.h"
 #include "GBC/Events/DeviceEvents.h"
 #include "GBC/IO/FileIO.h"
+#include "GBC/IO/OBJLoader.h"
 #include "GBC/Rendering/Basic/BasicRenderer.h"
 #include "GBC/Rendering/Buffer.h"
 #include "GBC/Rendering/Framebuffer.h"

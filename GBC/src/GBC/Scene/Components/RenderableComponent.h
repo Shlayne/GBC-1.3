@@ -1,21 +1,22 @@
 #pragma once
 
 #include "glm/glm.hpp"
-#include "GBC/Rendering/Basic/BasicRenderable.h"
+#include "GBC/Rendering/Texture.h"
 
 namespace gbc
 {
 	struct RenderableComponent
 	{
 		RenderableComponent() = default;
-		RenderableComponent(const BasicRenderable& renderable);
-		RenderableComponent(BasicRenderable&& renderable) noexcept;
-		RenderableComponent& operator=(const BasicRenderable& renderable);
-		RenderableComponent& operator=(BasicRenderable&& renderable) noexcept;
+		RenderableComponent(const Ref<Texture>& texture);
+		RenderableComponent(Ref<Texture>&& texture) noexcept;
+		RenderableComponent& operator=(const Ref<Texture>& texture);
+		RenderableComponent& operator=(Ref<Texture>&& texture) noexcept;
 
-		inline operator BasicRenderable&() { return renderable; }
-		inline operator const BasicRenderable&() const { return renderable; }
+		inline operator Ref<Texture>&() { return texture; }
+		inline operator const Ref<Texture>&() const { return texture; }
 
-		BasicRenderable renderable;
+		Ref<Texture> texture;
+		glm::vec4 tintColor{1.0f};
 	};
 }

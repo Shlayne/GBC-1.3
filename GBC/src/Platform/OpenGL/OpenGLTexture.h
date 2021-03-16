@@ -8,6 +8,7 @@ namespace gbc
 	{
 	public:
 		OpenGLTexture(TextureSpecification specification);
+		OpenGLTexture(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
 		virtual ~OpenGLTexture();
 
 		virtual void Bind(unsigned int slot = 0) const override;
@@ -19,6 +20,7 @@ namespace gbc
 		virtual void Update() override;
 	private:
 		TextureSpecification specification;
+		bool ownsRendererID = true;
 
 		RendererID rendererID = 0;
 		unsigned int internalFormat = 0;

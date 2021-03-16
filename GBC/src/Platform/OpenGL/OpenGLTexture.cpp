@@ -75,9 +75,16 @@ namespace gbc
 		glTextureSubImage2D(rendererID, 0, 0, 0, specification.texture->GetWidth(), specification.texture->GetHeight(), format, type, specification.texture->GetData());
 	}
 
+	OpenGLTexture::OpenGLTexture(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
+		: specification(specification), ownsRendererID(false)
+	{
+		rendererID = framebuffer->GetColorAttachment(attachmentIndex);
+	}
+
 	OpenGLTexture::~OpenGLTexture()
 	{
-		glDeleteTextures(1, &rendererID);
+		if (ownsRendererID)
+			glDeleteTextures(1, &rendererID);
 	}
 
 	void OpenGLTexture::Bind(unsigned int slot) const

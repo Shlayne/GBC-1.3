@@ -7,7 +7,7 @@ namespace gbc
 {
 	void PerspectiveCameraControllerScript::OnCreate()
 	{
-		lastMousePos = Input::GetMousePos();
+		//lastMousePos = Input::GetMousePos();
 	}
 
 	void PerspectiveCameraControllerScript::OnUpdate(Timestep timestep)

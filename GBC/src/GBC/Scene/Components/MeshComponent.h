@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GBC/Rendering/Basic/BasicModel.h"
+#include "GBC/Rendering/Basic/BasicMesh.h"
 
 namespace gbc
 {
@@ -10,12 +10,13 @@ namespace gbc
 		MeshComponent(MeshComponent&& mesh) noexcept;
 		MeshComponent& operator=(MeshComponent&& mesh) noexcept;
 
-		MeshComponent(const BasicModel& model);
-		MeshComponent(BasicModel&& model) noexcept;
+		MeshComponent(const Ref<BasicMesh>& mesh);
+		MeshComponent(Ref<BasicMesh>&& mesh) noexcept;
+		MeshComponent& operator=(Ref<BasicMesh>&& mesh) noexcept;
 
-		inline operator BasicModel&() { return model; }
-		inline operator const BasicModel&() const { return model; }
+		inline operator Ref<BasicMesh>&() { return mesh; }
+		inline operator const Ref<BasicMesh>&() const { return mesh; }
 
-		BasicModel model;
+		Ref<BasicMesh> mesh;
 	};
 }

@@ -23,6 +23,7 @@ namespace gbc
 			ImGui::Begin(name.c_str(), &enabled);
 			ImGui::PopStyleVar();
 
+			// TODO: entt iterates over its entities in a reverse order, so unreverse it.
 			context->registry.each([&](entt::entity handle)
 			{
 				Entity entity(handle, context.get());
@@ -45,10 +46,10 @@ namespace gbc
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 	{
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
 		if (selectedEntity == entity)
 			flags |= ImGuiTreeNodeFlags_Selected;
-		bool opened = ImGui::TreeNodeEx((void*)(size_t)(uint32_t)entity, flags, "%s", entity.Get<TagComponent>().tag.c_str());
+		bool opened = ImGui::TreeNodeEx((void*)(size_t)(uint32_t)entity, flags, "%s", entity.GetComponent<TagComponent>().tag.c_str());
 
 		bool removeEntity = false;
 		if (ImGui::BeginPopupContextItem(nullptr, ImGuiMouseButton_Right))
@@ -66,8 +67,9 @@ namespace gbc
 
 		if (removeEntity)
 		{
-			context->RemoveEntity(entity);
-			selectedEntity = {};
+			if (selectedEntity == entity)
+				selectedEntity = {};
+			context->DestroyEntity(entity);
 		}
 	}
 }

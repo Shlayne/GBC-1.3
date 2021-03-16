@@ -7,6 +7,10 @@ project "Editor"
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
+	defines {
+		"GBC_PROJECT_EDITOR"
+	}
+
 	files {
 		"src/**.h",
 		"src/**.cpp"
@@ -17,9 +21,12 @@ project "Editor"
 		"%{wks.location}/GBC/src",
 		"%{includedir.glm}",
 		"%{includedir.imgui}",
-		"%{includedir.spdlog}",
+		"%{includedir.stb}",
+		"%{includedir.yaml}",
 
-		"%{includedir.entt}"
+		"%{includedir.entt}",
+		"%{includedir.siv}",
+		"%{includedir.spdlog}"
 	}
 
 	links {

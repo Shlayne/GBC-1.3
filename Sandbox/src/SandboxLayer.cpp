@@ -9,19 +9,19 @@ void SandboxLayer::OnAttach()
 	scene = CreateScope<Scene>();
 
 	Entity entity = scene->CreateEntity();
-	BasicModel& model = entity.Add<MeshComponent>(BasicModel(4, 6)).model;
+	BasicMesh& mesh = entity.Add<MeshComponent>(BasicMesh(4, 6)).mesh;
 	entity.Add<RenderableComponent>(Texture::CreateRef(CreateRef<LocalTexture2D>("resources/textures/grass_side.png", 4, true)));
 
-	model.vertices[0] = {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
-	model.vertices[1] = {{ 0.5f, -0.5f, 0.0f}, {1.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
-	model.vertices[2] = {{ 0.5f,  0.5f, 0.0f}, {1.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
-	model.vertices[3] = {{-0.5f,  0.5f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
-	model.indices[0] = 0;
-	model.indices[1] = 1;
-	model.indices[2] = 2;
-	model.indices[3] = 2;
-	model.indices[4] = 3;
-	model.indices[5] = 0;
+	mesh.vertices[0] = {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
+	mesh.vertices[1] = {{ 0.5f, -0.5f, 0.0f}, {1.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
+	mesh.vertices[2] = {{ 0.5f,  0.5f, 0.0f}, {1.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
+	mesh.vertices[3] = {{-0.5f,  0.5f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}};
+	mesh.indices[0] = 0;
+	mesh.indices[1] = 1;
+	mesh.indices[2] = 2;
+	mesh.indices[3] = 2;
+	mesh.indices[4] = 3;
+	mesh.indices[5] = 0;
 
 	Entity camera = scene->CreateEntity();
 	auto& cameraCameraComponent = camera.Add<CameraComponent>();

@@ -17,9 +17,12 @@ project "Sandbox"
 		"%{wks.location}/GBC/src",
 		"%{includedir.glm}",
 		"%{includedir.imgui}",
-		"%{includedir.spdlog}",
+		"%{includedir.stb}",
+		"%{includedir.yaml}",
 
-		"%{includedir.entt}"
+		"%{includedir.entt}",
+		"%{includedir.siv}",
+		"%{includedir.spdlog}"
 	}
 
 	links {

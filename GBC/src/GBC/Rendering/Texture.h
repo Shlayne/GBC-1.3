@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LocalTexture2D.h"
+#include "Framebuffer.h"
 
 namespace gbc
 {
@@ -51,9 +52,13 @@ namespace gbc
 
 		// Call this when you want to update the internal
 		// texture after the the local texture has updated.
+		// Only call if this was not constructed with a Framebuffer.
 		virtual void Update() = 0;
 
 		static Ref<Texture> CreateRef(TextureSpecification specification);
 		static Scope<Texture> CreateScope(TextureSpecification specification);
+
+		static Ref<Texture> CreateRef(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
+		static Scope<Texture> CreateScope(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
 	};
 }

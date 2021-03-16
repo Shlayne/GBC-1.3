@@ -32,17 +32,10 @@ namespace gbc
 
 	glm::vec2 Input::GetMousePos()
 	{
-		static float px = 0.0f, py = 0.0f;
-		static double x = 0.0, y = 0.0;
-		Window& window = Application::Get().GetWindow();
-		glfwGetCursorPos(static_cast<GLFWwindow*>(window.GetNativeWindow()), &x, &y);
-
-		if (window.IsFocused() && window.ContainsMouse())
-		{
-			px = (float)x;
-			py = (float)y;
-		}
-		return {px, py};
+		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
+		double x, y;
+		glfwGetCursorPos(window, &x, &y);
+		return {(float)x, (float)y};
 	}
 
 	float Input::GetMousePosX()

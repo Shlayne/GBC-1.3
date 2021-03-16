@@ -27,6 +27,7 @@ project "GBC"
 		"%{includedir.glm}",
 		"%{includedir.imgui}",
 		"%{includedir.spdlog}",
+		"%{includedir.yaml}",
 
 		"%{includedir.entt}",
 		"%{includedir.siv}",
@@ -39,6 +40,7 @@ project "GBC"
 		"glm",
 		"imgui",
 		"stb",
+		"yaml",
 		"opengl32.lib"
 	}
 

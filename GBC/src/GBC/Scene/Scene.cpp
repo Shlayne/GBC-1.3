@@ -30,12 +30,12 @@ namespace gbc
 		GBC_PROFILE_FUNCTION();
 
 		Entity entity(registry.create(), this);
-		entity.Add<TransformComponent>();
-		entity.Add<TagComponent>(tag.empty() ? "Unknown Entity" : tag);
+		entity.AddComponent<TransformComponent>();
+		entity.AddComponent<TagComponent>(tag.empty() ? "Unknown Entity" : tag);
 		return entity;
 	}
 
-	void Scene::RemoveEntity(Entity entity)
+	void Scene::DestroyEntity(Entity entity)
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -69,29 +69,10 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		if (shouldResizeCameras)
+		registry.view<NativeScriptComponent>().each([=](entt::entity entity, NativeScriptComponent& nsc)
 		{
-			GBC_PROFILE_SCOPE("Resize Cameras - Scene::OnUpdate(Timestep)");
-
-			shouldResizeCameras = false;
-
-			auto view = registry.view<CameraComponent>();
-			for (auto entity : view)
-			{
-				auto& camera = view.get<CameraComponent>(entity);
-				if (!camera.fixedAspectRatio)
-					camera.camera.OnViewportResize(viewportSize.x, viewportSize.y);
-			}
-		}
-
-		{
-			GBC_PROFILE_SCOPE("Update Native Script Components - Scene::OnUpdate(Timestep)");
-
-			registry.view<NativeScriptComponent>().each([=](entt::entity entity, NativeScriptComponent& nsc)
-			{
-				nsc.instance->OnUpdate(timestep);
-			});
-		}
+			nsc.instance->OnUpdate(timestep);
+		});
 	}
 
 	void Scene::OnRender()
@@ -136,11 +117,48 @@ namespace gbc
 
 	void Scene::OnViewportResize(int width, int height)
 	{
+		GBC_PROFILE_FUNCTION();
+
 		if (width > 0 && height > 0)
 		{
-			shouldResizeCameras = true;
 			viewportSize.x = width;
 			viewportSize.y = height;
+
+			auto view = registry.view<CameraComponent>();
+			for (auto entity : view)
+			{
+				auto& camera = view.get<CameraComponent>(entity);
+				if (!camera.fixedAspectRatio)
+					camera.camera.OnViewportResize(viewportSize.x, viewportSize.y);
+			}
 		}
+	}
+
+	template<typename T>
+	void Scene::OnComponentAdded(Entity entity, T& component)
+	{
+		// TODO: this prevents adding custom user-defined components
+		static_assert(false);
+	}
+
+	template<>
+	void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent& component) {}
+
+	template<>
+	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component) {}
+
+	template<>
+	void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& component) {}
+
+	template<>
+	void Scene::OnComponentAdded<RenderableComponent>(Entity entity, RenderableComponent& component) {}
+
+	template<>
+	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
+
+	template<>
+	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
+	{
+		component.camera.OnViewportResize(viewportSize.x, viewportSize.y);
 	}
 }

@@ -16,6 +16,7 @@
 #include <cmath>
 #include <memory>
 #include <chrono>
+#include <regex>
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"

@@ -32,32 +32,37 @@ namespace gbc
 		return *this;
 	}
 
-	RenderableComponent::RenderableComponent(const BasicRenderable& renderable)
-		: renderable(renderable) {}
-	RenderableComponent::RenderableComponent(BasicRenderable&& renderable) noexcept
-		: renderable(std::move(renderable)) {}
-	RenderableComponent& RenderableComponent::operator=(const BasicRenderable& renderable)
+	RenderableComponent::RenderableComponent(const Ref<Texture>& texture)
+		: texture(texture) {}
+	RenderableComponent::RenderableComponent(Ref<Texture>&& texture) noexcept
+		: texture(std::move(texture)) {}
+	RenderableComponent& RenderableComponent::operator=(const Ref<Texture>& texture)
 	{
-		this->renderable = renderable;
+		this->texture = texture;
 		return *this;
 	}
-	RenderableComponent& RenderableComponent::operator=(BasicRenderable&& renderable) noexcept
+	RenderableComponent& RenderableComponent::operator=(Ref<Texture>&& texture) noexcept
 	{
-		this->renderable = std::move(renderable);
+		this->texture = std::move(texture);
 		return *this;
 	}
 
 	MeshComponent::MeshComponent(MeshComponent&& mesh) noexcept
-		: model(std::move(mesh.model)) {}
+		: mesh(std::move(mesh.mesh)) {}
 	MeshComponent& MeshComponent::operator=(MeshComponent&& mesh) noexcept
 	{
-		model = std::move(mesh.model);
+		mesh = std::move(mesh.mesh);
 		return *this;
 	}
-	MeshComponent::MeshComponent(const BasicModel& model)
-		: model(model) {}
-	MeshComponent::MeshComponent(BasicModel&& model) noexcept
-		: model(std::move(model)) {}
+	MeshComponent::MeshComponent(const Ref<BasicMesh>& mesh)
+		: mesh(mesh) {}
+	MeshComponent::MeshComponent(Ref<BasicMesh>&& mesh) noexcept
+		: mesh(std::move(mesh)) {}
+	MeshComponent& MeshComponent::operator=(Ref<BasicMesh>&& mesh) noexcept
+	{
+		mesh = std::move(mesh);
+		return *this;
+	}
 
 	CameraComponent::CameraComponent(const SceneCamera& camera)
 		: camera(camera) {}

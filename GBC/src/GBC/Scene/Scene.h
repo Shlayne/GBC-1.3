@@ -18,7 +18,7 @@ namespace gbc
 		~Scene();
 
 		Entity CreateEntity(const std::string& tag = std::string());
-		void RemoveEntity(Entity entity);
+		void DestroyEntity(Entity entity);
 
 		void OnCreate();
 		void OnDestroy();
@@ -27,12 +27,16 @@ namespace gbc
 
 		void OnViewportResize(int width, int height);
 	private:
+		template<typename T>
+		void OnComponentAdded(Entity entity, T& component);
+
 		entt::registry registry;
 
 		bool shouldResizeCameras = true;
 		glm::ivec2 viewportSize;
 
 		friend class Entity;
+		friend class SceneSerializer;
 		friend class SceneHierarchyPanel;
 	};
 }
