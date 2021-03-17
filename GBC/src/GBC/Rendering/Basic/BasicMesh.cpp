@@ -49,7 +49,7 @@ namespace gbc
 
 	BasicMesh::BasicMesh(OBJModel&& mesh) noexcept
 	{
-		vertexCount = (unsigned int)(mesh.indices.size() * 3);
+		vertexCount = (unsigned int)mesh.indices.size();
 		indexCount = vertexCount;
 		vertices = new BasicVertex[vertexCount];
 		indices = new unsigned int[indexCount];

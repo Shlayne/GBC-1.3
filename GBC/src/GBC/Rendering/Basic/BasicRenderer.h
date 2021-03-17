@@ -5,6 +5,7 @@
 #include "GBC/Scene/Components/RenderableComponent.h"
 #include "GBC/Rendering/Texture.h"
 #include "GBC/Rendering/Camera.h"
+#include "GBC/Rendering/EditorCamera.h"
 
 namespace gbc
 {
@@ -15,6 +16,7 @@ namespace gbc
 		static void Shutdown();
 
 		static void BeginScene(const Camera& camera, const glm::mat4& transform);
+		static void BeginScene(const EditorCamera& camera);
 		static void EndScene();
 
 		static void Submit(const Ref<BasicMesh>& mesh, const glm::mat4& transform = glm::mat4(1.0f), const RenderableComponent& renderableComponent = {});

@@ -62,17 +62,20 @@ namespace gbc
 	OpenGLTexture::OpenGLTexture(TextureSpecification specification)
 		: specification(specification)
 	{
-		GetOpenGLTypes(GetTextureFormat(specification.texture->GetChannels()), internalFormat, format, type);
+		if (specification.texture != nullptr && *specification.texture)
+		{
+			GetOpenGLTypes(GetTextureFormat(specification.texture->GetChannels()), internalFormat, format, type);
 
-		glCreateTextures(GL_TEXTURE_2D, 1, &rendererID);
-		glTextureStorage2D(rendererID, 1, internalFormat, specification.texture->GetWidth(), specification.texture->GetHeight());
+			glCreateTextures(GL_TEXTURE_2D, 1, &rendererID);
+			glTextureStorage2D(rendererID, 1, internalFormat, specification.texture->GetWidth(), specification.texture->GetHeight());
 
-		glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GetOpenGLFilterMode(specification.minFilter));
-		glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GetOpenGLFilterMode(specification.magFilter));
-		glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, GetOpenGLWrapMode(specification.wrapS));
-		glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, GetOpenGLWrapMode(specification.wrapT));
+			glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GetOpenGLFilterMode(specification.minFilter));
+			glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GetOpenGLFilterMode(specification.magFilter));
+			glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, GetOpenGLWrapMode(specification.wrapS));
+			glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, GetOpenGLWrapMode(specification.wrapT));
 
-		glTextureSubImage2D(rendererID, 0, 0, 0, specification.texture->GetWidth(), specification.texture->GetHeight(), format, type, specification.texture->GetData());
+			glTextureSubImage2D(rendererID, 0, 0, 0, specification.texture->GetWidth(), specification.texture->GetHeight(), format, type, specification.texture->GetData());
+		}
 	}
 
 	OpenGLTexture::OpenGLTexture(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)

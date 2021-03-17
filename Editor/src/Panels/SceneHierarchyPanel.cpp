@@ -4,16 +4,9 @@
 
 namespace gbc
 {
-	SceneHierarchyPanel::SceneHierarchyPanel(const std::string& name, const Ref<Scene>& context)
-		: Panel(name)
-	{
-		SetContext(context);
-	}
+	SceneHierarchyPanel::SceneHierarchyPanel(const std::string& name, Ref<Scene>& context, Entity& selectedEntity)
+		: Panel(name), context(context), selectedEntity(selectedEntity) {}
 
-	void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
-	{
-		this->context = context;
-	}
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{

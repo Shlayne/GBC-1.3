@@ -11,6 +11,7 @@
 #include "GBC/Events/KeyEvents.h"
 #include "GBC/Events/MouseEvents.h"
 #include "GBC/Events/DeviceEvents.h"
+#include "GBC/IO/FileDialog.h"
 #include "GBC/IO/FileIO.h"
 #include "GBC/IO/OBJLoader.h"
 #include "GBC/Rendering/Basic/BasicRenderer.h"

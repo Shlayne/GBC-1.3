@@ -5,6 +5,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
+#include "imguizmo/ImGuizmo.h"
 #include "glfw/glfw3.h"
 #include "GBC/Core/Application.h"
 
@@ -38,6 +39,7 @@ namespace gbc
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 	}
 
 	void ImGuiLayer::End()

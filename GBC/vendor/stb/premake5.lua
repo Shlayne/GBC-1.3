@@ -8,14 +8,12 @@ project "stb"
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
 	files {
-		"include/stb/stb_image.h",
-		"include/stb/stb_image_resize.h",
-		"include/stb/stb_image_write.h",
-		"stb.cpp"
+		"include/stb/**.h",
+		"src/stb.cpp"
 	}
 
 	includedirs {
-		"%{includedir.stb}"
+		"include/stb"
 	}
 
 	filter "system:windows"

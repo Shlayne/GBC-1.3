@@ -99,8 +99,14 @@ namespace gbc
 	{
 		// Set shader uniforms
 		data.shader->Bind();
-		data.shader->SetUniform("projection", camera.GetProjection());
-		data.shader->SetUniform("cameraTransform", transform);
+		data.shader->SetUniform("viewProjection", glm::inverse(transform) * camera.GetProjection());
+	}
+
+	void BasicRenderer::BeginScene(const EditorCamera& camera)
+	{
+		// Set shader uniforms
+		data.shader->Bind();
+		data.shader->SetUniform("viewProjection", camera.GetViewProjection());
 	}
 
 	void BasicRenderer::EndScene()
@@ -153,7 +159,7 @@ namespace gbc
 
 	unsigned int BasicRenderer::GetTexIndex(const Ref<Texture>& texture)
 	{
-		if (!texture)
+		if (!texture || !texture->GetTexture() || !*texture->GetTexture())
 			return 0;
 
 		for (unsigned int i = 1; i < data.textureCount; i++)

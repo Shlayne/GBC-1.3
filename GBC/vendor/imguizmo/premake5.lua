@@ -1,4 +1,4 @@
-project "yaml"
+project "imguizmo"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
@@ -8,14 +8,13 @@ project "yaml"
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
 	files {
-		"src/**.h",
-		"src/**.cpp",
-		"include/**.h",
-		"src/contrib/yaml-cpp.natvis"
+		"include/imguizmo/**.h",
+		"src/**.cpp"
 	}
 
 	includedirs {
-		"include"
+		"include/imguizmo",
+		"%{includedir.imgui}/imgui"
 	}
 
 	filter "system:windows"

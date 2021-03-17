@@ -1,5 +1,6 @@
 #include "EditorLayer.h"
 #include "imgui/imgui.h"
+#include "imguizmo/ImGuizmo.h"
 #include "Panels/StasticsPanel.h"
 #include "Panels/ProfilingPanel.h"
 #include "GBC/Scene/SceneSerializer.h"
@@ -12,6 +13,9 @@ namespace gbc
 
 		Window& window = Application::Get().GetWindow();
 
+		editorCamera = EditorCamera(90.0f, (float)window.GetWidth()/ (float)window.GetHeight(), 0.001f, 1000.0f);
+		editorCamera.OnViewportResize(window.GetWidth(), window.GetHeight());
+
 		FramebufferSpecification framebufferSpecification;
 		framebufferSpecification.width = window.GetWidth();
 		framebufferSpecification.height = window.GetHeight();
@@ -20,32 +24,29 @@ namespace gbc
 
 		scene = CreateRef<Scene>();
 
-		// TODO: Deserialize scene
-		Entity entity = scene->CreateEntity("Textured Square");
-		entity.AddComponent<MeshComponent>(CreateRef<BasicMesh>(OBJLoader::LoadOBJ("resources/models/square.obj")));
-		entity.AddComponent<RenderableComponent>(Texture::CreateRef(CreateRef<LocalTexture2D>("resources/textures/grass_side.png", 4, true)));
+		//// TODO: Deserialize scene
+		//Entity entity = scene->CreateEntity("Textured Cube");
+		//entity.AddComponent<MeshComponent>(CreateRef<BasicMesh>(OBJLoader::LoadOBJ("resources/models/cube.obj")));
+		//entity.AddComponent<RenderableComponent>(Texture::CreateRef(CreateRef<LocalTexture2D>("resources/textures/grass_side.png", 4, true)));
 
-		// TODO: Editor Camera with required key press to activate
-		Entity camera = scene->CreateEntity("Temp Camera Controller");
-		auto& cameraCameraComponent = camera.AddComponent<CameraComponent>();
-		cameraCameraComponent.primary = true;
-		cameraCameraComponent.camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
-		camera.AddComponent<NativeScriptComponent>().Bind<PerspectiveCameraControllerScript>();
+		//// TODO: Editor Camera with required key press to activate
+		//Entity camera = scene->CreateEntity("Camera Controller");
+		//auto& cameraCameraComponent = camera.AddComponent<CameraComponent>();
+		//cameraCameraComponent.primary = true;
+		//cameraCameraComponent.camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
+		//camera.AddComponent<NativeScriptComponent>().Bind<PerspectiveCameraControllerScript>();
 
 		scene->OnCreate();
 
-		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer);
-		sceneHierarchyPanel = AddPanel<SceneHierarchyPanel>("Scene Hierarchy", scene);
-		scenePropertiesPanel = AddPanel<ScenePropertiesPanel>("Scene Properties", sceneHierarchyPanel->GetSelectedEntity());
+		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer, scene, selectedEntity, gizmoType, editorCamera);
+		sceneHierarchyPanel = AddPanel<SceneHierarchyPanel>("Scene Hierarchy", scene, selectedEntity);
+		scenePropertiesPanel = AddPanel<ScenePropertiesPanel>("Scene Properties", selectedEntity);
 #if GBC_ENABLE_STATS
 		AddPanel<StatisticsPanel>("Statistics", BasicRenderer::GetStatistics());
 #endif
 #if GBC_ENABLE_PROFILE_RUNTIME
 		AddPanel<ProfilingPanel>("Profiling");
 #endif
-
-		SceneSerializer serializer(scene);
-		serializer.Serialize("resources/scenes/scene.yaml");
 	}
 
 	void EditorLayer::OnDetach()
@@ -69,10 +70,15 @@ namespace gbc
 		if (sceneViewportPanel->HasViewportSizeChanged())
 		{
 			const glm::vec2& viewportSize = sceneViewportPanel->GetViewportSize();
-			scene->OnViewportResize((int)viewportSize.x, (int)viewportSize.y);
+			int width = (int)viewportSize.x;
+			int height = (int)viewportSize.y;
+
+			editorCamera.OnViewportResize(width, height);
+			scene->OnViewportResize(width, height);
 		}
 
-		scene->OnUpdate(timestep);
+		editorCamera.OnUpdate(timestep);
+		scene->OnUpdateEditor(timestep);
 	}
 
 	void EditorLayer::OnRender()
@@ -84,7 +90,7 @@ namespace gbc
 	#endif
 
 		framebuffer->Bind();
-		scene->OnRender();
+		scene->OnRenderEditor(editorCamera);
 		framebuffer->Unbind();
 	}
 
@@ -116,7 +122,18 @@ namespace gbc
 		{
 			if (ImGui::BeginMenu("File"))
 			{
-				if (ImGui::MenuItem("Exit"))
+				if (ImGui::MenuItem("New", "Ctrl+N"))
+					NewScene();
+				if (ImGui::MenuItem("Open...", "Ctrl+O"))
+					OpenScene();
+				if (ImGui::MenuItem("Save...", "Ctrl+S"))
+					SaveScene();
+				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+					SaveAsScene();
+
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Exit", "Alt+F4"))
 					Application::Get().Terminate();
 
 				ImGui::EndMenu();
@@ -149,5 +166,150 @@ namespace gbc
 	void EditorLayer::OnEvent(Event& event)
 	{
 		GBC_PROFILE_FUNCTION();
+
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<WindowCloseEvent>(GBC_BIND_FUNC(OnWindowCloseEvent));
+		dispatcher.Dispatch<KeyPressEvent>(GBC_BIND_FUNC(OnKeyPressEvent));
+
+		if (!event.handled)
+			editorCamera.OnEvent(event);
+	}
+
+	bool EditorLayer::OnWindowCloseEvent(WindowCloseEvent& event)
+	{
+		bool allowedDiscard = true;
+		if (hasUnsavedChanges)
+		{
+			// TODO: Show "Any unsaved work will be lost!" message
+			//allowedDiscard = false;
+		}
+
+		return !allowedDiscard;
+	}
+
+	bool EditorLayer::OnKeyPressEvent(KeyPressEvent& event)
+	{
+		bool controlPressed = Input::IsKeyPressed(Keycode::LeftControl) || Input::IsKeyPressed(Keycode::RightControl);
+		bool shiftPressed = Input::IsKeyPressed(Keycode::LeftShift) || Input::IsKeyPressed(Keycode::RightShift);
+		bool altPressed = Input::IsKeyPressed(Keycode::LeftAlt) || Input::IsKeyPressed(Keycode::RightAlt);
+
+		bool control         =  controlPressed && !shiftPressed && !altPressed;
+		bool shift           = !controlPressed &&  shiftPressed && !altPressed;
+		bool controlShift    =  controlPressed &&  shiftPressed && !altPressed;
+		bool alt             = !controlPressed && !shiftPressed &&  altPressed;
+		bool controlAlt      =  controlPressed && !shiftPressed &&  altPressed;
+		bool shiftAlt        = !controlPressed &&  shiftPressed &&  altPressed;
+		bool controlShiftAlt =  controlPressed &&  shiftPressed &&  altPressed;
+
+		switch (event.GetKeycode())
+		{
+			// Scene
+			case Keycode::N:
+				if (control)
+					NewScene();
+				break;
+			case Keycode::O:
+				if (control)
+					OpenScene();
+				break;
+			case Keycode::S:
+				if (control || controlShift)
+				{
+					if (shiftPressed) SaveAsScene();
+					else SaveScene();
+				}
+				break;
+			// Gizmos
+			case Keycode::Q:
+				gizmoType = -1;
+				break;
+			case Keycode::W:
+				gizmoType = ImGuizmo::OPERATION::TRANSLATE;
+				break;
+			case Keycode::E:
+				gizmoType = ImGuizmo::OPERATION::ROTATE;
+				break;
+			case Keycode::R:
+				gizmoType = ImGuizmo::OPERATION::SCALE;
+				break;
+		}
+
+		return false;
+	}
+
+	void EditorLayer::ClearScene()
+	{
+		glm::ivec2 viewportSize = scene->GetViewportSize();
+		scene = CreateRef<Scene>();
+		scene->OnViewportResize(viewportSize.x, viewportSize.y);
+		selectedEntity = {};
+	}
+
+	void EditorLayer::NewScene()
+	{
+		bool allowedDiscard = true;
+		if (hasUnsavedChanges)
+		{
+			// TODO: Show "Any unsaved work will be lost!" message
+			//allowedDiscard = false;
+		}
+
+		if (allowedDiscard)
+		{
+			currentFilepath = std::string();
+			ClearScene();
+		}
+	}
+
+	void EditorLayer::OpenScene()
+	{
+		bool allowedDiscard = true;
+		if (hasUnsavedChanges)
+		{
+			// TODO: Show "Any unsaved work will be lost!" message
+			//allowedDiscard = false;
+		}
+
+		if (allowedDiscard)
+		{
+			auto initialDirectory = std::filesystem::absolute("./").string();
+			std::string filepath = FileDialog::OpenFile(initialDirectory.c_str(), "GBC Scene (*.gscn)\0*.gscn\0");
+			if (!filepath.empty())
+			{
+				currentFilepath = filepath;
+				ClearScene();
+				SceneSerializer serializer(scene);
+				serializer.Deserialize(filepath);
+			}
+		}
+	}
+
+	void EditorLayer::SaveScene()
+	{
+		if (!currentFilepath.empty())
+		{
+			hasUnsavedChanges = false;
+
+			SceneSerializer serializer(scene);
+			serializer.Serialize(currentFilepath);
+		}
+		else
+			SaveAsScene();
+	}
+
+	void EditorLayer::SaveAsScene()
+	{
+		auto initialDirectory = std::filesystem::absolute("./").string();
+		std::string filepath = FileDialog::SaveFile(initialDirectory.c_str(), "GBC Scene (*.gscn)\0*.gscn\0");
+		if (!filepath.empty())
+		{
+			// Add extension to extensionless path
+			size_t index = filepath.find_last_of(".gscn");
+			if (index != filepath.size() - 1)
+				filepath += ".gscn";
+
+			currentFilepath = filepath;
+			SaveScene();
+		}
 	}
 }

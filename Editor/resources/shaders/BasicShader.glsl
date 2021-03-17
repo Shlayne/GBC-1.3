@@ -10,17 +10,14 @@ out vec2 _texCoord;
 out vec4 _tintColor;
 out flat uint _texIndex;
 
-uniform mat4 projection;
-uniform mat4 cameraTransform;
+uniform mat4 viewProjection;
 
 void main()
 {
-	mat4 view = inverse(cameraTransform);
-	
-	gl_Position = projection * view * vec4(position, 1.0);
 	_texCoord = texCoord;
 	_tintColor = tintColor;
 	_texIndex = texIndex;
+	gl_Position = viewProjection * vec4(position, 1.0);
 }
 
 #type fragment

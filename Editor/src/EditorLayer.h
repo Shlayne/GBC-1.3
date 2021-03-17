@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gbc.h"
+#include "GBC/Rendering/EditorCamera.h"
 #include "Panels/SceneViewportPanel.h"
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ScenePropertiesPanel.h"
@@ -20,8 +21,25 @@ namespace gbc
 	#endif
 		virtual void OnEvent(Event& event) override;
 	private:
+		bool OnWindowCloseEvent(WindowCloseEvent& event);
+		bool OnKeyPressEvent(KeyPressEvent& event);
+
+		void ClearScene();
+
+		void NewScene();
+		void OpenScene();
+		void SaveScene();
+		void SaveAsScene();
+
+		std::string currentFilepath;
+		bool hasUnsavedChanges = false;
+		
+		EditorCamera editorCamera;
 		Ref<Scene> scene;
 		Ref<Framebuffer> framebuffer;
+
+		Entity selectedEntity;
+		int gizmoType = -1;
 
 		// Panels
 		template<typename T, typename... Args>
@@ -40,14 +58,6 @@ namespace gbc
 }
 
 // TODO:
-// 1) After resizing viewport, camera controller rotation freaks out because mouse position has changed
-// when imgui wrapper was blocking events, so when clicking back into viewport, mouseDPos will be incorrect.
-// Same thing when going into and out of fullscreen.
-// TLDR: Figure out a way to make mouseDPos 0 on viewport/window focus.
-// 2) Use "#if GBC_PROJECT_EDITOR" for editor-only code, e.g. entityIDs in BasicRender::Vertex
-// 3) BUGS in ScenePropertiesPanel.cpp:
-//		a) Tag component text edit box keeps getting deselected
-//		b) Cannot undock scene properties panel when selectedEntity is valid
-// 4) Editor camera
+// 1) Use "#if GBC_PROJECT_EDITOR" for editor-only code, e.g. entityIDs in BasicRender::Vertex
 
-// https://www.youtube.com/watch?v=zn7N7zHgCcs&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT&index=92
+// https://www.youtube.com/watch?v=f-GbHye1VFQ&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT&index=96

@@ -1,0 +1,14 @@
+Scene: Untitled
+Entities:
+  - Entity: 0
+    MeshComponent:
+      Mesh: resources/models/square.obj
+    RenderableComponent:
+      Texture: resources/textures/grass_side.png
+      TintColor: [1, 1, 1, 1]
+    TagComponent:
+      Tag: Textured Square
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]

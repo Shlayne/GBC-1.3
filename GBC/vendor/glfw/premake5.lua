@@ -7,8 +7,8 @@ project "glfw"
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
 	files {
-		"include/GLFW/glfw3.h",
-		"include/GLFW/glfw3native.h",
+		"include/glfw/glfw3.h",
+		"include/glfw/glfw3native.h",
 		"src/glfw_config.h",
 		"src/context.c",
 		"src/init.c",

@@ -21,6 +21,7 @@ project "Editor"
 		"%{wks.location}/GBC/src",
 		"%{includedir.glm}",
 		"%{includedir.imgui}",
+		"%{includedir.imguizmo}",
 		"%{includedir.stb}",
 		"%{includedir.yaml}",
 

@@ -27,12 +27,15 @@ namespace gbc
 
 	struct TextureSpecification
 	{
+		TextureSpecification() = default;
 		TextureSpecification(Ref<LocalTexture2D> texture)
 			: texture(texture) {}
 		TextureSpecification(Ref<LocalTexture2D> texture, TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapS, TextureWrapMode wrapT)
 			: texture(texture), minFilter(minFilter), magFilter(magFilter), wrapS(wrapS), wrapT(wrapT) {}
+		TextureSpecification(TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapS, TextureWrapMode wrapT)
+			: minFilter(minFilter), magFilter(magFilter), wrapS(wrapS), wrapT(wrapT) {}
 
-		Ref<LocalTexture2D> texture;
+		Ref<LocalTexture2D> texture = nullptr;
 		TextureFilterMode minFilter = TextureFilterMode::Linear;
 		TextureFilterMode magFilter = TextureFilterMode::Nearest;
 		TextureWrapMode wrapS = TextureWrapMode::ClampToEdge;

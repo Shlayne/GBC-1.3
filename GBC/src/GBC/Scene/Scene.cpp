@@ -65,7 +65,7 @@ namespace gbc
 		});
 	}
 
-	void Scene::OnUpdate(Timestep timestep)
+	void Scene::OnUpdateRuntime(Timestep timestep)
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -75,7 +75,7 @@ namespace gbc
 		});
 	}
 
-	void Scene::OnRender()
+	void Scene::OnRenderRuntime()
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -115,6 +115,31 @@ namespace gbc
 		}
 	}
 
+	void Scene::OnUpdateEditor(Timestep timestep)
+	{
+		GBC_PROFILE_FUNCTION();
+
+	}
+
+	void Scene::OnRenderEditor(EditorCamera& camera)
+	{
+		GBC_PROFILE_FUNCTION();
+
+		Renderer::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+		Renderer::Clear();
+
+		BasicRenderer::BeginScene(camera);
+
+		auto group = registry.group(entt::get<MeshComponent, TransformComponent, RenderableComponent>);
+		for (auto entity : group)
+		{
+			auto [mesh, transform, renderable] = group.get<MeshComponent, TransformComponent, RenderableComponent>(entity);
+			BasicRenderer::Submit(mesh, transform, renderable);
+		}
+
+		BasicRenderer::EndScene();
+	}
+
 	void Scene::OnViewportResize(int width, int height)
 	{
 		GBC_PROFILE_FUNCTION();
@@ -132,6 +157,16 @@ namespace gbc
 					camera.camera.OnViewportResize(viewportSize.x, viewportSize.y);
 			}
 		}
+	}
+
+	Entity Scene::GetPrimaryCameraEntity()
+	{
+		// TODO: primary camera entity should be stored in Scene, not in CameraComponent
+		auto view = registry.view<CameraComponent>();
+		for (auto handle : view)
+			if (view.get<CameraComponent>(handle).primary)
+				return {handle, this};
+		return {};
 	}
 
 	template<typename T>

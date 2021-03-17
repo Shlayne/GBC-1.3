@@ -18,10 +18,13 @@
 #include <chrono>
 #include <regex>
 
+#include "GBC/Math/Math.h"
 #include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/quaternion.hpp"
+#include "glm/gtx/matrix_decompose.hpp"
 
 #include "GBC/Core/Logger.h"
 #include "GBC/Core/Core.h"

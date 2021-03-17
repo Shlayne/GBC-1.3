@@ -8,24 +8,12 @@ project "imgui"
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
 	files {
-		"include/imgui/imconfig.h",
-		"include/imgui/imgui.h",
-		"include/imgui/imgui_impl_glfw.h",
-		"include/imgui/imgui_impl_opengl3.h",
-		"include/imgui/imgui_internal.h",
-		"include/imgui/imstb_rectpack.h",
-		"include/imgui/imstb_textedit.h",
-		"include/imgui/imstb_truetype.h",
-		"imgui.cpp",
-		"imgui_demo.cpp",
-		"imgui_draw.cpp",
-		"imgui_impl_glfw.cpp",
-		"imgui_impl_opengl3.cpp",
-		"imgui_tables.cpp",
-		"imgui_widgets.cpp"
+		"include/imgui/**.h",
+		"src/**.cpp"
 	}
 
 	includedirs {
+		"include/imgui",
 		"%{includedir.glad}",
 		"%{includedir.glfw}"
 	}

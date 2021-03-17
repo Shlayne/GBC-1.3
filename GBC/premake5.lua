@@ -26,6 +26,7 @@ project "GBC"
 		"%{includedir.glfw}",
 		"%{includedir.glm}",
 		"%{includedir.imgui}",
+		"%{includedir.imguizmo}",
 		"%{includedir.spdlog}",
 		"%{includedir.yaml}",
 
@@ -39,6 +40,7 @@ project "GBC"
 		"glfw",
 		"glm",
 		"imgui",
+		"imguizmo",
 		"stb",
 		"yaml",
 		"opengl32.lib"

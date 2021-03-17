@@ -7,6 +7,10 @@ project "Sandbox"
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
+	defines {
+		"GBC_PROJECT_SANDBOX"
+	}
+
 	files {
 		"src/**.h",
 		"src/**.cpp"
@@ -17,6 +21,7 @@ project "Sandbox"
 		"%{wks.location}/GBC/src",
 		"%{includedir.glm}",
 		"%{includedir.imgui}",
+		"%{includedir.imguizmo}",
 		"%{includedir.stb}",
 		"%{includedir.yaml}",
 

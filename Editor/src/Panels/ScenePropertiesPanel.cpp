@@ -14,6 +14,8 @@ namespace gbc
 	{
 		if (entity.HasComponent<T>())
 		{
+			ImGui::PushID(label.c_str());
+
 			const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
 				ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
 
@@ -47,17 +49,21 @@ namespace gbc
 
 			if (removeComponent)
 				entity.RemoveComponent<T>();
+
+			ImGui::PopID();
 		}
 	}
 
 	template<typename T>
-	static void DrawAddComponent(const std::string& label, Entity entity)
+	static bool DrawAddComponent(const std::string& label, Entity entity)
 	{
 		if (!entity.HasComponent<T>() && ImGui::MenuItem(label.c_str()))
 		{
 			entity.AddComponent<T>();
 			ImGui::CloseCurrentPopup();
+			return true;
 		}
+		return false;
 	}
 
 	ScenePropertiesPanel::ScenePropertiesPanel(const std::string& name, Entity& selectedEntity)
@@ -73,6 +79,8 @@ namespace gbc
 			{
 				//if (selectedEntity.Has<TagComponent>())
 				{
+					ImGui::PushID("TagComponent");
+
 					std::string& tag = selectedEntity.GetComponent<TagComponent>().tag;
 
 					static constexpr size_t bufferSize = 256;
@@ -82,6 +90,8 @@ namespace gbc
 
 					if (ImGui::InputText("", buffer, sizeof(buffer)))
 						tag = buffer;
+
+					ImGui::PopID();
 				}
 
 				ImGui::SameLine();
@@ -90,10 +100,10 @@ namespace gbc
 					ImGui::OpenPopup("AddComponent");
 				if (ImGui::BeginPopup("AddComponent"))
 				{
-					DrawAddComponent<TransformComponent>("Transform", selectedEntity);
-					DrawAddComponent<CameraComponent>("Camera", selectedEntity);
-					DrawAddComponent<MeshComponent>("Mesh", selectedEntity);
-					DrawAddComponent<RenderableComponent>("Renderable", selectedEntity);
+					if (!DrawAddComponent<TransformComponent>("Transform", selectedEntity))
+					if (!DrawAddComponent<CameraComponent>("Camera", selectedEntity))
+					if (!DrawAddComponent<MeshComponent>("Mesh", selectedEntity))
+					if (!DrawAddComponent<RenderableComponent>("Renderable", selectedEntity));
 					ImGui::EndPopup();
 				}
 				ImGui::PopItemWidth();

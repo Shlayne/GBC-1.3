@@ -1,0 +1,14 @@
+Scene: Untitled
+Entities:
+  - Entity: 0
+    MeshComponent:
+      Mesh: resources/models/cube.obj
+    RenderableComponent:
+      Texture: resources/textures/dirt.png
+      TintColor: [1, 1, 1, 1]
+    TagComponent:
+      Tag: Cube
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]

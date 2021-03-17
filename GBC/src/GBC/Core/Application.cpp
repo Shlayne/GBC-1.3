@@ -104,12 +104,15 @@ namespace gbc
 		GBC_PROFILE_FUNCTION();
 
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowCloseEvent>(GBC_BIND_FUNC(OnWindowCloseEvent));
 		dispatcher.Dispatch<WindowResizeEvent>(GBC_BIND_FUNC(OnWindowResizeEvent));
 		dispatcher.Dispatch<WindowMinimizeEvent>(GBC_BIND_FUNC(OnWindowMinimizeEvent));
 
 		for (auto it = layerStack.rbegin(); !event.handled && it != layerStack.rend(); ++it)
 			(*it)->OnEvent(event);
+
+		// Let the client handle window close events if they want to.
+		if (!event.handled)
+			dispatcher.Dispatch<WindowCloseEvent>(GBC_BIND_FUNC(OnWindowCloseEvent));
 	}
 
 	bool Application::OnWindowCloseEvent(WindowCloseEvent& event)

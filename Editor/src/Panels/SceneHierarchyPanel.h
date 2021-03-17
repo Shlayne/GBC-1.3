@@ -10,17 +10,13 @@ namespace gbc
 	class SceneHierarchyPanel : public Panel
 	{
 	public:
-		SceneHierarchyPanel(const std::string& name, const Ref<Scene>& context);
-		
-		void SetContext(const Ref<Scene>& context);
+		SceneHierarchyPanel(const std::string& name, Ref<Scene>& context, Entity& selectedEntity);
 
 		virtual void OnImGuiRender() override;
-
-		inline Entity& GetSelectedEntity() { return selectedEntity; }
 	private:
 		void DrawEntityNode(Entity entity);
 
-		Ref<Scene> context;
-		Entity selectedEntity;
+		Ref<Scene>& context;
+		Entity& selectedEntity;
 	};
 }
