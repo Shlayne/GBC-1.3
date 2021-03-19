@@ -11,27 +11,31 @@
 
 namespace gbc
 {
-	SceneViewportPanel::SceneViewportPanel(const std::string& name, const Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, EditorCamera& editorCamera)
-		: Panel(name), framebuffer(framebuffer), context(context), selectedEntity(selectedEntity), gizmoType(gizmoType), editorCamera(editorCamera) {}
-	
+	SceneViewportPanel::SceneViewportPanel(const std::string& name, bool& viewportSizeChanged, bool& viewportFocused, bool& viewportHovered, glm::ivec2& viewportSize, glm::vec2& viewportPos, glm::vec2& absoluteMousePos, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, EditorCamera& editorCamera)
+		: Panel(name), viewportSizeChanged(viewportSizeChanged), viewportFocused(viewportFocused), viewportHovered(viewportHovered), viewportSize(viewportSize), viewportPos(viewportPos), absoluteMousePos(absoluteMousePos), framebuffer(framebuffer), context(context), selectedEntity(selectedEntity), gizmoType(gizmoType), editorCamera(editorCamera) {}
+
 	void SceneViewportPanel::OnImGuiRender()
 	{
 		if (enabled)
 		{
-			viewportSizeChanged = false;
-
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
 			ImGui::Begin(name.c_str(), &enabled);
 			ImGui::PopStyleVar();
 
 			viewportFocused = ImGui::IsWindowFocused();
 			viewportHovered = ImGui::IsWindowHovered();
+			ImVec2 viewportOffset = ImGui::GetCursorPos();
 
 			ImVec2 size = ImGui::GetContentRegionAvail();
 			viewportSizeChanged = size.x != viewportSize.x || size.y != viewportSize.y;
 			viewportSize = {size.x, size.y};
 			ImGui::Image((void*)(size_t)framebuffer->GetColorAttachment(), size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
-			
+
+			ImVec2 windowPos = ImGui::GetWindowPos();
+			viewportPos = {windowPos.x + viewportOffset.x,	windowPos.y + viewportOffset.y};
+			ImVec2 mousePos = ImGui::GetMousePos();
+			absoluteMousePos = {mousePos.x, mousePos.y};
+
 			// Gizmos
 			if (selectedEntity && gizmoType != -1)
 			{

@@ -12,6 +12,7 @@ namespace gbc
 		glm::vec4 tintColor;
 		glm::vec2 texCoord;
 		unsigned int texIndex;
+		int entityID;
 	};
 
 	struct BasicRendererData
@@ -65,7 +66,8 @@ namespace gbc
 			{BufferElementType::Float3, "position" },
 			{BufferElementType::Float4, "tintColor"},
 			{BufferElementType::Float2, "texCoord" },
-			{BufferElementType::UInt,   "texIndex" }
+			{BufferElementType::UInt,   "texIndex" },
+			{BufferElementType::Int,    "entityID" }
 		});
 
 		data.vertexArray = VertexArray::CreateRef();
@@ -169,7 +171,7 @@ namespace gbc
 		return data.textureCount;
 	}
 
-	void BasicRenderer::Submit(const Ref<BasicMesh>& mesh, const glm::mat4& transform, const RenderableComponent& renderableComponent)
+	void BasicRenderer::Submit(const Ref<BasicMesh>& mesh, const glm::mat4& transform, const RenderableComponent& renderableComponent, int entityID)
 	{
 		if (mesh == nullptr)
 			return;
@@ -193,6 +195,7 @@ namespace gbc
 			data.localVertexBufferCurrent->texCoord = mesh->vertices[i].texCoord;
 			data.localVertexBufferCurrent->tintColor = mesh->vertices[i].tintColor * renderableComponent.tintColor;
 			data.localVertexBufferCurrent->texIndex = texIndex;
+			data.localVertexBufferCurrent->entityID = entityID;
 		}
 
 		// Handle indices

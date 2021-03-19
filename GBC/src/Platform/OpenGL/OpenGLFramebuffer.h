@@ -12,8 +12,6 @@ namespace gbc
 
 		virtual void Bind() override;
 		virtual void Unbind() override;
-		virtual void BindColorTexture(unsigned int index = 0, unsigned int slot = 0) override;
-		virtual void UnbindColorTexture(unsigned int slot = 0) override;
 
 		virtual void OnViewportResize(int width, int height) override;
 		virtual const FramebufferSpecification& GetSpecification() const override { return specification; }
@@ -21,9 +19,9 @@ namespace gbc
 		virtual RendererID GetColorAttachment(unsigned int index = 0) const override { return index < colorAttachments.size() ? colorAttachments[index] : 0; }
 		virtual RendererID GetDepthAttachment() const override { return depthAttachment; }
 
-		virtual bool GetColorPixel(void* pixel, int x, int y, unsigned int index = 0) const override;
+		virtual void GetColorPixel(void* pixel, int x, int y, unsigned int index = 0) const override;
 
-		virtual void ClearColorAttachment(const void* value, unsigned int index = 0) override;
+		virtual void ClearColorAttachment(int value, unsigned int index = 0) override;
 	private:
 		void Recreate();
 		void Clear();

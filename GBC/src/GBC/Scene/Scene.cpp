@@ -125,16 +125,13 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		Renderer::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
-		Renderer::Clear();
-
 		BasicRenderer::BeginScene(camera);
 
 		auto group = registry.group(entt::get<MeshComponent, TransformComponent, RenderableComponent>);
 		for (auto entity : group)
 		{
 			auto [mesh, transform, renderable] = group.get<MeshComponent, TransformComponent, RenderableComponent>(entity);
-			BasicRenderer::Submit(mesh, transform, renderable);
+			BasicRenderer::Submit(mesh, transform, renderable, static_cast<int>(entity));
 		}
 
 		BasicRenderer::EndScene();

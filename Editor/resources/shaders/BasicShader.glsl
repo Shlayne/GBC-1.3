@@ -5,10 +5,12 @@ layout(location = 0) in vec3 position;
 layout(location = 1) in vec4 tintColor;
 layout(location = 2) in vec2 texCoord;
 layout(location = 3) in uint texIndex;
+layout(location = 4) in int entityID;
 
 out vec2 _texCoord;
 out vec4 _tintColor;
 out flat uint _texIndex;
+out flat int _entityID;
 
 uniform mat4 viewProjection;
 
@@ -17,6 +19,7 @@ void main()
 	_texCoord = texCoord;
 	_tintColor = tintColor;
 	_texIndex = texIndex;
+	_entityID = entityID;
 	gl_Position = viewProjection * vec4(position, 1.0);
 }
 
@@ -26,8 +29,10 @@ void main()
 in vec2 _texCoord;
 in vec4 _tintColor;
 in flat uint _texIndex;
+in flat int _entityID;
 
 layout(location = 0) out vec4 outColor;
+layout(location = 1) out int entityID;
 
 uniform sampler2D textures[32];
 
@@ -76,4 +81,6 @@ void main()
 	outColor = _tintColor * GetTextureColor();
 	if (outColor.a == 0.0)
 		discard;
+
+	entityID = _entityID;
 }

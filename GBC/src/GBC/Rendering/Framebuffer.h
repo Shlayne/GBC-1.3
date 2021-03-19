@@ -45,12 +45,13 @@ namespace gbc
 		FramebufferTextureSpecification() = default;
 		FramebufferTextureSpecification(FramebufferTextureFormat format)
 			: format(format) {}
-		FramebufferTextureSpecification(FramebufferTextureFormat format, FramebufferFilterMode minFilter, FramebufferFilterMode magFilter, FramebufferWrapMode wrapS, FramebufferWrapMode wrapT)
-			: format(format), minFilter(minFilter), magFilter(magFilter), wrapS(wrapS), wrapT(wrapT) {}
+		FramebufferTextureSpecification(FramebufferTextureFormat format, FramebufferFilterMode minFilter, FramebufferFilterMode magFilter, FramebufferWrapMode wrapR, FramebufferWrapMode wrapS, FramebufferWrapMode wrapT)
+			: format(format), minFilter(minFilter), magFilter(magFilter), wrapR(wrapR), wrapS(wrapS), wrapT(wrapT) {}
 
 		FramebufferTextureFormat format = FramebufferTextureFormat::None;
 		FramebufferFilterMode minFilter = FramebufferFilterMode::Linear;
 		FramebufferFilterMode magFilter = FramebufferFilterMode::Nearest;
+		FramebufferWrapMode wrapR = FramebufferWrapMode::ClampToEdge;
 		FramebufferWrapMode wrapS = FramebufferWrapMode::ClampToEdge;
 		FramebufferWrapMode wrapT = FramebufferWrapMode::ClampToEdge;
 	};
@@ -79,8 +80,6 @@ namespace gbc
 
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
-		virtual void BindColorTexture(unsigned int index = 0, unsigned int slot = 0) = 0;
-		virtual void UnbindColorTexture(unsigned int slot = 0) = 0;
 
 		virtual void OnViewportResize(int width, int height) = 0;
 		virtual const FramebufferSpecification& GetSpecification() const = 0;
@@ -88,9 +87,9 @@ namespace gbc
 		virtual RendererID GetColorAttachment(unsigned int index = 0) const = 0;
 		virtual RendererID GetDepthAttachment() const = 0;
 
-		virtual bool GetColorPixel(void* pixel, int x, int y, unsigned int index = 0) const = 0;
+		virtual void GetColorPixel(void* pixel, int x, int y, unsigned int index = 0) const = 0;
 
-		virtual void ClearColorAttachment(const void* value, unsigned int index = 0) = 0;
+		virtual void ClearColorAttachment(int value, unsigned int index = 0) = 0;
 
 		static Ref<Framebuffer> CreateRef(FramebufferSpecification specification); 
 		static Scope<Framebuffer> CreateScope(FramebufferSpecification specification);

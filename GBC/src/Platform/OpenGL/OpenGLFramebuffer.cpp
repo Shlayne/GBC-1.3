@@ -29,28 +29,16 @@ namespace gbc
 		return 0;
 	}
 
-	void GetOpenGLTypes(FramebufferTextureFormat inFormat, GLenum& internalFormat, GLenum& format, GLenum& type)
+	static GLenum GetOpenGLFormat(FramebufferTextureFormat format)
 	{
-		switch (inFormat)
+		switch (format)
 		{
-			case FramebufferTextureFormat::RGBA8:
-				internalFormat = GL_RGBA8;
-				format = GL_RGBA;
-				type = GL_UNSIGNED_BYTE;
-				return;
-			case FramebufferTextureFormat::RedInteger:
-				internalFormat = GL_R32I;
-				format = GL_RED_INTEGER;
-				type = GL_INT;
-				return;
-			case FramebufferTextureFormat::Depth24Stencil8:
-				internalFormat = GL_DEPTH24_STENCIL8;
-				format = GL_DEPTH24_STENCIL8;
-				type = GL_DEPTH_STENCIL_ATTACHMENT;
-				return;
+			case FramebufferTextureFormat::RGBA8:      return GL_RGBA8;
+			case FramebufferTextureFormat::RedInteger: return GL_RED_INTEGER;
 		}
 
 		GBC_CORE_ASSERT(false, "Unknown Framebuffer Texture Format!");
+		return 0;
 	}
 
 	static GLenum GetTextureTarget(bool multisampled)
@@ -68,11 +56,8 @@ namespace gbc
 		glBindTexture(textureTarget, id);
 	}
 
-	static void AttachColorTexture(unsigned int id, int samples, int width, int height, FramebufferTextureSpecification textureTpecification, int index)
+	static void AttachColorTexture(unsigned int id, int samples, GLenum internalFormat, GLenum format, int width, int height, FramebufferTextureSpecification textureSpecification, int index)
 	{
-		GLenum internalFormat, format, type;
-		GetOpenGLTypes(textureTpecification.format, internalFormat, format, type);
-
 		bool multisampled = samples > 1;
 		if (multisampled)
 		{
@@ -80,21 +65,19 @@ namespace gbc
 		}
 		else
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, nullptr);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GetOpenGLFilterMode(textureTpecification.minFilter));
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GetOpenGLFilterMode(textureTpecification.magFilter));
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GetOpenGLWrapMode(textureTpecification.wrapS));
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GetOpenGLWrapMode(textureTpecification.wrapT));
+			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, nullptr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GetOpenGLFilterMode(textureSpecification.minFilter));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GetOpenGLFilterMode(textureSpecification.magFilter));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GetOpenGLWrapMode(textureSpecification.wrapR));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GetOpenGLWrapMode(textureSpecification.wrapS));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GetOpenGLWrapMode(textureSpecification.wrapT));
 		}
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GetTextureTarget(multisampled), id, 0);
 	}
 
-	static void AttachDepthTexture(unsigned int id, int samples, int width, int height, FramebufferTextureSpecification textureTpecification)
+	static void AttachDepthTexture(unsigned int id, int samples, GLenum format, GLenum attachmentType, int width, int height, FramebufferTextureSpecification textureSpecification)
 	{
-		GLenum internalFormat, format, type;
-		GetOpenGLTypes(textureTpecification.format, internalFormat, format, type);
-
 		bool multisampled = samples > 1;
 		if (multisampled)
 		{
@@ -103,13 +86,14 @@ namespace gbc
 		else
 		{
 			glTexStorage2D(GL_TEXTURE_2D, 1, format, width, height);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GetOpenGLFilterMode(textureTpecification.minFilter));
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GetOpenGLFilterMode(textureTpecification.magFilter));
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GetOpenGLWrapMode(textureTpecification.wrapS));
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GetOpenGLWrapMode(textureTpecification.wrapT));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GetOpenGLFilterMode(textureSpecification.minFilter));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GetOpenGLFilterMode(textureSpecification.magFilter));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GetOpenGLWrapMode(textureSpecification.wrapR));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GetOpenGLWrapMode(textureSpecification.wrapS));
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GetOpenGLWrapMode(textureSpecification.wrapT));
 		}
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, type, GetTextureTarget(multisampled), id, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentType, GetTextureTarget(multisampled), id, 0);
 	}
 
 	OpenGLFramebuffer::OpenGLFramebuffer(FramebufferSpecification specification)
@@ -131,27 +115,6 @@ namespace gbc
 		Clear();
 	}
 
-	bool OpenGLFramebuffer::GetColorPixel(void* pixel, int x, int y, unsigned int index) const
-	{
-		if (index < colorAttachmentSpecifications.size() &&
-			x >= 0 && x < specification.width && y >= 0 && y < specification.height)
-		{
-			glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
-			GLenum internalFormat, format, type;
-			GetOpenGLTypes(colorAttachmentSpecifications[index].format, internalFormat, format, type);
-			glReadPixels(x, y, 1, 1, format, type, pixel);
-			return true;
-		}
-		return false;
-	}
-
-	void OpenGLFramebuffer::ClearColorAttachment(const void* value, unsigned int index)
-	{
-		GLenum internalFormat, format, type;
-		GetOpenGLTypes(colorAttachmentSpecifications[index].format, internalFormat, format, type);
-		glClearTexImage(colorAttachments[index], 0, format, type, value);
-	}
-
 	void OpenGLFramebuffer::Recreate()
 	{
 		Clear();
@@ -171,7 +134,16 @@ namespace gbc
 			for (size_t i = 0; i < colorAttachments.size(); i++)
 			{
 				BindTextures(textureTarget, colorAttachments[i]);
-				AttachColorTexture(colorAttachments[i], specification.samples, specification.width, specification.height, colorAttachmentSpecifications[i], (int)i);
+
+				switch (colorAttachmentSpecifications[i].format)
+				{
+					case FramebufferTextureFormat::RGBA8:
+						AttachColorTexture(colorAttachments[i], specification.samples, GL_RGBA8, GL_RGBA, specification.width, specification.height, colorAttachmentSpecifications[i], (int)i);
+						break;
+					case FramebufferTextureFormat::RedInteger:
+						AttachColorTexture(colorAttachments[i], specification.samples, GL_R32I, GL_RED_INTEGER, specification.width, specification.height, colorAttachmentSpecifications[i], (int)i);
+						break;
+				}
 			}
 		}
 	
@@ -179,7 +151,13 @@ namespace gbc
 		{
 			CreateTextures(textureTarget, &depthAttachment, 1);
 			BindTextures(textureTarget, depthAttachment);
-			AttachDepthTexture(depthAttachment, specification.samples, specification.width, specification.height, depthAttachmentSpecification);
+
+			switch (depthAttachmentSpecification.format)
+			{
+				case FramebufferTextureFormat::Depth24Stencil8:
+					AttachDepthTexture(depthAttachment, specification.samples, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT, specification.width, specification.height, depthAttachmentSpecification);
+					break;
+			}
 		}
 
 		int maxColorAttachments = Renderer::GetMaxFramebufferColorAttachments();
@@ -187,7 +165,7 @@ namespace gbc
 		{
 			GBC_CORE_ASSERT(colorAttachments.size() <= maxColorAttachments, "Too many Framebuffer color attachments!");
 			GLenum* buffers = (GLenum*)alloca(colorAttachments.size() * sizeof(GLenum));
-			for (size_t i = 0; i < colorAttachments.size(); i++)
+			for (unsigned int i = 0; i < (unsigned int)colorAttachments.size(); i++)
 				buffers[i] = (GLenum)(GL_COLOR_ATTACHMENT0 + i);
 
 			glDrawBuffers((int)colorAttachments.size(), buffers);
@@ -228,22 +206,28 @@ namespace gbc
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void OpenGLFramebuffer::BindColorTexture(unsigned int index, unsigned int slot)
-	{
-		GBC_CORE_ASSERT(index < colorAttachments.size());
-		glBindTextureUnit(slot, colorAttachments[index]);
-	}
-
-	void OpenGLFramebuffer::UnbindColorTexture(unsigned int slot)
-	{
-		glBindTextureUnit(slot, 0);
-	}
-
 	void OpenGLFramebuffer::OnViewportResize(int width, int height)
 	{
 		GBC_CORE_ASSERT(width <= Renderer::GetMaxFramebufferWidth() && height <= Renderer::GetMaxFramebufferHeight(), "Framebuffer too large!");
 		specification.width = width;
 		specification.height = height;
 		Recreate();
+	}
+
+	void OpenGLFramebuffer::GetColorPixel(void* pixel, int x, int y, unsigned int index) const
+	{
+		GBC_CORE_ASSERT(index < colorAttachments.size() && x >= 0 && x < specification.width && y >= 0 && y < specification.height, "Framebuffer index or position out of bounds!");
+
+		glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
+		// TODO: abstract this---VVVVVVVVVVVVVV--VVVVVV
+		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, pixel);
+	}
+
+	void OpenGLFramebuffer::ClearColorAttachment(int value, unsigned int index)
+	{
+		GBC_CORE_ASSERT(index < colorAttachments.size(), "Framebuffer index out of bounds!");
+
+		// TODO: abstract this------------------------------------------------------------------------------------VVVVVV
+		glClearTexImage(colorAttachments[index], 0, GetOpenGLFormat(colorAttachmentSpecifications[index].format), GL_INT, &value);
 	}
 }

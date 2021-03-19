@@ -103,7 +103,7 @@ namespace gbc
 					if (!DrawAddComponent<TransformComponent>("Transform", selectedEntity))
 					if (!DrawAddComponent<CameraComponent>("Camera", selectedEntity))
 					if (!DrawAddComponent<MeshComponent>("Mesh", selectedEntity))
-					if (!DrawAddComponent<RenderableComponent>("Renderable", selectedEntity));
+					DrawAddComponent<RenderableComponent>("Renderable", selectedEntity);
 					ImGui::EndPopup();
 				}
 				ImGui::PopItemWidth();

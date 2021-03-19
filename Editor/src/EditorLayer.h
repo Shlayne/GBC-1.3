@@ -23,6 +23,7 @@ namespace gbc
 	private:
 		bool OnWindowCloseEvent(WindowCloseEvent& event);
 		bool OnKeyPressEvent(KeyPressEvent& event);
+		bool OnMouseButtonPressEvent(MouseButtonPressEvent& event);
 
 		void ClearScene();
 
@@ -37,6 +38,13 @@ namespace gbc
 		EditorCamera editorCamera;
 		Ref<Scene> scene;
 		Ref<Framebuffer> framebuffer;
+
+		bool viewportSizeChanged = false;
+		bool viewportFocused = false;
+		bool viewportHovered = false;
+		glm::ivec2 viewportSize{1};
+		glm::vec2 viewportPos{0.0f};
+		glm::vec2 absoluteMousePos{0.0f};
 
 		Entity selectedEntity;
 		int gizmoType = -1;
@@ -58,6 +66,6 @@ namespace gbc
 }
 
 // TODO:
-// 1) Use "#if GBC_PROJECT_EDITOR" for editor-only code, e.g. entityIDs in BasicRender::Vertex
+// 1) Scene base class, then EditorScene and RuntimeScene inherit from Scene
 
-// https://www.youtube.com/watch?v=f-GbHye1VFQ&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT&index=96
+// Waiting for episode 100 https://www.youtube.com/watch?v=CU9v3uUgRaE&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT&index=99

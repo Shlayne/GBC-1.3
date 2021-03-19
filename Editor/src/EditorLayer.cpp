@@ -13,32 +13,20 @@ namespace gbc
 
 		Window& window = Application::Get().GetWindow();
 
-		editorCamera = EditorCamera(90.0f, (float)window.GetWidth()/ (float)window.GetHeight(), 0.001f, 1000.0f);
+		editorCamera = EditorCamera(90.0f, 0.001f, 1000.0f);
 		editorCamera.OnViewportResize(window.GetWidth(), window.GetHeight());
 
 		FramebufferSpecification framebufferSpecification;
 		framebufferSpecification.width = window.GetWidth();
 		framebufferSpecification.height = window.GetHeight();
-		framebufferSpecification.attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth24Stencil8};
+		framebufferSpecification.attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RedInteger, FramebufferTextureFormat::Depth24Stencil8};
 		framebuffer = Framebuffer::CreateRef(framebufferSpecification);
 
 		scene = CreateRef<Scene>();
-
-		//// TODO: Deserialize scene
-		//Entity entity = scene->CreateEntity("Textured Cube");
-		//entity.AddComponent<MeshComponent>(CreateRef<BasicMesh>(OBJLoader::LoadOBJ("resources/models/cube.obj")));
-		//entity.AddComponent<RenderableComponent>(Texture::CreateRef(CreateRef<LocalTexture2D>("resources/textures/grass_side.png", 4, true)));
-
-		//// TODO: Editor Camera with required key press to activate
-		//Entity camera = scene->CreateEntity("Camera Controller");
-		//auto& cameraCameraComponent = camera.AddComponent<CameraComponent>();
-		//cameraCameraComponent.primary = true;
-		//cameraCameraComponent.camera.SetProjectionType(SceneCamera::ProjectionType::Perspective);
-		//camera.AddComponent<NativeScriptComponent>().Bind<PerspectiveCameraControllerScript>();
-
 		scene->OnCreate();
 
-		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer, scene, selectedEntity, gizmoType, editorCamera);
+		// TODO: Figure out a different way to have Panels change values in EditorLayer
+		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", viewportSizeChanged, viewportFocused, viewportHovered, viewportSize, viewportPos, absoluteMousePos, framebuffer, scene, selectedEntity, gizmoType, editorCamera);
 		sceneHierarchyPanel = AddPanel<SceneHierarchyPanel>("Scene Hierarchy", scene, selectedEntity);
 		scenePropertiesPanel = AddPanel<ScenePropertiesPanel>("Scene Properties", selectedEntity);
 #if GBC_ENABLE_STATS
@@ -63,18 +51,15 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		bool viewportFocused = sceneViewportPanel->IsViewportFocused();
-		bool viewportHovered = sceneViewportPanel->IsViewportHovered();
 		Application::Get().GetImGuiLayer().SetBlockEvents(!viewportFocused && !viewportHovered);
 
-		if (sceneViewportPanel->HasViewportSizeChanged())
+		if (viewportSizeChanged)
 		{
-			const glm::vec2& viewportSize = sceneViewportPanel->GetViewportSize();
-			int width = (int)viewportSize.x;
-			int height = (int)viewportSize.y;
+			viewportSizeChanged = false;
 
-			editorCamera.OnViewportResize(width, height);
-			scene->OnViewportResize(width, height);
+			editorCamera.OnViewportResize(viewportSize.x, viewportSize.y);
+			framebuffer->OnViewportResize(viewportSize.x, viewportSize.y);
+			scene->OnViewportResize(viewportSize.x, viewportSize.y);
 		}
 
 		editorCamera.OnUpdate(timestep);
@@ -90,7 +75,13 @@ namespace gbc
 	#endif
 
 		framebuffer->Bind();
+
+		Renderer::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+		Renderer::Clear();
+		framebuffer->ClearColorAttachment(-1, 1);
+
 		scene->OnRenderEditor(editorCamera);
+
 		framebuffer->Unbind();
 	}
 
@@ -170,6 +161,7 @@ namespace gbc
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<WindowCloseEvent>(GBC_BIND_FUNC(OnWindowCloseEvent));
 		dispatcher.Dispatch<KeyPressEvent>(GBC_BIND_FUNC(OnKeyPressEvent));
+		dispatcher.Dispatch<MouseButtonPressEvent>(GBC_BIND_FUNC(OnMouseButtonPressEvent));
 
 		if (!event.handled)
 			editorCamera.OnEvent(event);
@@ -234,6 +226,28 @@ namespace gbc
 				break;
 		}
 
+		return false;
+	}
+
+	bool EditorLayer::OnMouseButtonPressEvent(MouseButtonPressEvent& event)
+	{
+		if (viewportHovered && viewportFocused && event.GetButton() == Mousecode::ButtonLeft && !Input::IsKeyPressed(Keycode::LeftAlt) && !ImGuizmo::IsOver())
+		{
+			glm::ivec2 relativeMousePos = absoluteMousePos - viewportPos;
+			relativeMousePos.y = viewportSize.y - 1 - relativeMousePos.y;
+
+			if (relativeMousePos.x >= 0 && relativeMousePos.x < viewportSize.x &&
+				relativeMousePos.y >= 0 && relativeMousePos.y < viewportSize.y)
+			{
+				int pixel = -1;
+				framebuffer->Bind();
+				framebuffer->GetColorPixel(&pixel, relativeMousePos.x, relativeMousePos.y, 1);
+				framebuffer->Unbind();
+
+				selectedEntity = pixel != -1 ? Entity(static_cast<entt::entity>(pixel), scene.get()) : Entity();
+				return true;
+			}
+		}
 		return false;
 	}
 

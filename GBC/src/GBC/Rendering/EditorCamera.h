@@ -10,7 +10,7 @@ namespace gbc
 	{
 	public:
 		EditorCamera() = default;
-		EditorCamera(float fov, float aspectRatio, float nearClip, float farClip);
+		EditorCamera(float fov, float nearClip, float farClip);
 
 		void OnUpdate(Timestep timestep);
 		void OnEvent(Event& event);

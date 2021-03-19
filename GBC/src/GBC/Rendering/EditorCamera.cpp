@@ -4,8 +4,8 @@
 
 namespace gbc
 {
-	EditorCamera::EditorCamera(float fov, float aspectRatio, float nearClip, float farClip)
-		: Camera(), fov(fov), aspectRatio(aspectRatio), nearClip(nearClip), farClip(farClip)
+	EditorCamera::EditorCamera(float fov, float nearClip, float farClip)
+		: Camera(), fov(fov), nearClip(nearClip), farClip(farClip)
 	{
 		RecalculateView();
 	}
