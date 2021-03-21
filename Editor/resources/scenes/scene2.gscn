@@ -2,9 +2,9 @@ Scene: Untitled
 Entities:
   - Entity: 0
     MeshComponent:
-      Mesh: resources/models/cube.obj
+      Filepath: resources/models/cube.obj
     RenderableComponent:
-      Texture: resources/textures/dirt.png
+      Filepath: resources/textures/dirt.png
       TintColor: [1, 1, 1, 1]
     TagComponent:
       Tag: Cube

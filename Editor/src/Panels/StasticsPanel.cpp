@@ -1,6 +1,7 @@
 #include "StasticsPanel.h"
 #if GBC_ENABLE_STATS
 #include "imgui/imgui.h"
+#include "GBC/ImGui/ImGuiHelper.h"
 
 namespace gbc
 {
@@ -11,13 +12,13 @@ namespace gbc
 	{
 		if (enabled)
 		{
-			ImGui::Begin("Statistics", &enabled);
-			ImGui::Text("Renderer");
-			ImGui::Indent();
-			ImGui::Text("Draw Calls:    %d", statistics.drawCalls);
-			ImGui::Text("Index Count:   %d", statistics.indexCount);
-			ImGui::Text("Vertex Count:  %d", statistics.vertexCount);
-			ImGui::Text("Texture Count: %d", statistics.textureCount);
+			ImGui::Begin(name.c_str(), &enabled);
+			ImGuiHelper::BeginTable("Renderer", 2);
+			ImGuiHelper::Text("Draw Calls"); ImGuiHelper::NextTableColumn(); ImGuiHelper::Text(std::to_string(statistics.drawCalls)); ImGuiHelper::NextTableColumn();
+			ImGuiHelper::Text("Index Count"); ImGuiHelper::NextTableColumn(); ImGuiHelper::Text(std::to_string(statistics.indexCount)); ImGuiHelper::NextTableColumn();
+			ImGuiHelper::Text("Vertex Count"); ImGuiHelper::NextTableColumn(); ImGuiHelper::Text(std::to_string(statistics.vertexCount)); ImGuiHelper::NextTableColumn();
+			ImGuiHelper::Text("Texture Count"); ImGuiHelper::NextTableColumn(); ImGuiHelper::Text(std::to_string(statistics.textureCount));
+			ImGuiHelper::EndTable();
 			ImGui::End();
 		}
 	}

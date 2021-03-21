@@ -14,6 +14,7 @@ namespace gbc
 		BasicMesh(const BasicMesh& mesh);
 		BasicMesh(BasicMesh&& mesh) noexcept;
 		BasicMesh& operator=(BasicMesh&& mesh) noexcept;
+		BasicMesh(const OBJModel& mesh);
 		BasicMesh(OBJModel&& mesh) noexcept;
 
 		void Create(unsigned int vertexCount, unsigned int indexCount);
@@ -22,6 +23,5 @@ namespace gbc
 		unsigned int indexCount = 0;
 		BasicVertex* vertices = nullptr;
 		unsigned int* indices = nullptr;
-		std::string filepath;
 	};
 }

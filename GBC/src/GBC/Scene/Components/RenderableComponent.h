@@ -16,6 +16,7 @@ namespace gbc
 		inline operator Ref<Texture>&() { return texture; }
 		inline operator const Ref<Texture>&() const { return texture; }
 
+		std::string filepath;
 		Ref<Texture> texture;
 		glm::vec4 tintColor{1.0f};
 	};

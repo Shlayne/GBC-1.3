@@ -6,6 +6,7 @@
 #include "GBC/Scene/Components/CameraComponent.h"
 #include "GBC/Scene/Components/MeshComponent.h"
 #include "GBC/Scene/Components/RenderableComponent.h"
+#include "GBC/IO/FileDialog.h"
 
 namespace gbc
 {
@@ -16,8 +17,8 @@ namespace gbc
 		{
 			ImGui::PushID(label.c_str());
 
-			const ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
-				ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
+				ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth;
 
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
@@ -25,7 +26,7 @@ namespace gbc
 			ImGuiStyle& style = ImGui::GetStyle();
 			float lineHeight = font->FontSize + style.FramePadding.y * 2.0f;
 
-			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), flags, label.c_str());
+			bool open = ImGui::TreeNodeEx(label.c_str(), flags, label.c_str());
 
 			// TODO: This will eventually have more than just remove component, i.e. other settings.
 			ImGui::SameLine(contentRegionAvailable.x - lineHeight + style.FramePadding.x * 1.5f);
@@ -42,8 +43,9 @@ namespace gbc
 
 			if (open)
 			{
+				ImGui::Unindent();
 				func(entity.GetComponent<T>());
-				ImGui::Separator();
+				ImGui::Indent();
 				ImGui::TreePop();
 			}
 
@@ -57,13 +59,17 @@ namespace gbc
 	template<typename T>
 	static bool DrawAddComponent(const std::string& label, Entity entity)
 	{
-		if (!entity.HasComponent<T>() && ImGui::MenuItem(label.c_str()))
+		if (!entity.HasComponent<T>())
 		{
-			entity.AddComponent<T>();
-			ImGui::CloseCurrentPopup();
-			return true;
+			if (ImGui::MenuItem(label.c_str()))
+			{
+				entity.AddComponent<T>();
+				ImGui::CloseCurrentPopup();
+			}
+			else
+				return false;
 		}
-		return false;
+		return true;
 	}
 
 	ScenePropertiesPanel::ScenePropertiesPanel(const std::string& name, Entity& selectedEntity)
@@ -80,52 +86,37 @@ namespace gbc
 				//if (selectedEntity.Has<TagComponent>())
 				{
 					ImGui::PushID("TagComponent");
-
-					std::string& tag = selectedEntity.GetComponent<TagComponent>().tag;
-
-					static constexpr size_t bufferSize = 256;
-					char buffer[bufferSize]{0};
-					GBC_CORE_ASSERT(tag.size() < bufferSize);
-					strcpy_s(buffer, sizeof(buffer), tag.c_str());
-
-					if (ImGui::InputText("", buffer, sizeof(buffer)))
-						tag = buffer;
-
+					ImGuiHelper::TextEdit(&selectedEntity.GetComponent<TagComponent>().tag);
 					ImGui::PopID();
 				}
 
-				ImGui::SameLine();
-				ImGui::PushItemWidth(-1);
-				if (ImGui::Button("Add Component"))
-					ImGui::OpenPopup("AddComponent");
-				if (ImGui::BeginPopup("AddComponent"))
-				{
-					if (!DrawAddComponent<TransformComponent>("Transform", selectedEntity))
-					if (!DrawAddComponent<CameraComponent>("Camera", selectedEntity))
-					if (!DrawAddComponent<MeshComponent>("Mesh", selectedEntity))
-					DrawAddComponent<RenderableComponent>("Renderable", selectedEntity);
-					ImGui::EndPopup();
-				}
-				ImGui::PopItemWidth();
+				ImGui::Separator();
 
 				DrawComponent<TransformComponent>("Transform", selectedEntity, true, [](TransformComponent& component)
 				{
+					ImGuiHelper::BeginTable("Transform", 2);
 					ImGuiHelper::Float3Edit("Translation", &component.translation.x);
+					ImGuiHelper::NextTableColumn();
 					glm::vec3 rotation = glm::degrees(component.rotation);
 					if (ImGuiHelper::Float3Edit("Rotation", &rotation.x, 0.0f, 1.0f))
 						component.rotation = glm::radians(rotation);
+					ImGuiHelper::NextTableColumn();
 					ImGuiHelper::Float3Edit("Scale", &component.scale.x, 1.0f);
+					ImGuiHelper::EndTable();
 				});
 
 				DrawComponent<CameraComponent>("Camera", selectedEntity, true, [](CameraComponent& component)
 				{
 					SceneCamera& camera = component.camera;
 
+					ImGuiHelper::BeginTable("Camera", 2);
 					ImGuiHelper::Checkbox("Primary", &component.primary);
+					ImGuiHelper::NextTableColumn();
 
 					static constexpr const char* names[]{"Perspective", "Orthographic"};
 					int selectedItem = static_cast<int>(camera.GetProjectionType());
 					ImGuiHelper::Combo("Projection", &selectedItem, names, sizeof(names) / sizeof(const char*));
+					ImGuiHelper::NextTableColumn();
 
 					switch (selectedItem)
 					{
@@ -136,10 +127,12 @@ namespace gbc
 							float perspectiveFOV = glm::degrees(camera.GetPerspectiveFOV());
 							if (ImGuiHelper::FloatEdit("Size", &perspectiveFOV), 1.0f)
 								camera.SetPerspectiveFOV(glm::radians(perspectiveFOV));
+							ImGuiHelper::NextTableColumn();
 
 							float perspectiveNearClip = camera.GetPerspectiveNearClip();
 							if (ImGuiHelper::FloatEdit("Near Clip", &perspectiveNearClip, 0.1f))
 								camera.SetPerspectiveNearClip(perspectiveNearClip);
+							ImGuiHelper::NextTableColumn();
 
 							float perspectiveFarClip = camera.GetPerspectiveFarClip();
 							if (ImGuiHelper::FloatEdit("Far Clip", &perspectiveFarClip, 0.1f))
@@ -150,38 +143,77 @@ namespace gbc
 						{
 							component.camera.SetProjectionType(SceneCamera::ProjectionType::Orthographic);
 
-							ImGuiHelper::Checkbox("Fixed Aspect", &component.fixedAspectRatio);
-
 							float orthographicSize = camera.GetOrthographicSize();
 							if (ImGuiHelper::FloatEdit("Size", &orthographicSize, 0.1f))
 								camera.SetOrthographicSize(orthographicSize);
+							ImGuiHelper::NextTableColumn();
 
 							float orthographicNearClip = camera.GetOrthographicNearClip();
 							if (ImGuiHelper::FloatEdit("Near Clip", &orthographicNearClip, 0.1f))
 								camera.SetOrthographicNearClip(orthographicNearClip);
+							ImGuiHelper::NextTableColumn();
 
 							float orthographicFarClip = camera.GetOrthographicFarClip();
 							if (ImGuiHelper::FloatEdit("Far Clip", &orthographicFarClip, 0.1f))
 								camera.SetOrthographicFarClip(orthographicFarClip);
+							ImGuiHelper::NextTableColumn();
+
+							ImGuiHelper::Checkbox("Fixed Aspect", &component.fixedAspectRatio);
 							break;
 						}
 					}
+
+					ImGuiHelper::EndTable();
 				});
 
 				DrawComponent<MeshComponent>("Mesh", selectedEntity, true, [](MeshComponent& component)
 				{
-					ImGuiHelper::BeginColumns("Mesh");
-					ImGui::Text("%s", component.mesh != nullptr ? component.mesh->filepath.c_str() : "Unknown");
-					ImGuiHelper::EndColumns();
+					ImGuiHelper::BeginTable("Mesh", 2);
+					ImGuiHelper::Text("Filepath");
+					ImGuiHelper::NextTableColumn();
+					if (ImGui::Button("..."))
+					{
+						auto filepath = FileDialog::OpenFile("OBJ Model (*.obj)\0*.obj\0");
+						if (filepath)
+							component = OBJLoader::LoadOBJ(*filepath);
+					}
+					ImGui::SameLine();
+					ImGuiHelper::TextEdit(&component.filepath);
+					ImGuiHelper::EndTable();
 				});
 
 				DrawComponent<RenderableComponent>("Renderable", selectedEntity, true, [](RenderableComponent& component)
 				{
-					ImGuiHelper::BeginColumns("Texture");
-					ImGui::Text("%s", component.texture != nullptr ? component.texture->GetTexture()->GetFilePath().c_str() : "Unknown");
-					ImGuiHelper::EndColumns();
-					ImGuiHelper::ColorEdit4("Tint Color", &component.tintColor.x);
+					ImGuiHelper::BeginTable("Renderable", 2);
+					ImGuiHelper::Text("Filepath");
+					ImGuiHelper::NextTableColumn();
+					if (ImGui::Button("..."))
+					{
+						auto filepath = FileDialog::OpenFile("Image\0*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.psd;*.pic;*.pnm;*.hdr;*.tga;\0JPG (*.jpg)\0*.jpg;*.jpeg\0PNG (*.png)\0*.png\0BMP (*.bmp)\0*.bmp\0GIF (*.gif)\0*.gif\0PSD (*.psd)\0*.psd\0PIC (*.pic)\0*.pic\0PNM (*.pnm)\0*.pnm\0HDR (*.hdr)\0*.hdr\0TGA (*.tga)\0*.tga\0");
+						if (filepath)
+							component = Texture::CreateRef(CreateRef<LocalTexture2D>(*filepath, 4, true));
+					}
+					ImGui::SameLine();
+					ImGuiHelper::TextEdit(&component.filepath);
+
+					ImGuiHelper::NextTableColumn();
+					ImGuiHelper::ColorEdit4("Tint Color" , &component.tintColor.x);
+					ImGuiHelper::EndTable();
 				});
+
+				if (ImGui::Button("Add Component"))
+					ImGui::OpenPopup("AddComponent");
+				if (ImGui::BeginPopup("AddComponent"))
+				{
+					bool allComponentsAdded = true;
+					allComponentsAdded &= DrawAddComponent<CameraComponent>("Camera", selectedEntity);
+					allComponentsAdded &= DrawAddComponent<MeshComponent>("Mesh", selectedEntity);
+					allComponentsAdded &= DrawAddComponent<RenderableComponent>("Renderable", selectedEntity);
+					allComponentsAdded &= DrawAddComponent<TransformComponent>("Transform", selectedEntity);
+					if (allComponentsAdded)
+						ImGui::CloseCurrentPopup();
+					ImGui::EndPopup();
+				}
 			}
 
 			ImGui::End();

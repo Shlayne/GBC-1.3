@@ -12,18 +12,47 @@ namespace gbc
 		static void Shutdown();
 		friend class ImGuiLayer;
 
-		static constexpr float defaultPercentWidth = 0.7f;
+		static constexpr float defaultResetValue = 0.0f;
+		static constexpr float defaultSpeed = 0.1f;
 	public:
 		static void SetDarkthemeColors();
 
-		static void BeginColumns(const std::string& label, float percentWidth = defaultPercentWidth);
-		static void EndColumns();
+		static void BeginTable(const std::string& id, int columnCount);
+		static void NextTableColumn();
+		static void EndTable();
 
-		static bool Float3Edit(const std::string& label, float* values, float resetValue = 0.0f, float speed = 0.1f, float percentWidth = defaultPercentWidth);
-		static bool FloatEdit(const std::string& label, float* value, float speed = 0.1f, float percentWidth = defaultPercentWidth);
-		static bool Combo(const std::string& label, int* selectedItem, const char* const* names, int count, float percentWidth = defaultPercentWidth);
-		static bool Checkbox(const std::string& label, bool* value, float percentWidth = defaultPercentWidth);
-		static bool ColorEdit3(const std::string& label, float* values, float percentWidth = defaultPercentWidth);
-		static bool ColorEdit4(const std::string& label, float* values, float percentWidth = defaultPercentWidth);
+		template<typename... Args>
+		static void Text(const std::string& format, Args&&... args)
+		{
+			ImGui::Text(format.c_str(), std::forward<Args>(args)...);
+		}
+		template<typename... Args>
+		static void Text(const std::string& label, const std::string& format, Args&&... args)
+		{
+			Text(label);
+			NextTableColumn();
+			Text(format, std::forward<Args>(args)...);
+		}
+
+		static bool Float3Edit(float* values, float resetValue = defaultResetValue, float speed = defaultSpeed);
+		static bool Float3Edit(const std::string& label, float* values, float resetValue = defaultResetValue, float speed = defaultSpeed);
+		
+		static bool FloatEdit(float* value, float speed = defaultSpeed);
+		static bool FloatEdit(const std::string& label, float* value, float speed = defaultSpeed);
+		
+		static bool Combo(int* selectedItem, const char* const* names, int count);
+		static bool Combo(const std::string& label, int* selectedItem, const char* const* names, int count);
+		
+		static bool Checkbox(bool* value);
+		static bool Checkbox(const std::string& label, bool* value);
+		
+		static bool ColorEdit3(float* values);
+		static bool ColorEdit3(const std::string& label, float* values);
+		
+		static bool ColorEdit4(float* values);
+		static bool ColorEdit4(const std::string& label, float* values);
+		
+		static bool TextEdit(std::string* value);
+		static bool TextEdit(const std::string& label, std::string* value);
 	};
 }

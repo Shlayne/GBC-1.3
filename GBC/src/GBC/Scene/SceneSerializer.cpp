@@ -111,14 +111,14 @@ namespace gbc
 		// TODO: reference mesh by ID
 		SerializeComponent<MeshComponent>(out, entity, "MeshComponent", [&](MeshComponent& component)
 		{
-			out << YAML::Key << "Mesh" << YAML::Value << component.mesh->filepath;
+			out << YAML::Key << "Filepath" << YAML::Value << component.filepath;
 		});
 		// TODO: how do this ???
 		//SerializeComponent<NativeScriptComponent>(out, entity, "NativeScriptComponent", [&](NativeScriptComponent& component) {});
 		SerializeComponent<RenderableComponent>(out, entity, "RenderableComponent", [&](RenderableComponent& component)
 		{
 			// TODO: reference texture by ID
-			out << YAML::Key << "Texture" << YAML::Value << component.texture->GetTexture()->GetFilePath()
+			out << YAML::Key << "Filepath" << YAML::Value << component.texture->GetTexture()->GetFilePath()
 				<< YAML::Key << "TintColor" << YAML::Value << component.tintColor;
 		});
 		SerializeComponent<TagComponent>(out, entity, "TagComponent", [&](TagComponent& component)
@@ -216,7 +216,7 @@ namespace gbc
 					if (meshComponentNode)
 					{
 						auto& meshComponent = entity.AddComponent<MeshComponent>();
-						meshComponent.mesh = CreateRef<BasicMesh>(OBJLoader::LoadOBJ(meshComponentNode["Mesh"].as<std::string>()));
+						meshComponent = OBJLoader::LoadOBJ(meshComponentNode["Filepath"].as<std::string>());
 					}
 
 					auto renderableComponentNode = entityNode["RenderableComponent"];
@@ -236,7 +236,7 @@ namespace gbc
 
 						// TODO: don't mandate 4 channels or vertical flip, that information
 						// should be in LocalTexture2DSpecifications
-						renderableComponent.texture = Texture::CreateRef(CreateRef<LocalTexture2D>(renderableComponentNode["Texture"].as<std::string>(), 4, true));
+						renderableComponent = Texture::CreateRef(CreateRef<LocalTexture2D>(renderableComponentNode["Filepath"].as<std::string>(), 4, true));
 
 						renderableComponent.tintColor = renderableComponentNode["TintColor"].as<glm::vec4>();
 					}

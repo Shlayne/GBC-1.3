@@ -72,110 +72,81 @@ namespace gbc
 		colors[ImGuiCol_TitleBgCollapsed] = {0.15f, 0.155f, 0.16f, 1.0f};
 	}
 
-	void ImGuiHelper::BeginColumns(const std::string& label, float percentWidth)
+	void ImGuiHelper::BeginTable(const std::string& id, int columnCount)
 	{
-		GBC_CORE_ASSERT(percentWidth >= 0.0f && percentWidth <= 1.0f, "Percent width out of bounds!");
+		ImGuiStyle& style = ImGui::GetStyle();
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x / 2.0f, style.ItemSpacing.y));
 
-		ImGui::PushID(label.c_str());
-		float availableWidth = ImGui::GetContentRegionAvail().x;
-		ImGui::Columns(2);
-		ImGui::SetColumnWidth(0, availableWidth * (1.0f - percentWidth));
-		ImGui::SetColumnWidth(1, availableWidth * percentWidth);
-		ImGui::Text(label.c_str());
-		ImGui::NextColumn();
-
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, ImGui::GetStyle().FramePadding.y));
+		ImGui::PushID(id.c_str());
+		ImGuiTableFlags tableFlags = ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_BordersInnerV;
+		ImGui::BeginTable(id.c_str(), columnCount, tableFlags);
+		ImGuiTableColumnFlags columnFlags = ImGuiTableColumnFlags_WidthAuto;
+		ImGui::TableSetupColumn(nullptr, columnFlags);
+		NextTableColumn();
 	}
 
-	void ImGuiHelper::EndColumns()
+	void ImGuiHelper::NextTableColumn()
 	{
-		ImGui::PopStyleVar();
+		ImGui::TableNextColumn();
+	}
 
-		ImGui::Columns();
+	void ImGuiHelper::EndTable()
+	{
+		ImGui::EndTable();
 		ImGui::PopID();
+
+		ImGui::PopStyleVar();
 	}
 
-	bool ImGuiHelper::Float3Edit(const std::string& label, float* values, float resetValue, float speed, float percentWidth)
+	bool ImGuiHelper::Float3Edit(float* values, float resetValue, float speed)
 	{
 		bool changed = false;
-		BeginColumns(label, percentWidth);
+		ImGui::PushItemWidth(-FLT_MIN);
 
-		ImGuiIO& io = ImGui::GetIO();
+		changed |= ImGui::DragFloat3("", values, speed);
 
-		ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
-		float lineHeight = ImGui::GetFont()->FontSize + ImGui::GetStyle().FramePadding.y * 2.0f;
-		ImVec2 buttonSize = {lineHeight, lineHeight};
-
-		ImGui::PushStyleColor(ImGuiCol_Button, {0.8f, 0.1f, 0.15f, 1.0f});
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, {0.9f, 0.2f, 0.2f, 1.0f});
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, {0.8f, 0.1f, 0.15f, 1.0f});
-		ImGui::PushFont(data.boldFont);
-		if (ImGui::Button("X", buttonSize))
-		{
-			*values = resetValue;
-			changed = true;
-		}
-		ImGui::PopFont();
-		ImGui::SameLine();
-		changed |= ImGui::DragFloat("##X", values, speed);
 		ImGui::PopItemWidth();
-		ImGui::SameLine();
-		ImGui::PopStyleColor(3);
-
-		ImGui::PushStyleColor(ImGuiCol_Button, {0.2f, 0.7f, 0.3f, 1.0f});
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, {0.3f, 0.8f, 0.3f, 1.0f});
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, {0.2f, 0.7f, 0.3f, 1.0f});
-		ImGui::PushFont(data.boldFont);
-		if (ImGui::Button("Y", buttonSize))
-		{
-			values[1] = resetValue;
-			changed = true;
-		}
-		ImGui::PopFont();
-		ImGui::SameLine();
-		changed |= ImGui::DragFloat("##Y", &values[1], speed);
-		ImGui::PopItemWidth();
-		ImGui::SameLine();
-		ImGui::PopStyleColor(3);
-
-		ImGui::PushStyleColor(ImGuiCol_Button, {0.1f, 0.25f, 0.8f, 1.0f});
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, {0.2f, 0.35f, 0.9f, 1.0f});
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, {0.1f, 0.25f, 0.8f, 1.0f});
-		ImGui::PushFont(data.boldFont);
-		if (ImGui::Button("Z", buttonSize))
-		{
-			values[2] = resetValue;
-			changed = true;
-		}
-		ImGui::PopFont();
-		ImGui::SameLine();
-		changed |= ImGui::DragFloat("##Z", &values[2], speed);
-		ImGui::PopItemWidth();
-		ImGui::PopStyleColor(3);
-
-		EndColumns();
 		return changed;
 	}
 
-	bool ImGuiHelper::FloatEdit(const std::string& label, float* value, float speed, float percentWidth)
+	bool ImGuiHelper::Float3Edit(const std::string& label, float* values, float resetValue, float speed)
 	{
 		bool changed = false;
-		BeginColumns(label, percentWidth);
-		
-		ImGui::PushItemWidth(-1);
+		ImGui::PushID(label.c_str());
+		Text(label);
+		NextTableColumn();
+		changed |= Float3Edit(values, resetValue, speed);
+		ImGui::PopID();
+		return changed;
+	}
+
+	bool ImGuiHelper::FloatEdit(float* value, float speed)
+	{
+		bool changed = false;
+		ImGui::PushItemWidth(-FLT_MIN);
+
 		changed |= ImGui::DragFloat("", value, speed);
+
 		ImGui::PopItemWidth();
-		
-		EndColumns();
 		return changed;
 	}
-	
-	bool ImGuiHelper::Combo(const std::string& label, int* selectedItem, const char* const* names, int count, float percentWidth)
+
+	bool ImGuiHelper::FloatEdit(const std::string& label, float* value, float speed)
 	{
 		bool changed = false;
-		BeginColumns(label, percentWidth);
+		ImGui::PushID(label.c_str());
+		Text(label);
+		NextTableColumn();
+		changed |= FloatEdit(value, speed);
+		ImGui::PopID();
+		return changed;
+	}
 
-		ImGui::PushItemWidth(-1);
+	bool ImGuiHelper::Combo(int* selectedItem, const char* const* names, int count)
+	{
+		bool changed = false;
+		ImGui::PushItemWidth(-FLT_MIN);
+
 		if (ImGui::BeginCombo("", names[*selectedItem]))
 		{
 			for (int i = 0; i < count; i++)
@@ -191,42 +162,116 @@ namespace gbc
 			}
 			ImGui::EndCombo();
 		}
-		ImGui::PopItemWidth();
 
-		EndColumns();
+		ImGui::PopItemWidth();
 		return changed;
 	}
 
-	bool ImGuiHelper::Checkbox(const std::string& label, bool* value, float percentWidth)
+	bool ImGuiHelper::Combo(const std::string& label, int* selectedItem, const char* const* names, int count)
 	{
 		bool changed = false;
-		BeginColumns(label, percentWidth);
+		ImGui::PushID(label.c_str());
+		Text(label);
+		NextTableColumn();
+		changed |= Combo(selectedItem, names, count);
+		ImGui::PopID();
+		return changed;
+	}
+
+	bool ImGuiHelper::Checkbox(bool* value)
+	{
+		bool changed = false;
+		ImGui::PushItemWidth(-FLT_MIN);
 
 		changed |= ImGui::Checkbox("", value);
 
-		EndColumns();
+		ImGui::PopItemWidth();
 		return changed;
 	}
 
-	bool ImGuiHelper::ColorEdit3(const std::string& label, float* values, float percentWidth)
+	bool ImGuiHelper::Checkbox(const std::string& label, bool* value)
 	{
 		bool changed = false;
-		BeginColumns(label, percentWidth);
+		ImGui::PushID(label.c_str());
+		Text(label);
+		NextTableColumn();
+		changed |= Checkbox(value);
+		ImGui::PopID();
+		return changed;
+	}
+
+	bool ImGuiHelper::ColorEdit3(float* values)
+	{
+		bool changed = false;
+		ImGui::PushItemWidth(-FLT_MIN);
 
 		changed |= ImGui::ColorEdit3("", values);
 
-		EndColumns();
+		ImGui::PopItemWidth();
 		return changed;
 	}
 
-	bool ImGuiHelper::ColorEdit4(const std::string& label, float* values, float percentWidth)
+	bool ImGuiHelper::ColorEdit3(const std::string& label, float* values)
 	{
 		bool changed = false;
-		BeginColumns(label, percentWidth);
+		ImGui::PushID(label.c_str());
+		Text(label);
+		NextTableColumn();
+		changed |= ColorEdit3(values);
+		ImGui::PopID();
+		return changed;
+	}
+
+	bool ImGuiHelper::ColorEdit4(float* values)
+	{
+		bool changed = false;
+		ImGui::PushItemWidth(-FLT_MIN);
 
 		changed |= ImGui::ColorEdit4("", values);
 
-		EndColumns();
+		ImGui::PopItemWidth();
+		return changed;
+	}
+
+	bool ImGuiHelper::ColorEdit4(const std::string& label, float* values)
+	{
+		bool changed = false;
+		ImGui::PushID(label.c_str());
+		Text(label);
+		NextTableColumn();
+		changed |= ColorEdit4(values);
+		ImGui::PopID();
+		return changed;
+	}
+
+	bool ImGuiHelper::TextEdit(std::string* value)
+	{
+		bool changed = false;
+		ImGui::PushItemWidth(-FLT_MIN);
+
+		static constexpr size_t bufferSize = 256;
+		char buffer[bufferSize]{0};
+		GBC_CORE_ASSERT(value->size() < bufferSize);
+		strcpy_s(buffer, sizeof(buffer), value->c_str());
+
+		if (ImGui::InputText("", buffer, sizeof(buffer)))
+		{
+			*value = buffer;
+			changed = true;
+		}
+
+		ImGui::PopItemWidth();
+		return changed;
+	}
+
+	bool ImGuiHelper::TextEdit(const std::string& label, std::string* value)
+	{
+		bool changed = false;
+		ImGui::PushID(label.c_str());
+		Text(label);
+		NextTableColumn();
+		changed |= TextEdit(value);
+		ImGui::PopID();
 		return changed;
 	}
 }

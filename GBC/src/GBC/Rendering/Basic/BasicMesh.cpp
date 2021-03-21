@@ -47,13 +47,27 @@ namespace gbc
 		return *this;
 	}
 
+	BasicMesh::BasicMesh(const OBJModel& mesh)
+	{
+		vertexCount = (unsigned int)mesh.indices.size();
+		indexCount = vertexCount;
+		vertices = new BasicVertex[vertexCount];
+		indices = new unsigned int[indexCount];
+
+		for (unsigned int i = 0; i < (unsigned int)mesh.indices.size(); i++)
+		{
+			vertices[i].position = mesh.positions[mesh.indices[i].x];
+			vertices[i].texCoord = mesh.texCoords[mesh.indices[i].y];
+			indices[i] = i;
+		}
+	}
+
 	BasicMesh::BasicMesh(OBJModel&& mesh) noexcept
 	{
 		vertexCount = (unsigned int)mesh.indices.size();
 		indexCount = vertexCount;
 		vertices = new BasicVertex[vertexCount];
 		indices = new unsigned int[indexCount];
-		filepath = mesh.filepath;
 
 		for (unsigned int i = 0; i < (unsigned int)mesh.indices.size(); i++)
 		{

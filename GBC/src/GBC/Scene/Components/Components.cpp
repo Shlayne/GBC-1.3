@@ -7,14 +7,12 @@
 
 namespace gbc
 {
-	TransformComponent::TransformComponent(const glm::vec3& translation)
-		: translation(translation) {}
-	
-	TransformComponent::operator glm::mat4() const
+	CameraComponent::CameraComponent(const SceneCamera& camera)
+		: camera(camera) {}
+	CameraComponent& CameraComponent::operator=(const SceneCamera& camera)
 	{
-		return glm::translate(glm::mat4(1.0f), translation) *
-			   glm::toMat4(glm::quat(rotation)) *
-			   glm::scale(glm::mat4(1.0f), scale);
+		this->camera = camera;
+		return *this;
 	}
 
 	TagComponent::TagComponent(const std::string& tag)
@@ -32,19 +30,14 @@ namespace gbc
 		return *this;
 	}
 
-	RenderableComponent::RenderableComponent(const Ref<Texture>& texture)
-		: texture(texture) {}
-	RenderableComponent::RenderableComponent(Ref<Texture>&& texture) noexcept
-		: texture(std::move(texture)) {}
-	RenderableComponent& RenderableComponent::operator=(const Ref<Texture>& texture)
+	TransformComponent::TransformComponent(const glm::vec3& translation)
+		: translation(translation) {}
+	
+	TransformComponent::operator glm::mat4() const
 	{
-		this->texture = texture;
-		return *this;
-	}
-	RenderableComponent& RenderableComponent::operator=(Ref<Texture>&& texture) noexcept
-	{
-		this->texture = std::move(texture);
-		return *this;
+		return glm::translate(glm::mat4(1.0f), translation) *
+			   glm::toMat4(glm::quat(rotation)) *
+			   glm::scale(glm::mat4(1.0f), scale);
 	}
 
 	MeshComponent::MeshComponent(MeshComponent&& mesh) noexcept
@@ -63,12 +56,45 @@ namespace gbc
 		mesh = std::move(mesh);
 		return *this;
 	}
-
-	CameraComponent::CameraComponent(const SceneCamera& camera)
-		: camera(camera) {}
-	CameraComponent& CameraComponent::operator=(const SceneCamera& camera)
+	MeshComponent::MeshComponent(const OBJModel& mesh)
+		: filepath(mesh.filepath), mesh(CreateRef<BasicMesh>(mesh)) {}
+	MeshComponent::MeshComponent(OBJModel&& mesh) noexcept
+		: filepath(std::move(mesh.filepath)), mesh(CreateRef<BasicMesh>(std::move(mesh))) {}
+	MeshComponent& MeshComponent::operator=(OBJModel&& mesh) noexcept
 	{
-		this->camera = camera;
+		filepath = std::move(mesh.filepath);
+		this->mesh = CreateRef<BasicMesh>(std::move(mesh));
+		return *this;
+	}
+
+	RenderableComponent::RenderableComponent(const Ref<Texture>& texture)
+		: texture(texture)
+	{
+		if (this->texture && this->texture->GetTexture())
+			filepath = this->texture->GetTexture()->GetFilePath();
+	}
+	RenderableComponent::RenderableComponent(Ref<Texture>&& texture) noexcept
+		: texture(std::move(texture))
+	{
+		if (this->texture && this->texture->GetTexture())
+			filepath = this->texture->GetTexture()->GetFilePath();
+	}
+	RenderableComponent& RenderableComponent::operator=(const Ref<Texture>& texture)
+	{
+		this->texture = texture;
+		if (this->texture && this->texture->GetTexture())
+			filepath = this->texture->GetTexture()->GetFilePath();
+		else
+			filepath.clear();
+		return *this;
+	}
+	RenderableComponent& RenderableComponent::operator=(Ref<Texture>&& texture) noexcept
+	{
+		this->texture = std::move(texture);
+		if (this->texture && this->texture->GetTexture())
+			filepath = this->texture->GetTexture()->GetFilePath();
+		else
+			filepath.clear();
 		return *this;
 	}
 }

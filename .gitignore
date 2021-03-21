@@ -1,3 +1,7 @@
+# ProfileSessions
+Editor/ProfileSessions/
+Editor/ProfileSessions/**
+
 # Visual Studio
 .vs/
 .vs/**

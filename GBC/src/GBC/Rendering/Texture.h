@@ -30,14 +30,15 @@ namespace gbc
 		TextureSpecification() = default;
 		TextureSpecification(Ref<LocalTexture2D> texture)
 			: texture(texture) {}
-		TextureSpecification(Ref<LocalTexture2D> texture, TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapS, TextureWrapMode wrapT)
-			: texture(texture), minFilter(minFilter), magFilter(magFilter), wrapS(wrapS), wrapT(wrapT) {}
-		TextureSpecification(TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapS, TextureWrapMode wrapT)
-			: minFilter(minFilter), magFilter(magFilter), wrapS(wrapS), wrapT(wrapT) {}
+		TextureSpecification(Ref<LocalTexture2D> texture, TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapR, TextureWrapMode wrapS, TextureWrapMode wrapT)
+			: texture(texture), minFilter(minFilter), magFilter(magFilter), wrapR(wrapR), wrapS(wrapS), wrapT(wrapT) {}
+		TextureSpecification(TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapR, TextureWrapMode wrapS, TextureWrapMode wrapT)
+			: minFilter(minFilter), magFilter(magFilter), wrapR(wrapR), wrapS(wrapS), wrapT(wrapT) {}
 
 		Ref<LocalTexture2D> texture = nullptr;
 		TextureFilterMode minFilter = TextureFilterMode::Linear;
 		TextureFilterMode magFilter = TextureFilterMode::Nearest;
+		TextureWrapMode wrapR = TextureWrapMode::ClampToEdge;
 		TextureWrapMode wrapS = TextureWrapMode::ClampToEdge;
 		TextureWrapMode wrapT = TextureWrapMode::ClampToEdge;
 	};

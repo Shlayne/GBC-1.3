@@ -17,6 +17,7 @@
 #include <memory>
 #include <chrono>
 #include <regex>
+#include <optional>
 
 #include "GBC/Math/Math.h"
 #include "glm/glm.hpp"

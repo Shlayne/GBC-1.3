@@ -31,6 +31,9 @@ namespace gbc
 
 		float GetPitch() const { return pitch; }
 		float GetYaw() const { return yaw; }
+
+		bool IsUsing() const;
+		inline void SetBlocked(bool blocked) { this->blocked = blocked; }
 	private:
 		void RecalculateProjection();
 		void RecalculateView();
@@ -60,5 +63,7 @@ namespace gbc
 		float distance = 5.0f;
 		float pitch = 0.0f;
 		float yaw = 0.0f;
+
+		bool blocked = false;
 	};
 }

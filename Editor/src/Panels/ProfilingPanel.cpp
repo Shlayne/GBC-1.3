@@ -14,13 +14,17 @@ namespace gbc
 		if (enabled)
 		{
 			ImGui::Begin("Profiling", &enabled);
-			if (ImGuiHelper::Checkbox(profiling ? "Stop Profiling" : "Start Profiling", &profiling, 0.5f))
+			ImGuiHelper::BeginTable("Profiling", 2);
+			ImGuiHelper::Text(profiling ? "Stop Profiling" : "Start Profiling");
+			ImGuiHelper::NextTableColumn();
+			if (ImGuiHelper::Checkbox(&profiling))
 			{
 				if (profiling)
 					GBC_PROFILE_BEGIN_RUNTIME("Runtime", (std::string("ProfileSessions/GBCProfileRuntime") += std::to_string(++profileCount)) += ".json");
 				else
 					GBC_PROFILE_END_RUNTIME();
 			}
+			ImGuiHelper::EndTable();
 			ImGui::End();
 		}
 	}

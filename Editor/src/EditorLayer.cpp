@@ -26,7 +26,7 @@ namespace gbc
 		scene->OnCreate();
 
 		// TODO: Figure out a different way to have Panels change values in EditorLayer
-		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", viewportSizeChanged, viewportFocused, viewportHovered, viewportSize, viewportPos, absoluteMousePos, framebuffer, scene, selectedEntity, gizmoType, editorCamera);
+		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", viewportSizeChanged, viewportFocused, viewportHovered, viewportSize, viewportPos, absoluteMousePos, framebuffer, scene, selectedEntity, gizmoType, canUseGizmos, editorCamera);
 		sceneHierarchyPanel = AddPanel<SceneHierarchyPanel>("Scene Hierarchy", scene, selectedEntity);
 		scenePropertiesPanel = AddPanel<ScenePropertiesPanel>("Scene Properties", selectedEntity);
 #if GBC_ENABLE_STATS
@@ -51,6 +51,7 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
+		editorCamera.SetBlocked(ImGuizmo::IsUsing());
 		Application::Get().GetImGuiLayer().SetBlockEvents(!viewportFocused && !viewportHovered);
 
 		if (viewportSizeChanged)
@@ -162,6 +163,7 @@ namespace gbc
 		dispatcher.Dispatch<WindowCloseEvent>(GBC_BIND_FUNC(OnWindowCloseEvent));
 		dispatcher.Dispatch<KeyPressEvent>(GBC_BIND_FUNC(OnKeyPressEvent));
 		dispatcher.Dispatch<MouseButtonPressEvent>(GBC_BIND_FUNC(OnMouseButtonPressEvent));
+		dispatcher.Dispatch<MouseButtonReleaseEvent>(GBC_BIND_FUNC(OnMouseButtonReleaseEvent));
 
 		if (!event.handled)
 			editorCamera.OnEvent(event);
@@ -211,18 +213,23 @@ namespace gbc
 					else SaveScene();
 				}
 				break;
+
 			// Gizmos
 			case Keycode::Q:
-				gizmoType = -1;
+				if (viewportFocused)
+					gizmoType = -1;
 				break;
 			case Keycode::W:
-				gizmoType = ImGuizmo::OPERATION::TRANSLATE;
+				if (viewportFocused)
+					gizmoType = ImGuizmo::OPERATION::TRANSLATE;
 				break;
 			case Keycode::E:
-				gizmoType = ImGuizmo::OPERATION::ROTATE;
+				if (viewportFocused)
+					gizmoType = ImGuizmo::OPERATION::ROTATE;
 				break;
 			case Keycode::R:
-				gizmoType = ImGuizmo::OPERATION::SCALE;
+				if (viewportFocused)
+					gizmoType = ImGuizmo::OPERATION::SCALE;
 				break;
 		}
 
@@ -231,8 +238,10 @@ namespace gbc
 
 	bool EditorLayer::OnMouseButtonPressEvent(MouseButtonPressEvent& event)
 	{
-		if (viewportHovered && viewportFocused && event.GetButton() == Mousecode::ButtonLeft && !Input::IsKeyPressed(Keycode::LeftAlt) && !ImGuizmo::IsOver())
+		if (viewportHovered && viewportFocused && event.GetButton() == Mousecode::ButtonLeft && !editorCamera.IsUsing() && !ImGuizmo::IsOver())
 		{
+			canUseGizmos = false;
+
 			glm::ivec2 relativeMousePos = absoluteMousePos - viewportPos;
 			relativeMousePos.y = viewportSize.y - 1 - relativeMousePos.y;
 
@@ -248,6 +257,14 @@ namespace gbc
 				return true;
 			}
 		}
+
+		canUseGizmos = true;
+		return false;
+	}
+
+	bool EditorLayer::OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& event)
+	{
+		canUseGizmos = true;
 		return false;
 	}
 
@@ -270,7 +287,7 @@ namespace gbc
 
 		if (allowedDiscard)
 		{
-			currentFilepath = std::string();
+			currentFilepath.clear();
 			ClearScene();
 		}
 	}
@@ -286,14 +303,13 @@ namespace gbc
 
 		if (allowedDiscard)
 		{
-			auto initialDirectory = std::filesystem::absolute("./").string();
-			std::string filepath = FileDialog::OpenFile(initialDirectory.c_str(), "GBC Scene (*.gscn)\0*.gscn\0");
-			if (!filepath.empty())
+			auto filepath = FileDialog::OpenFile("GBC Scene (*.gscn)\0*.gscn\0");
+			if (filepath)
 			{
-				currentFilepath = filepath;
+				currentFilepath = *filepath;
 				ClearScene();
 				SceneSerializer serializer(scene);
-				serializer.Deserialize(filepath);
+				serializer.Deserialize(*filepath);
 			}
 		}
 	}
@@ -313,16 +329,15 @@ namespace gbc
 
 	void EditorLayer::SaveAsScene()
 	{
-		auto initialDirectory = std::filesystem::absolute("./").string();
-		std::string filepath = FileDialog::SaveFile(initialDirectory.c_str(), "GBC Scene (*.gscn)\0*.gscn\0");
-		if (!filepath.empty())
+		auto filepath = FileDialog::SaveFile("GBC Scene (*.gscn)\0*.gscn\0");
+		if (filepath)
 		{
 			// Add extension to extensionless path
-			size_t index = filepath.find_last_of(".gscn");
-			if (index != filepath.size() - 1)
-				filepath += ".gscn";
+			size_t index = filepath->find_last_of(".gscn");
+			if (index != filepath->size() - 1)
+				*filepath += ".gscn";
 
-			currentFilepath = filepath;
+			currentFilepath = *filepath;
 			SaveScene();
 		}
 	}

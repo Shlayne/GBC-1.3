@@ -24,6 +24,7 @@ namespace gbc
 		bool OnWindowCloseEvent(WindowCloseEvent& event);
 		bool OnKeyPressEvent(KeyPressEvent& event);
 		bool OnMouseButtonPressEvent(MouseButtonPressEvent& event);
+		bool OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& event);
 
 		void ClearScene();
 
@@ -48,6 +49,7 @@ namespace gbc
 
 		Entity selectedEntity;
 		int gizmoType = -1;
+		bool canUseGizmos = true;
 
 		// Panels
 		template<typename T, typename... Args>

@@ -11,8 +11,8 @@
 
 namespace gbc
 {
-	SceneViewportPanel::SceneViewportPanel(const std::string& name, bool& viewportSizeChanged, bool& viewportFocused, bool& viewportHovered, glm::ivec2& viewportSize, glm::vec2& viewportPos, glm::vec2& absoluteMousePos, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, EditorCamera& editorCamera)
-		: Panel(name), viewportSizeChanged(viewportSizeChanged), viewportFocused(viewportFocused), viewportHovered(viewportHovered), viewportSize(viewportSize), viewportPos(viewportPos), absoluteMousePos(absoluteMousePos), framebuffer(framebuffer), context(context), selectedEntity(selectedEntity), gizmoType(gizmoType), editorCamera(editorCamera) {}
+	SceneViewportPanel::SceneViewportPanel(const std::string& name, bool& viewportSizeChanged, bool& viewportFocused, bool& viewportHovered, glm::ivec2& viewportSize, glm::vec2& viewportPos, glm::vec2& absoluteMousePos, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, bool& canUseGizmos, EditorCamera& editorCamera)
+		: Panel(name), viewportSizeChanged(viewportSizeChanged), viewportFocused(viewportFocused), viewportHovered(viewportHovered), viewportSize(viewportSize), viewportPos(viewportPos), absoluteMousePos(absoluteMousePos), framebuffer(framebuffer), context(context), selectedEntity(selectedEntity), gizmoType(gizmoType), canUseGizmos(canUseGizmos), editorCamera(editorCamera) {}
 
 	void SceneViewportPanel::OnImGuiRender()
 	{
@@ -71,7 +71,7 @@ namespace gbc
 
 				// Draw gizmos
 				if (ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), (ImGuizmo::OPERATION)gizmoType,
-					ImGuizmo::MODE::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr))
+					ImGuizmo::MODE::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr) && canUseGizmos)
 				{
 					glm::vec3 translation, rotation, scale;
 					if (Math::Decompose(transform, translation, rotation, scale))

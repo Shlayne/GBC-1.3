@@ -2,9 +2,9 @@ Scene: Untitled
 Entities:
   - Entity: 0
     MeshComponent:
-      Mesh: resources/models/square.obj
+      Filepath: resources/models/square.obj
     RenderableComponent:
-      Texture: resources/textures/grass_side.png
+      Filepath: resources/textures/grass_side.png
       TintColor: [1, 1, 1, 1]
     TagComponent:
       Tag: Textured Square

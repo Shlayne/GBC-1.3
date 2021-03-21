@@ -19,6 +19,7 @@ static const std::regex faceRegex2("^(?:\\d+/\\d+/\\d+|\\d+//?\\d+|\\d+)$");
 
 OBJModel OBJLoader::LoadOBJ(const std::string& filepath, bool triangulateFaces)
 {
+	// TODO: reimplement error checking
 	OBJModel modelOut;
 
 	std::ifstream file(filepath);
@@ -109,11 +110,12 @@ OBJModel OBJLoader::LoadOBJ(const std::string& filepath, bool triangulateFaces)
 				else
 					modelOut.indices.insert(modelOut.indices.end(), indices.begin(), indices.end());
 			}
-			else if (!token0.empty() && token0[0] != '#')
-			{
-				modelOut.Clear();
-				return modelOut;
-			}
+			// For now, just ignore unknown commands
+			//else if (!token0.empty() && token0[0] != '#')
+			//{
+			//	modelOut.Clear();
+			//	return modelOut;
+			//}
 		}
 
 		file.close();

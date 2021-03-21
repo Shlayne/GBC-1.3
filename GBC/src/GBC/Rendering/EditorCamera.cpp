@@ -10,9 +10,14 @@ namespace gbc
 		RecalculateView();
 	}
 
+	bool EditorCamera::IsUsing() const
+	{
+		return !blocked && Input::IsKeyPressed(Keycode::LeftShift);
+	}
+
 	void EditorCamera::OnUpdate(Timestep timestep)
 	{
-		if (Input::IsKeyPressed(Keycode::LeftAlt))
+		if (IsUsing())
 		{
 			glm::vec2 mousePosition = Input::GetMousePos();
 			glm::vec2 delta = (mousePosition - prevMousePosition) * 0.003f;
@@ -31,8 +36,11 @@ namespace gbc
 
 	void EditorCamera::OnEvent(Event& event)
 	{
-		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<MouseScrollEvent>(GBC_BIND_FUNC(OnMouseScrollEvent));
+		if (IsUsing())
+		{
+			EventDispatcher dispatcher(event);
+			dispatcher.Dispatch<MouseScrollEvent>(GBC_BIND_FUNC(OnMouseScrollEvent));
+		}
 	}
 
 	bool EditorCamera::OnMouseScrollEvent(MouseScrollEvent& event)

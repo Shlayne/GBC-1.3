@@ -9,8 +9,15 @@
 
 namespace gbc
 {
-	std::string FileDialog::OpenFile(const char* initialDirectory, const char* filter)
+	std::optional<std::string> FileDialog::OpenFile(const char* filter, const char* initialDirectory)
 	{
+		std::string initDir;
+		if (initialDirectory == nullptr)
+		{
+			initDir = std::filesystem::absolute("./").string();
+			initialDirectory = initDir.c_str();
+		}
+
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = {0};
 		ZeroMemory(&ofn, sizeof(OPENFILENAMEA));
@@ -22,11 +29,21 @@ namespace gbc
 		ofn.nFilterIndex = 1;
 		ofn.lpstrInitialDir = initialDirectory;
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-		return GetOpenFileNameA(&ofn) == TRUE ? ofn.lpstrFile : std::string();
+
+		if (GetOpenFileNameA(&ofn) == TRUE)
+			return ofn.lpstrFile;
+		return std::nullopt;
 	}
 
-	std::string FileDialog::SaveFile(const char* initialDirectory, const char* filter)
+	std::optional<std::string> FileDialog::SaveFile(const char* filter, const char* initialDirectory)
 	{
+		std::string initDir;
+		if (initialDirectory == nullptr)
+		{
+			initDir = std::filesystem::absolute("./").string();
+			initialDirectory = initDir.c_str();
+		}
+
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = {0};
 		ZeroMemory(&ofn, sizeof(OPENFILENAMEA));
@@ -38,7 +55,10 @@ namespace gbc
 		ofn.nFilterIndex = 1;
 		ofn.lpstrInitialDir = initialDirectory;
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-		return GetSaveFileNameA(&ofn) == TRUE ? ofn.lpstrFile : std::string();
+
+		if (GetSaveFileNameA(&ofn) == TRUE)
+			return ofn.lpstrFile;
+		return std::nullopt;
 	}
 }
 #endif
