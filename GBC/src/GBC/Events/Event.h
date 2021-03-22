@@ -49,8 +49,8 @@ namespace gbc
 	public:
 		EventDispatcher(Event& event);
 
-		template<typename E, typename Fn>
-		bool Dispatch(const Fn& func)
+		template<typename E, typename Func>
+		bool Dispatch(const Func& func)
 		{
 			if (event.GetType() == E::GetStaticType())
 			{

@@ -69,5 +69,9 @@ namespace gbc
 
 // TODO:
 // 1) Scene base class, then EditorScene and RuntimeScene inherit from Scene
+// 
+// BUGS:
+// 1) resizing main window with short panels at the bottom causes tables
+// to have zero or negative size, which makes imgui assert
 
 // Waiting for episode 100 https://www.youtube.com/watch?v=CU9v3uUgRaE&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT&index=99

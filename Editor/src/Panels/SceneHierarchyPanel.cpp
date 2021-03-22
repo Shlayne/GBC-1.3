@@ -1,5 +1,7 @@
 #include "SceneHierarchyPanel.h"
 #include "imgui/imgui.h"
+#include "GBC/Scene/Components/CameraComponent.h"
+#include "GBC/Scene/Components/MeshComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 
 namespace gbc
@@ -14,6 +16,8 @@ namespace gbc
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, ImGui::GetStyle().WindowPadding.y));
 			ImGui::Begin(name.c_str(), &enabled);
+			focused = ImGui::IsWindowFocused();
+			hovered = ImGui::IsWindowHovered();
 			ImGui::PopStyleVar();
 
 			// TODO: entt iterates over its entities in a reverse order, so unreverse it.
@@ -28,8 +32,27 @@ namespace gbc
 
 			if (ImGui::BeginPopupContextWindow(nullptr, ImGuiMouseButton_Right | ImGuiPopupFlags_NoOpenOverItems))
 			{
-				if (ImGui::MenuItem("Create Empty Entity"))
-					context->CreateEntity("Empty Entity");
+				if (ImGui::BeginMenu("Create"))
+				{
+					if (ImGui::MenuItem("Empty Entity"))
+						context->CreateEntity("Empty Entity");
+					if (ImGui::MenuItem("Camera"))
+					{
+						Entity entity = context->CreateEntity("Camera");
+						entity.AddComponent<CameraComponent>();
+					}
+					if (ImGui::BeginMenu("Mesh"))
+					{
+						if (ImGui::MenuItem("Empty Mesh"))
+						{
+							Entity entity = context->CreateEntity("Empty Mesh");
+							entity.AddComponent<MeshComponent>();
+						}
+						ImGui::EndMenu();
+					}
+
+					ImGui::EndMenu();
+				}
 				ImGui::EndPopup();
 			}
 

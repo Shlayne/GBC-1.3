@@ -80,14 +80,24 @@ namespace gbc
 		ImGui::PushID(id.c_str());
 		ImGuiTableFlags tableFlags = ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_BordersInnerV;
 		ImGui::BeginTable(id.c_str(), columnCount, tableFlags);
+
 		ImGuiTableColumnFlags columnFlags = ImGuiTableColumnFlags_WidthAuto;
 		ImGui::TableSetupColumn(nullptr, columnFlags);
+		ImGui::TableSetupColumn(nullptr, ImGuiTableColumnFlags_None);
+		for (int i = 2; i < columnCount; i++)
+			ImGui::TableSetupColumn(nullptr, columnFlags);
+
 		NextTableColumn();
 	}
 
 	void ImGuiHelper::NextTableColumn()
 	{
 		ImGui::TableNextColumn();
+	}
+
+	void ImGuiHelper::PrevTableColumn()
+	{
+		ImGui::TableSetColumnIndex(ImGui::TableGetColumnIndex() - 1);
 	}
 
 	void ImGuiHelper::EndTable()
@@ -113,9 +123,13 @@ namespace gbc
 	{
 		bool changed = false;
 		ImGui::PushID(label.c_str());
-		Text(label);
+
 		NextTableColumn();
 		changed |= Float3Edit(values, resetValue, speed);
+		PrevTableColumn();
+		Text(label);
+		NextTableColumn();
+
 		ImGui::PopID();
 		return changed;
 	}
@@ -135,9 +149,13 @@ namespace gbc
 	{
 		bool changed = false;
 		ImGui::PushID(label.c_str());
-		Text(label);
+
 		NextTableColumn();
 		changed |= FloatEdit(value, speed);
+		PrevTableColumn();
+		Text(label);
+		NextTableColumn();
+
 		ImGui::PopID();
 		return changed;
 	}
@@ -171,9 +189,13 @@ namespace gbc
 	{
 		bool changed = false;
 		ImGui::PushID(label.c_str());
-		Text(label);
+
 		NextTableColumn();
 		changed |= Combo(selectedItem, names, count);
+		PrevTableColumn();
+		Text(label);
+		NextTableColumn();
+
 		ImGui::PopID();
 		return changed;
 	}
@@ -193,9 +215,13 @@ namespace gbc
 	{
 		bool changed = false;
 		ImGui::PushID(label.c_str());
-		Text(label);
+
 		NextTableColumn();
 		changed |= Checkbox(value);
+		PrevTableColumn();
+		Text(label);
+		NextTableColumn();
+
 		ImGui::PopID();
 		return changed;
 	}
@@ -215,9 +241,13 @@ namespace gbc
 	{
 		bool changed = false;
 		ImGui::PushID(label.c_str());
-		Text(label);
+
 		NextTableColumn();
 		changed |= ColorEdit3(values);
+		PrevTableColumn();
+		Text(label);
+		NextTableColumn();
+
 		ImGui::PopID();
 		return changed;
 	}
@@ -237,9 +267,13 @@ namespace gbc
 	{
 		bool changed = false;
 		ImGui::PushID(label.c_str());
-		Text(label);
+
 		NextTableColumn();
 		changed |= ColorEdit4(values);
+		PrevTableColumn();
+		Text(label);
+		NextTableColumn();
+
 		ImGui::PopID();
 		return changed;
 	}
@@ -268,9 +302,13 @@ namespace gbc
 	{
 		bool changed = false;
 		ImGui::PushID(label.c_str());
-		Text(label);
+
 		NextTableColumn();
 		changed |= TextEdit(value);
+		PrevTableColumn();
+		Text(label);
+		NextTableColumn();
+
 		ImGui::PopID();
 		return changed;
 	}

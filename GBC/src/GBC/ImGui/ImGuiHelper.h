@@ -19,6 +19,7 @@ namespace gbc
 
 		static void BeginTable(const std::string& id, int columnCount);
 		static void NextTableColumn();
+		static void PrevTableColumn();
 		static void EndTable();
 
 		template<typename... Args>

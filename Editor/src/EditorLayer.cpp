@@ -3,6 +3,7 @@
 #include "imguizmo/ImGuizmo.h"
 #include "Panels/StasticsPanel.h"
 #include "Panels/ProfilingPanel.h"
+#include "Panels/Debug/DemoPanel.h"
 #include "GBC/Scene/SceneSerializer.h"
 
 namespace gbc
@@ -26,7 +27,7 @@ namespace gbc
 		scene->OnCreate();
 
 		// TODO: Figure out a different way to have Panels change values in EditorLayer
-		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", viewportSizeChanged, viewportFocused, viewportHovered, viewportSize, viewportPos, absoluteMousePos, framebuffer, scene, selectedEntity, gizmoType, canUseGizmos, editorCamera);
+		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", viewportSizeChanged, viewportSize, viewportPos, absoluteMousePos, framebuffer, scene, selectedEntity, gizmoType, canUseGizmos, editorCamera);
 		sceneHierarchyPanel = AddPanel<SceneHierarchyPanel>("Scene Hierarchy", scene, selectedEntity);
 		scenePropertiesPanel = AddPanel<ScenePropertiesPanel>("Scene Properties", selectedEntity);
 #if GBC_ENABLE_STATS
@@ -34,6 +35,9 @@ namespace gbc
 #endif
 #if GBC_ENABLE_PROFILE_RUNTIME
 		AddPanel<ProfilingPanel>("Profiling");
+#endif
+#if GBC_CONFIG_DEBUG
+		AddPanel<DemoPanel>("Demo");
 #endif
 	}
 
@@ -51,6 +55,9 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
+		viewportFocused = sceneViewportPanel->IsFocused();
+		viewportHovered = sceneViewportPanel->IsHovered();
+
 		editorCamera.SetBlocked(ImGuizmo::IsUsing());
 		Application::Get().GetImGuiLayer().SetBlockEvents(!viewportFocused && !viewportHovered);
 
@@ -63,7 +70,7 @@ namespace gbc
 			scene->OnViewportResize(viewportSize.x, viewportSize.y);
 		}
 
-		editorCamera.OnUpdate(timestep);
+		editorCamera.OnUpdate(viewportHovered ? timestep : Timestep());
 		scene->OnUpdateEditor(timestep);
 	}
 
@@ -105,10 +112,13 @@ namespace gbc
 		ImGui::PopStyleVar(2);
 
 		ImGuiStyle& style = ImGui::GetStyle();
-		float prevWindowMinWidth = style.WindowMinSize.x;
+		ImVec2 prevWindowMinSize = style.WindowMinSize;
 		style.WindowMinSize.x = 200.0f;
+		// TODO: resizing main window with short panels at the bottom causes tables
+		// to have zero or negative size, which makes imgui assert
+		//style.WindowMinSize.y = 200.0f;
 		ImGui::DockSpace(ImGui::GetID("Dockspace"));
-		style.WindowMinSize.x = prevWindowMinWidth;
+		style.WindowMinSize = prevWindowMinSize;
 
 		if (ImGui::BeginMenuBar())
 		{

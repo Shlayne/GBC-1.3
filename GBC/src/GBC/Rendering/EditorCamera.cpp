@@ -17,21 +17,22 @@ namespace gbc
 
 	void EditorCamera::OnUpdate(Timestep timestep)
 	{
-		if (IsUsing())
-		{
-			glm::vec2 mousePosition = Input::GetMousePos();
-			glm::vec2 delta = (mousePosition - prevMousePosition) * 0.003f;
-			prevMousePosition = mousePosition;
+		// Always update mouse position regardless if the camera is in use
+		glm::vec2 mousePosition = Input::GetMousePos();
+		glm::vec2 delta = (mousePosition - prevMousePosition) * 0.003f;
+		prevMousePosition = mousePosition;
 
+		if (timestep && IsUsing())
+		{
 			if (Input::IsMouseButtonPressed(Mousecode::ButtonMiddle))
 				MousePan(delta);
 			else if (Input::IsMouseButtonPressed(Mousecode::ButtonLeft))
 				MouseRotate(delta);
 			else if (Input::IsMouseButtonPressed(Mousecode::ButtonRight))
 				MouseZoom(delta.y);
-		}
 
-		RecalculateView();
+			RecalculateView();
+		}
 	}
 
 	void EditorCamera::OnEvent(Event& event)

@@ -11,8 +11,8 @@
 
 namespace gbc
 {
-	SceneViewportPanel::SceneViewportPanel(const std::string& name, bool& viewportSizeChanged, bool& viewportFocused, bool& viewportHovered, glm::ivec2& viewportSize, glm::vec2& viewportPos, glm::vec2& absoluteMousePos, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, bool& canUseGizmos, EditorCamera& editorCamera)
-		: Panel(name), viewportSizeChanged(viewportSizeChanged), viewportFocused(viewportFocused), viewportHovered(viewportHovered), viewportSize(viewportSize), viewportPos(viewportPos), absoluteMousePos(absoluteMousePos), framebuffer(framebuffer), context(context), selectedEntity(selectedEntity), gizmoType(gizmoType), canUseGizmos(canUseGizmos), editorCamera(editorCamera) {}
+	SceneViewportPanel::SceneViewportPanel(const std::string& name, bool& viewportSizeChanged, glm::ivec2& viewportSize, glm::vec2& viewportPos, glm::vec2& absoluteMousePos, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, bool& canUseGizmos, EditorCamera& editorCamera)
+		: Panel(name), viewportSizeChanged(viewportSizeChanged), viewportSize(viewportSize), viewportPos(viewportPos), absoluteMousePos(absoluteMousePos), framebuffer(framebuffer), context(context), selectedEntity(selectedEntity), gizmoType(gizmoType), canUseGizmos(canUseGizmos), editorCamera(editorCamera) {}
 
 	void SceneViewportPanel::OnImGuiRender()
 	{
@@ -20,10 +20,10 @@ namespace gbc
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
 			ImGui::Begin(name.c_str(), &enabled);
+			focused = ImGui::IsWindowFocused();
+			hovered = ImGui::IsWindowHovered();
 			ImGui::PopStyleVar();
 
-			viewportFocused = ImGui::IsWindowFocused();
-			viewportHovered = ImGui::IsWindowHovered();
 			ImVec2 viewportOffset = ImGui::GetCursorPos();
 
 			ImVec2 size = ImGui::GetContentRegionAvail();

@@ -18,6 +18,5 @@ namespace gbc
 
 		std::string filepath;
 		Ref<Texture> texture;
-		glm::vec4 tintColor{1.0f};
 	};
 }

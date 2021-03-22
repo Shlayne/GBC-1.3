@@ -118,8 +118,7 @@ namespace gbc
 		SerializeComponent<RenderableComponent>(out, entity, "RenderableComponent", [&](RenderableComponent& component)
 		{
 			// TODO: reference texture by ID
-			out << YAML::Key << "Filepath" << YAML::Value << component.texture->GetTexture()->GetFilePath()
-				<< YAML::Key << "TintColor" << YAML::Value << component.tintColor;
+			out << YAML::Key << "Filepath" << YAML::Value << component.filepath;
 		});
 		SerializeComponent<TagComponent>(out, entity, "TagComponent", [&](TagComponent& component)
 		{
@@ -237,8 +236,6 @@ namespace gbc
 						// TODO: don't mandate 4 channels or vertical flip, that information
 						// should be in LocalTexture2DSpecifications
 						renderableComponent = Texture::CreateRef(CreateRef<LocalTexture2D>(renderableComponentNode["Filepath"].as<std::string>(), 4, true));
-
-						renderableComponent.tintColor = renderableComponentNode["TintColor"].as<glm::vec4>();
 					}
 
 					auto transformComponentNode = entityNode["TransformComponent"];

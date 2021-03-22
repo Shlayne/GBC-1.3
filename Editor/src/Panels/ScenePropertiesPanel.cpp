@@ -11,25 +11,25 @@
 namespace gbc
 {
 	template<typename T, typename Func>
-	static void DrawComponent(const std::string& label, Entity entity, bool removable, Func func)
+	static void DrawComponent(const std::string& label, int columnCount, Entity entity, bool removable, Func func)
 	{
 		if (entity.HasComponent<T>())
 		{
 			ImGui::PushID(label.c_str());
 
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
-				ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth;
-
-			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
-
 			ImFont* font = ImGui::GetFont();
 			ImGuiStyle& style = ImGui::GetStyle();
-			float lineHeight = font->FontSize + style.FramePadding.y * 2.0f;
+
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed |
+				ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_SpanAvailWidth;
+
+			float lineHeight = ImGui::GetFrameHeight();
+			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
 			bool open = ImGui::TreeNodeEx(label.c_str(), flags, label.c_str());
 
 			// TODO: This will eventually have more than just remove component, i.e. other settings.
-			ImGui::SameLine(contentRegionAvailable.x - lineHeight + style.FramePadding.x * 1.5f);
+			ImGui::SameLine(contentRegionAvailable.x - lineHeight + style.FramePadding.x);
 			if (ImGui::Button("+", {lineHeight, lineHeight}))
 				ImGui::OpenPopup("ComponentSettings");
 
@@ -44,7 +44,9 @@ namespace gbc
 			if (open)
 			{
 				ImGui::Unindent();
+				ImGuiHelper::BeginTable(label.c_str(), columnCount);
 				func(entity.GetComponent<T>());
+				ImGuiHelper::EndTable();
 				ImGui::Indent();
 				ImGui::TreePop();
 			}
@@ -80,9 +82,14 @@ namespace gbc
 		if (enabled)
 		{
 			ImGui::Begin(name.c_str(), &enabled);
+			focused = ImGui::IsWindowFocused();
+			hovered = ImGui::IsWindowHovered();
 
 			if (selectedEntity)
 			{
+				// TODO:
+				//ImGui::PushID((void*)selectedEntity.GetUUID());
+
 				//if (selectedEntity.Has<TagComponent>())
 				{
 					ImGui::PushID("TagComponent");
@@ -92,9 +99,8 @@ namespace gbc
 
 				ImGui::Separator();
 
-				DrawComponent<TransformComponent>("Transform", selectedEntity, true, [](TransformComponent& component)
+				DrawComponent<TransformComponent>("Transform", 2, selectedEntity, true, [](TransformComponent& component)
 				{
-					ImGuiHelper::BeginTable("Transform", 2);
 					ImGuiHelper::Float3Edit("Translation", &component.translation.x);
 					ImGuiHelper::NextTableColumn();
 					glm::vec3 rotation = glm::degrees(component.rotation);
@@ -102,14 +108,12 @@ namespace gbc
 						component.rotation = glm::radians(rotation);
 					ImGuiHelper::NextTableColumn();
 					ImGuiHelper::Float3Edit("Scale", &component.scale.x, 1.0f);
-					ImGuiHelper::EndTable();
 				});
 
-				DrawComponent<CameraComponent>("Camera", selectedEntity, true, [](CameraComponent& component)
+				DrawComponent<CameraComponent>("Camera", 2, selectedEntity, true, [](CameraComponent& component)
 				{
 					SceneCamera& camera = component.camera;
 
-					ImGuiHelper::BeginTable("Camera", 2);
 					ImGuiHelper::Checkbox("Primary", &component.primary);
 					ImGuiHelper::NextTableColumn();
 
@@ -162,43 +166,32 @@ namespace gbc
 							break;
 						}
 					}
-
-					ImGuiHelper::EndTable();
 				});
 
-				DrawComponent<MeshComponent>("Mesh", selectedEntity, true, [](MeshComponent& component)
+				DrawComponent<MeshComponent>("Mesh", 3, selectedEntity, true, [](MeshComponent& component)
 				{
-					ImGuiHelper::BeginTable("Mesh", 2);
-					ImGuiHelper::Text("Filepath");
+					ImGuiHelper::TextEdit("Filepath", &component.filepath);
+					float lineHeight = ImGui::GetFrameHeight();
 					ImGuiHelper::NextTableColumn();
-					if (ImGui::Button("..."))
+					if (ImGui::Button("...", {lineHeight, lineHeight}))
 					{
 						auto filepath = FileDialog::OpenFile("OBJ Model (*.obj)\0*.obj\0");
 						if (filepath)
 							component = OBJLoader::LoadOBJ(*filepath);
 					}
-					ImGui::SameLine();
-					ImGuiHelper::TextEdit(&component.filepath);
-					ImGuiHelper::EndTable();
 				});
 
-				DrawComponent<RenderableComponent>("Renderable", selectedEntity, true, [](RenderableComponent& component)
+				DrawComponent<RenderableComponent>("Renderable", 3, selectedEntity, true, [](RenderableComponent& component)
 				{
-					ImGuiHelper::BeginTable("Renderable", 2);
-					ImGuiHelper::Text("Filepath");
+					ImGuiHelper::TextEdit("Filepath", &component.filepath);
+					float lineHeight = ImGui::GetFrameHeight();
 					ImGuiHelper::NextTableColumn();
-					if (ImGui::Button("..."))
+					if (ImGui::Button("...", {lineHeight, lineHeight}))
 					{
 						auto filepath = FileDialog::OpenFile("Image\0*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.psd;*.pic;*.pnm;*.hdr;*.tga;\0JPG (*.jpg)\0*.jpg;*.jpeg\0PNG (*.png)\0*.png\0BMP (*.bmp)\0*.bmp\0GIF (*.gif)\0*.gif\0PSD (*.psd)\0*.psd\0PIC (*.pic)\0*.pic\0PNM (*.pnm)\0*.pnm\0HDR (*.hdr)\0*.hdr\0TGA (*.tga)\0*.tga\0");
 						if (filepath)
 							component = Texture::CreateRef(CreateRef<LocalTexture2D>(*filepath, 4, true));
 					}
-					ImGui::SameLine();
-					ImGuiHelper::TextEdit(&component.filepath);
-
-					ImGuiHelper::NextTableColumn();
-					ImGuiHelper::ColorEdit4("Tint Color" , &component.tintColor.x);
-					ImGuiHelper::EndTable();
 				});
 
 				if (ImGui::Button("Add Component"))
@@ -214,6 +207,9 @@ namespace gbc
 						ImGui::CloseCurrentPopup();
 					ImGui::EndPopup();
 				}
+
+				// TODO:
+				//ImGui::PopID();
 			}
 
 			ImGui::End();

@@ -193,7 +193,7 @@ namespace gbc
 		{
 			data.localVertexBufferCurrent->position = transform * glm::vec4(mesh->vertices[i].position, 1.0f);
 			data.localVertexBufferCurrent->texCoord = mesh->vertices[i].texCoord;
-			data.localVertexBufferCurrent->tintColor = mesh->vertices[i].tintColor * renderableComponent.tintColor;
+			data.localVertexBufferCurrent->tintColor = mesh->vertices[i].tintColor;
 			data.localVertexBufferCurrent->texIndex = texIndex;
 			data.localVertexBufferCurrent->entityID = entityID;
 		}
