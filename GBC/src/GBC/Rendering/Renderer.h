@@ -18,20 +18,14 @@ namespace gbc
 		static void EnableCullFace();
 		static void DisableCullFace();
 
-		// TODO: render capabilities
-		static int GetMaxTextureSlots();
-		static int GetMaxTextureSize();
-		static int GetMaxFramebufferWidth();
-		static int GetMaxFramebufferHeight();
-		static int GetMaxFramebufferColorAttachments();
-
 		static void SetViewport(int x, int y, int width, int height);
 
 		static void Clear();
 		static void SetClearColor(const glm::vec4& color);
 
-		static void DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, unsigned int count = 0);
+		static void DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, uint32_t offset = 0, uint32_t count = 0, RendererPrimitive primitive = RendererPrimitive::Triangles);
 	private:
 		static Scope<RendererAPI> api;
+		friend class RendererCapabilities;
 	};
 }

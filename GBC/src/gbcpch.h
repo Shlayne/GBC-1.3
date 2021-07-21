@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <utility>
 #include <cmath>
+#include <cstdint>
 #include <memory>
 #include <chrono>
 #include <regex>

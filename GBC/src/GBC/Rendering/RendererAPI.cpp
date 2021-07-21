@@ -1,11 +1,18 @@
 #include "gbcpch.h"
 #include "RendererAPI.h"
-#include "Platform/OpenGL/OpenGLRendererAPI.h"
+#include "Platform/Renderer/OpenGL/OpenGLRendererAPI.h"
 
 namespace gbc
 {
-	// TODO: this should not be hardcoded here
-	RendererAPI::API RendererAPI::api = RendererAPI::API::OpenGL;
+	RendererAPI::API RendererAPI::api = RendererAPI::API::Unset;
+
+	void RendererAPI::SetAPI(API api)
+	{
+		if (RendererAPI::api == API::Unset)
+			RendererAPI::api = api;
+		else
+			GBC_CORE_ASSERT(false, "Attempted to set the renderer API in the middle of execution.");
+	}
 
 	Scope<RendererAPI> RendererAPI::CreateScope()
 	{

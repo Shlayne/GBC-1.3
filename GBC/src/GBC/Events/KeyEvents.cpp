@@ -33,10 +33,20 @@ namespace gbc
 		return stream.str();
 	}
 
-	KeyCharEvent::KeyCharEvent(unsigned int codepoint, int mods)
-		: codepoint(codepoint), mods(mods) {}
+	KeyCharEvent::KeyCharEvent(uint32_t codepoint)
+		: codepoint(codepoint) {}
 
 	std::string KeyCharEvent::ToString() const
+	{
+		std::stringstream stream;
+		stream << "KeyCharEvent: codepoint=" << codepoint;
+		return stream.str();
+	}
+
+	KeyCharModsEvent::KeyCharModsEvent(uint32_t codepoint, int mods)
+		: codepoint(codepoint), mods(mods) {}
+
+	std::string KeyCharModsEvent::ToString() const
 	{
 		std::stringstream stream;
 		stream << "KeyCharEvent: codepoint=" << codepoint << " mods=" << mods;

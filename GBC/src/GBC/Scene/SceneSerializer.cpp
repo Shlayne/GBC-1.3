@@ -94,11 +94,11 @@ namespace gbc
 		out << YAML::BeginMap
 			<< YAML::Key << "Entity" << YAML::Value << "0"; // TODO: entity ID goes here
 
-		SerializeComponent<CameraComponent>(out, entity, "CameraComponent", [&](CameraComponent& component)
+		SerializeComponent<CameraComponent>(out, entity, "CameraComponent", [&out](CameraComponent& component)
 		{
 			auto& camera = component.camera;
 			out << YAML::Key << "Camera" << YAML::Value << YAML::BeginMap
-				<< YAML::Key << "ProjectionType" << YAML::Value << (int)camera.GetProjectionType()
+				<< YAML::Key << "ProjectionType" << YAML::Value << static_cast<int>(camera.GetProjectionType())
 				<< YAML::Key << "PerspectiveFOV" << YAML::Value << camera.GetPerspectiveFOV()
 				<< YAML::Key << "PerspectiveNear" << YAML::Value << camera.GetPerspectiveNearClip()
 				<< YAML::Key << "PerspectiveFar" << YAML::Value << camera.GetPerspectiveFarClip()
@@ -109,22 +109,22 @@ namespace gbc
 				<< YAML::Key << "Primary" << YAML::Value << component.primary;
 		});
 		// TODO: reference mesh by ID
-		SerializeComponent<MeshComponent>(out, entity, "MeshComponent", [&](MeshComponent& component)
+		SerializeComponent<MeshComponent>(out, entity, "MeshComponent", [&out](MeshComponent& component)
 		{
 			out << YAML::Key << "Filepath" << YAML::Value << component.filepath;
 		});
 		// TODO: how do this ???
 		//SerializeComponent<NativeScriptComponent>(out, entity, "NativeScriptComponent", [&](NativeScriptComponent& component) {});
-		SerializeComponent<RenderableComponent>(out, entity, "RenderableComponent", [&](RenderableComponent& component)
+		SerializeComponent<RenderableComponent>(out, entity, "RenderableComponent", [&out](RenderableComponent& component)
 		{
-			// TODO: reference texture by ID
+			// TODO: reference texture by UUID
 			out << YAML::Key << "Filepath" << YAML::Value << component.filepath;
 		});
-		SerializeComponent<TagComponent>(out, entity, "TagComponent", [&](TagComponent& component)
+		SerializeComponent<TagComponent>(out, entity, "TagComponent", [&out](TagComponent& component)
 		{
 			out << YAML::Key << "Tag" << YAML::Value << component.tag;
 		});
-		SerializeComponent<TransformComponent>(out, entity, "TransformComponent", [&](TransformComponent& component)
+		SerializeComponent<TransformComponent>(out, entity, "TransformComponent", [&out](TransformComponent& component)
 		{
 			out << YAML::Key << "Translation" << YAML::Value << component.translation
 				<< YAML::Key << "Rotation" << YAML::Value << component.rotation
@@ -214,8 +214,12 @@ namespace gbc
 					auto meshComponentNode = entityNode["MeshComponent"];
 					if (meshComponentNode)
 					{
-						auto& meshComponent = entity.AddComponent<MeshComponent>();
-						meshComponent = OBJLoader::LoadOBJ(meshComponentNode["Filepath"].as<std::string>());
+						OBJModel model;
+						auto result = OBJLoader::LoadOBJ(meshComponentNode["Filepath"].as<std::string>(), model);
+						if (result)
+							entity.AddComponent<MeshComponent>() = std::move(model);
+						else
+							OBJLoader::LogError(result);
 					}
 
 					auto renderableComponentNode = entityNode["RenderableComponent"];
@@ -235,7 +239,7 @@ namespace gbc
 
 						// TODO: don't mandate 4 channels or vertical flip, that information
 						// should be in LocalTexture2DSpecifications
-						renderableComponent = Texture::CreateRef(CreateRef<LocalTexture2D>(renderableComponentNode["Filepath"].as<std::string>(), 4, true));
+						renderableComponent = Texture::CreateRef(CreateRef<LocalTexture2D>(renderableComponentNode["Filepath"].as<std::string>(), 4));
 					}
 
 					auto transformComponentNode = entityNode["TransformComponent"];

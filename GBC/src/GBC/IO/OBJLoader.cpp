@@ -1,124 +1,143 @@
 #include "gbcpch.h"
 #include "OBJLoader.h"
 
-void OBJModel::Clear()
+OBJModel::OBJModel(OBJModel&& model) noexcept
+	: filepath(std::move(filepath)), positions(std::move(positions)), texCoords(std::move(texCoords)), normals(std::move(normals)), indices(std::move(indices)), edgeIndices(std::move(edgeIndices)) {}
+
+OBJModel& OBJModel::operator=(OBJModel&& model) noexcept
 {
-	filepath.clear();
-	positions.clear();
-	texCoords.clear();
-	normals.clear();
-	indices.clear();
+	if (this != &model)
+	{
+		filepath = std::move(filepath);
+		positions = std::move(positions);
+		texCoords = std::move(texCoords);
+		normals = std::move(normals);
+		indices = std::move(indices);
+		edgeIndices = std::move(edgeIndices);
+	}
+	return *this;
 }
 
-// These were fun to make... okay maybe not...
-static const std::regex positionRegex("^\\s*v\\s+(?:[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?)\\s+(?:[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?)\\s+(?:[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?)\\s*(?:\\s#.*?)?$");
-static const std::regex texCoordRegex("^\\s*vt\\s+(?:[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?)\\s+(?:[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?)\\s*(?:\\s#.*?)?$");
-static const std::regex normalRegex("^\\s*vn\\s+(?:[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?)\\s+(?:[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?)\\s+(?:[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][-+]?\\d+)?)\\s*(?:\\s#.*?)?$");
-static const std::regex faceRegex1("^\\s*f\\s+.*?\\s*(?:\\s#.*?)?$");
-static const std::regex faceRegex2("^(?:\\d+/\\d+/\\d+|\\d+//?\\d+|\\d+)$");
+#define OBJERROR(errorCode) do { result.error.code = (errorCode); result.error.line = lineNumber; return result; } while (false)
+#define OBJERROR_LINE(errorCode, errorLine) do { result.error.code = (errorCode); result.error.line = (errorLine); return result; } while (false)
 
-OBJModel OBJLoader::LoadOBJ(const std::string& filepath, bool triangulateFaces)
+OBJResult OBJLoader::LoadOBJ(const std::string& filepath, OBJModel& outModel)
 {
-	// TODO: reimplement error checking
-	OBJModel modelOut;
+	OBJResult result;
+	outModel.filepath = filepath;
 
 	std::ifstream file(filepath);
-	if (file.is_open())
+	if (!file.is_open())
+		OBJERROR_LINE(OBJErrorCode::MissingFile, 0);
+
+	size_t lineNumber = 0;
+
+	while (!file.eof())
 	{
-		modelOut.filepath = filepath;
+		lineNumber++;
+		std::string originalLine;
+		std::getline(file, originalLine);
+		std::stringstream line(originalLine);
 
-		while (!file.eof())
+		std::string token0;
+		line >> token0;
+
+		if (token0 == "v")
 		{
-			std::string originalLine;
-			std::getline(file, originalLine);
-			std::stringstream line(originalLine);
-
-			std::string token0;
-			line >> token0;
-
-			if (token0 == "v")
-			{
-				if (!std::regex_match(originalLine, positionRegex)) { modelOut.Clear(); return modelOut; }
-				float x, y, z;
-				line >> x >> y >> z;
-				if (!line) { modelOut.Clear(); return modelOut; }
-				modelOut.positions.emplace_back(x, y, z);
-			}
-			else if (token0 == "vt")
-			{
-				if (!std::regex_match(originalLine, texCoordRegex)) { modelOut.Clear(); return modelOut; }
-				float x, y;
-				line >> x >> y;
-				if (!line) { modelOut.Clear(); return modelOut; }
-				modelOut.texCoords.emplace_back(x, y);
-			}
-			else if (token0 == "vn")
-			{
-				if (!std::regex_match(originalLine, normalRegex)) { modelOut.Clear(); return modelOut; }
-				float x, y, z;
-				line >> x >> y >> z;
-				if (!line) { modelOut.Clear(); return modelOut; }
-				modelOut.normals.emplace_back(x, y, z);
-			}
-			else if (token0 == "f")
-			{
-				if (!std::regex_match(originalLine, faceRegex1)) { modelOut.Clear(); return modelOut; }
-				
-				std::string originalVertex;
-				glm::uvec3 index(0);
-				std::vector<glm::uvec3> indices;
-				unsigned int vertexCount = 0;
-
-				for (line >> originalVertex; line && originalVertex[0] != '#'; line >> originalVertex)
-				{
-					if (!std::regex_match(originalVertex, faceRegex2)) { modelOut.Clear(); return modelOut; }
-					std::stringstream vertex(originalVertex);
-
-					// Must exist
-					std::string positionIndex;
-					std::getline(vertex, positionIndex, '/');
-					if (positionIndex.empty()) { modelOut.Clear(); return modelOut; }
-					index.x = (unsigned int)std::stoul(positionIndex) - 1;
-
-					// Might not exist
-					std::string texCoordIndex;
-					std::getline(vertex, texCoordIndex, '/');
-					if (!texCoordIndex.empty())
-						index.y = (unsigned int)std::stoul(texCoordIndex) - 1;
-
-					// Might not exist
-					std::string normalIndex;
-					std::getline(vertex, normalIndex, '/');
-					if (!normalIndex.empty())
-						index.z = (unsigned int)std::stoul(normalIndex) - 1;
-
-					indices.push_back(index);
-					vertexCount++;
-				}
-
-				if (vertexCount == 0 || (triangulateFaces && vertexCount < 3)) { modelOut.Clear(); return modelOut; }
-
-				if (triangulateFaces && vertexCount != 3)
-				{
-					for (unsigned int i = 2; i < (unsigned int)indices.size(); i++)
-					{
-						modelOut.indices.push_back(indices[0]);
-						modelOut.indices.push_back(indices[i - 1]);
-						modelOut.indices.push_back(indices[i]);
-					}
-				}
-				else
-					modelOut.indices.insert(modelOut.indices.end(), indices.begin(), indices.end());
-			}
-			// For now, just ignore unknown commands
-			//else if (!token0.empty() && token0[0] != '#')
-			//{
-			//	modelOut.Clear();
-			//	return modelOut;
-			//}
+			float x, y, z;
+			line >> x >> y >> z;
+			if (!line)
+				OBJERROR(OBJErrorCode::InvalidVertexData);
+			outModel.positions.emplace_back(x, y, z);
 		}
+		else if (token0 == "vt")
+		{
+			float x, y;
+			line >> x >> y;
+			if (!line)
+				OBJERROR(OBJErrorCode::InvalidTexCoordData);
+			outModel.texCoords.emplace_back(x, y);
+		}
+		else if (token0 == "vn")
+		{
+			float x, y, z;
+			line >> x >> y >> z;
+			if (!line)
+				OBJERROR(OBJErrorCode::InvalidNormalData);
+			outModel.normals.emplace_back(x, y, z);
+		}
+		else if (token0 == "f")
+		{
+			std::string originalVertex;
+			glm::uvec3 index(0);
+			std::vector<glm::uvec3> indices;
+			uint32_t vertexCount = 0;
 
-		file.close();
+			for (line >> originalVertex; line && originalVertex[0] != '#'; line >> originalVertex)
+			{
+				std::stringstream vertex(originalVertex);
+
+				// Must exist
+				std::string positionIndex;
+				std::getline(vertex, positionIndex, '/');
+				if (positionIndex.empty())
+					OBJERROR(OBJErrorCode::InvalidFaceData);
+				index.x = static_cast<uint32_t>(std::stoul(positionIndex) - 1);
+
+				// Might not exist
+				std::string texCoordIndex;
+				std::getline(vertex, texCoordIndex, '/');
+				if (!texCoordIndex.empty())
+					index.y = static_cast<uint32_t>(std::stoul(texCoordIndex) - 1);
+
+				// Might not exist
+				std::string normalIndex;
+				std::getline(vertex, normalIndex, '/');
+				if (!normalIndex.empty())
+					index.z = static_cast<uint32_t>(std::stoul(normalIndex) - 1);
+
+				indices.push_back(index);
+				vertexCount++;
+			}
+
+			if (!vertexCount)
+				OBJERROR(OBJErrorCode::InvalidFaceData);
+
+			outModel.indices.insert(outModel.indices.end(), indices.begin(), indices.end());
+		}
+		else if (token0 == "l")
+		{
+			uint32_t index1;
+			uint32_t index2;
+			line >> index1 >> index2;
+			if (!line)
+				OBJERROR(OBJErrorCode::InvalidLineData);
+			outModel.edgeIndices.push_back(index1);
+			outModel.edgeIndices.push_back(index2);
+		}
+		// For now, just ignore unknown commands
+		//else if (!token0.empty() && token0[0] != '#')
+		//	OBJERROR(OBJErrorCode::InvalidCommand);
 	}
-	return modelOut;
+
+	file.close();
+	return result;
+}
+
+void OBJLoader::LogError(const OBJResult& result)
+{
+	const char* message;
+	switch (result.error.code)
+	{
+		case OBJErrorCode::None: return;
+		case OBJErrorCode::MissingFile: message = "Missing file."; break;
+		case OBJErrorCode::InvalidVertexData: message = "Invalid vertex position data."; break;
+		case OBJErrorCode::InvalidTexCoordData: message = "Invalid texture coordinate data."; break;
+		case OBJErrorCode::InvalidNormalData: message = "Invalid normal data."; break;
+		case OBJErrorCode::InvalidFaceData: message = "Invalid face data."; break;
+		case OBJErrorCode::InvalidLineData: message = "Invalid line data."; break;
+		default: message = "Unknown error."; break;
+	}
+
+	GBC_CORE_INFO("Failed to load 3D model on line {0}. Error: {1}", result.error.line, message);
 }

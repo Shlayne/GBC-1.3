@@ -9,7 +9,6 @@ namespace gbc
 	class PerspectiveCameraControllerScript : public ScriptableEntity
 	{
 	public:
-		virtual void OnCreate() override;
 		virtual void OnUpdate(Timestep timestep) override;
 	private:
 		float speed = 1.0f;

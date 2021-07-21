@@ -11,25 +11,25 @@ namespace gbc
 		virtual ~ScriptableEntity() = default;
 
 		template<typename T, typename... Args>
-		T& Add(Args&&... args)
+		T& AddComponent(Args&&... args)
 		{
 			return entity.AddComponent<T>(std::forward<Args>(args)...);
 		}
 
 		template<typename T>
-		void Remove()
+		void RemoveComponent()
 		{
 			entity.RemoveComponent<T>();
 		}
 
 		template<typename T>
-		T& Get()
+		T& GetComponent()
 		{
 			return entity.GetComponent<T>();
 		}
 
 		template<typename T>
-		bool Has()
+		bool HasComponent()
 		{
 			return entity.HasComponent<T>();
 		}

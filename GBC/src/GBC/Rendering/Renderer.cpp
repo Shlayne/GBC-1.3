@@ -4,14 +4,15 @@
 
 namespace gbc
 {
-	Scope<RendererAPI> Renderer::api = RendererAPI::CreateScope();
+	Scope<RendererAPI> Renderer::api = nullptr;
 
 	void Renderer::Init()
 	{
 		GBC_PROFILE_FUNCTION();
 
-		BasicRenderer::Init();
+		api = RendererAPI::CreateScope();
 		api->Init();
+		BasicRenderer::Init();
 	}
 
 	void Renderer::Shutdown()
@@ -40,21 +41,6 @@ namespace gbc
 	void Renderer::DisableCullFace()
 	{ api->DisableCullFace(); }
 
-	int Renderer::GetMaxTextureSlots()
-	{ return api->GetMaxTextureSlots(); }
-
-	int Renderer::GetMaxTextureSize()
-	{ return api->GetMaxTextureSize(); }
-
-	int Renderer::GetMaxFramebufferWidth()
-	{ return api->GetMaxFramebufferWidth(); }
-
-	int Renderer::GetMaxFramebufferHeight()
-	{ return api->GetMaxFramebufferHeight(); }
-
-	int Renderer::GetMaxFramebufferColorAttachments()
-	{ return api->GetMaxFramebufferColorAttachments(); }
-
 	void Renderer::SetViewport(int x, int y, int width, int height)
 	{ api->SetViewport(x, y, width, height); }
 
@@ -64,6 +50,6 @@ namespace gbc
 	void Renderer::SetClearColor(const glm::vec4& color)
 	{ api->SetClearColor(color); }
 
-	void Renderer::DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, unsigned int count)
-	{ api->DrawIndexed(vertexArray, indexBuffer, count); }
+	void Renderer::DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, uint32_t offset, uint32_t count, RendererPrimitive primitive)
+	{ api->DrawIndexed(vertexArray, indexBuffer, offset, count, primitive); }
 }

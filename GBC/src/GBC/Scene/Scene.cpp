@@ -46,7 +46,7 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		registry.view<NativeScriptComponent>().each([=](entt::entity entity, NativeScriptComponent& nsc)
+		registry.view<NativeScriptComponent>().each([this](entt::entity entity, NativeScriptComponent& nsc)
 		{
 			nsc.instance = nsc.createFunc();
 			nsc.instance->entity = {entity, this};
@@ -58,7 +58,7 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		registry.view<NativeScriptComponent>().each([=](entt::entity entity, NativeScriptComponent& nsc)
+		registry.view<NativeScriptComponent>().each([](entt::entity entity, NativeScriptComponent& nsc)
 		{
 			nsc.instance->OnDestroy();
 			nsc.destroyFunc(&nsc);
@@ -69,7 +69,7 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		registry.view<NativeScriptComponent>().each([=](entt::entity entity, NativeScriptComponent& nsc)
+		registry.view<NativeScriptComponent>().each([timestep = timestep](entt::entity entity, NativeScriptComponent& nsc)
 		{
 			nsc.instance->OnUpdate(timestep);
 		});
@@ -78,9 +78,6 @@ namespace gbc
 	void Scene::OnRenderRuntime()
 	{
 		GBC_PROFILE_FUNCTION();
-
-		Renderer::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
-		Renderer::Clear();
 
 		// Get camera
 		glm::mat4 primaryCameraTransform;
@@ -102,7 +99,7 @@ namespace gbc
 
 		if (primaryCamera != nullptr)
 		{
-			BasicRenderer::BeginScene(*primaryCamera, primaryCameraTransform);
+			BasicRenderer::BeginScene(*primaryCamera, glm::inverse(primaryCameraTransform));
 
 			auto group = registry.group(entt::get<MeshComponent, TransformComponent, RenderableComponent>);
 			for (auto entity : group)
@@ -119,9 +116,13 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
+		registry.view<NativeScriptComponent>().each([timestep = timestep](entt::entity entity, NativeScriptComponent& nsc)
+		{
+			nsc.instance->OnUpdate(timestep);
+		});
 	}
 
-	void Scene::OnRenderEditor(EditorCamera& camera)
+	void Scene::OnRenderEditor(const EditorCamera& camera)
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -173,20 +174,11 @@ namespace gbc
 		static_assert(false);
 	}
 
-	template<>
-	void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent& component) {}
-
-	template<>
-	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component) {}
-
-	template<>
-	void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& component) {}
-
-	template<>
-	void Scene::OnComponentAdded<RenderableComponent>(Entity entity, RenderableComponent& component) {}
-
-	template<>
-	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
+	template<> void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent& component) {}
+	template<> void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component) {}
+	template<> void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& component) {}
+	template<> void Scene::OnComponentAdded<RenderableComponent>(Entity entity, RenderableComponent& component) {}
+	template<> void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
 
 	template<>
 	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)

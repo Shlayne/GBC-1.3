@@ -1,7 +1,7 @@
 #include "gbcpch.h"
 #if GBC_ENABLE_IMGUI
-#include "ImGuiLayer.h"
-#include "GBC/ImGui/ImGuiHelper.h"
+#include "ImGuiWrapper.h"
+#include "ImGuiHelper.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
@@ -11,18 +11,20 @@
 
 namespace gbc
 {
-	ImGuiLayer::ImGuiLayer()
+	ImGuiWrapper::ImGuiWrapper()
 	{
 		GBC_PROFILE_FUNCTION();
 
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiHelper::Init();
-		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()), true);
-		ImGui_ImplOpenGL3_Init("#version 460"); // TODO: this version should be gotten from the window
+
+		Window& window = Application::Get().GetWindow();
+		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(window.GetNativeWindow()), true);
+		ImGui_ImplOpenGL3_Init(window.GetContext().GetVersion());
 	}
 
-	ImGuiLayer::~ImGuiLayer()
+	ImGuiWrapper::~ImGuiWrapper()
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -32,7 +34,7 @@ namespace gbc
 		ImGui::DestroyContext();
 	}
 
-	void ImGuiLayer::Begin()
+	void ImGuiWrapper::Begin()
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -42,13 +44,13 @@ namespace gbc
 		ImGuizmo::BeginFrame();
 	}
 
-	void ImGuiLayer::End()
+	void ImGuiWrapper::End()
 	{
 		GBC_PROFILE_FUNCTION();
 
 		ImGuiIO& io = ImGui::GetIO();
 		Window& window = Application::Get().GetWindow();
-		io.DisplaySize = ImVec2((float)window.GetWidth(), (float)window.GetHeight());
+		io.DisplaySize = ImVec2(static_cast<float>(window.GetWidth()), static_cast<float>(window.GetHeight()));
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -62,7 +64,7 @@ namespace gbc
 		}
 	}
 
-	void ImGuiLayer::OnEvent(Event& event)
+	void ImGuiWrapper::OnEvent(Event& event)
 	{
 		if (blockEvents)
 		{

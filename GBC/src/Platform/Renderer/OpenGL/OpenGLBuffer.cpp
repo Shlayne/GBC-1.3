@@ -23,7 +23,7 @@ namespace gbc
 		return 0;
 	}
 
-	OpenGLVertexBuffer::OpenGLVertexBuffer(unsigned int size, const void* data, BufferUsage usage)
+	OpenGLVertexBuffer::OpenGLVertexBuffer(uint32_t size, const void* data, BufferUsage usage)
 	{
 		glCreateBuffers(1, &rendererID);
 		glBindBuffer(GL_ARRAY_BUFFER, rendererID);
@@ -45,18 +45,18 @@ namespace gbc
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	void OpenGLVertexBuffer::SetData(unsigned int size, const void* data)
+	void OpenGLVertexBuffer::SetData(uint32_t size, const void* data)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, rendererID);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
 	}
 
-	OpenGLIndexBuffer::OpenGLIndexBuffer(unsigned int count, const void* data, BufferUsage usage)
-		: count(count)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t count, const void* data, BufferUsage usage, BufferIndexType type)
+		: count(count), type(type)
 	{
 		glCreateBuffers(1, &rendererID);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GetOpenGLUsage(usage));
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * static_cast<GLsizeiptr>(type), data, GetOpenGLUsage(usage));
 	}
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
@@ -74,9 +74,9 @@ namespace gbc
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	void OpenGLIndexBuffer::SetData(unsigned int count, const void* data)
+	void OpenGLIndexBuffer::SetData(uint32_t count, const void* data)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, rendererID);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, count * sizeof(unsigned int), data);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, count * static_cast<GLsizeiptr>(type), data);
 	}
 }

@@ -16,12 +16,12 @@ namespace gbc
 		virtual void OnViewportResize(int width, int height) override;
 		virtual const FramebufferSpecification& GetSpecification() const override { return specification; }
 
-		virtual RendererID GetColorAttachment(unsigned int index = 0) const override { return index < colorAttachments.size() ? colorAttachments[index] : 0; }
+		virtual RendererID GetColorAttachment(uint32_t index = 0) const override { return index < colorAttachments.size() ? colorAttachments[index] : 0; }
 		virtual RendererID GetDepthAttachment() const override { return depthAttachment; }
 
-		virtual void GetColorPixel(void* pixel, int x, int y, unsigned int index = 0) const override;
+		virtual void GetColorPixel(void* pixel, int x, int y, uint32_t index = 0) const override;
 
-		virtual void ClearColorAttachment(int value, unsigned int index = 0) override;
+		virtual void ClearColorAttachment(int value, uint32_t index = 0) override;
 	private:
 		void Recreate();
 		void Clear();

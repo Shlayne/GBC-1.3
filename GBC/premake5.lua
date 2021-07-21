@@ -24,13 +24,13 @@ project "GBC"
 		"src",
 		"%{includedir.glad}",
 		"%{includedir.glfw}",
-		"%{includedir.glm}",
 		"%{includedir.imgui}",
 		"%{includedir.imguizmo}",
 		"%{includedir.spdlog}",
 		"%{includedir.yaml}",
 
 		"%{includedir.entt}",
+		"%{includedir.glm}",
 		"%{includedir.siv}",
 		"%{includedir.stb}"
 	}
@@ -38,7 +38,6 @@ project "GBC"
 	links {
 		"glad",
 		"glfw",
-		"glm",
 		"imgui",
 		"imguizmo",
 		"stb",

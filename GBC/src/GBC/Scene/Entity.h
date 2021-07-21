@@ -9,7 +9,7 @@ namespace gbc
 	{
 	public:
 		Entity() = default;
-		Entity(entt::entity handle, Scene* context);
+		Entity(entt::entity handle, Scene* context) noexcept;
 
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args)
@@ -40,12 +40,12 @@ namespace gbc
 			return context->registry.has<T>(handle);
 		}
 
-		inline operator bool() const { return handle != entt::null; }
-		inline operator ENTT_ID_TYPE() const { return static_cast<ENTT_ID_TYPE>(handle); }
-		inline operator entt::entity() const { return handle; }
+		inline operator bool() const noexcept { return handle != entt::null; }
+		inline operator ENTT_ID_TYPE() const noexcept { return static_cast<ENTT_ID_TYPE>(handle); }
+		inline operator entt::entity() const noexcept { return handle; }
 
-		inline bool operator==(const Entity& entity) const { return handle == entity.handle && context == entity.context; }
-		inline bool operator!=(const Entity& entity) const { return !(*this == entity); }
+		inline bool operator==(const Entity& entity) const noexcept { return handle == entity.handle && context == entity.context; }
+		inline bool operator!=(const Entity& entity) const noexcept { return !(*this == entity); }
 	private:
 		entt::entity handle = entt::null;
 		Scene* context = nullptr;

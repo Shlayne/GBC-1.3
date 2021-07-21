@@ -9,19 +9,16 @@ namespace gbc
 	struct BasicMesh
 	{
 		BasicMesh() = default;
-		~BasicMesh();
-		BasicMesh(unsigned int vertexCount, unsigned int indexCount);
+		BasicMesh(uint32_t vertexCount, uint32_t indexCount);
 		BasicMesh(const BasicMesh& mesh);
 		BasicMesh(BasicMesh&& mesh) noexcept;
 		BasicMesh& operator=(BasicMesh&& mesh) noexcept;
-		BasicMesh(const OBJModel& mesh);
-		BasicMesh(OBJModel&& mesh) noexcept;
+		BasicMesh(const OBJModel& model);
+		BasicMesh(OBJModel&& model) noexcept;
 
-		void Create(unsigned int vertexCount, unsigned int indexCount);
+		void Create(uint32_t vertexCount, uint32_t indexCount);
 
-		unsigned int vertexCount = 0;
-		unsigned int indexCount = 0;
-		BasicVertex* vertices = nullptr;
-		unsigned int* indices = nullptr;
+		std::vector<BasicVertex> vertices;
+		std::vector<uint32_t> indices;
 	};
 }

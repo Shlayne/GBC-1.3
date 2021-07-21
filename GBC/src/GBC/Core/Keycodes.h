@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cstdint>
+
 namespace gbc
 {
-	enum class Keycode : unsigned short
+	enum class Keycode : uint16_t
 	{
 		// Taken from glfw3.h and modified
 		/* Printable keys */

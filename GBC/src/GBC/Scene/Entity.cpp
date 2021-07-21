@@ -3,6 +3,6 @@
 
 namespace gbc
 {
-	Entity::Entity(entt::entity handle, Scene* context)
+	Entity::Entity(entt::entity handle, Scene* context) noexcept
 		: handle(handle), context(context) {}
 }

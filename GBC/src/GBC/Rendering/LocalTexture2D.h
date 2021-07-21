@@ -18,16 +18,14 @@ namespace gbc
 
 		bool SetSubregion(const LocalTexture2D& texture, int positionX, int positionY);
 
-		LocalTexture2D* CreateMipmap();
+		inline const std::string& GetFilePath() const noexcept { return filePath; }
+		inline int GetWidth() const noexcept { return width; }
+		inline int GetHeight() const noexcept { return height; }
+		inline int GetChannels() const noexcept { return channels; }
+		inline unsigned char* GetData() const noexcept { return data; }
 
-		inline const std::string& GetFilePath() const { return filePath; }
-		inline int GetWidth() const { return width; }
-		inline int GetHeight() const { return height; }
-		inline int GetChannels() const { return channels; }
-		inline unsigned char* GetData() const { return data; }
-
-		inline operator bool() const { return data != nullptr; }
-		inline bool operator==(const LocalTexture2D& texture) const { return data == texture.data; }
+		inline operator bool() const noexcept { return data != nullptr; }
+		inline bool operator==(const LocalTexture2D& texture) const noexcept { return data == texture.data; }
 	private:
 		std::string filePath;
 

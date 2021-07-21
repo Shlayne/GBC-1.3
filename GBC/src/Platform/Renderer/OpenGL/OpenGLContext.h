@@ -9,13 +9,13 @@ namespace gbc
 	class OpenGLContext : public Context
 	{
 	public:
-		OpenGLContext(void* nativeContext);
-
-		virtual void Init() override;
+		virtual void PreInit() override;
+		virtual void Init(void* nativeContext) override;
 		virtual void SwapBuffers() override;
 		virtual Timestep GetElapsedTime() const override;
+		virtual const char* GetVersion() const override;
 	private:
-		GLFWwindow* window;
+		GLFWwindow* window = nullptr;
 		mutable float lastTime = 0.0f;
 	};
 }

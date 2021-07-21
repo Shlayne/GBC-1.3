@@ -17,18 +17,18 @@ namespace gbc
 		virtual void EnableCullFace() override;
 		virtual void DisableCullFace() override;
 
-		// TODO: render capabilities
+		virtual void SetViewport(int x, int y, int width, int height) override;
+
+		virtual void SetClearColor(const glm::vec4& color) override;
+		virtual void Clear() override;
+
+		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, uint32_t offset, uint32_t count, RendererPrimitive primitive) override;
+
+		// Render capabilities
 		virtual int GetMaxTextureSlots() override;
 		virtual int GetMaxTextureSize() override;
 		virtual int GetMaxFramebufferWidth() override;
 		virtual int GetMaxFramebufferHeight() override;
 		virtual int GetMaxFramebufferColorAttachments() override;
-
-		virtual void SetViewport(int x, int y, int width, int height) override;
-
-		virtual void Clear() override;
-		virtual void SetClearColor(const glm::vec4& color) override;
-
-		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, unsigned int count) override;
 	};
 }

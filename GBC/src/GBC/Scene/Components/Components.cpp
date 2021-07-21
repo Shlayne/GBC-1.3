@@ -7,19 +7,19 @@
 
 namespace gbc
 {
-	CameraComponent::CameraComponent(const SceneCamera& camera)
+	CameraComponent::CameraComponent(const SceneCamera& camera) noexcept
 		: camera(camera) {}
-	CameraComponent& CameraComponent::operator=(const SceneCamera& camera)
+	CameraComponent& CameraComponent::operator=(const SceneCamera& camera) noexcept
 	{
 		this->camera = camera;
 		return *this;
 	}
 
-	TagComponent::TagComponent(const std::string& tag)
+	TagComponent::TagComponent(const std::string& tag) noexcept
 		: tag(tag) {}
 	TagComponent::TagComponent(std::string&& tag) noexcept
 		: tag(std::move(tag)) {}
-	TagComponent& TagComponent::operator=(const std::string& tag)
+	TagComponent& TagComponent::operator=(const std::string& tag) noexcept
 	{
 		this->tag = tag;
 		return *this;
@@ -30,10 +30,10 @@ namespace gbc
 		return *this;
 	}
 
-	TransformComponent::TransformComponent(const glm::vec3& translation)
+	TransformComponent::TransformComponent(const glm::vec3& translation) noexcept
 		: translation(translation) {}
 	
-	TransformComponent::operator glm::mat4() const
+	TransformComponent::operator glm::mat4() const noexcept
 	{
 		return glm::translate(glm::mat4(1.0f), translation) *
 			   glm::toMat4(glm::quat(rotation)) *
@@ -47,7 +47,7 @@ namespace gbc
 		mesh = std::move(mesh.mesh);
 		return *this;
 	}
-	MeshComponent::MeshComponent(const Ref<BasicMesh>& mesh)
+	MeshComponent::MeshComponent(const Ref<BasicMesh>& mesh) noexcept
 		: mesh(mesh) {}
 	MeshComponent::MeshComponent(Ref<BasicMesh>&& mesh) noexcept
 		: mesh(std::move(mesh)) {}
@@ -56,18 +56,18 @@ namespace gbc
 		mesh = std::move(mesh);
 		return *this;
 	}
-	MeshComponent::MeshComponent(const OBJModel& mesh)
-		: filepath(mesh.filepath), mesh(CreateRef<BasicMesh>(mesh)) {}
-	MeshComponent::MeshComponent(OBJModel&& mesh) noexcept
-		: filepath(std::move(mesh.filepath)), mesh(CreateRef<BasicMesh>(std::move(mesh))) {}
-	MeshComponent& MeshComponent::operator=(OBJModel&& mesh) noexcept
+	MeshComponent::MeshComponent(const OBJModel& model) noexcept
+		: filepath(model.filepath), mesh(CreateRef<BasicMesh>(model)) {}
+	MeshComponent::MeshComponent(OBJModel&& model) noexcept
+		: filepath(std::move(model.filepath)), mesh(std::move(CreateRef<BasicMesh>(std::move(model)))) {}
+	MeshComponent& MeshComponent::operator=(OBJModel&& model) noexcept
 	{
-		filepath = std::move(mesh.filepath);
-		this->mesh = CreateRef<BasicMesh>(std::move(mesh));
+		filepath = std::move(model.filepath);
+		mesh = CreateRef<BasicMesh>(std::move(model));
 		return *this;
 	}
 
-	RenderableComponent::RenderableComponent(const Ref<Texture>& texture)
+	RenderableComponent::RenderableComponent(const Ref<Texture>& texture) noexcept
 		: texture(texture)
 	{
 		if (this->texture && this->texture->GetTexture())
@@ -79,7 +79,7 @@ namespace gbc
 		if (this->texture && this->texture->GetTexture())
 			filepath = this->texture->GetTexture()->GetFilePath();
 	}
-	RenderableComponent& RenderableComponent::operator=(const Ref<Texture>& texture)
+	RenderableComponent& RenderableComponent::operator=(const Ref<Texture>& texture) noexcept
 	{
 		this->texture = texture;
 		if (this->texture && this->texture->GetTexture())

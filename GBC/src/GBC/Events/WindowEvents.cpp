@@ -60,22 +60,7 @@ namespace gbc
 	}
 
 	WindowDropEvent::WindowDropEvent(int pathCount, const char** paths)
-		: pathCount(pathCount), paths(new char*[pathCount])
-	{
-		for (int i = 0; i < pathCount; i++)
-		{
-			size_t length = strlen(paths[i]) + 1;
-			this->paths[i] = new char[length];
-			strcpy_s(this->paths[i], length * sizeof(char), paths[i]);
-		}
-	}
-
-	WindowDropEvent::~WindowDropEvent()
-	{
-		for (int i = 0; i < pathCount; i++)
-			delete[] paths[i];
-		delete[] paths;
-	}
+		: pathCount(pathCount), paths(paths) {}
 
 	std::string WindowDropEvent::ToString() const
 	{

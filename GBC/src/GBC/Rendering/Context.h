@@ -9,14 +9,13 @@ namespace gbc
 	public:
 		virtual ~Context() = default;
 
-		virtual void Init() = 0;
+		virtual void PreInit() = 0;
+		virtual void Init(void* nativeContext) = 0;
 		virtual void SwapBuffers() = 0;
-
-		// TODO: this has nothing to do with graphics,
-		// so it shouldn't be in graphics context
 		virtual Timestep GetElapsedTime() const = 0;
+		virtual const char* GetVersion() const = 0;
 
-		static Ref<Context> CreateRef(void* nativeContext);
-		static Scope<Context> CreateScope(void* nativeContext);
+		static Ref<Context> CreateRef();
+		static Scope<Context> CreateScope();
 	};
 }

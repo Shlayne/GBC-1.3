@@ -6,15 +6,17 @@ namespace gbc
 {
 	struct CameraComponent
 	{
-		CameraComponent() = default;
-		CameraComponent(const SceneCamera& camera);
-		CameraComponent& operator=(const SceneCamera& camera);
+		CameraComponent() noexcept = default;
+		CameraComponent(const SceneCamera& camera) noexcept;
+		CameraComponent& operator=(const SceneCamera& camera) noexcept;
 
-		inline operator SceneCamera&() { return camera; }
-		inline operator const SceneCamera&() const { return camera; }
+		inline operator SceneCamera&() noexcept { return camera; }
+		inline operator const SceneCamera&() const noexcept { return camera; }
 
 		SceneCamera camera;
-		bool primary = false;
 		bool fixedAspectRatio = false;
+
+		// TODO: move to Scene
+		bool primary = false;
 	};
 }

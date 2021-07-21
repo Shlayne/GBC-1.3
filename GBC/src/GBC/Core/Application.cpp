@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "GBC/Rendering/Renderer.h"
 #include "GBC/Events/WindowEvents.h"
+#include "Timestep.h"
 
 namespace gbc
 {
@@ -20,14 +21,15 @@ namespace gbc
 		Renderer::Init();
 
 #if GBC_ENABLE_IMGUI
-		imguiLayer = new ImGuiLayer();
-		PushOverlay(imguiLayer);
+		imguiWrapper = new ImGuiWrapper();
 #endif
 	}
 
 	Application::~Application()
 	{
 		GBC_PROFILE_FUNCTION();
+
+		delete imguiWrapper;
 
 		for (Layer* layer : layerStack)
 		{
@@ -57,10 +59,10 @@ namespace gbc
 					layer->OnRender();
 
 #if GBC_ENABLE_IMGUI
-				imguiLayer->Begin();
+				imguiWrapper->Begin();
 				for (Layer* layer : layerStack)
 					layer->OnImGuiRender();
-				imguiLayer->End();
+				imguiWrapper->End();
 #endif
 
 				window->SwapBuffers();
@@ -70,7 +72,7 @@ namespace gbc
 		}
 	}
 
-	void Application::Terminate()
+	void Application::Close()
 	{
 		running = false;
 	}
@@ -87,16 +89,20 @@ namespace gbc
 		overlay->OnAttach();
 	}
 
-	void Application::PopLayer(Layer* layer)
+	Layer* Application::PopLayer()
 	{
-		if (layerStack.PopLayer(layer))
+		Layer* layer = layerStack.PopLayer();
+		if (layer)
 			layer->OnDetach();
+		return layer;
 	}
 
-	void Application::PopOverlay(Layer* overlay)
+	Layer* Application::PopOverlay()
 	{
-		if (layerStack.PopOverlay(overlay))
+		Layer* overlay = layerStack.PopOverlay();
+		if (overlay)
 			overlay->OnDetach();
+		return overlay;
 	}
 
 	void Application::OnEvent(Event& event)
@@ -104,21 +110,19 @@ namespace gbc
 		GBC_PROFILE_FUNCTION();
 
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowResizeEvent>(GBC_BIND_FUNC(OnWindowResizeEvent));
-		dispatcher.Dispatch<WindowMinimizeEvent>(GBC_BIND_FUNC(OnWindowMinimizeEvent));
+		dispatcher.Dispatch(this, &Application::OnWindowResizeEvent);
+		dispatcher.Dispatch(this, &Application::OnWindowMinimizeEvent);
+		dispatcher.Dispatch(this, &Application::OnJoystickConnectEvent);
+		dispatcher.Dispatch(this, &Application::OnMonitorConnectEvent);
+
+		imguiWrapper->OnEvent(event);
 
 		for (auto it = layerStack.rbegin(); !event.handled && it != layerStack.rend(); ++it)
 			(*it)->OnEvent(event);
 
 		// Let the client handle window close events if they want to.
 		if (!event.handled)
-			dispatcher.Dispatch<WindowCloseEvent>(GBC_BIND_FUNC(OnWindowCloseEvent));
-	}
-
-	bool Application::OnWindowCloseEvent(WindowCloseEvent& event)
-	{
-		Terminate();
-		return true;
+			dispatcher.Dispatch(this, &Application::OnWindowCloseEvent);
 	}
 
 	bool Application::OnWindowResizeEvent(WindowResizeEvent& event)
@@ -142,5 +146,23 @@ namespace gbc
 	{
 		rendering = !event.IsMinimized();
 		return false;
+	}
+
+	bool Application::OnJoystickConnectEvent(JoystickConnectEvent& event)
+	{
+		GBC_CORE_INFO("Joystick Connect Event: jid={0}, connected={1}", event.GetJID(), event.IsConnected());
+		return false;
+	}
+
+	bool Application::OnMonitorConnectEvent(MonitorConnectEvent& event)
+	{
+		GBC_CORE_INFO("Monitor Connect Event: connected={0}", event.IsConnected());
+		return false;
+	}
+
+	bool Application::OnWindowCloseEvent(WindowCloseEvent& event)
+	{
+		Close();
+		return true;
 	}
 }

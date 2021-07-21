@@ -1,14 +1,16 @@
 #pragma once
 
-#include "GBC/Core/Application.h"
-#include "GBC/Core/Logger.h"
+#include "Application.h"
+#include "Logger.h"
 #include "GBC/Debug/Profiler.h"
+#include "GBC/Rendering/RendererAPI.h"
 
 #if GBC_PLATFORM_WINDOWS
 extern gbc::Application* gbc::CreateApplication();
 
 int main(int argc, char** argv)
 {
+	gbc::RendererAPI::SetAPI(gbc::RendererAPI::API::OpenGL);
 	gbc::Logger::Init();
 
 	GBC_PROFILE_BEGIN("Init", "GBCProfileInit.json");

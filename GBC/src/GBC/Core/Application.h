@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Window.h"
-#include "GBC/ImGui/ImGuiLayer.h"
-#include "Timestep.h"
+#include "GBC/ImGui/ImGuiWrapper.h"
+#include "GBC/Events/DeviceEvents.h"
 #include "GBC/Events/WindowEvents.h"
 #include "LayerStack.h"
 
@@ -11,27 +11,29 @@ namespace gbc
 	class Application
 	{
 	public:
-		Application(const WindowSpecifications& windowSpecs = WindowSpecifications());
+		Application(const WindowSpecifications& windowSpecs = {});
 		virtual ~Application();
 
 		inline static Application& Get() { return *instance; }
 		inline Window& GetWindow() { return *window; }
 #if GBC_ENABLE_IMGUI
-		inline ImGuiLayer& GetImGuiLayer() { return *imguiLayer; }
+		inline ImGuiWrapper& GetImGuiWrapper() { return *imguiWrapper; }
 #endif
 
 		void Run();
-		void Terminate();
+		void Close();
 	protected:
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
-		void PopLayer(Layer* layer);
-		void PopOverlay(Layer* overlay);
+		Layer* PopLayer();
+		Layer* PopOverlay();
 	private:
-		bool OnWindowCloseEvent(WindowCloseEvent& event);
+		void OnEvent(Event& event);
 		bool OnWindowResizeEvent(WindowResizeEvent& event);
 		bool OnWindowMinimizeEvent(WindowMinimizeEvent& event);
-		void OnEvent(Event& event);
+		bool OnJoystickConnectEvent(JoystickConnectEvent& event);
+		bool OnMonitorConnectEvent(MonitorConnectEvent& event);
+		bool OnWindowCloseEvent(WindowCloseEvent& event);
 
 		static Application* instance;
 
@@ -40,7 +42,7 @@ namespace gbc
 
 		Scope<Window> window;
 #if GBC_ENABLE_IMGUI
-		ImGuiLayer* imguiLayer;
+		ImGuiWrapper* imguiWrapper;
 #endif
 		LayerStack layerStack;
 	};

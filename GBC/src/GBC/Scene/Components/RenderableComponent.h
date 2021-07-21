@@ -7,14 +7,14 @@ namespace gbc
 {
 	struct RenderableComponent
 	{
-		RenderableComponent() = default;
-		RenderableComponent(const Ref<Texture>& texture);
+		RenderableComponent() noexcept = default;
+		RenderableComponent(const Ref<Texture>& texture) noexcept;
 		RenderableComponent(Ref<Texture>&& texture) noexcept;
-		RenderableComponent& operator=(const Ref<Texture>& texture);
+		RenderableComponent& operator=(const Ref<Texture>& texture) noexcept;
 		RenderableComponent& operator=(Ref<Texture>&& texture) noexcept;
 
-		inline operator Ref<Texture>&() { return texture; }
-		inline operator const Ref<Texture>&() const { return texture; }
+		inline operator Ref<Texture>&() noexcept { return texture; }
+		inline operator const Ref<Texture>&() const noexcept { return texture; }
 
 		std::string filepath;
 		Ref<Texture> texture;

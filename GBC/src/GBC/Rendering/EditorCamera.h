@@ -15,25 +15,25 @@ namespace gbc
 		void OnUpdate(Timestep timestep);
 		void OnEvent(Event& event);
 
-		inline float GetDistance() const { return distance; }
-		inline void SetDistance(float distance) { this->distance = distance; }
+		inline float GetDistance() const noexcept { return distance; }
+		inline void SetDistance(float distance) noexcept { this->distance = distance; }
 
-		void OnViewportResize(int width, int height);
+		virtual void OnViewportResize(int width, int height) override;
 
-		const glm::mat4& GetView() const { return view; }
-		glm::mat4 GetViewProjection() const { return projection * view; }
+		inline const glm::mat4& GetView() const noexcept { return view; }
+		inline glm::mat4 GetViewProjection() const noexcept { return projection * view; }
 
 		glm::vec3 GetRightDirection() const;
 		glm::vec3 GetUpDirection() const;
 		glm::vec3 GetForwardDirection() const;
-		const glm::vec3& GetPosition() const { return position; }
+		inline const glm::vec3& GetPosition() const noexcept { return position; }
 		glm::quat GetOrientation() const;
 
-		float GetPitch() const { return pitch; }
-		float GetYaw() const { return yaw; }
+		inline float GetPitch() const noexcept { return pitch; }
+		inline float GetYaw() const noexcept { return yaw; }
 
 		bool IsUsing() const;
-		inline void SetBlocked(bool blocked) { this->blocked = blocked; }
+		inline void SetBlocked(bool blocked) noexcept { this->blocked = blocked; }
 	private:
 		void RecalculateProjection();
 		void RecalculateView();
@@ -44,7 +44,7 @@ namespace gbc
 		void MouseRotate(const glm::vec2& delta);
 		void MouseZoom(float delta);
 
-		glm::vec2 GetPanSpeed() const;
+		//glm::vec2 GetPanSpeed() const;
 		float GetRotationSpeed() const;
 		float GetZoomSpeed() const;
 

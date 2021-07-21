@@ -1,13 +1,18 @@
 #include "gbcpch.h"
 #include "TextureAtlas.h"
-#include "GBC/Rendering/Renderer.h"
+#include "GBC/Rendering/RendererCapabilities.h"
 
 namespace gbc
 {
 	TextureAtlas::TextureAtlas()
-		: maxTextureSize(Renderer::GetMaxTextureSize()), root(new TextureNode(glm::ivec2(), maxTextureSize)) {}
+		: maxTextureSize(RendererCapabilities::GetMaxTextureSize()), root(new TextureNode(glm::ivec2(0), maxTextureSize)) {}
 
-	glm::ivec2 TextureAtlas::AddTexture(Ref<LocalTexture2D> texture)
+	TextureAtlas::~TextureAtlas()
+	{
+		Clear(root);
+	}
+
+	glm::ivec2 TextureAtlas::AddTexture(const Ref<LocalTexture2D>& texture)
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -16,11 +21,11 @@ namespace gbc
 		while ((textureSize.x < atlasTextureSize.x || textureSize.y < atlasTextureSize.y) ||
 			(atlasTextureSize.x < maxTextureSize.x || atlasTextureSize.y < maxTextureSize.y))
 		{
-			TextureNode* node = AddTexture(root.get(), texture, textureSize);
+			TextureNode* node = AddTexture(root, texture, textureSize);
 			if (node != nullptr)
 				return node->position;
 			else
-				atlasTextureSize *= 2; // Keep the texture size a power of 2
+				atlasTextureSize << 1; // Keep the texture size a power of 2
 		}
 
 		// If this happens, the texture can not fit on the GPU, this is very bad
@@ -28,18 +33,16 @@ namespace gbc
 	}
 
 	// From: https://straypixels.net/texture-packing-for-fonts/
-	TextureAtlas::TextureNode* TextureAtlas::AddTexture(TextureNode* node, Ref<LocalTexture2D> texture, const glm::ivec2& size)
+	TextureAtlas::TextureNode* TextureAtlas::AddTexture(TextureNode* node, const Ref<LocalTexture2D>& texture, const glm::ivec2& size)
 	{
 		// If the node has a texture, it can only be a leaf node, so don't bother
 		if (node->texture != nullptr)
-		{
 			return nullptr;
-		}
 		// If the node has both children, search them for an opening
 		else if (node->left != nullptr && node->right != nullptr)
 		{
-			TextureNode* newLeftNode = AddTexture(node->left.get(), texture, size);
-			return newLeftNode != nullptr ? newLeftNode : AddTexture(node->right.get(), texture, size);
+			TextureNode* newLeftNode = AddTexture(node->left, texture, size);
+			return newLeftNode != nullptr ? newLeftNode : AddTexture(node->right, texture, size);
 		}
 		// If an opening has been found
 		else
@@ -59,9 +62,7 @@ namespace gbc
 			}
 			// This opening is not big enough
 			else if (realSize.x < size.x || realSize.y < size.y)
-			{
 				return nullptr;
-			}
 			// This opening is bigger than the texture
 			else
 			{
@@ -75,68 +76,52 @@ namespace gbc
 				// Get the right position and size of the opening and empty space
 				if (splitVertically)
 				{
-					node->left.reset(new TextureNode(node->position, {node->size.x, size.y}));
-					node->right.reset(new TextureNode({node->position.x, node->position.y + size.y}, {node->size.x, node->size.y - size.y}));
+					node->left = new TextureNode(node->position, {node->size.x, size.y});
+					node->right = new TextureNode({node->position.x, node->position.y + size.y}, {node->size.x, node->size.y - size.y});
 				}
 				else
 				{
-					node->left.reset(new TextureNode(node->position, {size.x, node->size.y}));
-					node->right.reset(new TextureNode({node->position.x + size.x, node->position.y}, {node->size.x - size.x, node->size.y}));
+					node->left = new TextureNode(node->position, {size.x, node->size.y});
+					node->right = new TextureNode({node->position.x + size.x, node->position.y}, {node->size.x - size.x, node->size.y});
 				}
 
-				return AddTexture(node->left.get(), texture, size);
+				return AddTexture(node->left, texture, size);
 			}
 		}
 	}
 
-	LocalTexture2D** TextureAtlas::Create(int mipmapLevels)
+	Ref<LocalTexture2D> TextureAtlas::Create()
 	{
 		GBC_PROFILE_FUNCTION();
 
-		LocalTexture2D** atlasTextures = nullptr;
-		if (mipmapLevels > 0)
-		{
-			{
-				GBC_PROFILE_SCOPE("LocalTexture2D Allocation - TextureAtlas::Create(int)");
-				atlasTextures = new LocalTexture2D * [mipmapLevels];
-				for (int i = 0; i < mipmapLevels; i++)
-					atlasTextures[i] = new LocalTexture2D(atlasTextureSize.x >> i, atlasTextureSize.y >> i, 4);
-			}
-			GBC_PROFILE_SCOPE("PutTexture - TextureAtlas::Create(int)");
-			PutTexture(root.get(), atlasTextures, mipmapLevels);
-		}
-		return atlasTextures;
+		Ref<LocalTexture2D> atlasTexture = CreateRef<LocalTexture2D>(atlasTextureSize.x, atlasTextureSize.y, 4);
+		PutTexture(root, atlasTexture);
+		return atlasTexture;
 	}
 
-	void TextureAtlas::PutTexture(TextureNode* node, LocalTexture2D** atlasTextures, int mipmapLevels)
+	void TextureAtlas::PutTexture(TextureNode* node, const Ref<LocalTexture2D>& atlasTexture)
 	{
 		if (node != nullptr)
 		{
 			if (node->texture != nullptr)
-			{
-				// Yes, copying the original texture is a waste of memory,
-				// but it makes coding it easier.
-				// TODO: fix this
-				LocalTexture2D* texture = new LocalTexture2D(*(node->texture));
-
-				for (int i = 0; i < mipmapLevels && texture != nullptr && texture; i++)
-				{
-					// This is... finally, where textures are copied
-					atlasTextures[i]->SetSubregion(*texture, node->position.x >> i, node->position.y >> i);
-					LocalTexture2D* newTexture = texture->CreateMipmap();
-					delete texture;
-					texture = newTexture;
-				}
-
-				delete texture;
-			}
+				atlasTexture->SetSubregion(*node->texture, node->position.x, node->position.y);
 			// Since a node with a texture has no children, don't try to copy their
 			// non-existent textures, because they themselves don't exist.
 			else
 			{
-				PutTexture(node->left.get(), atlasTextures, mipmapLevels);
-				PutTexture(node->right.get(), atlasTextures, mipmapLevels);
+				PutTexture(node->left, atlasTexture);
+				PutTexture(node->right, atlasTexture);
 			}
+		}
+	}
+
+	void TextureAtlas::Clear(TextureNode* node)
+	{
+		if (node)
+		{
+			Clear(node->left);
+			Clear(node->right);
+			delete node;
 		}
 	}
 }

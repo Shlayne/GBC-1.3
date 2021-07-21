@@ -177,7 +177,14 @@ namespace gbc
 					{
 						auto filepath = FileDialog::OpenFile("OBJ Model (*.obj)\0*.obj\0");
 						if (filepath)
-							component = OBJLoader::LoadOBJ(*filepath);
+						{
+							OBJModel model;
+							auto result = OBJLoader::LoadOBJ(*filepath, model);
+							if (result)
+								component = std::move(model);
+							else
+								OBJLoader::LogError(result);
+						}
 					}
 				});
 
@@ -194,7 +201,7 @@ namespace gbc
 					}
 				});
 
-				if (ImGui::Button("Add Component"))
+				if (ImGui::Button("Add Component", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight())))
 					ImGui::OpenPopup("AddComponent");
 				if (ImGui::BeginPopup("AddComponent"))
 				{

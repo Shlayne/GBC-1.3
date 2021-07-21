@@ -8,11 +8,11 @@ namespace gbc
 	{
 	public:
 		JoystickConnectEvent(int jid, bool connect);
-		EVENT_CLASS_TYPE(EventType::JoystickConnect)
-		EVENT_CLASS_CATEGORY(EventCategory_Application | EventCategory_Device)
+		EVENT_CLASS_TYPE(EventType::JoystickConnect);
+		EVENT_CLASS_CATEGORY(EventCategory_Device | EventCategory_Application);
 
-		inline bool GetJID() const { return jid; }
-		inline bool HasConnected() const { return connect; }
+		inline int GetJID() const noexcept { return jid; }
+		inline bool IsConnected() const noexcept { return connect; }
 
 		virtual std::string ToString() const override;
 	private:
@@ -24,10 +24,10 @@ namespace gbc
 	{
 	public:
 		MonitorConnectEvent(bool connect);
-		EVENT_CLASS_TYPE(EventType::MonitorConnect)
-		EVENT_CLASS_CATEGORY(EventCategory_Application | EventCategory_Device)
+		EVENT_CLASS_TYPE(EventType::MonitorConnect);
+		EVENT_CLASS_CATEGORY(EventCategory_Device | EventCategory_Application);
 
-		inline bool HasConnected() const { return connect; }
+		inline bool IsConnected() const noexcept { return connect; }
 
 		virtual std::string ToString() const override;
 	private:

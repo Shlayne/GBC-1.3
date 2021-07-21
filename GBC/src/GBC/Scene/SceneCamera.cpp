@@ -34,11 +34,8 @@ namespace gbc
 			case ProjectionType::Orthographic:
 			{
 				float orthoTop = orthographicSize * 0.5f;
-				float orthoBottom = -orthoTop;
 				float orthoRight = orthoTop * aspectRatio;
-				float orthoLeft = -orthoRight;
-
-				projection = glm::ortho(orthoLeft, orthoRight, orthoBottom, orthoTop, orthographicNear, orthographicFar);
+				projection = glm::ortho(-orthoRight, orthoRight, -orthoTop, orthoTop, orthographicNear, orthographicFar);
 				return;
 			}
 		}
@@ -48,7 +45,7 @@ namespace gbc
 
 	void SceneCamera::OnViewportResize(int width, int height)
 	{
-		aspectRatio = (float)width / (float)height;
+		aspectRatio = static_cast<float>(width) / height;
 		Recalculate();
 	}
 }

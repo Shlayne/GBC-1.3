@@ -26,10 +26,12 @@
 #endif
 
 #define GBC_EXPAND_MACRO(x) x
-#define GBC_STRINGIFY_MACRO(x) #x
+#define GBC_STRINGIFY_MACRO_IMPL(x) #x
+#define GBC_STRINGIFY_MACRO(x) GBC_EXPAND_MACRO(GBC_STRINGIFY_MACRO_IMPL(x))
 #define GBC_BIND_FUNC(func) [this](auto&&... args) -> decltype(auto) { return this->func(std::forward<decltype(args)>(args)...); }
 
 #include <memory>
+#include <cstdint>
 
 namespace gbc
 {
@@ -47,7 +49,7 @@ namespace gbc
 	{ return std::make_unique<T>(std::forward<Args>(args)...); }
 
 	// RendererID
-	using RendererID = unsigned int;
+	using RendererID = uint32_t;
 }
 
 #include "Logger.h"

@@ -11,7 +11,7 @@ namespace gbc
 	{
 		int width = 1280;
 		int height = 720;
-		const char* title = "GBC-1.3";
+		const char* title = "GBC v1.3";
 		bool vsync = true;
 		bool resizable = true;
 		bool fullscreen = false;
@@ -59,7 +59,7 @@ namespace gbc
 		using EventCallbackFunc = std::function<void(Event&)>;
 		virtual void SetEventCallback(const EventCallbackFunc& callback) = 0;
 
-		static Ref<Window> CreateRef(const WindowSpecifications& specs = WindowSpecifications());
-		static Scope<Window> CreateScope(const WindowSpecifications& specs = WindowSpecifications());
+		static Ref<Window> CreateRef(const WindowSpecifications& specs);
+		static Scope<Window> CreateScope(const WindowSpecifications& specs);
 	};
 }

@@ -34,7 +34,7 @@ namespace gbc
 	
 		const BufferLayout& layout = vertexBuffer->GetLayout();
 		const std::vector<BufferElement>& elements = layout.GetElements();
-		for (unsigned int i = 0; i < elements.size(); i++)
+		for (uint32_t i = 0; i < static_cast<uint32_t>(elements.size()); i++)
 		{
 			const BufferElement& element = elements[i];
 			glEnableVertexAttribArray(i);

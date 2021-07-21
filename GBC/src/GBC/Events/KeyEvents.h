@@ -9,11 +9,11 @@ namespace gbc
 	{
 	public:
 		KeyPressEvent(Keycode keycode, int mods);
-		EVENT_CLASS_TYPE(EventType::KeyPress)
-		EVENT_CLASS_CATEGORY(EventCategory_Keyboard)
+		EVENT_CLASS_TYPE(EventType::KeyPress);
+		EVENT_CLASS_CATEGORY(EventCategory_Keyboard);
 
-		inline Keycode GetKeycode() const { return keycode; }
-		inline int GetMods() const { return mods; }
+		inline Keycode GetKeycode() const noexcept { return keycode; }
+		inline int GetMods() const noexcept { return mods; }
 
 		virtual std::string ToString() const override;
 	private:
@@ -25,8 +25,8 @@ namespace gbc
 	{
 	public:
 		KeyRepeatEvent(Keycode keycode, int mods);
-		EVENT_CLASS_TYPE(EventType::KeyRepeat)
-		EVENT_CLASS_CATEGORY(EventCategory_Keyboard)
+		EVENT_CLASS_TYPE(EventType::KeyRepeat);
+		EVENT_CLASS_CATEGORY(EventCategory_Keyboard);
 
 		inline Keycode GetKeycode() const { return keycode; }
 		inline int GetMods() const { return mods; }
@@ -41,8 +41,8 @@ namespace gbc
 	{
 	public:
 		KeyReleaseEvent(Keycode keycode, int mods);
-		EVENT_CLASS_TYPE(EventType::KeyRelease)
-		EVENT_CLASS_CATEGORY(EventCategory_Keyboard)
+		EVENT_CLASS_TYPE(EventType::KeyRelease);
+		EVENT_CLASS_CATEGORY(EventCategory_Keyboard);
 
 		inline Keycode GetKeycode() const { return keycode; }
 		inline int GetMods() const { return mods; }
@@ -56,16 +56,30 @@ namespace gbc
 	class KeyCharEvent : public Event
 	{
 	public:
-		KeyCharEvent(unsigned int codepoint, int mods);
-		EVENT_CLASS_TYPE(EventType::KeyChar)
-		EVENT_CLASS_CATEGORY(EventCategory_Keyboard)
+		KeyCharEvent(uint32_t codepoint);
+		EVENT_CLASS_TYPE(EventType::KeyChar);
+		EVENT_CLASS_CATEGORY(EventCategory_Keyboard);
 
-		inline unsigned int GetCodepoint() const { return codepoint; }
+		inline uint32_t GetCodepoint() const { return codepoint; }
+
+		virtual std::string ToString() const override;
+	private:
+		uint32_t codepoint;
+	};
+
+	class KeyCharModsEvent : public Event
+	{
+	public:
+		KeyCharModsEvent(uint32_t codepoint, int mods);
+		EVENT_CLASS_TYPE(EventType::KeyCharMods);
+		EVENT_CLASS_CATEGORY(EventCategory_Keyboard);
+
+		inline uint32_t GetCodepoint() const { return codepoint; }
 		inline int GetMods() const { return mods; }
 
 		virtual std::string ToString() const override;
 	private:
-		unsigned int codepoint;
+		uint32_t codepoint;
 		int mods;
 	};
 }

@@ -2,7 +2,7 @@
 
 namespace gbc
 {
-	enum class Mousecode : unsigned short
+	enum class Mousecode : uint16_t
 	{
 		// Taken from glfw3.h and modified
 		Button1 = 0, ButtonLeft = Button1,

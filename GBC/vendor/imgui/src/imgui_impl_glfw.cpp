@@ -159,8 +159,15 @@ void ImGui_ImplGlfw_CharCallback(GLFWwindow* window, unsigned int c)
     io.AddInputCharacter(c);
 }
 
-void ImGui_ImplGlfw_MonitorCallback(GLFWmonitor*, int)
+void ImGui_ImplGlfw_MonitorCallback(GLFWmonitor* monitor, int event)
 {
+    //--------------------------------------------
+    // This wasn't here and I don't know why.
+    //--------------------------------------------
+    if (g_PrevUserCallbackMonitor != NULL)
+        g_PrevUserCallbackMonitor(monitor, event);
+    //--------------------------------------------
+
     g_WantUpdateMonitors = true;
 }
 

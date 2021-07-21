@@ -11,8 +11,8 @@ namespace gbc
 		OpenGLTexture(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
 		virtual ~OpenGLTexture();
 
-		virtual void Bind(unsigned int slot = 0) const override;
-		virtual void Unbind(unsigned int slot = 0) const override;
+		virtual void Bind(uint32_t slot = 0) const override;
+		virtual void Unbind(uint32_t slot = 0) const override;
 
 		virtual const Ref<LocalTexture2D>& GetTexture() const override { return specification.texture; }
 		virtual const TextureSpecification& GetSpecification() const override { return specification; }
@@ -23,8 +23,8 @@ namespace gbc
 		bool ownsRendererID = true;
 
 		RendererID rendererID = 0;
-		unsigned int internalFormat = 0;
-		unsigned int format = 0;
-		unsigned int type = 0;
+		uint32_t internalFormat = 0;
+		uint32_t format = 0;
+		uint32_t type = 0;
 	};
 }

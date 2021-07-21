@@ -19,13 +19,13 @@ project "Editor"
 	includedirs {
 		"src",
 		"%{wks.location}/GBC/src",
-		"%{includedir.glm}",
 		"%{includedir.imgui}",
 		"%{includedir.imguizmo}",
 		"%{includedir.stb}",
 		"%{includedir.yaml}",
 
 		"%{includedir.entt}",
+		"%{includedir.glm}",
 		"%{includedir.siv}",
 		"%{includedir.spdlog}"
 	}

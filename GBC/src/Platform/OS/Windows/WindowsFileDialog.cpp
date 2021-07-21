@@ -1,7 +1,7 @@
 #include "gbcpch.h"
-#if GBC_PLATFORM_WINDOWS
 #include "GBC/IO/FileDialog.h"
 #include <commdlg.h>
+#include <filesystem>
 #include "glfw/glfw3.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "glfw/glfw3native.h"
@@ -61,4 +61,3 @@ namespace gbc
 		return std::nullopt;
 	}
 }
-#endif

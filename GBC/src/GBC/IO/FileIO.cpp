@@ -3,22 +3,28 @@
 
 namespace gbc
 {
-	std::string FileIO::ReadFile(const std::string& filepath)
+	std::optional<std::string> FileIO::Read(const std::string& filepath, std::ios_base::openmode mode)
 	{
-		std::ifstream file(filepath);
+		std::ifstream file(filepath, mode);
 		if (file.is_open())
 		{
-			// Get the file size
-			file.seekg(0, std::ios::end);
-			size_t size = file.tellg();
-			file.seekg(0, std::ios::beg);
-
-			// Read the file into the string
-			std::string contents(size, ' ');
-			file.read(&contents[0], size);
+			std::stringstream stream;
+			stream << file.rdbuf();
 			file.close();
-			return contents;
+			return stream.str();
 		}
-		return std::string();
+		return std::nullopt;
+	}
+
+	bool FileIO::Write(const std::string& filepath, std::string_view contents, std::ios_base::openmode mode)
+	{
+		std::ofstream file(filepath, mode);
+		if (file.is_open())
+		{
+			file << contents;
+			file.close();
+			return file.good();
+		}
+		return false;
 	}
 }

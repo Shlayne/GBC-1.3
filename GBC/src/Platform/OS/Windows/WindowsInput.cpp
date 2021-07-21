@@ -1,5 +1,4 @@
 #include "gbcpch.h"
-#if GBC_PLATFORM_WINDOWS
 #include "GBC/Core/Input.h"
 #include "glfw/glfw3.h"
 #include "GBC/Core/Application.h"
@@ -9,7 +8,7 @@ namespace gbc
 	bool Input::IsKeyPressed(Keycode keycode)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		return glfwGetKey(window, static_cast<int>(keycode)) == GLFW_PRESS;
+		return glfwGetKey(window, static_cast<int>(keycode)) != GLFW_RELEASE;
 	}
 
 	bool Input::IsKeyReleased(Keycode keycode)
@@ -21,7 +20,7 @@ namespace gbc
 	bool Input::IsMouseButtonPressed(Mousecode button)
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		return glfwGetMouseButton(window, static_cast<int>(button)) == GLFW_PRESS;
+		return glfwGetMouseButton(window, static_cast<int>(button)) != GLFW_RELEASE;
 	}
 
 	bool Input::IsMouseButtonReleased(Mousecode button)
@@ -48,4 +47,3 @@ namespace gbc
 		return GetMousePos().y;
 	}
 }
-#endif

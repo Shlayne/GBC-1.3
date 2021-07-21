@@ -1,6 +1,6 @@
 #include "gbcpch.h"
+#if GBC_ENABLE_IMGUI
 #include "ImGuiHelper.h"
-#include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 
 namespace gbc
@@ -313,3 +313,4 @@ namespace gbc
 		return changed;
 	}
 }
+#endif

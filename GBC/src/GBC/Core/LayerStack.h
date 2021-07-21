@@ -10,17 +10,17 @@ namespace gbc
 	public:
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
-		bool PopLayer(Layer* layer);
-		bool PopOverlay(Layer* overlay);
+		Layer* PopLayer();
+		Layer* PopOverlay();
 
-		inline std::vector<Layer*>::iterator begin() { return layers.begin(); }
-		inline std::vector<Layer*>::iterator end() { return layers.end(); }
-		inline std::vector<Layer*>::reverse_iterator rbegin() { return layers.rbegin(); }
-		inline std::vector<Layer*>::reverse_iterator rend() { return layers.rend(); }
-		inline std::vector<Layer*>::const_iterator cbegin() const { return layers.cbegin(); }
-		inline std::vector<Layer*>::const_iterator cend() const { return layers.cend(); }
-		inline std::vector<Layer*>::const_reverse_iterator crbegin() const { return layers.crbegin(); }
-		inline std::vector<Layer*>::const_reverse_iterator crend() const { return layers.crend(); }
+		inline auto begin() noexcept { return layers.begin(); }
+		inline auto end() noexcept { return layers.end(); }
+		inline auto rbegin() noexcept { return layers.rbegin(); }
+		inline auto rend() noexcept { return layers.rend(); }
+		inline auto cbegin() const noexcept { return layers.cbegin(); }
+		inline auto cend() const noexcept { return layers.cend(); }
+		inline auto crbegin() const noexcept { return layers.crbegin(); }
+		inline auto crend() const noexcept { return layers.crend(); }
 	private:
 		std::vector<Layer*> layers;
 		size_t layerInsertIndex = 0;

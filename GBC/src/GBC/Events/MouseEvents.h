@@ -9,11 +9,11 @@ namespace gbc
 	{
 	public:
 		MouseButtonPressEvent(Mousecode button, int mods);
-		EVENT_CLASS_TYPE(EventType::MouseButtonPress)
-		EVENT_CLASS_CATEGORY(EventCategory_Mouse | EventCategory_MouseButton)
+		EVENT_CLASS_TYPE(EventType::MouseButtonPress);
+		EVENT_CLASS_CATEGORY(EventCategory_Mouse | EventCategory_MouseButton);
 
-		inline Mousecode GetButton() const { return button; }
-		inline int GetMods() const { return mods; }
+		inline Mousecode GetButton() const noexcept { return button; }
+		inline int GetMods() const noexcept { return mods; }
 
 		virtual std::string ToString() const override;
 	private:
@@ -25,11 +25,11 @@ namespace gbc
 	{
 	public:
 		MouseButtonReleaseEvent(Mousecode button, int mods);
-		EVENT_CLASS_TYPE(EventType::MouseButtonRelease)
-		EVENT_CLASS_CATEGORY(EventCategory_Mouse | EventCategory_MouseButton)
+		EVENT_CLASS_TYPE(EventType::MouseButtonRelease);
+		EVENT_CLASS_CATEGORY(EventCategory_Mouse | EventCategory_MouseButton);
 
-		inline Mousecode GetButton() const { return button; }
-		inline int GetMods() const { return mods; }
+		inline Mousecode GetButton() const noexcept { return button; }
+		inline int GetMods() const noexcept { return mods; }
 
 		virtual std::string ToString() const override;
 	private:
@@ -41,11 +41,11 @@ namespace gbc
 	{
 	public:
 		MouseMoveEvent(float x, float y);
-		EVENT_CLASS_TYPE(EventType::MouseMove)
-		EVENT_CLASS_CATEGORY(EventCategory_Mouse)
+		EVENT_CLASS_TYPE(EventType::MouseMove);
+		EVENT_CLASS_CATEGORY(EventCategory_Mouse);
 
-		inline float GetX() const { return x; }
-		inline float GetY() const { return y; }
+		inline float GetX() const noexcept { return x; }
+		inline float GetY() const noexcept { return y; }
 
 		virtual std::string ToString() const override;
 	private:
@@ -57,11 +57,11 @@ namespace gbc
 	{
 	public:
 		MouseScrollEvent(float offsetX, float offsetY);
-		EVENT_CLASS_TYPE(EventType::MouseScroll)
-		EVENT_CLASS_CATEGORY(EventCategory_Mouse)
+		EVENT_CLASS_TYPE(EventType::MouseScroll);
+		EVENT_CLASS_CATEGORY(EventCategory_Mouse);
 
-		inline float GetOffsetX() const { return offsetX; }
-		inline float GetOffsetY() const { return offsetY; }
+		inline float GetOffsetX() const noexcept { return offsetX; }
+		inline float GetOffsetY() const noexcept { return offsetY; }
 
 		virtual std::string ToString() const override;
 	private:
@@ -73,10 +73,10 @@ namespace gbc
 	{
 	public:
 		MouseEnterEvent(bool enter);
-		EVENT_CLASS_TYPE(EventType::MouseEnter)
-		EVENT_CLASS_CATEGORY(EventCategory_Mouse)
+		EVENT_CLASS_TYPE(EventType::MouseEnter);
+		EVENT_CLASS_CATEGORY(EventCategory_Mouse);
 
-		inline bool HasEntered() const { return enter; }
+		inline bool HasEntered() const noexcept { return enter; }
 
 		virtual std::string ToString() const override;
 	private:

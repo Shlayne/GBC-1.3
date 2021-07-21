@@ -1,6 +1,5 @@
 #pragma once
 
-#include "glm/glm.hpp"
 #include "BasicMesh.h"
 #include "GBC/Scene/Components/RenderableComponent.h"
 #include "GBC/Rendering/Texture.h"
@@ -15,7 +14,7 @@ namespace gbc
 		static void Init();
 		static void Shutdown();
 
-		static void BeginScene(const Camera& camera, const glm::mat4& transform);
+		static void BeginScene(const Camera& camera, const glm::mat4& view);
 		static void BeginScene(const EditorCamera& camera);
 		static void EndScene();
 
@@ -24,19 +23,19 @@ namespace gbc
 #if GBC_ENABLE_STATS
 		struct Statistics
 		{
-			unsigned int drawCalls = 0;
-			unsigned int indexCount = 0;
-			unsigned int vertexCount = 0;
-			unsigned int textureCount = 0;
+			uint32_t drawCalls = 0;
+			uint32_t indexCount = 0;
+			uint32_t vertexCount = 0;
+			uint32_t textureCount = 0;
 		};
 
 		static const Statistics& GetStatistics();
 		static void ResetStatistics();
 #endif
 	private:
-		static void EnsureBatch(unsigned int vertexCount, unsigned int indexCount, unsigned int texIndex = 0);
+		static void EnsureBatch(uint32_t vertexCount, uint32_t indexCount, uint32_t texIndex = 0);
 		static void Reset();
 
-		static unsigned int GetTexIndex(const Ref<Texture>& texture);
+		static uint32_t GetTexIndex(const Ref<Texture>& texture);
 	};
 }

@@ -3,14 +3,29 @@
 #include "glad/glad.h"
 #include "glfw/glfw3.h"
 
+#define GBC_OPENGL_VERSION_MAJOR 4
+#define GBC_OPENGL_VERSION_MINOR 6
+#define GBC_OPENGL_VERSION "#version " GBC_STRINGIFY_MACRO(GBC_OPENGL_VERSION_MAJOR) GBC_STRINGIFY_MACRO(GBC_OPENGL_VERSION_MINOR) "0"
+
 namespace gbc
 {
-	OpenGLContext::OpenGLContext(void* nativeContext)
-		: window(static_cast<GLFWwindow*>(nativeContext)) {}
+	void OpenGLContext::PreInit()
+	{
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GBC_OPENGL_VERSION_MAJOR);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GBC_OPENGL_VERSION_MINOR);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	}
 
-	void OpenGLContext::Init()
+	const char* OpenGLContext::GetVersion() const
+	{
+		return GBC_OPENGL_VERSION;
+	}
+
+	void OpenGLContext::Init(void* nativeContext)
 	{
 		GBC_PROFILE_FUNCTION();
+
+		window = static_cast<GLFWwindow*>(nativeContext);
 
 		GBC_CORE_ASSERT(window != nullptr, "Window is nullptr!");
 		glfwMakeContextCurrent(window);
@@ -32,7 +47,7 @@ namespace gbc
 
 	Timestep OpenGLContext::GetElapsedTime() const
 	{
-		float time = (float)glfwGetTime();
+		float time = static_cast<float>(glfwGetTime());
 		float elapsedTime = time - lastTime;
 		lastTime = time;
 		return elapsedTime;

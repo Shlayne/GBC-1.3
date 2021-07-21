@@ -93,41 +93,15 @@ namespace gbc
 	{
 		if (channels == texture.channels && positionX + texture.width <= width && positionX >= 0 && positionY + texture.height <= height && positionY >= 0)
 		{
-			size_t textureIncrement = (size_t)texture.width * channels;
-			size_t increment = (size_t)width * channels;
+			size_t textureIncrement = static_cast<size_t>(texture.width) * channels;
+			size_t increment = static_cast<size_t>(width) * channels;
 
 			unsigned char* source = texture.data;
-			unsigned char* destination = data + (((size_t)positionY * width + positionX) * channels);
-			for (size_t y = 0; y < texture.height; y++, source += textureIncrement, destination += increment)
+			unsigned char* destination = data + ((static_cast<size_t>(positionY) * width + positionX) * channels);
+			for (int y = 0; y < texture.height; y++, source += textureIncrement, destination += increment)
 				memcpy_s(destination, textureIncrement, source, textureIncrement);
 			return true;
 		}
 		return false;
-	}
-
-	LocalTexture2D* LocalTexture2D::CreateMipmap()
-	{
-		GBC_PROFILE_FUNCTION();
-
-		if (data != nullptr)
-		{
-			LocalTexture2D* texture = new LocalTexture2D(width >> 1, height >> 1, channels);
-
-			for (int y = 0; y < texture->height; y++)
-			{
-				for (int x = 0; x < texture->width; x++)
-				{
-					int index1 = ((y * 2 + 0) * width + x * 2) * channels;
-					int index2 = ((y * 2 + 1) * width + x * 2) * channels;
-					int textureIndex = (y * texture->width + x) * channels;
-
-					for (int c = 0; c < channels; c++)
-						texture->data[textureIndex + c] = (data[index1 + c] + data[index1 + channels + c] + data[index2 + c] + data[index2 + channels + c]) / 4;
-				}
-			}
-
-			return texture;
-		}
-		return nullptr;
 	}
 }

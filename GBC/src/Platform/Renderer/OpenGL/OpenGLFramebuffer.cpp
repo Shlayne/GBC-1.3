@@ -1,7 +1,7 @@
 #include "gbcpch.h"
 #include "OpenGLFramebuffer.h"
 #include "glad/glad.h"
-#include "GBC/Rendering/Renderer.h"
+#include "GBC/Rendering/RendererCapabilities.h"
 
 namespace gbc
 {
@@ -46,17 +46,17 @@ namespace gbc
 		return multisampled ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 	}
 
-	static void CreateTextures(GLenum textureTarget, unsigned int* id, unsigned int count)
+	static void CreateTextures(GLenum textureTarget, uint32_t* id, uint32_t count)
 	{
 		glCreateTextures(textureTarget, count, id);
 	}
 
-	static void BindTextures(GLenum textureTarget, unsigned int id)
+	static void BindTextures(GLenum textureTarget, uint32_t id)
 	{
 		glBindTexture(textureTarget, id);
 	}
 
-	static void AttachColorTexture(unsigned int id, int samples, GLenum internalFormat, GLenum format, int width, int height, FramebufferTextureSpecification textureSpecification, int index)
+	static void AttachColorTexture(uint32_t id, int samples, GLenum internalFormat, GLenum format, int width, int height, FramebufferTextureSpecification textureSpecification, int index)
 	{
 		bool multisampled = samples > 1;
 		if (multisampled)
@@ -76,7 +76,7 @@ namespace gbc
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GetTextureTarget(multisampled), id, 0);
 	}
 
-	static void AttachDepthTexture(unsigned int id, int samples, GLenum format, GLenum attachmentType, int width, int height, FramebufferTextureSpecification textureSpecification)
+	static void AttachDepthTexture(uint32_t id, int samples, GLenum format, GLenum attachmentType, int width, int height, FramebufferTextureSpecification textureSpecification)
 	{
 		bool multisampled = samples > 1;
 		if (multisampled)
@@ -129,7 +129,7 @@ namespace gbc
 		if (colorAttachmentSpecifications.size() != 0)
 		{
 			colorAttachments.resize(colorAttachmentSpecifications.size());
-			CreateTextures(textureTarget, colorAttachments.data(), (unsigned int)colorAttachments.size());
+			CreateTextures(textureTarget, colorAttachments.data(), static_cast<uint32_t>(colorAttachments.size()));
 
 			for (size_t i = 0; i < colorAttachments.size(); i++)
 			{
@@ -160,12 +160,12 @@ namespace gbc
 			}
 		}
 
-		int maxColorAttachments = Renderer::GetMaxFramebufferColorAttachments();
+		int maxColorAttachments = RendererCapabilities::GetMaxFramebufferColorAttachments();
 		if (colorAttachments.size() > 1)
 		{
 			GBC_CORE_ASSERT(colorAttachments.size() <= maxColorAttachments, "Too many Framebuffer color attachments!");
 			GLenum* buffers = (GLenum*)alloca(colorAttachments.size() * sizeof(GLenum));
-			for (unsigned int i = 0; i < (unsigned int)colorAttachments.size(); i++)
+			for (uint32_t i = 0; i < (uint32_t)colorAttachments.size(); i++)
 				buffers[i] = (GLenum)(GL_COLOR_ATTACHMENT0 + i);
 
 			glDrawBuffers((int)colorAttachments.size(), buffers);
@@ -208,13 +208,13 @@ namespace gbc
 
 	void OpenGLFramebuffer::OnViewportResize(int width, int height)
 	{
-		GBC_CORE_ASSERT(width <= Renderer::GetMaxFramebufferWidth() && height <= Renderer::GetMaxFramebufferHeight(), "Framebuffer too large!");
+		GBC_CORE_ASSERT(width <= RendererCapabilities::GetMaxFramebufferWidth() && height <= RendererCapabilities::GetMaxFramebufferHeight(), "Framebuffer too large!");
 		specification.width = width;
 		specification.height = height;
 		Recreate();
 	}
 
-	void OpenGLFramebuffer::GetColorPixel(void* pixel, int x, int y, unsigned int index) const
+	void OpenGLFramebuffer::GetColorPixel(void* pixel, int x, int y, uint32_t index) const
 	{
 		GBC_CORE_ASSERT(index < colorAttachments.size() && x >= 0 && x < specification.width && y >= 0 && y < specification.height, "Framebuffer index or position out of bounds!");
 
@@ -223,7 +223,7 @@ namespace gbc
 		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, pixel);
 	}
 
-	void OpenGLFramebuffer::ClearColorAttachment(int value, unsigned int index)
+	void OpenGLFramebuffer::ClearColorAttachment(int value, uint32_t index)
 	{
 		GBC_CORE_ASSERT(index < colorAttachments.size(), "Framebuffer index out of bounds!");
 

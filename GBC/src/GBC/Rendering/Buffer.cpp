@@ -1,7 +1,7 @@
 #include "gbcpch.h"
 #include "Buffer.h"
 #include "RendererAPI.h"
-#include "Platform/OpenGL/OpenGLBuffer.h"
+#include "Platform/Renderer/OpenGL/OpenGLBuffer.h"
 
 namespace gbc
 {
@@ -49,10 +49,10 @@ namespace gbc
 		return 0;
 	}
 
-	BufferElement::BufferElement(BufferElementType type, const std::string& name, bool normalized)
+	BufferElement::BufferElement(BufferElementType type, const std::string& name, bool normalized) noexcept
 		: type(type), name(name), normalized(normalized), count(GetElementCount(type)), size(GetElementSize(type)) {}
 
-	BufferLayout::BufferLayout(std::initializer_list<BufferElement> elements)
+	BufferLayout::BufferLayout(std::initializer_list<BufferElement> elements) noexcept
 		: elements(elements)
 	{
 		for (BufferElement& element : this->elements)
@@ -62,7 +62,7 @@ namespace gbc
 		}
 	}
 
-	Ref<VertexBuffer> VertexBuffer::CreateRef(unsigned int size, const void* data, BufferUsage usage)
+	Ref<VertexBuffer> VertexBuffer::CreateRef(uint32_t size, const void* data, BufferUsage usage)
 	{
 		switch (RendererAPI::GetAPI())
 		{
@@ -74,7 +74,7 @@ namespace gbc
 		return nullptr;
 	}
 
-	Scope<VertexBuffer> VertexBuffer::CreateScope(unsigned int size, const void* data, BufferUsage usage)
+	Scope<VertexBuffer> VertexBuffer::CreateScope(uint32_t size, const void* data, BufferUsage usage)
 	{
 		switch (RendererAPI::GetAPI())
 		{
@@ -86,24 +86,24 @@ namespace gbc
 		return nullptr;
 	}
 
-	Ref<IndexBuffer> IndexBuffer::CreateRef(unsigned int count, const void* data, BufferUsage usage)
+	Ref<IndexBuffer> IndexBuffer::CreateRef(uint32_t count, const void* data, BufferUsage usage, BufferIndexType type)
 	{
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLIndexBuffer>(count, data, usage);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLIndexBuffer>(count, data, usage, type);
 		}
 
 		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 
-	Scope<IndexBuffer> IndexBuffer::CreateScope(unsigned int count, const void* data, BufferUsage usage)
+	Scope<IndexBuffer> IndexBuffer::CreateScope(uint32_t count, const void* data, BufferUsage usage, BufferIndexType type)
 	{
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::None:   return nullptr;
-			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLIndexBuffer>(count, data, usage);
+			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLIndexBuffer>(count, data, usage, type);
 		}
 
 		GBC_CORE_ASSERT(false, "Unknown Renderer API!");

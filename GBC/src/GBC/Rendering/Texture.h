@@ -28,9 +28,9 @@ namespace gbc
 	struct TextureSpecification
 	{
 		TextureSpecification() = default;
-		TextureSpecification(Ref<LocalTexture2D> texture)
+		TextureSpecification(const Ref<LocalTexture2D>& texture)
 			: texture(texture) {}
-		TextureSpecification(Ref<LocalTexture2D> texture, TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapR, TextureWrapMode wrapS, TextureWrapMode wrapT)
+		TextureSpecification(const Ref<LocalTexture2D>& texture, TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapR, TextureWrapMode wrapS, TextureWrapMode wrapT)
 			: texture(texture), minFilter(minFilter), magFilter(magFilter), wrapR(wrapR), wrapS(wrapS), wrapT(wrapT) {}
 		TextureSpecification(TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapR, TextureWrapMode wrapS, TextureWrapMode wrapT)
 			: minFilter(minFilter), magFilter(magFilter), wrapR(wrapR), wrapS(wrapS), wrapT(wrapT) {}
@@ -48,8 +48,8 @@ namespace gbc
 	public:
 		virtual ~Texture() = default;
 
-		virtual void Bind(unsigned int slot = 0) const = 0;
-		virtual void Unbind(unsigned int slot = 0) const = 0;
+		virtual void Bind(uint32_t slot = 0) const = 0;
+		virtual void Unbind(uint32_t slot = 0) const = 0;
 
 		virtual const Ref<LocalTexture2D>& GetTexture() const = 0;
 		virtual const TextureSpecification& GetSpecification() const = 0;

@@ -40,7 +40,7 @@ namespace gbc
 		if (IsUsing())
 		{
 			EventDispatcher dispatcher(event);
-			dispatcher.Dispatch<MouseScrollEvent>(GBC_BIND_FUNC(OnMouseScrollEvent));
+			dispatcher.Dispatch(this, &EditorCamera::OnMouseScrollEvent);
 		}
 	}
 
@@ -54,8 +54,8 @@ namespace gbc
 
 	void EditorCamera::OnViewportResize(int width, int height)
 	{
-		viewportSize.x = (float)width;
-		viewportSize.y = (float)height;
+		viewportSize.x = static_cast<float>(width);
+		viewportSize.y = static_cast<float>(height);
 		RecalculateProjection();
 	}
 
@@ -68,16 +68,12 @@ namespace gbc
 	void EditorCamera::RecalculateView()
 	{
 		position = focalPoint - GetForwardDirection() * distance;
-
-		glm::quat orientation = GetOrientation();
-		view = glm::inverse(glm::translate(glm::mat4(1.0f), position) * glm::toMat4(orientation));
+		view = glm::inverse(glm::translate(glm::mat4(1.0f), position) * glm::toMat4(GetOrientation()));
 	}
 
 	void EditorCamera::MousePan(const glm::vec2& delta)
 	{
-		glm::vec2 panSpeed = GetPanSpeed();
-		focalPoint -= GetRightDirection() * delta.x * panSpeed.x * distance;
-		focalPoint += GetUpDirection() * delta.y * panSpeed.y * distance;
+		focalPoint += (GetUpDirection() * delta.y - GetRightDirection() * delta.x) * distance;
 	}
 
 	void EditorCamera::MouseRotate(const glm::vec2& delta)
@@ -97,16 +93,16 @@ namespace gbc
 		}
 	}
 
-	glm::vec2 EditorCamera::GetPanSpeed() const
-	{
-		float x = std::min(viewportSize.x / 1000.0f, 2.4f);
-		float xFactor = 0.0366f * x * x - 0.1778f * x + 0.3021f;
+	//glm::vec2 EditorCamera::GetPanSpeed() const
+	//{
+	//	float x = std::min(viewportSize.x / 1000.0f, 2.4f);
+	//	float xFactor = 0.0366f * x * x - 0.1778f * x + 0.3021f;
 
-		float y = std::min(viewportSize.x / 1000.0f, 2.4f);
-		float yFactor = 0.0366f * y * y - 0.1778f * y + 0.3021f;
+	//	float y = std::min(viewportSize.x / 1000.0f, 2.4f);
+	//	float yFactor = 0.0366f * y * y - 0.1778f * y + 0.3021f;
 
-		return {xFactor, yFactor};
-	}
+	//	return {xFactor, yFactor};
+	//}
 
 	float EditorCamera::GetRotationSpeed() const
 	{
@@ -115,7 +111,7 @@ namespace gbc
 
 	float EditorCamera::GetZoomSpeed() const
 	{
-		float dist = std::max(distance * 0.2f, 0.0f);
+		float dist = std::max(distance * 0.4f, 0.0f);
 		return std::min(dist * dist, 100.0f);
 	}
 

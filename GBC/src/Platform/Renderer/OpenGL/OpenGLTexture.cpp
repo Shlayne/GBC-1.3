@@ -80,10 +80,7 @@ namespace gbc
 	}
 
 	OpenGLTexture::OpenGLTexture(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
-		: specification(specification), ownsRendererID(false)
-	{
-		rendererID = framebuffer->GetColorAttachment(attachmentIndex);
-	}
+		: specification(specification), ownsRendererID(false), rendererID(framebuffer->GetColorAttachment(attachmentIndex)) {}
 
 	OpenGLTexture::~OpenGLTexture()
 	{
@@ -91,12 +88,12 @@ namespace gbc
 			glDeleteTextures(1, &rendererID);
 	}
 
-	void OpenGLTexture::Bind(unsigned int slot) const
+	void OpenGLTexture::Bind(uint32_t slot) const
 	{
 		glBindTextureUnit(slot, rendererID);
 	}
 
-	void OpenGLTexture::Unbind(unsigned int slot) const
+	void OpenGLTexture::Unbind(uint32_t slot) const
 	{
 		glBindTextureUnit(slot, 0);
 	}

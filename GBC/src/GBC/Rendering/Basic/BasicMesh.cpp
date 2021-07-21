@@ -3,94 +3,78 @@
 
 namespace gbc
 {
-	BasicMesh::BasicMesh(unsigned int vertexCount, unsigned int indexCount)
-		: vertexCount(vertexCount), indexCount(indexCount)
-	{
-		vertices = new BasicVertex[vertexCount];
-		indices = new unsigned int[indexCount];
-	}
+	BasicMesh::BasicMesh(uint32_t vertexCount, uint32_t indexCount)
+		: vertices(vertexCount), indices(indexCount) {}
 
 	BasicMesh::BasicMesh(const BasicMesh& mesh)
-		: vertexCount(mesh.vertexCount), indexCount(mesh.indexCount)
+		: vertices(mesh.vertices.size()), indices(mesh.indices.size())
 	{
-		vertices = new BasicVertex[vertexCount];
-		indices = new unsigned int[indexCount];
-		memcpy_s(vertices, vertexCount, mesh.vertices, vertexCount);
-		memcpy_s(indices, indexCount, mesh.indices, indexCount);
+		memcpy_s(&vertices[0], vertices.size(), &mesh.vertices[0], mesh.vertices.size());
+		memcpy_s(&indices[0], indices.size(), &mesh.indices[0], mesh.indices.size());
 	}
 
 	BasicMesh::BasicMesh(BasicMesh&& mesh) noexcept
-		: vertexCount(mesh.vertexCount), indexCount(mesh.indexCount), vertices(mesh.vertices), indices(mesh.indices)
-	{
-		mesh.vertexCount = 0;
-		mesh.indexCount = 0;
-		mesh.vertices = nullptr;
-		mesh.indices = nullptr;
-	}
-
-	BasicMesh::~BasicMesh()
-	{
-		delete[] vertices;
-		delete[] indices;
-	}
+		:vertices(std::move(mesh.vertices)), indices(std::move(mesh.indices)) {}
 
 	BasicMesh& BasicMesh::operator=(BasicMesh&& mesh) noexcept
 	{
-		vertexCount = mesh.vertexCount;
-		indexCount = mesh.indexCount;
-		vertices = mesh.vertices;
-		indices = mesh.indices;
-		mesh.vertexCount = 0;
-		mesh.indexCount = 0;
-		mesh.vertices = nullptr;
-		mesh.indices = nullptr;
+		if (this != &mesh)
+		{
+			vertices = std::move(mesh.vertices);
+			indices = std::move(mesh.indices);
+		}
 		return *this;
 	}
 
-	BasicMesh::BasicMesh(const OBJModel& mesh)
+	BasicMesh::BasicMesh(const OBJModel& model)
+		: vertices(model.indices.size()), indices(model.indices.size())
 	{
-		vertexCount = (unsigned int)mesh.indices.size();
-		indexCount = vertexCount;
-		vertices = new BasicVertex[vertexCount];
-		indices = new unsigned int[indexCount];
-
-		for (unsigned int i = 0; i < (unsigned int)mesh.indices.size(); i++)
+		if (model.texCoords.empty())
 		{
-			vertices[i].position = mesh.positions[mesh.indices[i].x];
-			vertices[i].texCoord = mesh.texCoords[mesh.indices[i].y];
-			indices[i] = i;
+			for (size_t i = 0; i < model.indices.size(); i++)
+			{
+				vertices[i].position = model.positions[model.indices[i].x];
+				indices[i] = static_cast<uint32_t>(i);
+			}
+		}
+		else
+		{
+			for (size_t i = 0; i < model.indices.size(); i++)
+			{
+				vertices[i].position = model.positions[model.indices[i].x];
+				vertices[i].texCoord = model.texCoords[model.indices[i].y];
+				indices[i] = static_cast<uint32_t>(i);
+			}
 		}
 	}
 
-	BasicMesh::BasicMesh(OBJModel&& mesh) noexcept
+	BasicMesh::BasicMesh(OBJModel&& model) noexcept
+		: vertices(model.indices.size()), indices(model.indices.size())
 	{
-		vertexCount = (unsigned int)mesh.indices.size();
-		indexCount = vertexCount;
-		vertices = new BasicVertex[vertexCount];
-		indices = new unsigned int[indexCount];
-
-		for (unsigned int i = 0; i < (unsigned int)mesh.indices.size(); i++)
+		if (model.texCoords.empty())
 		{
-			vertices[i].position = mesh.positions[mesh.indices[i].x];
-			vertices[i].texCoord = mesh.texCoords[mesh.indices[i].y];
-			indices[i] = i;
+			for (size_t i = 0; i < model.indices.size(); i++)
+			{
+				vertices[i].position = model.positions[model.indices[i].x];
+				indices[i] = static_cast<uint32_t>(i);
+			}
 		}
-
-		mesh.Clear();
+		else
+		{
+			for (size_t i = 0; i < model.indices.size(); i++)
+			{
+				vertices[i].position = model.positions[model.indices[i].x];
+				vertices[i].texCoord = model.texCoords[model.indices[i].y];
+				indices[i] = static_cast<uint32_t>(i);
+			}
+		}
 	}
 
-
-	void BasicMesh::Create(unsigned int vertexCount, unsigned int indexCount)
+	void BasicMesh::Create(uint32_t vertexCount, uint32_t indexCount)
 	{
-		if (this->vertexCount == 0)
-		{
-			delete[] vertices;
-			delete[] indices;
-		}
-
-		this->vertexCount = vertexCount;
-		this->indexCount = indexCount;
-		vertices = new BasicVertex[vertexCount];
-		indices = new unsigned int[indexCount];
+		vertices.clear();
+		indices.clear();
+		vertices.reserve(vertexCount);
+		indices.reserve(indexCount);
 	}
 }

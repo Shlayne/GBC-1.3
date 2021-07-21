@@ -24,8 +24,13 @@ namespace gbc
 		{
 			case FramebufferTextureFormat::Depth24Stencil8:
 				return true;
-			default: return false;
+			case FramebufferTextureFormat::RGBA8:
+			case FramebufferTextureFormat::RedInteger:
+				return false;
 		}
+
+		GBC_CORE_ASSERT(false, "Unknown Framebuffer Texture Format!");
+		return false;
 	}
 
 	enum class FramebufferFilterMode
@@ -84,12 +89,12 @@ namespace gbc
 		virtual void OnViewportResize(int width, int height) = 0;
 		virtual const FramebufferSpecification& GetSpecification() const = 0;
 
-		virtual RendererID GetColorAttachment(unsigned int index = 0) const = 0;
+		virtual RendererID GetColorAttachment(uint32_t index = 0) const = 0;
 		virtual RendererID GetDepthAttachment() const = 0;
 
-		virtual void GetColorPixel(void* pixel, int x, int y, unsigned int index = 0) const = 0;
+		virtual void GetColorPixel(void* pixel, int x, int y, uint32_t index = 0) const = 0;
 
-		virtual void ClearColorAttachment(int value, unsigned int index = 0) = 0;
+		virtual void ClearColorAttachment(int value, uint32_t index = 0) = 0;
 
 		static Ref<Framebuffer> CreateRef(FramebufferSpecification specification); 
 		static Scope<Framebuffer> CreateScope(FramebufferSpecification specification);

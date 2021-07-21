@@ -26,10 +26,10 @@ namespace gbc
 		void OnUpdateRuntime(Timestep timestep);
 		void OnRenderRuntime();
 		void OnUpdateEditor(Timestep timestep);
-		void OnRenderEditor(EditorCamera& camera);
+		void OnRenderEditor(const EditorCamera& camera);
 
 		void OnViewportResize(int width, int height);
-		inline glm::ivec2 GetViewportSize() const { return viewportSize; }
+		inline glm::ivec2 GetViewportSize() const noexcept { return viewportSize; }
 
 		Entity GetPrimaryCameraEntity();
 	private:
@@ -38,7 +38,6 @@ namespace gbc
 
 		entt::registry registry;
 
-		bool shouldResizeCameras = true;
 		glm::ivec2 viewportSize;
 
 		friend class Entity;

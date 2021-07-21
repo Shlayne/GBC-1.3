@@ -59,7 +59,7 @@ namespace gbc
 		viewportHovered = sceneViewportPanel->IsHovered();
 
 		editorCamera.SetBlocked(ImGuizmo::IsUsing());
-		Application::Get().GetImGuiLayer().SetBlockEvents(!viewportFocused && !viewportHovered);
+		Application::Get().GetImGuiWrapper().SetBlockEvents(!viewportFocused && !viewportHovered);
 
 		if (viewportSizeChanged)
 		{
@@ -136,7 +136,7 @@ namespace gbc
 				ImGui::Separator();
 
 				if (ImGui::MenuItem("Exit", "Alt+F4"))
-					Application::Get().Terminate();
+					Application::Get().Close();
 
 				ImGui::EndMenu();
 			}
@@ -170,10 +170,10 @@ namespace gbc
 		GBC_PROFILE_FUNCTION();
 
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowCloseEvent>(GBC_BIND_FUNC(OnWindowCloseEvent));
-		dispatcher.Dispatch<KeyPressEvent>(GBC_BIND_FUNC(OnKeyPressEvent));
-		dispatcher.Dispatch<MouseButtonPressEvent>(GBC_BIND_FUNC(OnMouseButtonPressEvent));
-		dispatcher.Dispatch<MouseButtonReleaseEvent>(GBC_BIND_FUNC(OnMouseButtonReleaseEvent));
+		dispatcher.Dispatch(this, &EditorLayer::OnWindowCloseEvent);
+		dispatcher.Dispatch(this, &EditorLayer::OnKeyPressEvent);
+		dispatcher.Dispatch(this, &EditorLayer::OnMouseButtonPressEvent);
+		dispatcher.Dispatch(this, &EditorLayer::OnMouseButtonReleaseEvent);
 
 		if (!event.handled)
 			editorCamera.OnEvent(event);

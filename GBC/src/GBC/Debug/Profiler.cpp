@@ -1,5 +1,6 @@
 #include "gbcpch.h"
 #include "Profiler.h"
+#include <filesystem>
 
 namespace gbc
 {
@@ -15,8 +16,13 @@ namespace gbc
 
 		// Create any directories that need to be created before opening the file
 		for (size_t beginIndex = 0, endIndex = 0; (endIndex = filepath.find_first_of("/\\", beginIndex)) != std::string::npos; beginIndex = endIndex + 1)
+		{
 			if (beginIndex != endIndex)
-				std::filesystem::create_directory(filepath.substr(beginIndex, endIndex - beginIndex));
+			{
+				std::filesystem::path path = std::filesystem::path(filepath.begin() + beginIndex, filepath.begin() + endIndex - beginIndex);
+				std::filesystem::create_directory(path);
+			}
+		}
 
 		outputStream.open(filepath);
 		if (outputStream.is_open())

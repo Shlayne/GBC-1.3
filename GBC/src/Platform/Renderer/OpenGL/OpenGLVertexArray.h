@@ -14,7 +14,7 @@ namespace gbc
 		virtual void Unbind() const override;
 
 		virtual void AddVertexBuffer(Ref<VertexBuffer> vertexBuffer) override;
-		virtual const std::vector<Ref<VertexBuffer>>& GetVertexBuffers() override { return vertexBuffers; }
+		inline virtual const std::vector<Ref<VertexBuffer>>& GetVertexBuffers() const override { return vertexBuffers; }
 	private:
 		RendererID rendererID = 0;
 		std::vector<Ref<VertexBuffer>> vertexBuffers;

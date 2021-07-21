@@ -6,7 +6,8 @@ namespace gbc
 	void LayerStack::PushLayer(Layer* layer)
 	{
 		GBC_CORE_ASSERT(std::find(layers.begin(), layers.begin() + layerInsertIndex, layer) == layers.begin() + layerInsertIndex, "Cannot add the same layer twice!");
-		layers.emplace(layers.begin() + layerInsertIndex++, layer);
+		layers.emplace(layers.begin() + layerInsertIndex, layer);
+		layerInsertIndex++;
 	}
 
 	void LayerStack::PushOverlay(Layer* overlay)
@@ -15,28 +16,14 @@ namespace gbc
 		layers.emplace_back(overlay);
 	}
 
-	bool LayerStack::PopLayer(Layer* layer)
+	Layer* LayerStack::PopLayer()
 	{
-		auto itEnd = layers.begin() + layerInsertIndex;
-		auto it = std::find(layers.begin(), itEnd, layer);
-		if (it != itEnd)
-		{
-			layers.erase(it);
-			layerInsertIndex--;
-			return true;
-		}
-		return false;
+		return layerInsertIndex ? *(layers.begin() + --layerInsertIndex) : nullptr;
 	}
 
-	bool LayerStack::PopOverlay(Layer* overlay)
+	Layer* LayerStack::PopOverlay()
 	{
-		auto itEnd = layers.end();
-		auto it = std::find(layers.begin() + layerInsertIndex, itEnd, overlay);
-		if (it != itEnd)
-		{
-			layers.erase(it);
-			return true;
-		}
-		return false;
+		auto it = layers.begin() + layerInsertIndex;
+		return it != layers.end() ? *it : nullptr;
 	}
 }

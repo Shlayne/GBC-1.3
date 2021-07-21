@@ -8,12 +8,12 @@ namespace gbc
 	{
 		WindowClose, WindowResize, WindowMove, WindowFocus, WindowMinimize, WindowMaximize, 
 			WindowDrop, WindowFramebufferResize, WindowContentScale, WindowRefresh,
-		KeyPress, KeyRepeat, KeyRelease, KeyChar,
+		KeyPress, KeyRepeat, KeyRelease, KeyChar, KeyCharMods,
 		MouseButtonPress, MouseButtonRelease, MouseMove, MouseScroll, MouseEnter,
 		JoystickConnect, MonitorConnect
 	};
 
-	using EventCategoryFlags = unsigned int;
+	using EventCategoryFlags = uint32_t;
 	enum EventCategory : EventCategoryFlags
 	{
 		EventCategory_None = 0,
@@ -44,17 +44,18 @@ namespace gbc
 		bool handled = false;
 	};
 
+	class Application;
 	class EventDispatcher
 	{
 	public:
 		EventDispatcher(Event& event);
 
-		template<typename E, typename Func>
-		bool Dispatch(const Func& func)
+		template<typename C, typename E>
+		bool Dispatch(C* object, bool(C::*func)(E&))
 		{
 			if (event.GetType() == E::GetStaticType())
 			{
-				event.handled |= func(static_cast<E&>(event));
+				event.handled |= (object->*func)(static_cast<E&>(event));
 				return true;
 			}
 			return false;

@@ -5,14 +5,9 @@
 
 namespace gbc
 {
-	void PerspectiveCameraControllerScript::OnCreate()
-	{
-		//lastMousePos = Input::GetMousePos();
-	}
-
 	void PerspectiveCameraControllerScript::OnUpdate(Timestep timestep)
 	{
-		TransformComponent& transform = Get<TransformComponent>();
+		TransformComponent& transform = GetComponent<TransformComponent>();
 
 		float movementSpeed = speed * timestep;
 

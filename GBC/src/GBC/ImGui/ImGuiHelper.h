@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "glm/glm.hpp"
+#include "imgui/imgui.h"
 
 namespace gbc
 {
@@ -10,7 +10,7 @@ namespace gbc
 	private:
 		static void Init();
 		static void Shutdown();
-		friend class ImGuiLayer;
+		friend class ImGuiWrapper;
 
 		static constexpr float defaultResetValue = 0.0f;
 		static constexpr float defaultSpeed = 0.1f;
