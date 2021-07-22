@@ -160,20 +160,21 @@ namespace gbc
 			}
 		}
 
-		int maxColorAttachments = RendererCapabilities::GetMaxFramebufferColorAttachments();
-		if (colorAttachments.size() > 1)
-		{
-			GBC_CORE_ASSERT(colorAttachments.size() <= maxColorAttachments, "Too many Framebuffer color attachments!");
-			GLenum* buffers = (GLenum*)alloca(colorAttachments.size() * sizeof(GLenum));
-			for (uint32_t i = 0; i < (uint32_t)colorAttachments.size(); i++)
-				buffers[i] = (GLenum)(GL_COLOR_ATTACHMENT0 + i);
-
-			glDrawBuffers((int)colorAttachments.size(), buffers);
-		}
-		else if (colorAttachments.empty())
+		if (colorAttachments.empty())
 		{
 			// Only depth-pass
 			glDrawBuffer(GL_NONE);
+		}
+		else
+		{
+			int maxColorAttachments = RendererCapabilities::GetMaxFramebufferColorAttachments();
+			GBC_CORE_ASSERT(colorAttachments.size() <= maxColorAttachments, "Too many Framebuffer color attachments!");
+			GLenum* buffers = new GLenum[colorAttachments.size()];
+			for (uint32_t i = 0; i < static_cast<uint32_t>(colorAttachments.size()); i++)
+				buffers[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
+
+			glDrawBuffers(static_cast<GLsizei>(colorAttachments.size()), buffers);
+			delete[] buffers;
 		}
 
 		GBC_CORE_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer incomplete!");
@@ -186,7 +187,7 @@ namespace gbc
 		if (rendererID != 0)
 		{
 			glDeleteFramebuffers(1, &rendererID);
-			glDeleteTextures((int)colorAttachments.size(), colorAttachments.data());
+			glDeleteTextures(static_cast<GLsizei>(colorAttachments.size()), colorAttachments.data());
 			glDeleteTextures(1, &depthAttachment);
 
 			rendererID = 0;

@@ -236,9 +236,6 @@ namespace gbc
 						// or maybe this:
 						// Texture::CreateRef(renderableComponentNode["Texture"].as<uint64_t>());
 						// and that would use the asset manager to get the correct Ref<Texture>
-
-						// TODO: don't mandate 4 channels or vertical flip, that information
-						// should be in LocalTexture2DSpecifications
 						renderableComponent = Texture::CreateRef(CreateRef<LocalTexture2D>(renderableComponentNode["Filepath"].as<std::string>(), 4));
 					}
 

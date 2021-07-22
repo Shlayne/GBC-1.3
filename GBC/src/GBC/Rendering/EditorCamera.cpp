@@ -24,11 +24,11 @@ namespace gbc
 
 		if (timestep && IsUsing())
 		{
-			if (Input::IsMouseButtonPressed(Mousecode::ButtonMiddle))
+			if (Input::IsMouseButtonPressed(MouseButton::ButtonMiddle))
 				MousePan(delta);
-			else if (Input::IsMouseButtonPressed(Mousecode::ButtonLeft))
+			else if (Input::IsMouseButtonPressed(MouseButton::ButtonLeft))
 				MouseRotate(delta);
-			else if (Input::IsMouseButtonPressed(Mousecode::ButtonRight))
+			else if (Input::IsMouseButtonPressed(MouseButton::ButtonRight))
 				MouseZoom(delta.y);
 
 			RecalculateView();

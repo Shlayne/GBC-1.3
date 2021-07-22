@@ -42,7 +42,7 @@ namespace gbc
 		lastMousePos = mousePos;
 
 		// TODO: remove this check when editor camera is in place
-		if (Input::IsMouseButtonPressed(Mousecode::ButtonLeft))
+		if (Input::IsMouseButtonPressed(MouseButton::ButtonLeft))
 		{
 			float rotationSpeed = sensitivity * timestep;
 			transform.rotation.y -= mouseDPos.x * rotationSpeed;

@@ -28,8 +28,8 @@ namespace gbc
 		EVENT_CLASS_TYPE(EventType::KeyRepeat);
 		EVENT_CLASS_CATEGORY(EventCategory_Keyboard);
 
-		inline Keycode GetKeycode() const { return keycode; }
-		inline int GetMods() const { return mods; }
+		inline Keycode GetKeycode() const noexcept { return keycode; }
+		inline int GetMods() const noexcept { return mods; }
 
 		virtual std::string ToString() const override;
 	private:
@@ -44,8 +44,8 @@ namespace gbc
 		EVENT_CLASS_TYPE(EventType::KeyRelease);
 		EVENT_CLASS_CATEGORY(EventCategory_Keyboard);
 
-		inline Keycode GetKeycode() const { return keycode; }
-		inline int GetMods() const { return mods; }
+		inline Keycode GetKeycode() const noexcept { return keycode; }
+		inline int GetMods() const noexcept { return mods; }
 
 		virtual std::string ToString() const override;
 	private:
@@ -60,7 +60,7 @@ namespace gbc
 		EVENT_CLASS_TYPE(EventType::KeyChar);
 		EVENT_CLASS_CATEGORY(EventCategory_Keyboard);
 
-		inline uint32_t GetCodepoint() const { return codepoint; }
+		inline uint32_t GetCodepoint() const noexcept { return codepoint; }
 
 		virtual std::string ToString() const override;
 	private:
@@ -74,8 +74,8 @@ namespace gbc
 		EVENT_CLASS_TYPE(EventType::KeyCharMods);
 		EVENT_CLASS_CATEGORY(EventCategory_Keyboard);
 
-		inline uint32_t GetCodepoint() const { return codepoint; }
-		inline int GetMods() const { return mods; }
+		inline uint32_t GetCodepoint() const noexcept { return codepoint; }
+		inline int GetMods() const noexcept { return mods; }
 
 		virtual std::string ToString() const override;
 	private:

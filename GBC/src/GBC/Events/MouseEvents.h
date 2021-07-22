@@ -1,39 +1,39 @@
 #pragma once
 
 #include "Event.h"
-#include "GBC/Core/Mousecodes.h"
+#include "GBC/Core/MouseButtons.h"
 
 namespace gbc
 {
 	class MouseButtonPressEvent : public Event
 	{
 	public:
-		MouseButtonPressEvent(Mousecode button, int mods);
+		MouseButtonPressEvent(MouseButton button, int mods);
 		EVENT_CLASS_TYPE(EventType::MouseButtonPress);
 		EVENT_CLASS_CATEGORY(EventCategory_Mouse | EventCategory_MouseButton);
 
-		inline Mousecode GetButton() const noexcept { return button; }
+		inline MouseButton GetButton() const noexcept { return button; }
 		inline int GetMods() const noexcept { return mods; }
 
 		virtual std::string ToString() const override;
 	private:
-		Mousecode button;
+		MouseButton button;
 		int mods;
 	};
 
 	class MouseButtonReleaseEvent : public Event
 	{
 	public:
-		MouseButtonReleaseEvent(Mousecode button, int mods);
+		MouseButtonReleaseEvent(MouseButton button, int mods);
 		EVENT_CLASS_TYPE(EventType::MouseButtonRelease);
 		EVENT_CLASS_CATEGORY(EventCategory_Mouse | EventCategory_MouseButton);
 
-		inline Mousecode GetButton() const noexcept { return button; }
+		inline MouseButton GetButton() const noexcept { return button; }
 		inline int GetMods() const noexcept { return mods; }
 
 		virtual std::string ToString() const override;
 	private:
-		Mousecode button;
+		MouseButton button;
 		int mods;
 	};
 

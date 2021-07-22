@@ -2,12 +2,23 @@
 #include "LocalTexture2D.h"
 #include "stb/stb_image.h"
 #include "stb/stb_image_write.h"
+#include "GBC/Rendering/RendererAPI.h"
 
 namespace gbc
 {
-	LocalTexture2D::LocalTexture2D(const std::string& filePath, int requiredChannels, bool flipVertically)
+	static bool GetDefaultVerticalFlip()
 	{
-		ReadFile(filePath, requiredChannels, flipVertically);
+		return RendererAPI::GetAPI() == RendererAPI::API::OpenGL;
+	}
+
+	LocalTexture2D::LocalTexture2D(const std::string& filepath, int requiredChannels)
+	{
+		ReadFile(filepath, requiredChannels);
+	}
+
+	LocalTexture2D::LocalTexture2D(const std::string& filepath, bool flipVertically, int requiredChannels)
+	{
+		ReadFile(filepath, flipVertically, requiredChannels);
 	}
 
 	LocalTexture2D::LocalTexture2D(int width, int height, int channels)
@@ -25,12 +36,17 @@ namespace gbc
 		delete[] data;
 	}
 
-	bool LocalTexture2D::ReadFile(const std::string& filePath, int requiredChannels, bool flipVertically)
+	bool LocalTexture2D::ReadFile(const std::string& filepath, int requiredChannels)
+	{
+		return ReadFile(filepath, GetDefaultVerticalFlip(), requiredChannels);
+	}
+
+	bool LocalTexture2D::ReadFile(const std::string& filepath, bool flipVertically, int requiredChannels)
 	{
 		GBC_PROFILE_FUNCTION();
 
 		stbi_set_flip_vertically_on_load(flipVertically);
-		stbi_uc* stbiData = stbi_load(filePath.c_str(), &width, &height, &channels, requiredChannels);
+		stbi_uc* stbiData = stbi_load(filepath.c_str(), &width, &height, &channels, requiredChannels);
 		if (stbiData != nullptr)
 		{
 			if (data != nullptr)
@@ -39,19 +55,24 @@ namespace gbc
 
 			if (requiredChannels != 0)
 				channels = requiredChannels;
-			this->filePath = filePath;
+			this->filepath = filepath;
 			return true;
 		}
 		return false;
 	}
 
-	bool LocalTexture2D::WriteFile(const std::string& filePath, bool flipVertically)
+	bool LocalTexture2D::WriteFile(const std::string& filepath)
+	{
+		return WriteFile(filepath, GetDefaultVerticalFlip());
+	}
+
+	bool LocalTexture2D::WriteFile(const std::string& filepath, bool flipVertically)
 	{
 		GBC_PROFILE_FUNCTION();
 
-		stbi_flip_vertically_on_write(flipVertically ? 1 : 0);
+		stbi_flip_vertically_on_write(flipVertically);
 		// TODO: let the user decide the output file format
-		return data != nullptr && stbi_write_png(filePath.c_str(), width, height, channels, data, 0) != 0;
+		return data != nullptr && stbi_write_png(filepath.c_str(), width, height, channels, data, 0) != 0;
 	}
 
 	void LocalTexture2D::Create(int width, int height, int channels)
@@ -59,7 +80,7 @@ namespace gbc
 		if (data != nullptr)
 		{
 			delete[] data;
-			filePath.clear();
+			filepath.clear();
 		}
 
 		size_t size = (size_t)width * height * channels;
@@ -79,7 +100,7 @@ namespace gbc
 			width = texture.width;
 			height = texture.height;
 			channels = texture.channels;
-			filePath = texture.filePath;
+			filepath = texture.filepath;
 
 			size_t size = (size_t)width * height * channels;
 			data = new unsigned char[size];

@@ -6,7 +6,7 @@ namespace gbc
 	EventDispatcher::EventDispatcher(Event& event)
 		: event(event) {}
 
-	bool Event::IsInCategory(EventCategory category) const
+	bool Event::IsInCategory(EventCategoryFlags category) const noexcept
 	{
 		return GetCategoryFlags() & category;
 	}

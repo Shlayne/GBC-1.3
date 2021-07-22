@@ -29,11 +29,13 @@ namespace gbc
 		Layer* PopOverlay();
 	private:
 		void OnEvent(Event& event);
+		bool OnWindowCloseEvent(WindowCloseEvent& event);
 		bool OnWindowResizeEvent(WindowResizeEvent& event);
 		bool OnWindowMinimizeEvent(WindowMinimizeEvent& event);
 		bool OnJoystickConnectEvent(JoystickConnectEvent& event);
-		bool OnMonitorConnectEvent(MonitorConnectEvent& event);
-		bool OnWindowCloseEvent(WindowCloseEvent& event);
+
+		static void StaticOnEvent(Event& event);
+		friend class Input;
 
 		static Application* instance;
 

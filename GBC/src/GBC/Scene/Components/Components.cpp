@@ -71,19 +71,19 @@ namespace gbc
 		: texture(texture)
 	{
 		if (this->texture && this->texture->GetTexture())
-			filepath = this->texture->GetTexture()->GetFilePath();
+			filepath = this->texture->GetTexture()->GetFilepath();
 	}
 	RenderableComponent::RenderableComponent(Ref<Texture>&& texture) noexcept
 		: texture(std::move(texture))
 	{
 		if (this->texture && this->texture->GetTexture())
-			filepath = this->texture->GetTexture()->GetFilePath();
+			filepath = this->texture->GetTexture()->GetFilepath();
 	}
 	RenderableComponent& RenderableComponent::operator=(const Ref<Texture>& texture) noexcept
 	{
 		this->texture = texture;
 		if (this->texture && this->texture->GetTexture())
-			filepath = this->texture->GetTexture()->GetFilePath();
+			filepath = this->texture->GetTexture()->GetFilepath();
 		else
 			filepath.clear();
 		return *this;
@@ -92,7 +92,7 @@ namespace gbc
 	{
 		this->texture = std::move(texture);
 		if (this->texture && this->texture->GetTexture())
-			filepath = this->texture->GetTexture()->GetFilePath();
+			filepath = this->texture->GetTexture()->GetFilepath();
 		else
 			filepath.clear();
 		return *this;

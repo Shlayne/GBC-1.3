@@ -8,21 +8,30 @@ namespace gbc
 	{
 		switch (primitive)
 		{
-			case RendererPrimitive::Triangles: return GL_TRIANGLES;
-			case RendererPrimitive::Lines:     return GL_LINES;
+			case RendererPrimitive::Points:					return GL_POINTS;
+			case RendererPrimitive::Lines:					return GL_LINES;
+			case RendererPrimitive::LineStrip:				return GL_LINE_STRIP;
+			case RendererPrimitive::Triangles:				return GL_TRIANGLES;
+			case RendererPrimitive::TriangleStrip:			return GL_TRIANGLE_STRIP;
+			case RendererPrimitive::LinesAdjacency:			return GL_LINES_ADJACENCY;
+			case RendererPrimitive::LineStripAdjacency:		return GL_LINE_STRIP_ADJACENCY;
+			case RendererPrimitive::TrianglesAdjacency:		return GL_TRIANGLES_ADJACENCY;
+			case RendererPrimitive::TriangleStripAdjacency: return GL_TRIANGLE_STRIP_ADJACENCY;
+			case RendererPrimitive::LineLoop:				return GL_LINE_LOOP;
+			case RendererPrimitive::TriangleFan:			return GL_TRIANGLE_FAN;
 		}
 
 		GBC_CORE_ASSERT(false, "Unknown Renderer Primitive!");
 		return 0;
 	}
 
-	static GLenum GetOpenGLIndexType(BufferIndexType indexType)
+	static GLenum GetOpenGLIndexType(IndexBufferElementType indexType)
 	{
 		switch (indexType)
 		{
-			case BufferIndexType::UInt32: return GL_UNSIGNED_INT;
-			case BufferIndexType::UInt16: return GL_UNSIGNED_SHORT;
-			case BufferIndexType::UInt8:  return GL_UNSIGNED_BYTE;
+			case IndexBufferElementType::UInt32: return GL_UNSIGNED_INT;
+			case IndexBufferElementType::UInt16: return GL_UNSIGNED_SHORT;
+			case IndexBufferElementType::UInt8:  return GL_UNSIGNED_BYTE;
 		}
 
 		GBC_CORE_ASSERT(false, "Unknown Buffer Index Type!");
@@ -31,6 +40,8 @@ namespace gbc
 
 	void OpenGLRendererAPI::Init()
 	{
+		clearBits |= GL_COLOR_BUFFER_BIT;
+
 		// TODO: this should be abstracted (shouldn't go here)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
@@ -43,13 +54,17 @@ namespace gbc
 	void OpenGLRendererAPI::EnableDepthTest()
 	{
 		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_ALWAYS);
+		glDepthFunc(GL_LESS);
+		// TODO: this should include GL_STENCIL_BUFFER_BIT if using the stencil buffer
+		clearBits |= GL_DEPTH_BUFFER_BIT;
 	}
 
 	void OpenGLRendererAPI::DisableDepthTest()
 	{
 		glDisable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
+		glDepthFunc(GL_ALWAYS);
+		// TODO: this should include GL_STENCIL_BUFFER_BIT if using the stencil buffer
+		clearBits &= ~GL_DEPTH_BUFFER_BIT;
 	}
 
 	void OpenGLRendererAPI::EnableBlending()
@@ -77,15 +92,15 @@ namespace gbc
 		glViewport(x, y, width, height);
 	}
 
-	void OpenGLRendererAPI::SetClearColor(const glm::vec4& color)
+	void OpenGLRendererAPI::SetClearColor(float red, float green, float blue, float alpha)
 	{
-		glClearColor(color.r, color.g, color.b, color.a);
+		glClearColor(red, green, blue, alpha);
 	}
 
 	void OpenGLRendererAPI::Clear()
 	{
 		// TODO: abstract this
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(clearBits);
 	}
 
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, uint32_t offset, uint32_t count, RendererPrimitive primitive)
@@ -96,7 +111,7 @@ namespace gbc
 		glDrawElements(GetOpenGLPrimitive(primitive), indexCount, GetOpenGLIndexType(indexBuffer->GetType()), (const void*)(offset * static_cast<GLsizeiptr>(indexBuffer->GetType())));
 	}
 
-	// Render capabilities
+	// Renderer capabilities
 
 	int OpenGLRendererAPI::GetMaxTextureSlots()
 	{

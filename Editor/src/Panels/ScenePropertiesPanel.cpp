@@ -197,7 +197,7 @@ namespace gbc
 					{
 						auto filepath = FileDialog::OpenFile("Image\0*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.psd;*.pic;*.pnm;*.hdr;*.tga;\0JPG (*.jpg)\0*.jpg;*.jpeg\0PNG (*.png)\0*.png\0BMP (*.bmp)\0*.bmp\0GIF (*.gif)\0*.gif\0PSD (*.psd)\0*.psd\0PIC (*.pic)\0*.pic\0PNM (*.pnm)\0*.pnm\0HDR (*.hdr)\0*.hdr\0TGA (*.tga)\0*.tga\0");
 						if (filepath)
-							component = Texture::CreateRef(CreateRef<LocalTexture2D>(*filepath, 4, true));
+							component = Texture::CreateRef(CreateRef<LocalTexture2D>(*filepath, 4));
 					}
 				});
 

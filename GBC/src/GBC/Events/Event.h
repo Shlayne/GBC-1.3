@@ -37,14 +37,14 @@ namespace gbc
 
 		virtual EventType GetType() const = 0;
 		virtual EventCategoryFlags GetCategoryFlags() const = 0;
-		bool IsInCategory(EventCategory category) const;
+		bool IsInCategory(EventCategoryFlags category) const noexcept;
 
+		// TODO: remove in non-debug builds
 		virtual std::string ToString() const = 0;
 
 		bool handled = false;
 	};
 
-	class Application;
 	class EventDispatcher
 	{
 	public:
@@ -56,6 +56,17 @@ namespace gbc
 			if (event.GetType() == E::GetStaticType())
 			{
 				event.handled |= (object->*func)(static_cast<E&>(event));
+				return true;
+			}
+			return false;
+		}
+
+		template<typename E>
+		bool Dispatch(bool(*func)(E&))
+		{
+			if (event.GetType() == E::GetStaticType())
+			{
+				event.handled |= func(static_cast<E&>(event));
 				return true;
 			}
 			return false;

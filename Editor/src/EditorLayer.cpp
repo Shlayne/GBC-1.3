@@ -248,7 +248,7 @@ namespace gbc
 
 	bool EditorLayer::OnMouseButtonPressEvent(MouseButtonPressEvent& event)
 	{
-		if (viewportHovered && viewportFocused && event.GetButton() == Mousecode::ButtonLeft && !editorCamera.IsUsing() && !ImGuizmo::IsOver())
+		if (viewportHovered && viewportFocused && event.GetButton() == MouseButton::ButtonLeft && !editorCamera.IsUsing() && !ImGuizmo::IsOver())
 		{
 			canUseGizmos = false;
 

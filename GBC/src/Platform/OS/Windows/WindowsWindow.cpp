@@ -5,7 +5,7 @@
 #include "GBC/Events/KeyEvents.h"
 #include "GBC/Events/MouseEvents.h"
 #include "GBC/Events/DeviceEvents.h"
-#include "GBC/Core/Application.h"
+#include "GBC/Core/Input.h"
 
 namespace gbc
 {
@@ -24,6 +24,8 @@ namespace gbc
 
 		if (!glfwInitialized)
 		{
+			Input::PreInit();
+
 			int initState = glfwInit();
 			GBC_CORE_ASSERT(initState == GLFW_TRUE, "Failed to initialize GLFW!");
 			glfwInitialized = true;
@@ -34,23 +36,7 @@ namespace gbc
 				GBC_CORE_ERROR("GLFW Error (id={0}): {1}", error, description);
 			});
 
-			// Device Events
-			glfwSetJoystickCallback([](int jid, int deviceEvent)
-			{
-				auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-				WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-
-				JoystickConnectEvent event(jid, deviceEvent == GLFW_CONNECTED);
-				state.eventCallback(event);
-			});
-			glfwSetMonitorCallback([](GLFWmonitor* monitor, int deviceEvent)
-			{
-				auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-				WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-
-				MonitorConnectEvent event(deviceEvent == GLFW_CONNECTED);
-				state.eventCallback(event);
-			});
+			Input::Init();
 		}
 
 		state.current.width = specs.width;
@@ -354,13 +340,13 @@ namespace gbc
 		{
 			case GLFW_PRESS:
 			{
-				MouseButtonPressEvent event(static_cast<Mousecode>(button), mods);
+				MouseButtonPressEvent event(static_cast<MouseButton>(button), mods);
 				state.eventCallback(event);
 				break;
 			}
 			case GLFW_RELEASE:
 			{
-				MouseButtonReleaseEvent event(static_cast<Mousecode>(button), mods);
+				MouseButtonReleaseEvent event(static_cast<MouseButton>(button), mods);
 				state.eventCallback(event);
 				break;
 			}

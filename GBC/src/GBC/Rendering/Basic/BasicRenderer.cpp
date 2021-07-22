@@ -64,17 +64,17 @@ namespace gbc
 		// Setup internal buffers
 		data.vertexBuffer = VertexBuffer::CreateRef(data.maxVertices * sizeof(Vertex), nullptr, BufferUsage::DynamicDraw);
 		data.vertexBuffer->SetLayout({
-			{BufferElementType::Float3, "position"},
-			{BufferElementType::Float4, "tintColor"},
-			{BufferElementType::Float2, "texCoord"},
-			{BufferElementType::UInt,   "texIndex"},
-			{BufferElementType::Int,    "entityID"}
+			{VertexBufferElementType::Float3, "position"},
+			{VertexBufferElementType::Float4, "tintColor"},
+			{VertexBufferElementType::Float2, "texCoord"},
+			{VertexBufferElementType::UInt,   "texIndex"},
+			{VertexBufferElementType::Int,    "entityID"}
 		});
 
 		data.vertexArray = VertexArray::CreateRef();
 		data.vertexArray->AddVertexBuffer(data.vertexBuffer);
 
-		data.indexBuffer = IndexBuffer::CreateRef(data.maxIndices, nullptr, BufferUsage::DynamicDraw, BufferIndexType::UInt32);
+		data.indexBuffer = IndexBuffer::CreateRef(data.maxIndices * sizeof(uint32_t), nullptr, BufferUsage::DynamicDraw, IndexBufferElementType::UInt32);
 
 		// Setup shader
 		data.shader = Shader::CreateRef("resources/shaders/BasicShader.glsl");

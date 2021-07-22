@@ -15,17 +15,17 @@ namespace gbc
 
 		virtual void SetData(uint32_t size, const void* data) override;
 
-		virtual const BufferLayout& GetLayout() const override { return layout; }
-		virtual void SetLayout(const BufferLayout& layout) override { this->layout = layout; }
+		virtual const VertexBufferLayout& GetLayout() const override { return layout; }
+		virtual void SetLayout(const VertexBufferLayout& layout) override { this->layout = layout; }
 	private:
 		RendererID rendererID = 0;
-		BufferLayout layout;
+		VertexBufferLayout layout;
 	};
 
 	class OpenGLIndexBuffer : public IndexBuffer
 	{
 	public:
-		OpenGLIndexBuffer(uint32_t count, const void* data, BufferUsage usage, BufferIndexType type);
+		OpenGLIndexBuffer(uint32_t count, const void* data, BufferUsage usage, IndexBufferElementType type);
 		virtual ~OpenGLIndexBuffer();
 
 		virtual void Bind() const override;
@@ -34,10 +34,10 @@ namespace gbc
 		virtual void SetData(uint32_t count, const void* data) override;
 
 		virtual uint32_t GetCount() const override { return count; }
-		virtual BufferIndexType GetType() const override { return type; }
+		virtual IndexBufferElementType GetType() const override { return type; }
 	private:
 		RendererID rendererID = 0;
 		uint32_t count = 0;
-		BufferIndexType type;
+		IndexBufferElementType type;
 	};
 }

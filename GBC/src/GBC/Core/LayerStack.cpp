@@ -18,12 +18,23 @@ namespace gbc
 
 	Layer* LayerStack::PopLayer()
 	{
-		return layerInsertIndex ? *(layers.begin() + --layerInsertIndex) : nullptr;
+		if (!layerInsertIndex)
+			return nullptr;
+
+		auto it = layers.begin() + --layerInsertIndex;
+		Layer* layer = *it;
+		layers.erase(it);
+		return layer;
 	}
 
 	Layer* LayerStack::PopOverlay()
 	{
-		auto it = layers.begin() + layerInsertIndex;
-		return it != layers.end() ? *it : nullptr;
+		if (layerInsertIndex == layers.size())
+			return nullptr;
+
+		auto it = layers.end() - 1;
+		Layer* overlay = *it;
+		layers.erase(it);
+		return overlay;
 	}
 }

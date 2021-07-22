@@ -7,11 +7,12 @@
 #include "GBC/Core/Core.h"
 #include "GBC/Core/Debugbreak.h"
 #include "GBC/Core/Input.h"
+#include "GBC/Core/Joysticks.h"
 #include "GBC/Core/Keycodes.h"
 #include "GBC/Core/Layer.h"
 #include "GBC/Core/LayerStack.h"
 #include "GBC/Core/Logger.h"
-#include "GBC/Core/Mousecodes.h"
+#include "GBC/Core/MouseButtons.h"
 #include "GBC/Core/Timestep.h"
 #include "GBC/Core/Window.h"
 

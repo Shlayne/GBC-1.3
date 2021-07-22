@@ -3,7 +3,7 @@
 
 namespace gbc
 {
-	MouseButtonPressEvent::MouseButtonPressEvent(Mousecode button, int mods)
+	MouseButtonPressEvent::MouseButtonPressEvent(MouseButton button, int mods)
 		: button(button), mods(mods) {}
 
 	std::string MouseButtonPressEvent::ToString() const
@@ -13,7 +13,7 @@ namespace gbc
 		return stream.str();
 	}
 
-	MouseButtonReleaseEvent::MouseButtonReleaseEvent(Mousecode button, int mods)
+	MouseButtonReleaseEvent::MouseButtonReleaseEvent(MouseButton button, int mods)
 		: button(button), mods(mods) {}
 
 	std::string MouseButtonReleaseEvent::ToString() const

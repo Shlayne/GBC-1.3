@@ -5,57 +5,40 @@
 
 namespace gbc
 {
-	static int GetElementCount(BufferElementType type)
+	static int GetElementCount(VertexBufferElementType type)
 	{
 		switch (type)
 		{
-			case BufferElementType::Int:    return 1;
-			case BufferElementType::Int2:   return 2;
-			case BufferElementType::Int3:   return 3;
-			case BufferElementType::Int4:   return 4;
-			case BufferElementType::UInt:   return 1;
-			case BufferElementType::UInt2:  return 2;
-			case BufferElementType::UInt3:  return 3;
-			case BufferElementType::UInt4:  return 4;
-			case BufferElementType::Float:  return 1;
-			case BufferElementType::Float2: return 2;
-			case BufferElementType::Float3: return 3;
-			case BufferElementType::Float4: return 4;
+			case VertexBufferElementType::Int:    return 1;
+			case VertexBufferElementType::Int2:   return 2;
+			case VertexBufferElementType::Int3:   return 3;
+			case VertexBufferElementType::Int4:   return 4;
+			case VertexBufferElementType::UInt:   return 1;
+			case VertexBufferElementType::UInt2:  return 2;
+			case VertexBufferElementType::UInt3:  return 3;
+			case VertexBufferElementType::UInt4:  return 4;
+			case VertexBufferElementType::Float:  return 1;
+			case VertexBufferElementType::Float2: return 2;
+			case VertexBufferElementType::Float3: return 3;
+			case VertexBufferElementType::Float4: return 4;
 		}
 
-		GBC_CORE_ASSERT(false, "Unknown BufferElementType!");
+		GBC_CORE_ASSERT(false, "Unknown Vertex Buffer Element Type!");
 		return 0;
 	}
 
-	static int GetElementSize(BufferElementType type)
+	static int GetElementSize(VertexBufferElementType type)
 	{
-		switch (type)
-		{
-			case BufferElementType::Int:    return 4 * 1;
-			case BufferElementType::Int2:   return 4 * 2;
-			case BufferElementType::Int3:   return 4 * 3;
-			case BufferElementType::Int4:   return 4 * 4;
-			case BufferElementType::UInt:   return 4 * 1;
-			case BufferElementType::UInt2:  return 4 * 2;
-			case BufferElementType::UInt3:  return 4 * 3;
-			case BufferElementType::UInt4:  return 4 * 4;
-			case BufferElementType::Float:  return 4 * 1;
-			case BufferElementType::Float2: return 4 * 2;
-			case BufferElementType::Float3: return 4 * 3;
-			case BufferElementType::Float4: return 4 * 4;
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown BufferElementType!");
-		return 0;
+		return GetElementCount(type) * sizeof(float);
 	}
 
-	BufferElement::BufferElement(BufferElementType type, const std::string& name, bool normalized) noexcept
+	VertexBufferElement::VertexBufferElement(VertexBufferElementType type, const std::string& name, bool normalized) noexcept
 		: type(type), name(name), normalized(normalized), count(GetElementCount(type)), size(GetElementSize(type)) {}
 
-	BufferLayout::BufferLayout(std::initializer_list<BufferElement> elements) noexcept
+	VertexBufferLayout::VertexBufferLayout(std::initializer_list<VertexBufferElement> elements) noexcept
 		: elements(elements)
 	{
-		for (BufferElement& element : this->elements)
+		for (VertexBufferElement& element : this->elements)
 		{
 			element.offset = stride;
 			stride += element.size;
@@ -86,7 +69,7 @@ namespace gbc
 		return nullptr;
 	}
 
-	Ref<IndexBuffer> IndexBuffer::CreateRef(uint32_t count, const void* data, BufferUsage usage, BufferIndexType type)
+	Ref<IndexBuffer> IndexBuffer::CreateRef(uint32_t count, const void* data, BufferUsage usage, IndexBufferElementType type)
 	{
 		switch (RendererAPI::GetAPI())
 		{
@@ -98,7 +81,7 @@ namespace gbc
 		return nullptr;
 	}
 
-	Scope<IndexBuffer> IndexBuffer::CreateScope(uint32_t count, const void* data, BufferUsage usage, BufferIndexType type)
+	Scope<IndexBuffer> IndexBuffer::CreateScope(uint32_t count, const void* data, BufferUsage usage, IndexBufferElementType type)
 	{
 		switch (RendererAPI::GetAPI())
 		{

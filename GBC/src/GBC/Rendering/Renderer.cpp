@@ -41,6 +41,8 @@ namespace gbc
 	void Renderer::DisableCullFace()
 	{ api->DisableCullFace(); }
 
+	void Renderer::SetViewport(const glm::ivec2& position, const glm::ivec2& size)
+	{ api->SetViewport(position.x, position.y, size.x, size.y); }
 	void Renderer::SetViewport(int x, int y, int width, int height)
 	{ api->SetViewport(x, y, width, height); }
 
@@ -48,7 +50,9 @@ namespace gbc
 	{ api->Clear(); }
 
 	void Renderer::SetClearColor(const glm::vec4& color)
-	{ api->SetClearColor(color); }
+	{ api->SetClearColor(color.r, color.g, color.b, color.a); }
+	void Renderer::SetClearColor(float red, float green, float blue, float alpha)
+	{ api->SetClearColor(red, green, blue, alpha); }
 
 	void Renderer::DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, uint32_t offset, uint32_t count, RendererPrimitive primitive)
 	{ api->DrawIndexed(vertexArray, indexBuffer, offset, count, primitive); }

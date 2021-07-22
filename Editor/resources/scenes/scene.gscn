@@ -2,13 +2,12 @@ Scene: Untitled
 Entities:
   - Entity: 0
     MeshComponent:
-      Filepath: resources/models/square.obj
+      Filepath: C:\dev\GBC-1.3\Editor\resources\models\cube.obj
     RenderableComponent:
-      Filepath: resources/textures/grass_side.png
-      TintColor: [1, 1, 1, 1]
+      Filepath: C:\dev\GBC-1.3\Editor\resources\textures\grass_side.png
     TagComponent:
-      Tag: Textured Square
+      Tag: Empty Mesh
     TransformComponent:
       Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
+      Rotation: [0.785398185, 0.610865235, 0.52359879]
+      Scale: [3.5, 3.5, 3.5]

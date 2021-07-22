@@ -7,8 +7,22 @@ namespace gbc
 {
 	enum class RendererPrimitive
 	{
+		// OpenGL, Vulkan, Direct3D, and Metal support these
+		Points,
+		Lines,
+		LineStrip,
 		Triangles,
-		Lines
+		TriangleStrip,
+
+		// OpenGL, Vulkan, and Direct3D support these
+		LinesAdjacency,
+		LineStripAdjacency,
+		TrianglesAdjacency,
+		TriangleStripAdjacency,
+
+		// OpenGL and Vulkan support these
+		LineLoop,
+		TriangleFan,
 	};
 
 	class RendererAPI
@@ -26,7 +40,7 @@ namespace gbc
 
 		virtual void SetViewport(int x, int y, int width, int height) = 0;
 
-		virtual void SetClearColor(const glm::vec4& color) = 0;
+		virtual void SetClearColor(float red, float green, float blue, float alpha) = 0;
 		virtual void Clear() = 0;
 
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, uint32_t offset, uint32_t count, RendererPrimitive primitive) = 0;

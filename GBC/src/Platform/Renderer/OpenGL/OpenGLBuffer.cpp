@@ -51,12 +51,12 @@ namespace gbc
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
 	}
 
-	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t count, const void* data, BufferUsage usage, BufferIndexType type)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t count, const void* data, BufferUsage usage, IndexBufferElementType type)
 		: count(count), type(type)
 	{
 		glCreateBuffers(1, &rendererID);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * static_cast<GLsizeiptr>(type), data, GetOpenGLUsage(usage));
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * static_cast<GLsizeiptr>(GetIndexBufferElementSize(type)), data, GetOpenGLUsage(usage));
 	}
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
@@ -77,6 +77,6 @@ namespace gbc
 	void OpenGLIndexBuffer::SetData(uint32_t count, const void* data)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, rendererID);
-		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, count * static_cast<GLsizeiptr>(type), data);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, count * static_cast<GLsizeiptr>(GetIndexBufferElementSize(type)), data);
 	}
 }

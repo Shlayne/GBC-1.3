@@ -12,14 +12,4 @@ namespace gbc
 		stream << "JoystickConnectEvent: connected=" << connect;
 		return stream.str();
 	}
-
-	MonitorConnectEvent::MonitorConnectEvent(bool connect)
-		: connect(connect) {}
-
-	std::string MonitorConnectEvent::ToString() const
-	{
-		std::stringstream stream;
-		stream << "MonitorConnectEvent: connected=" << connect;
-		return stream.str();
-	}
 }
