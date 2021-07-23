@@ -15,13 +15,13 @@ namespace gbc
 		inline float Micros() const noexcept { return seconds * 1000000.0f; }
 		inline float Nanos() const noexcept { return seconds * 1000000000.0f; }
 
-		inline Timestep operator+(Timestep timestep) noexcept { return seconds + timestep.seconds; }
+		inline Timestep operator+(Timestep timestep) const noexcept { return seconds + timestep.seconds; }
 		inline Timestep& operator+=(Timestep timestep) noexcept { seconds += timestep.seconds; return *this; }
-		inline Timestep operator-(Timestep timestep) noexcept { return seconds - timestep.seconds; }
+		inline Timestep operator-(Timestep timestep) const noexcept { return seconds - timestep.seconds; }
 		inline Timestep& operator-=(Timestep timestep) noexcept { seconds -= timestep.seconds; return *this; }
-		inline Timestep operator*(Timestep timestep) noexcept { return seconds * timestep.seconds; }
+		inline Timestep operator*(Timestep timestep) const noexcept { return seconds * timestep.seconds; }
 		inline Timestep& operator*=(Timestep timestep) noexcept { seconds *= timestep.seconds; return *this; }
-		inline Timestep operator/(Timestep timestep) { return seconds / timestep.seconds; }
+		inline Timestep operator/(Timestep timestep) const { return seconds / timestep.seconds; }
 		inline Timestep& operator/=(Timestep timestep) { seconds /= timestep.seconds; return *this; }
 	private:
 		float seconds;

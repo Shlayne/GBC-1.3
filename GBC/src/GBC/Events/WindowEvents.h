@@ -10,7 +10,9 @@ namespace gbc
 		EVENT_CLASS_TYPE(EventType::WindowClose);
 		EVENT_CLASS_CATEGORY(EventCategory_Window | EventCategory_Application);
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	};
 
 	class WindowResizeEvent : public Event
@@ -23,7 +25,9 @@ namespace gbc
 		inline int GetWidth() const noexcept { return width; }
 		inline int GetHeight() const noexcept { return height; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		int width;
 		int height;
@@ -39,7 +43,9 @@ namespace gbc
 		inline int GetX() const noexcept { return x; }
 		inline int GetY() const noexcept { return y; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		int x;
 		int y;
@@ -54,7 +60,9 @@ namespace gbc
 
 		inline bool IsFocused() const noexcept { return focus; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		bool focus;
 	};
@@ -68,7 +76,9 @@ namespace gbc
 
 		inline bool IsMinimized() const noexcept { return minimize; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		bool minimize;
 	};
@@ -82,7 +92,9 @@ namespace gbc
 
 		inline bool IsMaximized() const noexcept { return maximize; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		bool maximize;
 	};
@@ -97,7 +109,9 @@ namespace gbc
 		inline int GetPathCount() const noexcept { return pathCount; }
 		inline const char** GetPaths() const noexcept { return paths; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		int pathCount;
 		const char** paths;
@@ -113,7 +127,9 @@ namespace gbc
 		inline int GetWidth() const noexcept { return width; }
 		inline int GetHeight() const noexcept { return height; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		int width;
 		int height;
@@ -129,7 +145,9 @@ namespace gbc
 		inline float GetScaleX() const noexcept { return scaleX; }
 		inline float GetScaleY() const noexcept { return scaleY; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		float scaleX;
 		float scaleY;
@@ -141,6 +159,8 @@ namespace gbc
 		EVENT_CLASS_TYPE(EventType::WindowRefresh);
 		EVENT_CLASS_CATEGORY(EventCategory_Window);
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	};
 }

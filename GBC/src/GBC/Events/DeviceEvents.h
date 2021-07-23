@@ -14,7 +14,9 @@ namespace gbc
 		inline int GetJID() const noexcept { return jid; }
 		inline bool IsConnected() const noexcept { return connect; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		int jid;
 		bool connect;

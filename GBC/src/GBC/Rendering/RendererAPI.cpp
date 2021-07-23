@@ -18,7 +18,7 @@ namespace gbc
 	{
 		switch (api)
 		{
-			case API::None:   return nullptr;
+			case API::Headless:   return nullptr;
 			case API::OpenGL: return ::gbc::CreateScope<OpenGLRendererAPI>();
 		}
 

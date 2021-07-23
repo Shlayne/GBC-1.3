@@ -15,7 +15,9 @@ namespace gbc
 		inline MouseButton GetButton() const noexcept { return button; }
 		inline int GetMods() const noexcept { return mods; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		MouseButton button;
 		int mods;
@@ -31,7 +33,9 @@ namespace gbc
 		inline MouseButton GetButton() const noexcept { return button; }
 		inline int GetMods() const noexcept { return mods; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		MouseButton button;
 		int mods;
@@ -47,7 +51,9 @@ namespace gbc
 		inline float GetX() const noexcept { return x; }
 		inline float GetY() const noexcept { return y; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		float x;
 		float y;
@@ -63,7 +69,9 @@ namespace gbc
 		inline float GetOffsetX() const noexcept { return offsetX; }
 		inline float GetOffsetY() const noexcept { return offsetY; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		float offsetX;
 		float offsetY;
@@ -78,7 +86,9 @@ namespace gbc
 
 		inline bool HasEntered() const noexcept { return enter; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		bool enter;
 	};

@@ -76,6 +76,8 @@ namespace gbc
 
 	void OpenGLIndexBuffer::SetData(uint32_t count, const void* data)
 	{
+		GBC_CORE_ASSERT(count <= this->count, "Index buffer SetData count out of bounds!");
+
 		glBindBuffer(GL_ARRAY_BUFFER, rendererID);
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, count * static_cast<GLsizeiptr>(GetIndexBufferElementSize(type)), data);
 	}

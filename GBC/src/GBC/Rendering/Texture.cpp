@@ -9,7 +9,7 @@ namespace gbc
 	{
 		switch (RendererAPI::GetAPI())
 		{
-			case RendererAPI::API::None:   return nullptr;
+			case RendererAPI::API::Headless:   return nullptr;
 			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLTexture>(specification);
 		}
 
@@ -21,7 +21,7 @@ namespace gbc
 	{
 		switch (RendererAPI::GetAPI())
 		{
-			case RendererAPI::API::None:   return nullptr;
+			case RendererAPI::API::Headless:   return nullptr;
 			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLTexture>(specification);
 		}
 
@@ -35,7 +35,7 @@ namespace gbc
 
 		switch (RendererAPI::GetAPI())
 		{
-			case RendererAPI::API::None:   return nullptr;
+			case RendererAPI::API::Headless:   return nullptr;
 			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLTexture>(specification, framebuffer, attachmentIndex);
 		}
 
@@ -49,7 +49,7 @@ namespace gbc
 
 		switch (RendererAPI::GetAPI())
 		{
-			case RendererAPI::API::None:   return nullptr;
+			case RendererAPI::API::Headless:   return nullptr;
 			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLTexture>(specification, framebuffer, attachmentIndex);
 		}
 

@@ -37,10 +37,12 @@ namespace gbc
 
 		virtual EventType GetType() const = 0;
 		virtual EventCategoryFlags GetCategoryFlags() const = 0;
-		bool IsInCategory(EventCategoryFlags category) const noexcept;
+		inline bool IsInCategory(EventCategoryFlags category) const noexcept
+		{ return GetCategoryFlags() & category; }
 
-		// TODO: remove in non-debug builds
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const = 0;
+#endif
 
 		bool handled = false;
 	};
@@ -48,7 +50,7 @@ namespace gbc
 	class EventDispatcher
 	{
 	public:
-		EventDispatcher(Event& event);
+		EventDispatcher(Event& event) : event(event) {}
 
 		template<typename C, typename E>
 		bool Dispatch(C* object, bool(C::*func)(E&))
@@ -76,4 +78,11 @@ namespace gbc
 	};
 }
 
-std::ostream& operator<<(std::ostream& ostr, const gbc::Event& event);
+#if GBC_ENABLE_LOGGING
+#include <ostream>
+
+inline std::ostream& operator<<(std::ostream& ostr, const gbc::Event& event)
+{
+	return ostr << event.ToString();
+}
+#endif

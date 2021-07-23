@@ -74,7 +74,7 @@ namespace gbc
 		data.vertexArray = VertexArray::CreateRef();
 		data.vertexArray->AddVertexBuffer(data.vertexBuffer);
 
-		data.indexBuffer = IndexBuffer::CreateRef(data.maxIndices * sizeof(uint32_t), nullptr, BufferUsage::DynamicDraw, IndexBufferElementType::UInt32);
+		data.indexBuffer = IndexBuffer::CreateRef(data.maxIndices, nullptr, BufferUsage::DynamicDraw, IndexBufferElementType::UInt32);
 
 		// Setup shader
 		data.shader = Shader::CreateRef("resources/shaders/BasicShader.glsl");

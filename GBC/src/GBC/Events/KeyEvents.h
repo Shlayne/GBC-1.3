@@ -15,7 +15,9 @@ namespace gbc
 		inline Keycode GetKeycode() const noexcept { return keycode; }
 		inline int GetMods() const noexcept { return mods; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		Keycode keycode;
 		int mods;
@@ -31,7 +33,9 @@ namespace gbc
 		inline Keycode GetKeycode() const noexcept { return keycode; }
 		inline int GetMods() const noexcept { return mods; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		Keycode keycode;
 		int mods;
@@ -47,7 +51,9 @@ namespace gbc
 		inline Keycode GetKeycode() const noexcept { return keycode; }
 		inline int GetMods() const noexcept { return mods; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		Keycode keycode;
 		int mods;
@@ -62,7 +68,9 @@ namespace gbc
 
 		inline uint32_t GetCodepoint() const noexcept { return codepoint; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		uint32_t codepoint;
 	};
@@ -77,7 +85,9 @@ namespace gbc
 		inline uint32_t GetCodepoint() const noexcept { return codepoint; }
 		inline int GetMods() const noexcept { return mods; }
 
+#if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
+#endif
 	private:
 		uint32_t codepoint;
 		int mods;

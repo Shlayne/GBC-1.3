@@ -9,7 +9,7 @@ namespace gbc
 	{
 		switch (RendererAPI::GetAPI())
 		{
-			case RendererAPI::API::None:   return nullptr;
+			case RendererAPI::API::Headless:   return nullptr;
 			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLShader>(filepath);
 		}
 
@@ -21,7 +21,7 @@ namespace gbc
 	{
 		switch (RendererAPI::GetAPI())
 		{
-			case RendererAPI::API::None:   return nullptr;
+			case RendererAPI::API::Headless:   return nullptr;
 			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLShader>(filepath);
 		}
 

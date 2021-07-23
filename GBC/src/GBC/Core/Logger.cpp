@@ -12,9 +12,9 @@ namespace gbc
 		spdlog::set_pattern("%^[%T] %n: %v%$");
 
 		coreLogger = spdlog::stdout_color_mt("GBC");
-		coreLogger->set_level(spdlog::level::trace);
+		coreLogger->set_level(GBC_LOGGING_LEVEL);
 
 		clientLogger = spdlog::stdout_color_mt("Client");
-		clientLogger->set_level(spdlog::level::trace);
+		clientLogger->set_level(GBC_LOGGING_LEVEL);
 	}
 }

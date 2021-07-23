@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GBC/Core/Core.h"
 #if GBC_ENABLE_IMGUI
 #include "GBC/Events/Event.h"
 

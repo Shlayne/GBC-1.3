@@ -3,7 +3,6 @@ Editor/ProfileSessions/
 Editor/ProfileSessions/**
 
 # Visual Studio
-.vs/
 .vs/**
 **.sln
 **.vcxproj
@@ -14,12 +13,5 @@ Editor/ProfileSessions/**
 **/imgui.ini
 
 # Binaries
-bin/
 bin/**
-bin-int/
 bin-int/**
-
-**.obj
-#**.exe # so premake5.exe can be uploaded to git
-**.dll
-**.lib

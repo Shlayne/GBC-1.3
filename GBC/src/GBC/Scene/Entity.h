@@ -9,7 +9,8 @@ namespace gbc
 	{
 	public:
 		Entity() = default;
-		Entity(entt::entity handle, Scene* context) noexcept;
+		Entity(entt::entity handle, Scene* context) noexcept
+			: handle(handle), context(context) {}
 
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args)

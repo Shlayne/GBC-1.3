@@ -1,6 +1,9 @@
 #pragma once
 
+#include <string>
+#include <cstdint>
 #include "glm/glm.hpp"
+#include "GBC/Core/Core.h"
 
 namespace gbc
 {

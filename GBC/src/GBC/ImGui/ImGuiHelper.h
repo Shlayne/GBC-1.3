@@ -1,5 +1,7 @@
 #pragma once
 
+#include "GBC/Core/Core.h"
+#if GBC_ENABLE_IMGUI
 #include <string>
 #include "imgui/imgui.h"
 
@@ -57,3 +59,4 @@ namespace gbc
 		static bool TextEdit(const std::string& label, std::string* value);
 	};
 }
+#endif

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core.h"
+#include "GBC/Core/Core.h"
 #include "spdlog/spdlog.h"
 
 namespace gbc

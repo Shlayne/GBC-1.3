@@ -10,14 +10,14 @@ project "GBC"
 	pchheader "gbcpch.h"
 	pchsource "src/gbcpch.cpp"
 
+-- Headless=0 OpenGL=1 Vulkan=2 Direct3D=3 Metal=4
+	defines "GBC_RENDERER_API_ID=1"
+-- Only link this if GBC_RENDERER_API_ID == 1 (OpenGL)
+	links "opengl32.lib"
+
 	files {
 		"src/**.h",
 		"src/**.cpp"
-	}
-
-	defines {
-		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE"
 	}
 
 	includedirs {
@@ -41,8 +41,7 @@ project "GBC"
 		"imgui",
 		"imguizmo",
 		"stb",
-		"yaml",
-		"opengl32.lib"
+		"yaml"
 	}
 
 	filter "system:windows"
@@ -63,3 +62,6 @@ project "GBC"
 		defines "GBC_CONFIG_DIST"
 		runtime "Release"
 		optimize "on"
+
+	filter "system:not windows"
+		excludes "src/Platform/System/Windows/**"
