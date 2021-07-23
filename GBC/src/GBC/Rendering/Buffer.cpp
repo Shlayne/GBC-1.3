@@ -49,7 +49,7 @@ namespace gbc
 	{
 		switch (RendererAPI::GetAPI())
 		{
-			case RendererAPI::API::Headless:   return nullptr;
+			case RendererAPI::API::Headless: return nullptr;
 			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLVertexBuffer>(size, data, usage);
 		}
 
@@ -61,7 +61,7 @@ namespace gbc
 	{
 		switch (RendererAPI::GetAPI())
 		{
-			case RendererAPI::API::Headless:   return nullptr;
+			case RendererAPI::API::Headless: return nullptr;
 			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLVertexBuffer>(size, data, usage);
 		}
 
@@ -73,7 +73,7 @@ namespace gbc
 	{
 		switch (RendererAPI::GetAPI())
 		{
-			case RendererAPI::API::Headless:   return nullptr;
+			case RendererAPI::API::Headless: return nullptr;
 			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLIndexBuffer>(count, data, usage, type);
 		}
 
@@ -85,7 +85,7 @@ namespace gbc
 	{
 		switch (RendererAPI::GetAPI())
 		{
-			case RendererAPI::API::Headless:   return nullptr;
+			case RendererAPI::API::Headless: return nullptr;
 			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLIndexBuffer>(count, data, usage, type);
 		}
 

@@ -4,21 +4,13 @@
 
 namespace gbc
 {
-	RendererAPI::API RendererAPI::api = RendererAPI::API::Unset;
-
-	void RendererAPI::SetAPI(API api)
-	{
-		if (RendererAPI::api == API::Unset)
-			RendererAPI::api = api;
-		else
-			GBC_CORE_ASSERT(false, "Attempted to set the renderer API in the middle of execution.");
-	}
+	RendererAPI::API RendererAPI::api = static_cast<RendererAPI::API>(GBC_RENDERER_API_ID);
 
 	Scope<RendererAPI> RendererAPI::CreateScope()
 	{
 		switch (api)
 		{
-			case API::Headless:   return nullptr;
+			case API::Headless: return nullptr;
 			case API::OpenGL: return ::gbc::CreateScope<OpenGLRendererAPI>();
 		}
 

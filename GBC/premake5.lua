@@ -1,7 +1,7 @@
 project "GBC"
 	kind "StaticLib"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++latest"
 	staticruntime "on"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -47,6 +47,8 @@ project "GBC"
 	filter "system:windows"
 		systemversion "latest"
 		defines "GBC_PLATFORM_WINDOWS"
+-- Until Microsoft updates Windows 10 to not have terrible code, this must be here to prevent a warning
+		buildoptions "/wd5105"
 
 	filter "configurations:Debug"
 		defines "GBC_CONFIG_DEBUG"
