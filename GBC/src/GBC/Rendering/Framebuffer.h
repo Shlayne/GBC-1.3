@@ -96,7 +96,7 @@ namespace gbc
 
 		virtual void ClearColorAttachment(int value, uint32_t index = 0) = 0;
 
-		static Ref<Framebuffer> CreateRef(FramebufferSpecification specification); 
-		static Scope<Framebuffer> CreateScope(FramebufferSpecification specification);
+		static Ref<Framebuffer> CreateRef(const FramebufferSpecification& specification); 
+		static Scope<Framebuffer> CreateScope(const FramebufferSpecification& specification);
 	};
 }

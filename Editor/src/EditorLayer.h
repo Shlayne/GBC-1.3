@@ -40,13 +40,6 @@ namespace gbc
 		Ref<Scene> scene;
 		Ref<Framebuffer> framebuffer;
 
-		bool viewportSizeChanged = false;
-		bool viewportFocused = false;
-		bool viewportHovered = false;
-		glm::ivec2 viewportSize{1};
-		glm::vec2 viewportPos{0.0f};
-		glm::vec2 absoluteMousePos{0.0f};
-
 		Entity selectedEntity;
 		int gizmoType = -1;
 		bool canUseGizmos = true;

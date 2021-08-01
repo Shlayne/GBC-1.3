@@ -14,8 +14,7 @@ namespace gbc
 		if (enabled)
 		{
 			ImGui::Begin(name.c_str(), &enabled);
-			focused = ImGui::IsWindowFocused();
-			hovered = ImGui::IsWindowHovered();
+			Update();
 
 			ImGuiHelper::BeginTable("Profiling", 2);
 			if (ImGuiHelper::Checkbox(profiling ? "Stop Profiling" : "Start Profiling" , &profiling))

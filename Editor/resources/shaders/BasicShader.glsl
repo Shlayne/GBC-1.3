@@ -5,12 +5,10 @@ layout(location = 0) in vec3 position;
 layout(location = 1) in vec4 tintColor;
 layout(location = 2) in vec2 texCoord;
 layout(location = 3) in uint texIndex;
-layout(location = 4) in int entityID;
 
 out vec2 _texCoord;
 out vec4 _tintColor;
 out flat uint _texIndex;
-out flat int _entityID;
 
 uniform mat4 viewProjection;
 
@@ -19,7 +17,6 @@ void main()
 	_texCoord = texCoord;
 	_tintColor = tintColor;
 	_texIndex = texIndex;
-	_entityID = entityID;
 	gl_Position = viewProjection * vec4(position, 1.0);
 }
 
@@ -29,10 +26,8 @@ void main()
 in vec2 _texCoord;
 in vec4 _tintColor;
 in flat uint _texIndex;
-in flat int _entityID;
 
 layout(location = 0) out vec4 outColor;
-layout(location = 1) out int entityID;
 
 uniform sampler2D textures[32];
 
@@ -40,16 +35,16 @@ vec4 GetTextureColor()
 {
 	switch (_texIndex)
 	{
-		case  0: return texture(textures[ 0], _texCoord);
-		case  1: return texture(textures[ 1], _texCoord);
-		case  2: return texture(textures[ 2], _texCoord);
-		case  3: return texture(textures[ 3], _texCoord);
-		case  4: return texture(textures[ 4], _texCoord);
-		case  5: return texture(textures[ 5], _texCoord);
-		case  6: return texture(textures[ 6], _texCoord);
-		case  7: return texture(textures[ 7], _texCoord);
-		case  8: return texture(textures[ 8], _texCoord);
-		case  9: return texture(textures[ 9], _texCoord);
+		case 0: return texture(textures[0], _texCoord);
+		case 1: return texture(textures[1], _texCoord);
+		case 2: return texture(textures[2], _texCoord);
+		case 3: return texture(textures[3], _texCoord);
+		case 4: return texture(textures[4], _texCoord);
+		case 5: return texture(textures[5], _texCoord);
+		case 6: return texture(textures[6], _texCoord);
+		case 7: return texture(textures[7], _texCoord);
+		case 8: return texture(textures[8], _texCoord);
+		case 9: return texture(textures[9], _texCoord);
 		case 10: return texture(textures[10], _texCoord);
 		case 11: return texture(textures[11], _texCoord);
 		case 12: return texture(textures[12], _texCoord);
@@ -81,6 +76,4 @@ void main()
 	outColor = _tintColor * GetTextureColor();
 	if (outColor.a == 0.0)
 		discard;
-
-	entityID = _entityID;
 }

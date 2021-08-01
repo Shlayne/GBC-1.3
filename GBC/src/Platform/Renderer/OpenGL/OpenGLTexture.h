@@ -7,8 +7,8 @@ namespace gbc
 	class OpenGLTexture : public Texture
 	{
 	public:
-		OpenGLTexture(TextureSpecification specification);
-		OpenGLTexture(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
+		OpenGLTexture(const TextureSpecification& specification);
+		OpenGLTexture(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
 		virtual ~OpenGLTexture();
 
 		virtual void Bind(uint32_t slot = 0) const override;

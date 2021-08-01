@@ -12,6 +12,10 @@ namespace gbc
 	void JoystickState::OnConnect(uint32_t buttonCount, uint32_t axisCount, uint32_t hatCount)
 	{
 		GBC_CORE_ASSERT(!connected, "Joystick already connected!");
+		GBC_CORE_ASSERT(buttonCount <= static_cast<uint32_t>(JoystickButton::Count), "Joystick has too many buttons for enum to handle.");
+		GBC_CORE_ASSERT(axisCount <= static_cast<uint32_t>(JoystickAxis::Count), "Joystick has too many axes for enum to handle.");
+		GBC_CORE_ASSERT(hatCount <= static_cast<uint32_t>(JoystickHat::Count), "Joystick has too many hats for enum to handle.");
+
 		connected = true;
 
 		this->buttonCount = buttonCount;
@@ -26,6 +30,7 @@ namespace gbc
 	void JoystickState::OnDisconnect()
 	{
 		GBC_CORE_ASSERT(connected, "Joystick already disconnected!");
+
 		connected = false;
 
 		this->buttonCount = 0;

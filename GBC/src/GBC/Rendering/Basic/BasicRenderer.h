@@ -18,7 +18,7 @@ namespace gbc
 		static void BeginScene(const EditorCamera& camera);
 		static void EndScene();
 
-		static void Submit(const Ref<BasicMesh>& mesh, const glm::mat4& transform = glm::mat4(1.0f), const RenderableComponent& renderableComponent = {}, int entityID = -1);
+		static void Submit(const Ref<BasicMesh>& mesh, const glm::mat4& transform = glm::mat4(1.0f), const RenderableComponent& renderableComponent = {});
 
 #if GBC_ENABLE_STATS
 		struct Statistics

@@ -2,6 +2,7 @@
 
 #include "Camera.h"
 #include "GBC/Core/Timestep.h"
+#include "GBC/Events/KeyEvents.h"
 #include "GBC/Events/MouseEvents.h"
 
 namespace gbc
@@ -38,6 +39,14 @@ namespace gbc
 		void RecalculateProjection();
 		void RecalculateView();
 
+		void OnKeyEvent(Keycode keycode, bool pressed);
+		void OnMouseButtonEvent(MouseButton button, bool pressed);
+
+		bool OnKeyPressEvent(KeyPressEvent& event);
+		bool OnKeyReleaseEvent(KeyReleaseEvent& event);
+		bool OnMouseButtonPressEvent(MouseButtonPressEvent& event);
+		bool OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& event);
+		bool OnMouseMoveEvent(MouseMoveEvent& event);
 		bool OnMouseScrollEvent(MouseScrollEvent& event);
 
 		void MousePan(const glm::vec2& delta);
@@ -57,6 +66,7 @@ namespace gbc
 		glm::vec3 position{0.0f};
 		glm::vec3 focalPoint{0.0f};
 		
+		glm::vec2 mousePosition{0.0f};
 		glm::vec2 prevMousePosition{0.0f};
 		glm::vec2 viewportSize{1.0f};
 
@@ -65,5 +75,9 @@ namespace gbc
 		float yaw = 0.0f;
 
 		bool blocked = false;
+		bool activatorKeyPressed = false;
+		bool middleMouseButtonPressed = false;
+		bool leftMouseButtonPressed = false;
+		bool rightMouseButtonPressed = false;
 	};
 }

@@ -8,12 +8,25 @@ namespace gbc
 {
 	struct InputData
 	{
+		// Key
+		std::array<bool, GLFW_KEY_LAST + 1> keys;
+
+		// Mouse
+		std::array<bool, GLFW_MOUSE_BUTTON_LAST + 1> mouseButtons;
+
+		// Joystick
 		std::array<JoystickState, GLFW_JOYSTICK_LAST + 1> joysticks;
+
+		// Misc.
+		GLFWwindow* lastContext = nullptr;
 	};
 	static InputData data;
 
 	void Input::PreInit()
 	{
+		data.keys.fill(0);
+		data.mouseButtons.fill(false);
+
 		glfwInitHint(GLFW_JOYSTICK_HAT_BUTTONS, GLFW_FALSE);
 	}
 
@@ -45,8 +58,8 @@ namespace gbc
 
 		if (glfwJoystickIsGamepad(jid) == GLFW_TRUE)
 		{
-			buttonCount = sizeof(GLFWgamepadstate::buttons) / sizeof(unsigned char);
-			axisCount = sizeof(GLFWgamepadstate::axes) / sizeof(float);
+			buttonCount = sizeof(GLFWgamepadstate::buttons) / sizeof(*GLFWgamepadstate::buttons);
+			axisCount = sizeof(GLFWgamepadstate::axes) / sizeof(*GLFWgamepadstate::axes);
 		}
 		else
 		{
@@ -56,14 +69,14 @@ namespace gbc
 
 		data.joysticks[jid].OnConnect(buttonCount, axisCount, hatCount);
 		JoystickConnectEvent event(jid, true);
-		Application::StaticOnEvent(event);
+		Application::EventCallback(event);
 	}
 
 	void Input::OnJoystickDisconnected(int jid)
 	{
 		data.joysticks[jid].OnDisconnect();
 		JoystickConnectEvent event(jid, false);
-		Application::StaticOnEvent(event);
+		Application::EventCallback(event);
 	}
 
 	void Input::Update()
@@ -89,8 +102,8 @@ namespace gbc
 					glfwGetGamepadState(jid, &state);
 					buttons = state.buttons;
 					axes = state.axes;
-					buttonCount = sizeof(state.buttons) / sizeof(unsigned char);
-					axisCount = sizeof(state.axes) / sizeof(float);
+					buttonCount = sizeof(GLFWgamepadstate::buttons) / sizeof(*GLFWgamepadstate::buttons);
+					axisCount = sizeof(GLFWgamepadstate::axes) / sizeof(*GLFWgamepadstate::axes);
 				}
 				else
 				{
@@ -108,40 +121,69 @@ namespace gbc
 		}
 	}
 
+	bool Input::OnKeyPressEvent(KeyPressEvent& event)
+	{
+		data.keys[static_cast<size_t>(event.GetKeycode())] = true;
+		return false;
+	}
+
+	bool Input::OnKeyReleaseEvent(KeyReleaseEvent& event)
+	{
+		data.keys[static_cast<size_t>(event.GetKeycode())] = false;
+		return false;
+	}
+
+	bool Input::OnMouseButtonPressEvent(MouseButtonPressEvent& event)
+	{
+		data.mouseButtons[static_cast<size_t>(event.GetButton())] = true;
+		return false;
+	}
+
+	bool Input::OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& event)
+	{
+		data.mouseButtons[static_cast<size_t>(event.GetButton())] = false;
+		return false;
+	}
+
+	bool Input::OnMouseMoveEvent(MouseMoveEvent& event)
+	{
+		data.lastContext = glfwGetCurrentContext();
+		return false;
+	}
+
 	// Key
 
 	bool Input::IsKeyPressed(Keycode keycode)
 	{
-		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		return glfwGetKey(window, static_cast<int>(keycode)) != GLFW_RELEASE;
+		GBC_CORE_ASSERT(keycode < Keycode::Count, "Keycode index out of bounds!");
+		return data.keys[static_cast<size_t>(keycode)];
 	}
 
 	bool Input::IsKeyReleased(Keycode keycode)
 	{
-		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		return glfwGetKey(window, static_cast<int>(keycode)) == GLFW_RELEASE;
+		GBC_CORE_ASSERT(keycode < Keycode::Count, "Keycode index out of bounds!");
+		return !data.keys[static_cast<size_t>(keycode)];
 	}
 
 	// Mouse
 
 	bool Input::IsMouseButtonPressed(MouseButton button)
 	{
-		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		return glfwGetMouseButton(window, static_cast<int>(button)) != GLFW_RELEASE;
+		GBC_CORE_ASSERT(button < MouseButton::Count, "MouseButton index out of bounds!");
+		return data.mouseButtons[static_cast<size_t>(button)];
 	}
 
 	bool Input::IsMouseButtonReleased(MouseButton button)
 	{
-		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
-		return glfwGetMouseButton(window, static_cast<int>(button)) == GLFW_RELEASE;
+		GBC_CORE_ASSERT(button < MouseButton::Count, "MouseButton index out of bounds!");
+		return !data.mouseButtons[static_cast<size_t>(button)];
 	}
 
 	glm::vec2 Input::GetMousePos()
 	{
-		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		double x, y;
-		glfwGetCursorPos(window, &x, &y);
-		return {(float)x, (float)y};
+		glfwGetCursorPos(data.lastContext, &x, &y);
+		return {static_cast<float>(x), static_cast<float>(y)};
 	}
 
 	float Input::GetMousePosX()
@@ -158,84 +200,37 @@ namespace gbc
 
 	const JoystickState& Input::GetJoystickState(Joystick joystick)
 	{
-		GBC_CORE_ASSERT(joystick < Joystick::Count, "Joystick state index out of bounds!");
+		GBC_CORE_ASSERT(joystick < Joystick::Count, "Joystick index out of bounds!");
 		return data.joysticks[static_cast<size_t>(joystick)];
 	}
 
-	static bool IsJoystickButtonInState(Joystick joystick, JoystickButton button, unsigned char buttonState)
+	static bool IsJoystickButtonInState(Joystick joystick, JoystickButton button, bool buttonPressed)
 	{
+		GBC_CORE_ASSERT(joystick < Joystick::Count, "Joystick index out of bounds!");
 		int jid = static_cast<int>(joystick);
-
-		if (glfwJoystickPresent(jid) == GLFW_TRUE)
-		{
-			GBC_CORE_ASSERT(button < JoystickButton::Count);
-			size_t buttonIndex = static_cast<size_t>(button);
-
-			if (glfwJoystickIsGamepad(jid) == GLFW_TRUE)
-			{
-				GLFWgamepadstate state;
-				glfwGetGamepadState(jid, &state);
-				return state.buttons[buttonIndex] == buttonState;
-			}
-			else
-			{
-				int buttonCount;
-				const unsigned char* buttons = glfwGetJoystickButtons(jid, &buttonCount);
-				return buttonCount && buttons[buttonIndex] == buttonState;
-			}
-		}
-
-		return false;
+		const JoystickState& joystickState = data.joysticks[jid];
+		return joystickState.IsConnected() && joystickState.GetButton(button) == buttonPressed;
 	}
 
 	bool Input::IsJoystickButtonPressed(Joystick joystick, JoystickButton button)
-	{ return IsJoystickButtonInState(joystick, button, GLFW_PRESS); }
+	{ return IsJoystickButtonInState(joystick, button, true); }
 
 	bool Input::IsJoystickButtonReleased(Joystick joystick, JoystickButton button)
-	{ return IsJoystickButtonInState(joystick, button, GLFW_RELEASE); }
+	{ return IsJoystickButtonInState(joystick, button, false); }
 
 	float Input::GetJoystickAxis(Joystick joystick, JoystickAxis axis)
 	{
+		GBC_CORE_ASSERT(joystick < Joystick::Count, "Joystick index out of bounds!");
 		int jid = static_cast<int>(joystick);
-
-		if (glfwJoystickPresent(jid) == GLFW_TRUE)
-		{
-			GBC_CORE_ASSERT(axis < JoystickAxis::Count);
-			size_t axisIndex = static_cast<size_t>(axis);
-
-			if (glfwJoystickIsGamepad(jid) == GLFW_TRUE)
-			{
-				GLFWgamepadstate state;
-				glfwGetGamepadState(jid, &state);
-				return state.axes[axisIndex];
-			}
-			else
-			{
-				int axisCount;
-				const float* axes = glfwGetJoystickAxes(jid, &axisCount);
-				if (axisCount)
-					return axes[axisIndex];
-			}
-		}
-
-		return 0.0f;
+		const JoystickState& joystickState = data.joysticks[jid];
+		return joystickState.IsConnected() ? joystickState.GetAxis(axis) : 0.0f;
 	}
 
 	JoystickHatState Input::GetJoystickHat(Joystick joystick, JoystickHat hat)
 	{
+		GBC_CORE_ASSERT(joystick < Joystick::Count, "Joystick index out of bounds!");
 		int jid = static_cast<int>(joystick);
-
-		if (glfwJoystickPresent(jid) == GLFW_TRUE)
-		{
-			GBC_CORE_ASSERT(hat < JoystickHat::Count);
-			size_t axisIndex = static_cast<size_t>(hat);
-
-			int hatCount;
-			const unsigned char* hats = glfwGetJoystickHats(jid, &hatCount);
-			if (hatCount)
-				return static_cast<JoystickHatState>(hats[axisIndex]);
-		}
-
-		return JoystickHatState::Centered;
+		const JoystickState& joystickState = data.joysticks[jid];
+		return joystickState.IsConnected() ? joystickState.GetHat(hat) : JoystickHatState::Centered;
 	}
 }

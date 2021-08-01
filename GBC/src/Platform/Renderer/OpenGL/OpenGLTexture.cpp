@@ -59,7 +59,7 @@ namespace gbc
 		GBC_CORE_ASSERT(false, "Unknown Texture Format!");
 	}
 
-	OpenGLTexture::OpenGLTexture(TextureSpecification specification)
+	OpenGLTexture::OpenGLTexture(const TextureSpecification& specification)
 		: specification(specification)
 	{
 		if (specification.texture != nullptr && *specification.texture)
@@ -79,7 +79,7 @@ namespace gbc
 		}
 	}
 
-	OpenGLTexture::OpenGLTexture(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
+	OpenGLTexture::OpenGLTexture(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
 		: specification(specification), ownsRendererID(false), rendererID(framebuffer->GetColorAttachment(attachmentIndex)) {}
 
 	OpenGLTexture::~OpenGLTexture()

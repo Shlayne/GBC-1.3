@@ -82,8 +82,7 @@ namespace gbc
 		if (enabled)
 		{
 			ImGui::Begin(name.c_str(), &enabled);
-			focused = ImGui::IsWindowFocused();
-			hovered = ImGui::IsWindowHovered();
+			Update();
 
 			if (selectedEntity)
 			{
@@ -117,7 +116,7 @@ namespace gbc
 					ImGuiHelper::Checkbox("Primary", &component.primary);
 					ImGuiHelper::NextTableColumn();
 
-					static constexpr const char* names[]{"Perspective", "Orthographic"};
+					static constexpr const char* names[] {"Perspective", "Orthographic"};
 					int selectedItem = static_cast<int>(camera.GetProjectionType());
 					ImGuiHelper::Combo("Projection", &selectedItem, names, sizeof(names) / sizeof(const char*));
 					ImGuiHelper::NextTableColumn();

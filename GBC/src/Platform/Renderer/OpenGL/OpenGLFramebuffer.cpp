@@ -96,7 +96,7 @@ namespace gbc
 		glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentType, GetTextureTarget(multisampled), id, 0);
 	}
 
-	OpenGLFramebuffer::OpenGLFramebuffer(FramebufferSpecification specification)
+	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& specification)
 		: specification(specification)
 	{
 		for (const auto& specification : this->specification.attachments.attachments)

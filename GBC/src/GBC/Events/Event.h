@@ -77,12 +77,3 @@ namespace gbc
 		Event& event;
 	};
 }
-
-#if GBC_ENABLE_LOGGING
-#include <ostream>
-
-inline std::ostream& operator<<(std::ostream& ostr, const gbc::Event& event)
-{
-	return ostr << event.ToString();
-}
-#endif

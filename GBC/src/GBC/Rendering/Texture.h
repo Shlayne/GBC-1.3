@@ -59,10 +59,10 @@ namespace gbc
 		// Only call if this was not constructed with a Framebuffer.
 		virtual void Update() = 0;
 
-		static Ref<Texture> CreateRef(TextureSpecification specification);
-		static Scope<Texture> CreateScope(TextureSpecification specification);
+		static Ref<Texture> CreateRef(const TextureSpecification& specification);
+		static Scope<Texture> CreateScope(const TextureSpecification& specification);
 
-		static Ref<Texture> CreateRef(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
-		static Scope<Texture> CreateScope(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
+		static Ref<Texture> CreateRef(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
+		static Scope<Texture> CreateScope(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
 	};
 }

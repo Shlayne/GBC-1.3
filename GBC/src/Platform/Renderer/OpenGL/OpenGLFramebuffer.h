@@ -7,7 +7,7 @@ namespace gbc
 	class OpenGLFramebuffer : public Framebuffer
 	{
 	public:
-		OpenGLFramebuffer(FramebufferSpecification specification);
+		OpenGLFramebuffer(const FramebufferSpecification& specification);
 		virtual ~OpenGLFramebuffer();
 
 		virtual void Bind() override;

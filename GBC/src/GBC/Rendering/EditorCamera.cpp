@@ -5,30 +5,29 @@
 namespace gbc
 {
 	EditorCamera::EditorCamera(float fov, float nearClip, float farClip)
-		: Camera(), fov(fov), nearClip(nearClip), farClip(farClip)
+		: fov(fov), nearClip(nearClip), farClip(farClip)
 	{
 		RecalculateView();
 	}
 
 	bool EditorCamera::IsUsing() const
 	{
-		return !blocked && Input::IsKeyPressed(Keycode::LeftShift);
+		return !blocked && activatorKeyPressed;
 	}
 
 	void EditorCamera::OnUpdate(Timestep timestep)
 	{
 		// Always update mouse position regardless if the camera is in use
-		glm::vec2 mousePosition = Input::GetMousePos();
 		glm::vec2 delta = (mousePosition - prevMousePosition) * 0.003f;
 		prevMousePosition = mousePosition;
 
 		if (timestep && IsUsing())
 		{
-			if (Input::IsMouseButtonPressed(MouseButton::ButtonMiddle))
+			if (middleMouseButtonPressed)
 				MousePan(delta);
-			else if (Input::IsMouseButtonPressed(MouseButton::ButtonLeft))
+			else if (leftMouseButtonPressed)
 				MouseRotate(delta);
-			else if (Input::IsMouseButtonPressed(MouseButton::ButtonRight))
+			else if (rightMouseButtonPressed)
 				MouseZoom(delta.y);
 
 			RecalculateView();
@@ -37,17 +36,67 @@ namespace gbc
 
 	void EditorCamera::OnEvent(Event& event)
 	{
-		if (IsUsing())
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch(this, &EditorCamera::OnKeyPressEvent);
+		dispatcher.Dispatch(this, &EditorCamera::OnKeyReleaseEvent);
+		dispatcher.Dispatch(this, &EditorCamera::OnMouseButtonPressEvent);
+		dispatcher.Dispatch(this, &EditorCamera::OnMouseButtonReleaseEvent);
+		dispatcher.Dispatch(this, &EditorCamera::OnMouseMoveEvent);
+		dispatcher.Dispatch(this, &EditorCamera::OnMouseScrollEvent);
+	}
+
+	void EditorCamera::OnKeyEvent(Keycode keycode, bool pressed)
+	{
+		switch (keycode)
 		{
-			EventDispatcher dispatcher(event);
-			dispatcher.Dispatch(this, &EditorCamera::OnMouseScrollEvent);
+			case Keycode::LeftShift: activatorKeyPressed = pressed; break;
 		}
+	}
+
+	void EditorCamera::OnMouseButtonEvent(MouseButton button, bool pressed)
+	{
+		switch (button)
+		{
+			case MouseButton::ButtonMiddle: middleMouseButtonPressed = pressed; break;
+			case MouseButton::ButtonLeft:   leftMouseButtonPressed   = pressed; break;
+			case MouseButton::ButtonRight:  rightMouseButtonPressed  = pressed; break;
+		}
+	}
+
+	bool EditorCamera::OnKeyPressEvent(KeyPressEvent& event)
+	{
+		OnKeyEvent(event.GetKeycode(), true);
+		return false;
+	}
+
+	bool EditorCamera::OnKeyReleaseEvent(KeyReleaseEvent& event)
+	{
+		OnKeyEvent(event.GetKeycode(), false);
+		return false;
+	}
+
+	bool EditorCamera::OnMouseButtonPressEvent(MouseButtonPressEvent& event)
+	{
+		OnMouseButtonEvent(event.GetButton(), true);
+		return false;
+	}
+
+	bool EditorCamera::OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& event)
+	{
+		OnMouseButtonEvent(event.GetButton(), false);
+		return false;
+	}
+
+	bool EditorCamera::OnMouseMoveEvent(MouseMoveEvent& event)
+	{
+		mousePosition.x = event.GetX();
+		mousePosition.y = event.GetY();
+		return false;
 	}
 
 	bool EditorCamera::OnMouseScrollEvent(MouseScrollEvent& event)
 	{
-		float delta = event.GetOffsetY() * 0.1f;
-		MouseZoom(delta);
+		MouseZoom(event.GetOffsetY() * 0.1f);
 		RecalculateView();
 		return false;
 	}

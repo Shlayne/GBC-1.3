@@ -132,7 +132,7 @@ namespace gbc
 		for (auto entity : group)
 		{
 			auto [mesh, transform, renderable] = group.get<MeshComponent, TransformComponent, RenderableComponent>(entity);
-			BasicRenderer::Submit(mesh, transform, renderable, static_cast<int>(entity));
+			BasicRenderer::Submit(mesh, transform, renderable);
 		}
 
 		BasicRenderer::EndScene();

@@ -17,7 +17,6 @@ namespace gbc
 		instance = this;
 
 		window = Window::CreateScope(windowSpecs);
-		window->SetEventCallback(GBC_BIND_FUNC(OnEvent));
 
 		Renderer::Init();
 
@@ -30,7 +29,9 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
+#if GBC_ENABLE_IMGUI
 		delete imguiWrapper;
+#endif
 
 		for (Layer* layer : layerStack)
 		{
@@ -54,22 +55,37 @@ namespace gbc
 			timestep = window->GetContext().GetElapsedTime();
 
 			for (Layer* layer : layerStack)
-				layer->OnUpdate(timestep);
+				if (layer->IsEnabled())
+					layer->OnUpdate(timestep);
 
+			if (rendering)
+				for (Layer* layer : layerStack)
+					if (layer->IsEnabled())
+						layer->OnRender();
+
+#if GBC_ENABLE_IMGUI
+			if (rendering)
+				for (Layer* layer : layerStack)
+					if (layer->IsEnabled())
+						layer->OnRender();
+
+			imguiWrapper->Begin();
+			for (Layer* layer : layerStack)
+				if (layer->IsEnabled())
+					layer->OnImGuiRender();
+			imguiWrapper->End();
+
+			window->SwapBuffers();
+#else
 			if (rendering)
 			{
 				for (Layer* layer : layerStack)
-					layer->OnRender();
-
-#if GBC_ENABLE_IMGUI
-				imguiWrapper->Begin();
-				for (Layer* layer : layerStack)
-					layer->OnImGuiRender();
-				imguiWrapper->End();
-#endif
+					if (layer->IsEnabled())
+						layer->OnRender();
 
 				window->SwapBuffers();
 			}
+#endif
 
 			window->PollEvents();
 		}
@@ -108,8 +124,9 @@ namespace gbc
 		return overlay;
 	}
 
-	void Application::StaticOnEvent(Event& event)
+	void Application::EventCallback(Event& event)
 	{
+		GBC_CORE_ASSERT(instance != nullptr, "Application does not yet exist for events to be fired!");
 		instance->OnEvent(event);
 	}
 
@@ -118,15 +135,26 @@ namespace gbc
 		GBC_PROFILE_FUNCTION();
 
 		EventDispatcher dispatcher(event);
+
+		// All of these return false, so the event is never handled.
+		dispatcher.Dispatch(&Input::OnKeyPressEvent);
+		dispatcher.Dispatch(&Input::OnKeyReleaseEvent);
+		dispatcher.Dispatch(&Input::OnMouseButtonPressEvent);
+		dispatcher.Dispatch(&Input::OnMouseButtonReleaseEvent);
+		dispatcher.Dispatch(&Input::OnMouseMoveEvent);
+
 		dispatcher.Dispatch(this, &Application::OnWindowResizeEvent);
 		dispatcher.Dispatch(this, &Application::OnWindowMinimizeEvent);
-		dispatcher.Dispatch(this, &Application::OnJoystickConnectEvent);
 
 		if (event.IsInCategory(EventCategory_Keyboard | EventCategory_Mouse))
 			imguiWrapper->OnEvent(event);
 
 		for (auto it = layerStack.rbegin(); !event.handled && it != layerStack.rend(); ++it)
-			(*it)->OnEvent(event);
+		{
+			Layer* layer = *it;
+			if (layer->IsEnabled())
+				layer->OnEvent(event);
+		}
 
 		// Let the client handle window close events if they want to.
 		if (!event.handled)
@@ -143,7 +171,8 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		if (event.GetWidth() == 0 || event.GetHeight() == 0)
+		windowZeroSize = event.GetWidth() == 0 || event.GetHeight() == 0;
+		if (windowZeroSize)
 		{
 			rendering = false;
 			return true;
@@ -158,13 +187,7 @@ namespace gbc
 
 	bool Application::OnWindowMinimizeEvent(WindowMinimizeEvent& event)
 	{
-		rendering = !event.IsMinimized();
-		return false;
-	}
-
-	bool Application::OnJoystickConnectEvent(JoystickConnectEvent& event)
-	{
-		GBC_CORE_INFO("Joystick Connect Event: jid={0}, connected={1}", event.GetJID(), event.IsConnected());
+		rendering = !(windowZeroSize || event.IsMinimized());
 		return false;
 	}
 }

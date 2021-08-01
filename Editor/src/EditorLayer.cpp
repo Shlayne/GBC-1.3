@@ -2,8 +2,12 @@
 #include "imgui/imgui.h"
 #include "imguizmo/ImGuizmo.h"
 #include "Panels/StasticsPanel.h"
+#if GBC_ENABLE_PROFILE_RUNTIME
 #include "Panels/ProfilingPanel.h"
+#endif
+#if GBC_CONFIG_DEBUG
 #include "Panels/Debug/DemoPanel.h"
+#endif
 #include "GBC/Scene/SceneSerializer.h"
 
 namespace gbc
@@ -20,14 +24,14 @@ namespace gbc
 		FramebufferSpecification framebufferSpecification;
 		framebufferSpecification.width = window.GetWidth();
 		framebufferSpecification.height = window.GetHeight();
-		framebufferSpecification.attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RedInteger, FramebufferTextureFormat::Depth24Stencil8};
+		framebufferSpecification.attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth24Stencil8};
 		framebuffer = Framebuffer::CreateRef(framebufferSpecification);
 
 		scene = CreateRef<Scene>();
 		scene->OnCreate();
 
 		// TODO: Figure out a different way to have Panels change values in EditorLayer
-		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", viewportSizeChanged, viewportSize, viewportPos, absoluteMousePos, framebuffer, scene, selectedEntity, gizmoType, canUseGizmos, editorCamera);
+		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer, scene, selectedEntity, gizmoType, canUseGizmos, editorCamera);
 		sceneHierarchyPanel = AddPanel<SceneHierarchyPanel>("Scene Hierarchy", scene, selectedEntity);
 		scenePropertiesPanel = AddPanel<ScenePropertiesPanel>("Scene Properties", selectedEntity);
 #if GBC_ENABLE_STATS
@@ -55,15 +59,15 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		viewportFocused = sceneViewportPanel->IsFocused();
-		viewportHovered = sceneViewportPanel->IsHovered();
+		bool viewportFocused = sceneViewportPanel->IsFocused();
+		bool viewportHovered = sceneViewportPanel->IsHovered();
 
 		editorCamera.SetBlocked(ImGuizmo::IsUsing());
 		Application::Get().GetImGuiWrapper().SetBlockEvents(!viewportFocused && !viewportHovered);
 
-		if (viewportSizeChanged)
+		if (sceneViewportPanel->HasSizeChanged())
 		{
-			viewportSizeChanged = false;
+			const glm::ivec2& viewportSize = sceneViewportPanel->GetSize();
 
 			editorCamera.OnViewportResize(viewportSize.x, viewportSize.y);
 			framebuffer->OnViewportResize(viewportSize.x, viewportSize.y);
@@ -84,9 +88,8 @@ namespace gbc
 
 		framebuffer->Bind();
 
-		Renderer::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+		Renderer::SetClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		Renderer::Clear();
-		framebuffer->ClearColorAttachment(-1, 1);
 
 		scene->OnRenderEditor(editorCamera);
 
@@ -226,19 +229,19 @@ namespace gbc
 
 			// Gizmos
 			case Keycode::Q:
-				if (viewportFocused)
+				if (sceneViewportPanel->IsFocused())
 					gizmoType = -1;
 				break;
 			case Keycode::W:
-				if (viewportFocused)
+				if (sceneViewportPanel->IsFocused())
 					gizmoType = ImGuizmo::OPERATION::TRANSLATE;
 				break;
 			case Keycode::E:
-				if (viewportFocused)
+				if (sceneViewportPanel->IsFocused())
 					gizmoType = ImGuizmo::OPERATION::ROTATE;
 				break;
 			case Keycode::R:
-				if (viewportFocused)
+				if (sceneViewportPanel->IsFocused())
 					gizmoType = ImGuizmo::OPERATION::SCALE;
 				break;
 		}
@@ -248,27 +251,30 @@ namespace gbc
 
 	bool EditorLayer::OnMouseButtonPressEvent(MouseButtonPressEvent& event)
 	{
-		if (viewportHovered && viewportFocused && event.GetButton() == MouseButton::ButtonLeft && !editorCamera.IsUsing() && !ImGuizmo::IsOver())
-		{
-			canUseGizmos = false;
+		// TODO: Bring back mouse picking when calculating mesh intersections
+		// rather than reading back from a framebuffer attachment
 
-			glm::ivec2 relativeMousePos = absoluteMousePos - viewportPos;
-			relativeMousePos.y = viewportSize.y - 1 - relativeMousePos.y;
+		//if (sceneViewportPanel->IsHovered() && sceneViewportPanel->IsFocused() && event.GetButton() == MouseButton::ButtonLeft && !editorCamera.IsUsing() && !ImGuizmo::IsOver())
+		//{
+		//	canUseGizmos = false;
 
-			if (relativeMousePos.x >= 0 && relativeMousePos.x < viewportSize.x &&
-				relativeMousePos.y >= 0 && relativeMousePos.y < viewportSize.y)
-			{
-				int pixel = -1;
-				framebuffer->Bind();
-				framebuffer->GetColorPixel(&pixel, relativeMousePos.x, relativeMousePos.y, 1);
-				framebuffer->Unbind();
+		//	glm::ivec2 relativeMousePos = absoluteMousePos - viewportPos;
+		//	relativeMousePos.y = viewportSize.y - 1 - relativeMousePos.y;
 
-				selectedEntity = pixel != -1 ? Entity(static_cast<entt::entity>(pixel), scene.get()) : Entity();
-				return true;
-			}
-		}
+		//	if (relativeMousePos.x >= 0 && relativeMousePos.x < viewportSize.x &&
+		//		relativeMousePos.y >= 0 && relativeMousePos.y < viewportSize.y)
+		//	{
+		//		int pixel = -1;
+		//		framebuffer->Bind();
+		//		framebuffer->GetColorPixel(&pixel, relativeMousePos.x, relativeMousePos.y, 1);
+		//		framebuffer->Unbind();
 
-		canUseGizmos = true;
+		//		selectedEntity = pixel != -1 ? Entity(static_cast<entt::entity>(pixel), scene.get()) : Entity();
+		//		return true;
+		//	}
+		//}
+
+		//canUseGizmos = true;
 		return false;
 	}
 

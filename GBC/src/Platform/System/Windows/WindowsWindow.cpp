@@ -5,6 +5,7 @@
 #include "GBC/Events/KeyEvents.h"
 #include "GBC/Events/MouseEvents.h"
 #include "GBC/Events/DeviceEvents.h"
+#include "GBC/Core/Application.h"
 #include "GBC/Core/Input.h"
 
 namespace gbc
@@ -116,7 +117,7 @@ namespace gbc
 
 	void WindowsWindow::SetVSync(bool vsync)
 	{
-		glfwSwapInterval(vsync ? 1 : 0);
+		glfwSwapInterval(vsync);
 		state.vsync = vsync;
 	}
 
@@ -211,87 +212,133 @@ namespace gbc
 		glfwSetCursorEnterCallback(window, CursorEnterCallback);
 	}
 
+#define BEGIN_EVENT_CALLBACK GLFWwindow* context = glfwGetCurrentContext(); glfwMakeContextCurrent(window)
+#define END_EVENT_CALLBACK glfwMakeContextCurrent(context)
+
 	void WindowsWindow::WindowCloseCallback(GLFWwindow* window)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
+		BEGIN_EVENT_CALLBACK;
+
 		WindowCloseEvent event;
-		state.eventCallback(event);
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::WindowSizeCallback(GLFWwindow* window, int width, int height)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.current.width = width;
-		state.current.height = height;
+		BEGIN_EVENT_CALLBACK;
+
+		// Since ImGui's glfw implementation doesn't set a window user pointer, this is fine.
+		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
+		{
+			state->current.width = width;
+			state->current.height = height;
+		}
+
 		WindowResizeEvent event(width, height);
-		state.eventCallback(event);
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::WindowPosCallback(GLFWwindow* window, int x, int y)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.current.x = x;
-		state.current.y = y;
+		BEGIN_EVENT_CALLBACK;
+
+		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
+		{
+			state->current.x = x;
+			state->current.y = y;
+		}
+
 		WindowMoveEvent event(x, y);
-		state.eventCallback(event);
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::WindowFocusCallback(GLFWwindow* window, int focused)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.focused = focused == GLFW_TRUE;
-		WindowFocusEvent event(state.focused);
-		state.eventCallback(event);
+		BEGIN_EVENT_CALLBACK;
+
+		WindowFocusEvent event(focused == GLFW_TRUE);
+		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
+			state->focused = event.IsFocused();
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::WindowIconifyCallback(GLFWwindow* window, int iconified)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.minimized = iconified == GLFW_TRUE;
-		WindowMinimizeEvent event(state.minimized);
-		state.eventCallback(event);
+		BEGIN_EVENT_CALLBACK;
+
+		WindowMinimizeEvent event(iconified == GLFW_TRUE);
+		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
+			state->minimized = event.IsMinimized();
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::WindowMaximizeCallback(GLFWwindow* window, int maximized)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.maximized = maximized == GLFW_TRUE;
-		WindowMaximizeEvent event(state.maximized);
-		state.eventCallback(event);
+		BEGIN_EVENT_CALLBACK;
+
+		WindowMaximizeEvent event(maximized == GLFW_TRUE);
+		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
+			state->maximized = event.IsMaximized();
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::DropCallback(GLFWwindow* window, int pathCount, const char** paths)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
+		BEGIN_EVENT_CALLBACK;
+
 		WindowDropEvent event(pathCount, paths);
-		state.eventCallback(event);
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
+		BEGIN_EVENT_CALLBACK;
+
 		WindowFramebufferResizeEvent event(width, height);
-		state.eventCallback(event);
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::WindowContentScaleCallback(GLFWwindow* window, float scaleX, float scaleY)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
+		BEGIN_EVENT_CALLBACK;
+
 		WindowContentScaleEvent event(scaleX, scaleY);
-		state.eventCallback(event);
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::WindowRefreshCallback(GLFWwindow* window)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
+		BEGIN_EVENT_CALLBACK;
+
 		WindowRefreshEvent event;
-		state.eventCallback(event);
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 
 	void WindowsWindow::KeyCallback(GLFWwindow* window, int keycode, int scancode, int action, int mods)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
+		BEGIN_EVENT_CALLBACK;
+
 		if (keycode != GLFW_KEY_UNKNOWN)
 		{
 			switch (action)
@@ -299,79 +346,100 @@ namespace gbc
 				case GLFW_PRESS:
 				{
 					KeyPressEvent event(static_cast<Keycode>(keycode), mods);
-					state.eventCallback(event);
+					Application::EventCallback(event);
 					break;
 				}
 				case GLFW_REPEAT:
 				{
 					KeyRepeatEvent event(static_cast<Keycode>(keycode), mods);
-					state.eventCallback(event);
+					Application::EventCallback(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
 					KeyReleaseEvent event(static_cast<Keycode>(keycode), mods);
-					state.eventCallback(event);
+					Application::EventCallback(event);
 					break;
 				}
 			}
 		}
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::CharCallback(GLFWwindow* window, uint32_t codepoint)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
+		BEGIN_EVENT_CALLBACK;
+
 		KeyCharEvent event(codepoint);
-		state.eventCallback(event);
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::CharModsCallback(GLFWwindow* window, uint32_t codepoint, int mods)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
+		BEGIN_EVENT_CALLBACK;
+
 		KeyCharModsEvent event(codepoint, mods);
-		state.eventCallback(event);
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 
 	void WindowsWindow::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
+		BEGIN_EVENT_CALLBACK;
+
 		switch (action)
 		{
 			case GLFW_PRESS:
 			{
 				MouseButtonPressEvent event(static_cast<MouseButton>(button), mods);
-				state.eventCallback(event);
+				Application::EventCallback(event);
 				break;
 			}
 			case GLFW_RELEASE:
 			{
 				MouseButtonReleaseEvent event(static_cast<MouseButton>(button), mods);
-				state.eventCallback(event);
+				Application::EventCallback(event);
 				break;
 			}
 		}
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::CursorPosCallback(GLFWwindow* window, double x, double y)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		MouseMoveEvent event((float)x, (float)y);
-		state.eventCallback(event);
+		BEGIN_EVENT_CALLBACK;
+
+		MouseMoveEvent event(static_cast<float>(x), static_cast<float>(y));
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::ScrollCallback(GLFWwindow* window, double offsetX, double offsetY)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		MouseScrollEvent event((float)offsetX, (float)offsetY);
-		state.eventCallback(event);
+		BEGIN_EVENT_CALLBACK;
+
+		MouseScrollEvent event(static_cast<float>(offsetX), static_cast<float>(offsetY));
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 
 	void WindowsWindow::CursorEnterCallback(GLFWwindow* window, int entered)
 	{
-		WindowState& state = *static_cast<WindowState*>(glfwGetWindowUserPointer(window));
-		state.containsMouse = entered == GLFW_TRUE;
-		MouseEnterEvent event(state.containsMouse);
-		state.eventCallback(event);
+		BEGIN_EVENT_CALLBACK;
+
+		MouseEnterEvent event(entered == GLFW_TRUE);
+		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
+			state->containsMouse = event.HasEntered();
+		Application::EventCallback(event);
+
+		END_EVENT_CALLBACK;
 	}
 }

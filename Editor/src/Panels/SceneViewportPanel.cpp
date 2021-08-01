@@ -11,8 +11,8 @@
 
 namespace gbc
 {
-	SceneViewportPanel::SceneViewportPanel(const std::string& name, bool& viewportSizeChanged, glm::ivec2& viewportSize, glm::vec2& viewportPos, glm::vec2& absoluteMousePos, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, bool& canUseGizmos, EditorCamera& editorCamera)
-		: Panel(name), viewportSizeChanged(viewportSizeChanged), viewportSize(viewportSize), viewportPos(viewportPos), absoluteMousePos(absoluteMousePos), framebuffer(framebuffer), context(context), selectedEntity(selectedEntity), gizmoType(gizmoType), canUseGizmos(canUseGizmos), editorCamera(editorCamera) {}
+	SceneViewportPanel::SceneViewportPanel(const std::string& name, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, bool& canUseGizmos, EditorCamera& editorCamera)
+		: Panel(name), framebuffer(framebuffer), context(context), selectedEntity(selectedEntity), gizmoType(gizmoType), canUseGizmos(canUseGizmos), editorCamera(editorCamera) {}
 
 	void SceneViewportPanel::OnImGuiRender()
 	{
@@ -20,21 +20,12 @@ namespace gbc
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
 			ImGui::Begin(name.c_str(), &enabled);
-			focused = ImGui::IsWindowFocused();
-			hovered = ImGui::IsWindowHovered();
 			ImGui::PopStyleVar();
+			Update();
 
-			ImVec2 viewportOffset = ImGui::GetCursorPos();
-
-			ImVec2 size = ImGui::GetContentRegionAvail();
-			viewportSizeChanged = size.x != viewportSize.x || size.y != viewportSize.y;
-			viewportSize = {size.x, size.y};
-			ImGui::Image((void*)(size_t)framebuffer->GetColorAttachment(), size, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
-
-			ImVec2 windowPos = ImGui::GetWindowPos();
-			viewportPos = {windowPos.x + viewportOffset.x,	windowPos.y + viewportOffset.y};
-			ImVec2 mousePos = ImGui::GetMousePos();
-			absoluteMousePos = {mousePos.x, mousePos.y};
+			auto textureID = (void*)static_cast<size_t>(framebuffer->GetColorAttachment());
+			auto textureSize = ImVec2(static_cast<float>(size.x), static_cast<float>(size.y));
+			ImGui::Image(textureID, textureSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 
 			// Gizmos
 			if (selectedEntity && gizmoType != -1)
@@ -44,9 +35,7 @@ namespace gbc
 				ImGuizmo::SetDrawlist();
 
 				// Get window info
-				ImVec2 windowPosition = ImGui::GetWindowPos();
-				ImVec2 windowSize = ImGui::GetWindowSize();
-				ImGuizmo::SetRect(windowPosition.x, windowPosition.y, windowSize.x, windowSize.y);
+				ImGuizmo::SetRect(position.x, position.y, static_cast<float>(size.x), static_cast<float>(size.y));
 
 				// Get camera info
 				//Entity cameraEntity = context->GetPrimaryCameraEntity();
@@ -70,7 +59,7 @@ namespace gbc
 				float snapValues[3]{snapValue, snapValue, snapValue};
 
 				// Draw gizmos
-				if (ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), (ImGuizmo::OPERATION)gizmoType,
+				if (ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), static_cast<ImGuizmo::OPERATION>(gizmoType),
 					ImGuizmo::MODE::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr) && canUseGizmos)
 				{
 					glm::vec3 translation, rotation, scale;

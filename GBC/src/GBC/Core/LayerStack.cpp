@@ -5,14 +5,18 @@ namespace gbc
 {
 	void LayerStack::PushLayer(Layer* layer)
 	{
+		GBC_CORE_ASSERT(layer != nullptr, "Layer is nullptr!");
 		GBC_CORE_ASSERT(std::find(layers.begin(), layers.begin() + layerInsertIndex, layer) == layers.begin() + layerInsertIndex, "Cannot add the same layer twice!");
+		
 		layers.emplace(layers.begin() + layerInsertIndex, layer);
 		layerInsertIndex++;
 	}
 
 	void LayerStack::PushOverlay(Layer* overlay)
 	{
+		GBC_CORE_ASSERT(overlay != nullptr, "Overlay is nullptr!");
 		GBC_CORE_ASSERT(std::find(layers.begin() + layerInsertIndex, layers.end(), overlay) == layers.end(), "Cannot add the same overlay twice!");
+
 		layers.emplace_back(overlay);
 	}
 

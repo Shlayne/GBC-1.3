@@ -40,8 +40,6 @@ namespace gbc
 
 		virtual void* GetNativeWindow() override { return window; }
 		virtual Context& GetContext() override { return *context; }
-
-		virtual void SetEventCallback(const EventCallbackFunc& callback) override { state.eventCallback = callback; }
 	private:
 		void SaveDimensions();
 
@@ -68,8 +66,6 @@ namespace gbc
 			bool minimized = false;
 			bool maximized = false;
 			bool containsMouse = false;
-
-			EventCallbackFunc eventCallback;
 		} state;
 
 		// Callbacks

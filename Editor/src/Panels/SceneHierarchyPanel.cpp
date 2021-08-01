@@ -9,16 +9,14 @@ namespace gbc
 	SceneHierarchyPanel::SceneHierarchyPanel(const std::string& name, Ref<Scene>& context, Entity& selectedEntity)
 		: Panel(name), context(context), selectedEntity(selectedEntity) {}
 
-
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		if (enabled)
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, ImGui::GetStyle().WindowPadding.y));
 			ImGui::Begin(name.c_str(), &enabled);
-			focused = ImGui::IsWindowFocused();
-			hovered = ImGui::IsWindowHovered();
 			ImGui::PopStyleVar();
+			Update();
 
 			// TODO: entt iterates over its entities in a reverse order, so unreverse it.
 			context->registry.each([&](entt::entity handle)
@@ -65,7 +63,8 @@ namespace gbc
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
 		if (selectedEntity == entity)
 			flags |= ImGuiTreeNodeFlags_Selected;
-		bool opened = ImGui::TreeNodeEx((void*)(size_t)(uint32_t)entity, flags, "%s", entity.GetComponent<TagComponent>().tag.c_str());
+		auto id = (void*)static_cast<size_t>(static_cast<uint32_t>(entity));
+		bool opened = ImGui::TreeNodeEx(id, flags, "%s", entity.GetComponent<TagComponent>().tag.c_str());
 
 		bool removeEntity = false;
 		if (ImGui::BeginPopupContextItem(nullptr, ImGuiMouseButton_Right))

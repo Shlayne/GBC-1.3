@@ -11,14 +11,10 @@ namespace gbc
 	class SceneViewportPanel : public Panel
 	{
 	public:
-		SceneViewportPanel(const std::string& name, bool& viewportSizeChanged, glm::ivec2& viewportSize, glm::vec2& viewportPos, glm::vec2& absoluteMousePos, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, bool& canUseGizmos, EditorCamera& editorCamera);
+		SceneViewportPanel(const std::string& name, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, bool& canUseGizmos, EditorCamera& editorCamera);
 
 		virtual void OnImGuiRender() override;
 	private:
-		bool& viewportSizeChanged;
-		glm::ivec2& viewportSize;
-		glm::vec2& viewportPos;
-		glm::vec2& absoluteMousePos;
 		Ref<Framebuffer>& framebuffer;
 		Ref<Scene>& context;
 		Entity& selectedEntity;

@@ -5,7 +5,7 @@
 
 namespace gbc
 {
-	Ref<Framebuffer> Framebuffer::CreateRef(FramebufferSpecification specification)
+	Ref<Framebuffer> Framebuffer::CreateRef(const FramebufferSpecification& specification)
 	{
 		switch (RendererAPI::GetAPI())
 		{
@@ -17,7 +17,7 @@ namespace gbc
 		return nullptr;
 	}
 
-	Scope<Framebuffer> Framebuffer::CreateScope(FramebufferSpecification specification)
+	Scope<Framebuffer> Framebuffer::CreateScope(const FramebufferSpecification& specification)
 	{
 		switch (RendererAPI::GetAPI())
 		{

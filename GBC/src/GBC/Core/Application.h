@@ -27,20 +27,20 @@ namespace gbc
 		void PushOverlay(Layer* overlay);
 		Layer* PopLayer();
 		Layer* PopOverlay();
+	public:
+		using EventCallbackFunc = std::function<void(Event&)>;
+		static void EventCallback(Event& event);
 	private:
 		void OnEvent(Event& event);
 		bool OnWindowCloseEvent(WindowCloseEvent& event);
 		bool OnWindowResizeEvent(WindowResizeEvent& event);
 		bool OnWindowMinimizeEvent(WindowMinimizeEvent& event);
-		bool OnJoystickConnectEvent(JoystickConnectEvent& event);
-
-		static void StaticOnEvent(Event& event);
-		friend class Input;
 
 		static Application* instance;
 
 		bool running = true;
 		bool rendering = true;
+		bool windowZeroSize = false;
 
 		Scope<Window> window;
 #if GBC_ENABLE_IMGUI

@@ -5,7 +5,7 @@
 
 namespace gbc
 {
-	Ref<Texture> Texture::CreateRef(TextureSpecification specification)
+	Ref<Texture> Texture::CreateRef(const TextureSpecification& specification)
 	{
 		switch (RendererAPI::GetAPI())
 		{
@@ -17,7 +17,7 @@ namespace gbc
 		return nullptr;
 	}
 
-	Scope<Texture> Texture::CreateScope(TextureSpecification specification)
+	Scope<Texture> Texture::CreateScope(const TextureSpecification& specification)
 	{
 		switch (RendererAPI::GetAPI())
 		{
@@ -29,7 +29,7 @@ namespace gbc
 		return nullptr;
 	}
 
-	Ref<Texture> Texture::CreateRef(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
+	Ref<Texture> Texture::CreateRef(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
 	{
 		GBC_CORE_ASSERT(specification.texture == nullptr, "Texture Specification texture not nullptr when constructing with framebuffer!");
 
@@ -43,7 +43,7 @@ namespace gbc
 		return nullptr;
 	}
 
-	Scope<Texture> Texture::CreateScope(TextureSpecification specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
+	Scope<Texture> Texture::CreateScope(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
 	{
 		GBC_CORE_ASSERT(specification.texture == nullptr, "Texture Specification texture not nullptr when constructing with framebuffer!");
 

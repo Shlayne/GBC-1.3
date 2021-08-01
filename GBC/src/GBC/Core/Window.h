@@ -56,9 +56,6 @@ namespace gbc
 		virtual void* GetNativeWindow() = 0;
 		virtual Context& GetContext() = 0;
 
-		using EventCallbackFunc = std::function<void(Event&)>;
-		virtual void SetEventCallback(const EventCallbackFunc& callback) = 0;
-
 		static Ref<Window> CreateRef(const WindowSpecifications& specs);
 		static Scope<Window> CreateScope(const WindowSpecifications& specs);
 	};
