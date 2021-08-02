@@ -16,9 +16,6 @@ namespace gbc
 
 		// Joystick
 		std::array<JoystickState, GLFW_JOYSTICK_LAST + 1> joysticks;
-
-		// Misc.
-		GLFWwindow* lastContext = nullptr;
 	};
 	static InputData data;
 
@@ -145,12 +142,6 @@ namespace gbc
 		return false;
 	}
 
-	bool Input::OnMouseMoveEvent(MouseMoveEvent& event)
-	{
-		data.lastContext = glfwGetCurrentContext();
-		return false;
-	}
-
 	// Key
 
 	bool Input::IsKeyPressed(Keycode keycode)
@@ -179,21 +170,22 @@ namespace gbc
 		return !data.mouseButtons[static_cast<size_t>(button)];
 	}
 
-	glm::vec2 Input::GetMousePos()
+	glm::vec2 Input::GetAbsoluteMousePosition()
 	{
-		double x, y;
-		glfwGetCursorPos(data.lastContext, &x, &y);
-		return {static_cast<float>(x), static_cast<float>(y)};
+		GLFWwindow* window = glfwGetCurrentContext();
+		int windowX, windowY;
+		double cursorX, cursorY;
+		glfwGetWindowPos(window, &windowX, &windowY);
+		glfwGetCursorPos(window, &cursorX, &cursorY);
+		return {static_cast<float>(windowX + cursorX), static_cast<float>(windowY + cursorY)};
 	}
 
-	float Input::GetMousePosX()
+	glm::vec2 Input::GetRelativeMousePosition(void* nativeWindow)
 	{
-		return GetMousePos().x;
-	}
-
-	float Input::GetMousePosY()
-	{
-		return GetMousePos().y;
+		GLFWwindow* window = static_cast<GLFWwindow*>(nativeWindow);
+		double cursorX, cursorY;
+		glfwGetCursorPos(window, &cursorX, &cursorY);
+		return {static_cast<float>(cursorX), static_cast<float>(cursorY)};
 	}
 
 	// Joystick

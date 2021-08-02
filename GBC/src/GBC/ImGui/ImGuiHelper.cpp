@@ -21,7 +21,8 @@ namespace gbc
 
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard
 			| ImGuiConfigFlags_DockingEnable
-			| ImGuiConfigFlags_ViewportsEnable;
+			| ImGuiConfigFlags_ViewportsEnable
+			| ImGuiConfigFlags_NavEnableGamepad;
 		io.ConfigWindowsMoveFromTitleBarOnly = true;
 
 		style.WindowRounding = 0.0f;
@@ -29,11 +30,6 @@ namespace gbc
 		style.WindowPadding = {4.0f, 4.0f};
 
 		SetDarkthemeColors();
-	}
-
-	void ImGuiHelper::Shutdown()
-	{
-
 	}
 
 	void ImGuiHelper::SetDarkthemeColors()

@@ -10,7 +10,7 @@ namespace gbc
 	{
 	public:
 		virtual void PreInit() override;
-		virtual void Init(void* nativeContext) override;
+		virtual void Init(void* nativeWindow) override;
 		virtual void SwapBuffers() override;
 		virtual Timestep GetElapsedTime() const override;
 		virtual const char* GetVersion() const override;

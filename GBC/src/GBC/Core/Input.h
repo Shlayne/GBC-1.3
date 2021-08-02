@@ -6,6 +6,7 @@
 #include "GBC/Core/Keycodes.h"
 #include "GBC/Core/MouseButtons.h"
 #include "GBC/Core/Joysticks.h"
+#include "GBC/Core/Window.h"
 
 namespace gbc
 {
@@ -24,9 +25,10 @@ namespace gbc
 		static bool IsMouseButtonPressed(MouseButton button);
 		static bool IsMouseButtonReleased(MouseButton button);
 
-		static glm::vec2 GetMousePos();
-		static float GetMousePosX();
-		static float GetMousePosY();
+		// Gets the position of the mouse relative to the top left corner of the primary monitor.
+		static glm::vec2 GetAbsoluteMousePosition();
+		// Gets the position of the mouse relative to the window associated with nativeWindow.
+		static glm::vec2 GetRelativeMousePosition(void* nativeWindow);
 
 		// Joystick
 		static const JoystickState& GetJoystickState(Joystick joystick);
@@ -43,7 +45,6 @@ namespace gbc
 		static bool OnKeyReleaseEvent(KeyReleaseEvent& event);
 		static bool OnMouseButtonPressEvent(MouseButtonPressEvent& event);
 		static bool OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& event);
-		static bool OnMouseMoveEvent(MouseMoveEvent& event);
 
 		static void OnJoystickConnected(int jid);
 		static void OnJoystickDisconnected(int jid);

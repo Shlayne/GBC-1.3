@@ -87,9 +87,12 @@ static GLFWcursor*          g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
 static bool                 g_InstalledCallbacks = false;
 static bool                 g_WantUpdateMonitors = true;
 
+// All of the other callbacks that ImGui doesn't use so that I can get their window events sent into the main event system.
+static GLFWwindowfocusfun   g_UserCallbackWindowfocus = NULL;
+static GLFWcursorposfun     g_UserCallbackCursorpos = NULL;
+
 // Chain GLFW callbacks for main viewport: our callbacks will call the user's previously installed callbacks, if any.
 static GLFWmousebuttonfun   g_PrevUserCallbackMousebutton = NULL;
-static GLFWcursorposfun     g_PrevUserCallbackCursorpos = NULL;
 static GLFWscrollfun        g_PrevUserCallbackScroll = NULL;
 static GLFWkeyfun           g_PrevUserCallbackKey = NULL;
 static GLFWcharfun          g_PrevUserCallbackChar = NULL;
@@ -117,12 +120,6 @@ void ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow* window, int button, int acti
 
     if (action == GLFW_PRESS && button >= 0 && button < IM_ARRAYSIZE(g_MouseJustPressed))
         g_MouseJustPressed[button] = true;
-}
-
-void ImGui_ImplGlfw_CursorPosCallback(GLFWwindow* window, double x, double y)
-{
-    if (g_PrevUserCallbackCursorpos != NULL/* && window == g_Window*/)
-		g_PrevUserCallbackCursorpos(window, x, y);
 }
 
 void ImGui_ImplGlfw_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
@@ -237,9 +234,14 @@ static bool ImGui_ImplGlfw_Init(GLFWwindow* window, bool install_callbacks, Glfw
 #endif
     glfwSetErrorCallback(prev_error_callback);
 
+    // Cache the main window's callbacks so floating windows can call them too.
+    g_UserCallbackWindowfocus = glfwSetWindowFocusCallback(window, NULL);
+    glfwSetWindowFocusCallback(window, g_UserCallbackWindowfocus);
+    g_UserCallbackCursorpos = glfwSetCursorPosCallback(window, NULL);
+    glfwSetCursorPosCallback(window, g_UserCallbackCursorpos);
+
     // Chain GLFW callbacks: our callbacks will call the user's previously installed callbacks, if any.
     g_PrevUserCallbackMousebutton = NULL;
-	g_PrevUserCallbackCursorpos = NULL;
     g_PrevUserCallbackScroll = NULL;
     g_PrevUserCallbackKey = NULL;
     g_PrevUserCallbackChar = NULL;
@@ -248,7 +250,6 @@ static bool ImGui_ImplGlfw_Init(GLFWwindow* window, bool install_callbacks, Glfw
     {
         g_InstalledCallbacks = true;
         g_PrevUserCallbackMousebutton = glfwSetMouseButtonCallback(window, ImGui_ImplGlfw_MouseButtonCallback);
-		g_PrevUserCallbackCursorpos = glfwSetCursorPosCallback(window, ImGui_ImplGlfw_CursorPosCallback);
         g_PrevUserCallbackScroll = glfwSetScrollCallback(window, ImGui_ImplGlfw_ScrollCallback);
         g_PrevUserCallbackKey = glfwSetKeyCallback(window, ImGui_ImplGlfw_KeyCallback);
         g_PrevUserCallbackChar = glfwSetCharCallback(window, ImGui_ImplGlfw_CharCallback);
@@ -289,7 +290,6 @@ void ImGui_ImplGlfw_Shutdown()
     if (g_InstalledCallbacks)
     {
         glfwSetMouseButtonCallback(g_Window, g_PrevUserCallbackMousebutton);
-		glfwSetCursorPosCallback(g_Window, g_PrevUserCallbackCursorpos);
         glfwSetScrollCallback(g_Window, g_PrevUserCallbackScroll);
         glfwSetKeyCallback(g_Window, g_PrevUserCallbackKey);
         glfwSetCharCallback(g_Window, g_PrevUserCallbackChar);
@@ -588,8 +588,10 @@ static void ImGui_ImplGlfw_CreateWindow(ImGuiViewport* viewport)
     glfwSetWindowPos(data->Window, (int)viewport->Pos.x, (int)viewport->Pos.y);
 
     // Install GLFW callbacks for secondary viewports
-	glfwSetMouseButtonCallback(data->Window, ImGui_ImplGlfw_MouseButtonCallback);
-	glfwSetCursorPosCallback(data->Window, ImGui_ImplGlfw_CursorPosCallback);
+    glfwSetWindowFocusCallback(data->Window, g_UserCallbackWindowfocus);
+    glfwSetCursorPosCallback(data->Window, g_UserCallbackCursorpos);
+
+    glfwSetMouseButtonCallback(data->Window, ImGui_ImplGlfw_MouseButtonCallback);
     glfwSetScrollCallback(data->Window, ImGui_ImplGlfw_ScrollCallback);
     glfwSetKeyCallback(data->Window, ImGui_ImplGlfw_KeyCallback);
     glfwSetCharCallback(data->Window, ImGui_ImplGlfw_CharCallback);

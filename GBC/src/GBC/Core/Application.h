@@ -16,6 +16,7 @@ namespace gbc
 
 		inline static Application& Get() { return *instance; }
 		inline Window& GetWindow() { return *window; }
+		inline void* GetFocusedNativeWindow() { return focusedNativeWindow; }
 #if GBC_ENABLE_IMGUI
 		inline ImGuiWrapper& GetImGuiWrapper() { return *imguiWrapper; }
 #endif
@@ -34,6 +35,7 @@ namespace gbc
 		void OnEvent(Event& event);
 		bool OnWindowCloseEvent(WindowCloseEvent& event);
 		bool OnWindowResizeEvent(WindowResizeEvent& event);
+		bool OnWindowFocusEvent(WindowFocusEvent& event);
 		bool OnWindowMinimizeEvent(WindowMinimizeEvent& event);
 
 		static Application* instance;
@@ -43,6 +45,7 @@ namespace gbc
 		bool windowZeroSize = false;
 
 		Scope<Window> window;
+		void* focusedNativeWindow = nullptr;
 #if GBC_ENABLE_IMGUI
 		ImGuiWrapper* imguiWrapper;
 #endif

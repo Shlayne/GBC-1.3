@@ -4,9 +4,20 @@
 
 namespace gbc
 {
-	class WindowCloseEvent : public Event
+	class WindowEvent : public Event
 	{
 	public:
+		WindowEvent(void* nativeWindow);
+
+		inline void* GetNativeWindow() const noexcept { return nativeWindow; }
+	private:
+		void* nativeWindow;
+	};
+
+	class WindowCloseEvent : public WindowEvent
+	{
+	public:
+		WindowCloseEvent(void* nativeWindow);
 		EVENT_CLASS_TYPE(EventType::WindowClose);
 		EVENT_CLASS_CATEGORY(EventCategory_Window | EventCategory_Application);
 
@@ -15,10 +26,10 @@ namespace gbc
 #endif
 	};
 
-	class WindowResizeEvent : public Event
+	class WindowResizeEvent : public WindowEvent
 	{
 	public:
-		WindowResizeEvent(int width, int height);
+		WindowResizeEvent(void* nativeWindow, int width, int height);
 		EVENT_CLASS_TYPE(EventType::WindowResize);
 		EVENT_CLASS_CATEGORY(EventCategory_Window | EventCategory_Application);
 
@@ -33,10 +44,10 @@ namespace gbc
 		int height;
 	};
 
-	class WindowMoveEvent : public Event
+	class WindowMoveEvent : public WindowEvent
 	{
 	public:
-		WindowMoveEvent(int x, int y);
+		WindowMoveEvent(void* nativeWindow, int x, int y);
 		EVENT_CLASS_TYPE(EventType::WindowMove);
 		EVENT_CLASS_CATEGORY(EventCategory_Window);
 
@@ -51,12 +62,12 @@ namespace gbc
 		int y;
 	};
 
-	class WindowFocusEvent : public Event
+	class WindowFocusEvent : public WindowEvent
 	{
 	public:
-		WindowFocusEvent(bool focus);
+		WindowFocusEvent(void* nativeWindow, bool focus);
 		EVENT_CLASS_TYPE(EventType::WindowFocus);
-		EVENT_CLASS_CATEGORY(EventCategory_Window);
+		EVENT_CLASS_CATEGORY(EventCategory_Window | EventCategory_Application);
 
 		inline bool IsFocused() const noexcept { return focus; }
 
@@ -67,10 +78,10 @@ namespace gbc
 		bool focus;
 	};
 
-	class WindowMinimizeEvent : public Event
+	class WindowMinimizeEvent : public WindowEvent
 	{
 	public:
-		WindowMinimizeEvent(bool minimize);
+		WindowMinimizeEvent(void* nativeWindow, bool minimize);
 		EVENT_CLASS_TYPE(EventType::WindowMinimize);
 		EVENT_CLASS_CATEGORY(EventCategory_Window | EventCategory_Application);
 
@@ -83,10 +94,10 @@ namespace gbc
 		bool minimize;
 	};
 
-	class WindowMaximizeEvent : public Event
+	class WindowMaximizeEvent : public WindowEvent
 	{
 	public:
-		WindowMaximizeEvent(bool maximize);
+		WindowMaximizeEvent(void* nativeWindow, bool maximize);
 		EVENT_CLASS_TYPE(EventType::WindowMaximize);
 		EVENT_CLASS_CATEGORY(EventCategory_Window);
 
@@ -99,10 +110,10 @@ namespace gbc
 		bool maximize;
 	};
 
-	class WindowDropEvent : public Event
+	class WindowDropEvent : public WindowEvent
 	{
 	public:
-		WindowDropEvent(int pathCount, const char** paths);
+		WindowDropEvent(void* nativeWindow, int pathCount, const char** paths);
 		EVENT_CLASS_TYPE(EventType::WindowDrop);
 		EVENT_CLASS_CATEGORY(EventCategory_Window);
 
@@ -117,10 +128,10 @@ namespace gbc
 		const char** paths;
 	};
 
-	class WindowFramebufferResizeEvent : public Event
+	class WindowFramebufferResizeEvent : public WindowEvent
 	{
 	public:
-		WindowFramebufferResizeEvent(int width, int height);
+		WindowFramebufferResizeEvent(void* nativeWindow, int width, int height);
 		EVENT_CLASS_TYPE(EventType::WindowFramebufferResize);
 		EVENT_CLASS_CATEGORY(EventCategory_Window);
 
@@ -135,10 +146,10 @@ namespace gbc
 		int height;
 	};
 
-	class WindowContentScaleEvent : public Event
+	class WindowContentScaleEvent : public WindowEvent
 	{
 	public:
-		WindowContentScaleEvent(float scaleX, float scaleY);
+		WindowContentScaleEvent(void* nativeWindow, float scaleX, float scaleY);
 		EVENT_CLASS_TYPE(EventType::WindowContentScale);
 		EVENT_CLASS_CATEGORY(EventCategory_Window);
 
@@ -153,9 +164,10 @@ namespace gbc
 		float scaleY;
 	};
 
-	class WindowRefreshEvent : public Event
+	class WindowRefreshEvent : public WindowEvent
 	{
 	public:
+		WindowRefreshEvent(void* nativeWindow);
 		EVENT_CLASS_TYPE(EventType::WindowRefresh);
 		EVENT_CLASS_CATEGORY(EventCategory_Window);
 

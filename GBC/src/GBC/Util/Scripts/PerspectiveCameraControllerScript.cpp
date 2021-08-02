@@ -37,7 +37,7 @@ namespace gbc
 		if (movementUp != 0)
 			transform.translation.y += (float)movementUp * movementSpeed;
 
-		glm::vec2 mousePos = Input::GetMousePos();
+		glm::vec2 mousePos = Input::GetAbsoluteMousePosition();
 		glm::vec2 mouseDPos = mousePos - lastMousePos;
 		lastMousePos = mousePos;
 

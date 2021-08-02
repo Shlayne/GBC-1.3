@@ -3,6 +3,7 @@
 #include "GBC/Scene/Components/CameraComponent.h"
 #include "GBC/Scene/Components/MeshComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
+#include "GBC/Core/Input.h"
 
 namespace gbc
 {
@@ -80,7 +81,7 @@ namespace gbc
 		if (opened)
 			ImGui::TreePop();
 
-		if (removeEntity)
+		if (removeEntity || (focused && selectedEntity && Input::IsKeyPressed(Keycode::Delete)))
 		{
 			if (selectedEntity == entity)
 				selectedEntity = {};

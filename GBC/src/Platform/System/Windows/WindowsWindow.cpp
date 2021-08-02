@@ -14,10 +14,30 @@ namespace gbc
 	static bool glfwInitialized = false;
 
 	Ref<Window> Window::CreateRef(const WindowSpecifications& specs)
-	{ return ::gbc::CreateRef<WindowsWindow>(specs); }
+	{
+		auto window = ::gbc::CreateRef<WindowsWindow>(specs);
+
+		if (specs.focusOnShow)
+		{
+			WindowFocusEvent event(window->GetNativeWindow(), true);
+			Application::EventCallback(event);
+		}
+
+		return window;
+	}
 
 	Scope<Window> Window::CreateScope(const WindowSpecifications& specs)
-	{ return ::gbc::CreateScope<WindowsWindow>(specs); }
+	{
+		auto window = ::gbc::CreateScope<WindowsWindow>(specs);
+
+		if (specs.focusOnShow)
+		{
+			WindowFocusEvent event(window->GetNativeWindow(), true);
+			Application::EventCallback(event);
+		}
+
+		return window;
+	}
 
 	WindowsWindow::WindowsWindow(const WindowSpecifications& specs)
 	{
@@ -45,11 +65,13 @@ namespace gbc
 		state.title = specs.title;
 		state.resizable = specs.resizable;
 		state.fullscreen = specs.fullscreen;
+		state.focused = specs.focusOnShow;
 
 		context = Context::CreateScope();
 		context->PreInit();
 
 		glfwWindowHint(GLFW_RESIZABLE, state.resizable);
+		glfwWindowHint(GLFW_FOCUS_ON_SHOW, state.focused);
 
 		GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* videoMode = glfwGetVideoMode(primaryMonitor);
@@ -113,6 +135,12 @@ namespace gbc
 	{
 		glfwSetWindowTitle(window, title);
 		state.title = title;
+	}
+
+	void WindowsWindow::SetIcon(const Ref<LocalTexture2D>& texture)
+	{
+		GLFWimage image{texture->GetWidth(), texture->GetHeight(), texture->GetData()};
+		glfwSetWindowIcon(window, 1, &image);
 	}
 
 	void WindowsWindow::SetVSync(bool vsync)
@@ -219,7 +247,7 @@ namespace gbc
 	{
 		BEGIN_EVENT_CALLBACK;
 
-		WindowCloseEvent event;
+		WindowCloseEvent event(window);
 		Application::EventCallback(event);
 
 		END_EVENT_CALLBACK;
@@ -236,7 +264,7 @@ namespace gbc
 			state->current.height = height;
 		}
 
-		WindowResizeEvent event(width, height);
+		WindowResizeEvent event(window, width, height);
 		Application::EventCallback(event);
 
 		END_EVENT_CALLBACK;
@@ -252,7 +280,7 @@ namespace gbc
 			state->current.y = y;
 		}
 
-		WindowMoveEvent event(x, y);
+		WindowMoveEvent event(window, x, y);
 		Application::EventCallback(event);
 
 		END_EVENT_CALLBACK;
@@ -262,7 +290,7 @@ namespace gbc
 	{
 		BEGIN_EVENT_CALLBACK;
 
-		WindowFocusEvent event(focused == GLFW_TRUE);
+		WindowFocusEvent event(window, focused == GLFW_TRUE);
 		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
 			state->focused = event.IsFocused();
 		Application::EventCallback(event);
@@ -274,7 +302,7 @@ namespace gbc
 	{
 		BEGIN_EVENT_CALLBACK;
 
-		WindowMinimizeEvent event(iconified == GLFW_TRUE);
+		WindowMinimizeEvent event(window, iconified == GLFW_TRUE);
 		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
 			state->minimized = event.IsMinimized();
 		Application::EventCallback(event);
@@ -286,7 +314,7 @@ namespace gbc
 	{
 		BEGIN_EVENT_CALLBACK;
 
-		WindowMaximizeEvent event(maximized == GLFW_TRUE);
+		WindowMaximizeEvent event(window, maximized == GLFW_TRUE);
 		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
 			state->maximized = event.IsMaximized();
 		Application::EventCallback(event);
@@ -298,7 +326,7 @@ namespace gbc
 	{
 		BEGIN_EVENT_CALLBACK;
 
-		WindowDropEvent event(pathCount, paths);
+		WindowDropEvent event(window, pathCount, paths);
 		Application::EventCallback(event);
 
 		END_EVENT_CALLBACK;
@@ -308,7 +336,7 @@ namespace gbc
 	{
 		BEGIN_EVENT_CALLBACK;
 
-		WindowFramebufferResizeEvent event(width, height);
+		WindowFramebufferResizeEvent event(window, width, height);
 		Application::EventCallback(event);
 
 		END_EVENT_CALLBACK;
@@ -318,7 +346,7 @@ namespace gbc
 	{
 		BEGIN_EVENT_CALLBACK;
 
-		WindowContentScaleEvent event(scaleX, scaleY);
+		WindowContentScaleEvent event(window, scaleX, scaleY);
 		Application::EventCallback(event);
 
 		END_EVENT_CALLBACK;
@@ -328,7 +356,7 @@ namespace gbc
 	{
 		BEGIN_EVENT_CALLBACK;
 
-		WindowRefreshEvent event;
+		WindowRefreshEvent event(window);
 		Application::EventCallback(event);
 
 		END_EVENT_CALLBACK;

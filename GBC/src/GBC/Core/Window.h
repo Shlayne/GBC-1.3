@@ -4,6 +4,7 @@
 #include "Core.h"
 #include "GBC/Events/Event.h"
 #include "GBC/Rendering/Context.h"
+#include "GBC/Rendering/LocalTexture2D.h"
 
 namespace gbc
 {
@@ -16,6 +17,7 @@ namespace gbc
 		bool resizable = true;
 		bool fullscreen = false;
 		bool captureMouse = false;
+		bool focusOnShow = true;
 	};
 
 	class Window
@@ -36,6 +38,8 @@ namespace gbc
 
 		virtual const char* GetTitle() const = 0;
 		virtual void SetTitle(const char* title) = 0;
+
+		virtual void SetIcon(const Ref<LocalTexture2D>& texture) = 0;
 
 		virtual bool IsVSync() const = 0;
 		virtual void SetVSync(bool vsync) = 0;

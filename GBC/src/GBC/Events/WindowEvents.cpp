@@ -3,6 +3,12 @@
 
 namespace gbc
 {
+	WindowEvent::WindowEvent(void* nativeWindow)
+		: nativeWindow(nativeWindow) {}
+
+	WindowCloseEvent::WindowCloseEvent(void* nativeWindow)
+		: WindowEvent(nativeWindow) {}
+
 #if GBC_ENABLE_LOGGING
 	std::string WindowCloseEvent::ToString() const
 	{
@@ -10,8 +16,8 @@ namespace gbc
 	}
 #endif
 
-	WindowResizeEvent::WindowResizeEvent(int width, int height)
-		: width(width), height(height) {}
+	WindowResizeEvent::WindowResizeEvent(void* nativeWindow, int width, int height)
+		: WindowEvent(nativeWindow), width(width), height(height) {}
 
 #if GBC_ENABLE_LOGGING
 	std::string WindowResizeEvent::ToString() const
@@ -22,8 +28,8 @@ namespace gbc
 	}
 #endif
 
-	WindowMoveEvent::WindowMoveEvent(int x, int y)
-		: x(x), y(y) {}
+	WindowMoveEvent::WindowMoveEvent(void* nativeWindow, int x, int y)
+		: WindowEvent(nativeWindow), x(x), y(y) {}
 
 #if GBC_ENABLE_LOGGING
 	std::string WindowMoveEvent::ToString() const
@@ -34,8 +40,8 @@ namespace gbc
 	}
 #endif
 
-	WindowFocusEvent::WindowFocusEvent(bool focus)
-		: focus(focus) {}
+	WindowFocusEvent::WindowFocusEvent(void* nativeWindow, bool focus)
+		: WindowEvent(nativeWindow), focus(focus) {}
 
 #if GBC_ENABLE_LOGGING
 	std::string WindowFocusEvent::ToString() const
@@ -46,8 +52,8 @@ namespace gbc
 	}
 #endif
 
-	WindowMinimizeEvent::WindowMinimizeEvent(bool minimize)
-		: minimize(minimize) {}
+	WindowMinimizeEvent::WindowMinimizeEvent(void* nativeWindow, bool minimize)
+		: WindowEvent(nativeWindow), minimize(minimize) {}
 
 #if GBC_ENABLE_LOGGING
 	std::string WindowMinimizeEvent::ToString() const
@@ -58,8 +64,8 @@ namespace gbc
 	}
 #endif
 
-	WindowMaximizeEvent::WindowMaximizeEvent(bool maximize)
-		: maximize(maximize) {}
+	WindowMaximizeEvent::WindowMaximizeEvent(void* nativeWindow, bool maximize)
+		: WindowEvent(nativeWindow), maximize(maximize) {}
 
 #if GBC_ENABLE_LOGGING
 	std::string WindowMaximizeEvent::ToString() const
@@ -70,8 +76,8 @@ namespace gbc
 	}
 #endif
 
-	WindowDropEvent::WindowDropEvent(int pathCount, const char** paths)
-		: pathCount(pathCount), paths(paths) {}
+	WindowDropEvent::WindowDropEvent(void* nativeWindow, int pathCount, const char** paths)
+		: WindowEvent(nativeWindow), pathCount(pathCount), paths(paths) {}
 
 #if GBC_ENABLE_LOGGING
 	std::string WindowDropEvent::ToString() const
@@ -84,8 +90,8 @@ namespace gbc
 	}
 #endif
 
-	WindowFramebufferResizeEvent::WindowFramebufferResizeEvent(int width, int height)
-		: width(width), height(height) {}
+	WindowFramebufferResizeEvent::WindowFramebufferResizeEvent(void* nativeWindow, int width, int height)
+		: WindowEvent(nativeWindow), width(width), height(height) {}
 
 #if GBC_ENABLE_LOGGING
 	std::string WindowFramebufferResizeEvent::ToString() const
@@ -96,8 +102,8 @@ namespace gbc
 	}
 #endif
 
-	WindowContentScaleEvent::WindowContentScaleEvent(float scaleX, float scaleY)
-		: scaleX(scaleX), scaleY(scaleY) {}
+	WindowContentScaleEvent::WindowContentScaleEvent(void* nativeWindow, float scaleX, float scaleY)
+		: WindowEvent(nativeWindow), scaleX(scaleX), scaleY(scaleY) {}
 
 #if GBC_ENABLE_LOGGING
 	std::string WindowContentScaleEvent::ToString() const
@@ -107,6 +113,9 @@ namespace gbc
 		return stream.str();
 	}
 #endif
+
+	WindowRefreshEvent::WindowRefreshEvent(void* nativeWindow)
+		: WindowEvent(nativeWindow) {}
 
 #if GBC_ENABLE_LOGGING
 	std::string WindowRefreshEvent::ToString() const

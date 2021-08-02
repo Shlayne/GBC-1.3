@@ -11,7 +11,6 @@ namespace gbc
 	{
 	private:
 		static void Init();
-		static void Shutdown();
 		friend class ImGuiWrapper;
 
 		static constexpr float defaultResetValue = 0.0f;

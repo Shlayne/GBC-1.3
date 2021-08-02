@@ -64,10 +64,9 @@ namespace gbc
 						layer->OnRender();
 
 #if GBC_ENABLE_IMGUI
-			if (rendering)
-				for (Layer* layer : layerStack)
-					if (layer->IsEnabled())
-						layer->OnRender();
+			for (Layer* layer : layerStack)
+				if (layer->IsEnabled())
+					layer->OnRender();
 
 			imguiWrapper->Begin();
 			for (Layer* layer : layerStack)
@@ -141,9 +140,9 @@ namespace gbc
 		dispatcher.Dispatch(&Input::OnKeyReleaseEvent);
 		dispatcher.Dispatch(&Input::OnMouseButtonPressEvent);
 		dispatcher.Dispatch(&Input::OnMouseButtonReleaseEvent);
-		dispatcher.Dispatch(&Input::OnMouseMoveEvent);
 
 		dispatcher.Dispatch(this, &Application::OnWindowResizeEvent);
+		dispatcher.Dispatch(this, &Application::OnWindowFocusEvent);
 		dispatcher.Dispatch(this, &Application::OnWindowMinimizeEvent);
 
 		if (event.IsInCategory(EventCategory_Keyboard | EventCategory_Mouse))
@@ -163,6 +162,11 @@ namespace gbc
 
 	bool Application::OnWindowCloseEvent(WindowCloseEvent& event)
 	{
+		if (focusedNativeWindow == event.GetNativeWindow())
+			focusedNativeWindow = nullptr;
+
+		// TODO: shouldn't close when a window closes.
+		// For example, two window applications, one closes and it closes the entire application. Not supposed to happen.
 		Close();
 		return true;
 	}
@@ -183,6 +187,13 @@ namespace gbc
 			Renderer::SetViewport(0, 0, event.GetWidth(), event.GetHeight());
 			return false;
 		}
+	}
+
+	bool Application::OnWindowFocusEvent(WindowFocusEvent& event)
+	{
+		if (event.IsFocused())
+			focusedNativeWindow = event.GetNativeWindow();
+		return false;
 	}
 
 	bool Application::OnWindowMinimizeEvent(WindowMinimizeEvent& event)

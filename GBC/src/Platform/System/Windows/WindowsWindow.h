@@ -26,6 +26,8 @@ namespace gbc
 		virtual const char* GetTitle() const override { return state.title; }
 		virtual void SetTitle(const char* title) override;
 
+		virtual void SetIcon(const Ref<LocalTexture2D>& texture) override;
+
 		virtual bool IsVSync() const override { return state.vsync; }
 		virtual void SetVSync(bool vsync) override;
 
@@ -57,15 +59,23 @@ namespace gbc
 			} current, preFullscreen;
 
 			const char* title = nullptr;
-			bool vsync = false;
-			bool resizable = false;
-			bool fullscreen = false;
-			bool captureMouse = false;
 
-			bool focused = true;
-			bool minimized = false;
-			bool maximized = false;
-			bool containsMouse = false;
+			union
+			{
+				uint8_t flags = 0;
+				struct
+				{
+					char vsync : 1;
+					char resizable : 1;
+					char fullscreen : 1;
+					char captureMouse : 1;
+
+					char focused : 1;
+					char minimized : 1;
+					char maximized : 1;
+					char containsMouse : 1;
+				};
+			};
 		} state;
 
 		// Callbacks

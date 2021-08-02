@@ -21,11 +21,11 @@ namespace gbc
 		return GBC_OPENGL_VERSION;
 	}
 
-	void OpenGLContext::Init(void* nativeContext)
+	void OpenGLContext::Init(void* nativeWindow)
 	{
 		GBC_PROFILE_FUNCTION();
 
-		window = static_cast<GLFWwindow*>(nativeContext);
+		window = static_cast<GLFWwindow*>(nativeWindow);
 
 		GBC_CORE_ASSERT(window != nullptr, "Window is nullptr!");
 		glfwMakeContextCurrent(window);

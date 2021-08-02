@@ -28,7 +28,6 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		ImGuiHelper::Shutdown();
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
