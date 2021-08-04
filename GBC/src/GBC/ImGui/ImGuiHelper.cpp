@@ -49,10 +49,11 @@ namespace gbc
 		colors[ImGuiCol_Button] = {0.2f, 0.205f, 0.21f, 1.0f};
 		colors[ImGuiCol_ButtonHovered] = {0.3f, 0.305f, 0.31f, 1.0f};
 		colors[ImGuiCol_ButtonActive] = {0.15f, 0.155f, 0.16f, 1.0f};
+		colors[ImGuiCol_CheckMark] = {0.4f, 0.405f, 0.41f, 1.0f};
 
 		// Frame Background
-		colors[ImGuiCol_FrameBg] = {0.2f, 0.205f, 0.21f, 1.0f};
-		colors[ImGuiCol_FrameBgHovered] = {0.3f, 0.305f, 0.31f, 1.0f};
+		colors[ImGuiCol_FrameBg] = {0.165f, 0.170f, 0.175f, 1.0f};
+		colors[ImGuiCol_FrameBgHovered] = {0.2f, 0.205f, 0.21f, 1.0f};
 		colors[ImGuiCol_FrameBgActive] = {0.15f, 0.155f, 0.16f, 1.0f};
 
 		// Tabs
@@ -66,16 +67,24 @@ namespace gbc
 		colors[ImGuiCol_TitleBg] = {0.15f, 0.155f, 0.16f, 1.0f};
 		colors[ImGuiCol_TitleBgActive] = {0.15f, 0.155f, 0.16f, 1.0f};
 		colors[ImGuiCol_TitleBgCollapsed] = {0.15f, 0.155f, 0.16f, 1.0f};
+
+		// Slider
+		colors[ImGuiCol_SliderGrab] = {0.338f, 0.338f, 0.338f, 1.0f};
+		colors[ImGuiCol_SliderGrabActive] = {0.338f, 0.338f, 0.338f, 1.0f};
 	}
 
-	void ImGuiHelper::BeginTable(const std::string& id, int columnCount)
+	bool ImGuiHelper::BeginTable(const char* id, int columnCount, ImGuiTableFlags tableFlags)
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x / 2.0f, style.ItemSpacing.y));
 
-		ImGui::PushID(id.c_str());
-		ImGuiTableFlags tableFlags = ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_BordersInnerV;
-		ImGui::BeginTable(id.c_str(), columnCount, tableFlags);
+		ImGui::PushID(id);
+		if (!ImGui::BeginTable(id, columnCount, tableFlags))
+		{
+			ImGui::PopID();
+			ImGui::PopStyleVar();
+			return false;
+		}
 
 		ImGuiTableColumnFlags columnFlags = ImGuiTableColumnFlags_WidthAuto;
 		ImGui::TableSetupColumn(nullptr, columnFlags);
@@ -84,6 +93,7 @@ namespace gbc
 			ImGui::TableSetupColumn(nullptr, columnFlags);
 
 		NextTableColumn();
+		return true;
 	}
 
 	void ImGuiHelper::NextTableColumn()
@@ -104,7 +114,13 @@ namespace gbc
 		ImGui::PopStyleVar();
 	}
 
-	bool ImGuiHelper::Float3Edit(float* values, float resetValue, float speed)
+	bool ImGuiHelper::InputText(char* buffer, size_t size, ImGuiInputTextFlags flags)
+	{
+		ImGui::SetKeyboardFocusHere();
+		return ImGui::InputText("", buffer, size, flags) || (!ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left));
+	}
+
+	bool ImGuiHelper::FloatEdit3(float* values, float resetValue, float speed)
 	{
 		bool changed = false;
 		ImGui::PushItemWidth(-FLT_MIN);
@@ -115,13 +131,13 @@ namespace gbc
 		return changed;
 	}
 
-	bool ImGuiHelper::Float3Edit(const std::string& label, float* values, float resetValue, float speed)
+	bool ImGuiHelper::FloatEdit3(const char* label, float* values, float resetValue, float speed)
 	{
 		bool changed = false;
-		ImGui::PushID(label.c_str());
+		ImGui::PushID(label);
 
 		NextTableColumn();
-		changed |= Float3Edit(values, resetValue, speed);
+		changed |= FloatEdit3(values, resetValue, speed);
 		PrevTableColumn();
 		Text(label);
 		NextTableColumn();
@@ -141,13 +157,39 @@ namespace gbc
 		return changed;
 	}
 
-	bool ImGuiHelper::FloatEdit(const std::string& label, float* value, float speed)
+	bool ImGuiHelper::FloatEdit(const char* label, float* value, float speed)
 	{
 		bool changed = false;
-		ImGui::PushID(label.c_str());
+		ImGui::PushID(label);
 
 		NextTableColumn();
 		changed |= FloatEdit(value, speed);
+		PrevTableColumn();
+		Text(label);
+		NextTableColumn();
+
+		ImGui::PopID();
+		return changed;
+	}
+
+	bool ImGuiHelper::SliderFloat(float* value, float minValue, float maxValue)
+	{
+		bool changed = false;
+		ImGui::PushItemWidth(-FLT_MIN);
+
+		changed |= ImGui::SliderFloat("", value, minValue, maxValue);
+
+		ImGui::PopItemWidth();
+		return changed;
+	}
+
+	bool ImGuiHelper::SliderFloat(const char* label, float* value, float minValue, float maxValue)
+	{
+		bool changed = false;
+		ImGui::PushID(label);
+
+		NextTableColumn();
+		changed |= SliderFloat(value, minValue, maxValue);
 		PrevTableColumn();
 		Text(label);
 		NextTableColumn();
@@ -181,10 +223,10 @@ namespace gbc
 		return changed;
 	}
 
-	bool ImGuiHelper::Combo(const std::string& label, int* selectedItem, const char* const* names, int count)
+	bool ImGuiHelper::Combo(const char* label, int* selectedItem, const char* const* names, int count)
 	{
 		bool changed = false;
-		ImGui::PushID(label.c_str());
+		ImGui::PushID(label);
 
 		NextTableColumn();
 		changed |= Combo(selectedItem, names, count);
@@ -207,10 +249,10 @@ namespace gbc
 		return changed;
 	}
 
-	bool ImGuiHelper::Checkbox(const std::string& label, bool* value)
+	bool ImGuiHelper::Checkbox(const char* label, bool* value)
 	{
 		bool changed = false;
-		ImGui::PushID(label.c_str());
+		ImGui::PushID(label);
 
 		NextTableColumn();
 		changed |= Checkbox(value);
@@ -233,10 +275,10 @@ namespace gbc
 		return changed;
 	}
 
-	bool ImGuiHelper::ColorEdit3(const std::string& label, float* values)
+	bool ImGuiHelper::ColorEdit3(const char* label, float* values)
 	{
 		bool changed = false;
-		ImGui::PushID(label.c_str());
+		ImGui::PushID(label);
 
 		NextTableColumn();
 		changed |= ColorEdit3(values);
@@ -259,10 +301,10 @@ namespace gbc
 		return changed;
 	}
 
-	bool ImGuiHelper::ColorEdit4(const std::string& label, float* values)
+	bool ImGuiHelper::ColorEdit4(const char* label, float* values)
 	{
 		bool changed = false;
-		ImGui::PushID(label.c_str());
+		ImGui::PushID(label);
 
 		NextTableColumn();
 		changed |= ColorEdit4(values);
@@ -294,13 +336,45 @@ namespace gbc
 		return changed;
 	}
 
-	bool ImGuiHelper::TextEdit(const std::string& label, std::string* value)
+	bool ImGuiHelper::TextEdit(const char* label, std::string* value)
 	{
 		bool changed = false;
-		ImGui::PushID(label.c_str());
+		ImGui::PushID(label);
 
 		NextTableColumn();
 		changed |= TextEdit(value);
+		PrevTableColumn();
+		Text(label);
+		NextTableColumn();
+
+		ImGui::PopID();
+		return changed;
+	}
+
+	bool ImGuiHelper::ButtonDragDropTarget(const char* buttonText, const char* dragDropType, const std::function<void(const ImGuiPayload*)>& dragDropFunc)
+	{
+		bool changed = false;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.0f, 0.5f});
+		changed |= ImGui::Button(buttonText, {ImGui::GetContentRegionAvail().x, 0.0f});
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(dragDropType))
+				dragDropFunc(payload);
+			ImGui::EndDragDropTarget();
+		}
+		ImGui::PopStyleVar();
+
+		return changed;
+	}
+
+	bool ImGuiHelper::ButtonDragDropTarget(const char* label, const char* buttonText, const char* dragDropType, const std::function<void(const ImGuiPayload*)>& dragDropFunc)
+	{
+		bool changed = false;
+		ImGui::PushID(label);
+
+		NextTableColumn();
+		changed |= ButtonDragDropTarget(buttonText, dragDropType, dragDropFunc);
 		PrevTableColumn();
 		Text(label);
 		NextTableColumn();

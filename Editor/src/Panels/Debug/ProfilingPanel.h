@@ -2,7 +2,7 @@
 
 #include "GBC/Core/Core.h"
 #if GBC_ENABLE_PROFILE_RUNTIME
-#include "Panel.h"
+#include "Panels/Panel.h"
 
 namespace gbc
 {

@@ -51,6 +51,7 @@ namespace gbc
 		virtual void Bind(uint32_t slot = 0) const = 0;
 		virtual void Unbind(uint32_t slot = 0) const = 0;
 
+		virtual RendererID GetRendererID() const = 0;
 		virtual const Ref<LocalTexture2D>& GetTexture() const = 0;
 		virtual const TextureSpecification& GetSpecification() const = 0;
 

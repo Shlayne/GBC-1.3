@@ -2,10 +2,11 @@
 
 #include "gbc.h"
 #include "GBC/Rendering/EditorCamera.h"
+#include <map>
 #include "Panels/SceneViewportPanel.h"
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ScenePropertiesPanel.h"
-#include <map>
+#include "Panels/ContentBrowserPanel.h"
 
 namespace gbc
 {
@@ -30,6 +31,7 @@ namespace gbc
 
 		void NewScene();
 		void OpenScene();
+		void OpenSceneFile(const std::string& filepath);
 		void SaveScene();
 		void SaveAsScene();
 
@@ -57,6 +59,7 @@ namespace gbc
 		SceneViewportPanel* sceneViewportPanel = nullptr;
 		SceneHierarchyPanel* sceneHierarchyPanel = nullptr;
 		ScenePropertiesPanel* scenePropertiesPanel = nullptr;
+		ContentBrowserPanel* contentBrowserPanel = nullptr;
 	};
 }
 

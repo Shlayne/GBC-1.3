@@ -26,7 +26,7 @@ namespace gbc
 			float lineHeight = ImGui::GetFrameHeight();
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
-			bool open = ImGui::TreeNodeEx(label.c_str(), flags, label.c_str());
+			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), flags, label.c_str());
 
 			// TODO: This will eventually have more than just remove component, i.e. other settings.
 			ImGui::SameLine(contentRegionAvailable.x - lineHeight + style.FramePadding.x);
@@ -86,10 +86,11 @@ namespace gbc
 
 			if (selectedEntity)
 			{
-				// TODO:
-				//ImGui::PushID((void*)selectedEntity.GetUUID());
+				// TODO: ImGui::PushID((void*)selectedEntity.GetUUID());
 
-				//if (selectedEntity.Has<TagComponent>())
+				// This doesn't work and I have no idea why!??!?!???
+				ImGui::PushID((void*)static_cast<uint64_t>(static_cast<uint32_t>(selectedEntity)));
+
 				{
 					ImGui::PushID("TagComponent");
 					ImGuiHelper::TextEdit(&selectedEntity.GetComponent<TagComponent>().tag);
@@ -98,15 +99,15 @@ namespace gbc
 
 				ImGui::Separator();
 
-				DrawComponent<TransformComponent>("Transform", 2, selectedEntity, true, [](TransformComponent& component)
+				DrawComponent<TransformComponent>("Transform", 2, selectedEntity, false, [](TransformComponent& component)
 				{
-					ImGuiHelper::Float3Edit("Translation", &component.translation.x);
+					ImGuiHelper::FloatEdit3("Translation", &component.translation.x);
 					ImGuiHelper::NextTableColumn();
 					glm::vec3 rotation = glm::degrees(component.rotation);
-					if (ImGuiHelper::Float3Edit("Rotation", &rotation.x, 0.0f, 1.0f))
+					if (ImGuiHelper::FloatEdit3("Rotation", &rotation.x, 0.0f, 1.0f))
 						component.rotation = glm::radians(rotation);
 					ImGuiHelper::NextTableColumn();
-					ImGuiHelper::Float3Edit("Scale", &component.scale.x, 1.0f);
+					ImGuiHelper::FloatEdit3("Scale", &component.scale.x, 1.0f);
 				});
 
 				DrawComponent<CameraComponent>("Camera", 2, selectedEntity, true, [](CameraComponent& component)
@@ -118,7 +119,7 @@ namespace gbc
 
 					static constexpr const char* names[] {"Perspective", "Orthographic"};
 					int selectedItem = static_cast<int>(camera.GetProjectionType());
-					ImGuiHelper::Combo("Projection", &selectedItem, names, sizeof(names) / sizeof(const char*));
+					ImGuiHelper::Combo("Projection", &selectedItem, names, sizeof(names) / sizeof(*names));
 					ImGuiHelper::NextTableColumn();
 
 					switch (selectedItem)
@@ -167,37 +168,47 @@ namespace gbc
 					}
 				});
 
-				DrawComponent<MeshComponent>("Mesh", 3, selectedEntity, true, [](MeshComponent& component)
+				DrawComponent<MeshComponent>("Mesh", 2, selectedEntity, true, [](MeshComponent& component)
 				{
-					ImGuiHelper::TextEdit("Filepath", &component.filepath);
-					float lineHeight = ImGui::GetFrameHeight();
-					ImGuiHelper::NextTableColumn();
-					if (ImGui::Button("...", {lineHeight, lineHeight}))
+					const char* buttonText = "Null";
+					if (!component.filepath.empty())
+						buttonText = component.filepath.c_str();
+
+					ImGuiHelper::ButtonDragDropTarget("Model", buttonText, "CONTENT_BROWSER_ITEM", [&component](const ImGuiPayload* payload)
 					{
-						auto filepath = FileDialog::OpenFile("OBJ Model (*.obj)\0*.obj\0");
-						if (filepath)
+						std::string filepath = static_cast<const char*>(payload->Data);
+
+						if (filepath.ends_with(".obj"))
 						{
 							OBJModel model;
-							auto result = OBJLoader::LoadOBJ(*filepath, model);
-							if (result)
-								component = std::move(model);
-							else
-								OBJLoader::LogError(result);
+							if (OBJLoader::LoadOBJ(filepath, model))
+							{
+								component.mesh = CreateRef<BasicMesh>(std::move(model));
+								component.filepath = std::move(filepath);
+							}
 						}
-					}
+					});
 				});
 
-				DrawComponent<RenderableComponent>("Renderable", 3, selectedEntity, true, [](RenderableComponent& component)
+				DrawComponent<RenderableComponent>("Renderable", 2, selectedEntity, true, [](RenderableComponent& component)
 				{
-					ImGuiHelper::TextEdit("Filepath", &component.filepath);
-					float lineHeight = ImGui::GetFrameHeight();
+					ImGuiHelper::ColorEdit4("Tint Color", &component.color.x);
 					ImGuiHelper::NextTableColumn();
-					if (ImGui::Button("...", {lineHeight, lineHeight}))
+
+					const char* buttonText = "Null";
+					if (component.texture && component.texture->GetTexture())
+						buttonText = component.texture->GetTexture()->GetFilepath().c_str();
+
+					ImGuiHelper::ButtonDragDropTarget("Texture", buttonText, "CONTENT_BROWSER_ITEM", [&component](const ImGuiPayload* payload)
 					{
-						auto filepath = FileDialog::OpenFile("Image\0*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.psd;*.pic;*.pnm;*.hdr;*.tga;\0JPG (*.jpg)\0*.jpg;*.jpeg\0PNG (*.png)\0*.png\0BMP (*.bmp)\0*.bmp\0GIF (*.gif)\0*.gif\0PSD (*.psd)\0*.psd\0PIC (*.pic)\0*.pic\0PNM (*.pnm)\0*.pnm\0HDR (*.hdr)\0*.hdr\0TGA (*.tga)\0*.tga\0");
-						if (filepath)
-							component = Texture::CreateRef(CreateRef<LocalTexture2D>(*filepath, 4));
-					}
+						std::string filepath = (const char*)(payload->Data);
+						auto localTexture = CreateRef<LocalTexture2D>(filepath);
+						if (localTexture)
+							component.texture = Texture::CreateRef(localTexture);
+					});
+					ImGuiHelper::NextTableColumn();
+
+					ImGuiHelper::FloatEdit("Tiling Factor", &component.tilingFactor);
 				});
 
 				if (ImGui::Button("Add Component", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight())))
@@ -214,8 +225,7 @@ namespace gbc
 					ImGui::EndPopup();
 				}
 
-				// TODO:
-				//ImGui::PopID();
+				ImGui::PopID();
 			}
 
 			ImGui::End();

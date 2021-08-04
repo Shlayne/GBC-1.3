@@ -117,8 +117,15 @@ namespace gbc
 		//SerializeComponent<NativeScriptComponent>(out, entity, "NativeScriptComponent", [&](NativeScriptComponent& component) {});
 		SerializeComponent<RenderableComponent>(out, entity, "RenderableComponent", [&out](RenderableComponent& component)
 		{
+			out << YAML::Key << "TintColor" << YAML::Value << component.color;
+
 			// TODO: reference texture by UUID
-			out << YAML::Key << "Filepath" << YAML::Value << component.filepath;
+			std::string filepath;
+			if (component.texture && component.texture->GetTexture())
+				filepath = component.texture->GetTexture()->GetFilepath();
+			out << YAML::Key << "Texture" << YAML::Value << filepath;
+
+			out << YAML::Key << "TilingFactor" << YAML::Value << component.tilingFactor;
 		});
 		SerializeComponent<TagComponent>(out, entity, "TagComponent", [&out](TagComponent& component)
 		{
@@ -236,7 +243,9 @@ namespace gbc
 						// or maybe this:
 						// Texture::CreateRef(renderableComponentNode["Texture"].as<uint64_t>());
 						// and that would use the asset manager to get the correct Ref<Texture>
-						renderableComponent = Texture::CreateRef(CreateRef<LocalTexture2D>(renderableComponentNode["Filepath"].as<std::string>(), 4));
+						renderableComponent.color = renderableComponentNode["TintColor"].as<glm::vec4>();
+						renderableComponent.texture = Texture::CreateRef(CreateRef<LocalTexture2D>(renderableComponentNode["Texture"].as<std::string>(), 4));
+						renderableComponent.tilingFactor = renderableComponentNode["TilingFactor"].as<float>();
 					}
 
 					auto transformComponentNode = entityNode["TransformComponent"];

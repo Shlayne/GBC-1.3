@@ -15,12 +15,50 @@ namespace gbc
 			ImGui::Begin(name.c_str(), &enabled);
 			Update();
 
-			ImGuiHelper::BeginTable("Renderer", 2);
-			ImGuiHelper::Text("Draw Calls"); ImGuiHelper::NextTableColumn(); ImGuiHelper::Text(std::to_string(statistics.drawCalls)); ImGuiHelper::NextTableColumn();
-			ImGuiHelper::Text("Index Count"); ImGuiHelper::NextTableColumn(); ImGuiHelper::Text(std::to_string(statistics.indexCount)); ImGuiHelper::NextTableColumn();
-			ImGuiHelper::Text("Vertex Count"); ImGuiHelper::NextTableColumn(); ImGuiHelper::Text(std::to_string(statistics.vertexCount)); ImGuiHelper::NextTableColumn();
-			ImGuiHelper::Text("Texture Count"); ImGuiHelper::NextTableColumn(); ImGuiHelper::Text(std::to_string(statistics.textureCount));
-			ImGuiHelper::EndTable();
+			if (ImGuiHelper::BeginTable("Renderer", 2))
+			{
+				char buffer[10];
+
+				ImGuiHelper::Text("Draw Calls");
+				ImGuiHelper::NextTableColumn();
+				if (_ultoa_s(statistics.drawCalls, buffer, 10))
+				{
+					buffer[0] = '0';
+					buffer[1] = '\0';
+				}
+				ImGuiHelper::Text(buffer);
+				ImGuiHelper::NextTableColumn();
+
+				ImGuiHelper::Text("Index Count");
+				ImGuiHelper::NextTableColumn();
+				if (_ultoa_s(statistics.indexCount, buffer, 10))
+				{
+					buffer[0] = '0';
+					buffer[1] = '\0';
+				}
+				ImGuiHelper::Text(buffer);
+				ImGuiHelper::NextTableColumn();
+
+				ImGuiHelper::Text("Vertex Count");
+				ImGuiHelper::NextTableColumn();
+				if (_ultoa_s(statistics.vertexCount, buffer, 10))
+				{
+					buffer[0] = '0';
+					buffer[1] = '\0';
+				}
+				ImGuiHelper::Text(buffer);
+				ImGuiHelper::NextTableColumn();
+
+				ImGuiHelper::Text("Texture Count");
+				ImGuiHelper::NextTableColumn();
+				if (_ultoa_s(statistics.textureCount, buffer, 10))
+				{
+					buffer[0] = '0';
+					buffer[1] = '\0';
+				}
+				ImGuiHelper::Text(buffer);
+				ImGuiHelper::EndTable();
+			}
 
 			ImGui::End();
 		}

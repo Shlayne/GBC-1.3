@@ -1,14 +1,17 @@
 #include "EditorLayer.h"
 #include "imgui/imgui.h"
 #include "imguizmo/ImGuizmo.h"
-#include "Panels/StasticsPanel.h"
+#include "GBC/Scene/SceneSerializer.h"
+#include "Panels/ContentBrowserPanel.h"
+#if GBC_ENABLE_STATS
+	#include "Panels/StasticsPanel.h"
+#endif
 #if GBC_ENABLE_PROFILE_RUNTIME
-#include "Panels/ProfilingPanel.h"
+	#include "Panels/Debug/ProfilingPanel.h"
 #endif
 #if GBC_CONFIG_DEBUG
-#include "Panels/Debug/DemoPanel.h"
+	#include "Panels/Debug/DemoPanel.h"
 #endif
-#include "GBC/Scene/SceneSerializer.h"
 
 namespace gbc
 {
@@ -31,9 +34,10 @@ namespace gbc
 		scene->OnCreate();
 
 		// TODO: Figure out a different way to have Panels change values in EditorLayer
-		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer, scene, selectedEntity, gizmoType, canUseGizmos, editorCamera);
+		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer, scene, selectedEntity, gizmoType, canUseGizmos, editorCamera, GBC_BIND_FUNC(OpenSceneFile));
 		sceneHierarchyPanel = AddPanel<SceneHierarchyPanel>("Scene Hierarchy", scene, selectedEntity);
 		scenePropertiesPanel = AddPanel<ScenePropertiesPanel>("Scene Properties", selectedEntity);
+		contentBrowserPanel = AddPanel<ContentBrowserPanel>("Content Browser");
 #if GBC_ENABLE_STATS
 		AddPanel<StatisticsPanel>("Statistics", BasicRenderer::GetStatistics());
 #endif
@@ -297,8 +301,10 @@ namespace gbc
 		bool allowedDiscard = true;
 		if (hasUnsavedChanges)
 		{
-			// TODO: Show "Any unsaved work will be lost!" message
-			//allowedDiscard = false;
+			//bool action;
+			//if (ImGuiHelper::ConfirmAction("Create New Scene", &action,
+			//	"Are you sure you want to create a new scene?\nAny unsaved work will be lost!"))
+			//	allowedDiscard = action;
 		}
 
 		if (allowedDiscard)
@@ -321,13 +327,16 @@ namespace gbc
 		{
 			auto filepath = FileDialog::OpenFile("GBC Scene (*.gscn)\0*.gscn\0");
 			if (filepath)
-			{
-				currentFilepath = *filepath;
-				ClearScene();
-				SceneSerializer serializer(scene);
-				serializer.Deserialize(*filepath);
-			}
+				OpenSceneFile(*filepath);
 		}
+	}
+
+	void EditorLayer::OpenSceneFile(const std::string& filepath)
+	{
+		currentFilepath = filepath;
+		ClearScene();
+		SceneSerializer serializer(scene);
+		serializer.Deserialize(currentFilepath);
 	}
 
 	void EditorLayer::SaveScene()

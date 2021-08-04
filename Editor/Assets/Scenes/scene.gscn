@@ -2,11 +2,13 @@ Scene: Untitled
 Entities:
   - Entity: 0
     MeshComponent:
-      Filepath: C:\dev\GBC-1.3\Editor\resources\models\cube.obj
+      Filepath: Assets\Models\cube.obj
     RenderableComponent:
-      Filepath: C:\dev\GBC-1.3\Editor\resources\textures\grass_side.png
+      TintColor: [1, 1, 1, 1]
+      Texture: Assets\Textures\grass_side.png
+      TilingFactor: 1
     TagComponent:
-      Tag: Empty Mesh
+      Tag: Cube
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0.785398185, 0.610865235, 0.52359879]

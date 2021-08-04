@@ -66,35 +66,4 @@ namespace gbc
 		mesh = CreateRef<BasicMesh>(std::move(model));
 		return *this;
 	}
-
-	RenderableComponent::RenderableComponent(const Ref<Texture>& texture) noexcept
-		: texture(texture)
-	{
-		if (this->texture && this->texture->GetTexture())
-			filepath = this->texture->GetTexture()->GetFilepath();
-	}
-	RenderableComponent::RenderableComponent(Ref<Texture>&& texture) noexcept
-		: texture(std::move(texture))
-	{
-		if (this->texture && this->texture->GetTexture())
-			filepath = this->texture->GetTexture()->GetFilepath();
-	}
-	RenderableComponent& RenderableComponent::operator=(const Ref<Texture>& texture) noexcept
-	{
-		this->texture = texture;
-		if (this->texture && this->texture->GetTexture())
-			filepath = this->texture->GetTexture()->GetFilepath();
-		else
-			filepath.clear();
-		return *this;
-	}
-	RenderableComponent& RenderableComponent::operator=(Ref<Texture>&& texture) noexcept
-	{
-		this->texture = std::move(texture);
-		if (this->texture && this->texture->GetTexture())
-			filepath = this->texture->GetTexture()->GetFilepath();
-		else
-			filepath.clear();
-		return *this;
-	}
 }

@@ -14,6 +14,7 @@ namespace gbc
 		virtual void Bind(uint32_t slot = 0) const override;
 		virtual void Unbind(uint32_t slot = 0) const override;
 
+		virtual RendererID GetRendererID() const override { return rendererID; }
 		virtual const Ref<LocalTexture2D>& GetTexture() const override { return specification.texture; }
 		virtual const TextureSpecification& GetSpecification() const override { return specification; }
 

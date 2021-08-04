@@ -8,15 +8,10 @@ namespace gbc
 	struct RenderableComponent
 	{
 		RenderableComponent() noexcept = default;
-		RenderableComponent(const Ref<Texture>& texture) noexcept;
-		RenderableComponent(Ref<Texture>&& texture) noexcept;
-		RenderableComponent& operator=(const Ref<Texture>& texture) noexcept;
-		RenderableComponent& operator=(Ref<Texture>&& texture) noexcept;
+		RenderableComponent(const RenderableComponent&) noexcept = default;
 
-		inline operator Ref<Texture>&() noexcept { return texture; }
-		inline operator const Ref<Texture>&() const noexcept { return texture; }
-
-		std::string filepath;
+		glm::vec4 color{1.0f};
 		Ref<Texture> texture;
+		float tilingFactor = 1.0f;
 	};
 }

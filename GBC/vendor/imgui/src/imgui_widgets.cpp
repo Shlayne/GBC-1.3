@@ -1350,7 +1350,7 @@ void ImGui::SeparatorEx(ImGuiSeparatorFlags flags)
     IM_ASSERT(ImIsPowerOfTwo(flags & (ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_Vertical)));   // Check that only 1 option is selected
 
     float thickness_draw = 1.0f;
-    float thickness_layout = 0.0f;
+    float thickness_layout = 1.0f;
     if (flags & ImGuiSeparatorFlags_Vertical)
     {
         // Vertical separator, for menu bars (use current line height). Not exposed because it is misleading and it doesn't have an effect on regular layout.

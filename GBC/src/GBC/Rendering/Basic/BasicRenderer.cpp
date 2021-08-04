@@ -75,7 +75,7 @@ namespace gbc
 		data.indexBuffer = IndexBuffer::CreateRef(data.maxIndices, nullptr, BufferUsage::DynamicDraw, IndexBufferElementType::UInt32);
 
 		// Setup shader
-		data.shader = Shader::CreateRef("resources/shaders/BasicShader.glsl");
+		data.shader = Shader::CreateRef("Resources/Shaders/BasicShader.glsl");
 		data.shader->Bind();
 		int* samplers = new int[data.maxTextures];
 		for (uint32_t i = 0; i < data.maxTextures; i++)
@@ -196,7 +196,7 @@ namespace gbc
 		{
 			data.localVertexBufferCurrent->position = transform * glm::vec4(mesh->vertices[i].position, 1.0f);
 			data.localVertexBufferCurrent->texCoord = mesh->vertices[i].texCoord;
-			data.localVertexBufferCurrent->tintColor = mesh->vertices[i].tintColor;
+			data.localVertexBufferCurrent->tintColor = mesh->vertices[i].tintColor * renderableComponent.color;
 			data.localVertexBufferCurrent->texIndex = texIndex;
 		}
 

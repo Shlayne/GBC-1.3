@@ -1,0 +1,15 @@
+Scene: Untitled
+Entities:
+  - Entity: 0
+    MeshComponent:
+      Filepath: Assets\Models\square.obj
+    RenderableComponent:
+      TintColor: [1, 1, 1, 1]
+      Texture: Assets\Textures\dirt.png
+      TilingFactor: 1
+    TagComponent:
+      Tag: Cube
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0.785398185, 0.610865235, 0.52359879]
+      Scale: [3.5, 3.5, 3.5]
