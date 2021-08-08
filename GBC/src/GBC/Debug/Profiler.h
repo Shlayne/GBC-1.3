@@ -1,5 +1,6 @@
 #pragma once
 
+#if GBC_ENABLE_PROFILE_RUNTIME || GBC_ENABLE_PROFILE
 #include <algorithm>
 #include <chrono>
 #include <fstream>
@@ -66,6 +67,7 @@ namespace gbc
 		bool stopped;
 	};
 }
+#endif
 
 #if GBC_ENABLE_PROFILE_RUNTIME
 	#define GBC_PROFILE_BEGIN_RUNTIME(name, filePath) ::gbc::Profiler::Get().BeginSession(name, filePath)

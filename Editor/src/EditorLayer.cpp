@@ -157,8 +157,11 @@ namespace gbc
 				ImGui::Separator();
 
 				for (auto& [name, panel] : panels)
-					if (ImGui::MenuItem(name.c_str()))
+				{
+					bool enabled = panel->IsEnabled();
+					if (ImGui::MenuItem(name.c_str(), nullptr, &enabled))
 						panel->ToggleEnabled();
+				}
 
 				ImGui::EndMenu();
 			}

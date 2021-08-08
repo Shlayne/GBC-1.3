@@ -2,6 +2,7 @@
 
 #include "Panel.h"
 #include <vector>
+#include <list>
 #include <filesystem>
 #include "GBC/Rendering/Texture.h"
 
@@ -20,13 +21,24 @@ namespace gbc
 			bool directory = false;
 		};
 
-		void DrawHierarchy(const std::filesystem::path& path);
+		struct Directory
+		{
+			std::filesystem::path path;
+			std::vector<Directory> subdirectories;
+		};
+	private:
+		void DrawHierarchy(const Directory& directory);
 		void DrawBrowser();
 
-		void SetDirectory(const std::filesystem::path& path);
-		void RefreshDirectory();
+		void ForwardDirectory();
+		void BackwardDirectory();
+		void PushDirectory(const std::filesystem::path& path);
+		void RefreshDirectory(bool refreshAssetDirectory = false);
+		void RefreshDirectory(Directory& subdirectory);
 	private:
-		std::filesystem::path currentDirectory;
+		std::list<std::filesystem::path> cachedDirectories;
+		static constexpr size_t maxCachedDirectories = 16;
+		std::list<std::filesystem::path>::iterator currentCachedDirectory;
 
 		std::vector<File> files;
 		size_t directoryInsert = 0;
@@ -36,7 +48,7 @@ namespace gbc
 		Ref<Texture> directoryTexture;
 		Ref<Texture> fileTexture;
 
-		bool creatingFolder = false;
+		bool creatingDirectory = false;
 		bool renamingFile = false;
 		static constexpr size_t fileNameBufferSize = 128;
 		char fileNameBuffer[fileNameBufferSize];
@@ -44,12 +56,9 @@ namespace gbc
 		static constexpr char defaultFolderName[] = "New Folder";
 		static constexpr size_t defaultFolderNameSize = sizeof(defaultFolderName) / sizeof(*defaultFolderName);
 
-		// TODO: for back and forward buttons, use both literal buttons and the mouse buttons.
-		// To actually keep track of the directories however, use a linked list with a max
-		// number of iterations, say 16, that you can go to previous directories
+		Directory assetDirectory;
 
-		// Have a refresh button that calls RefreshDirectory()
-		// Have a search bar to search the current directory
-		// Basically just make it look like Hazel's (./Resources/ContentBrowserPanel.png for reference)
+		static constexpr size_t searchBufferSize = fileNameBufferSize;
+		char searchBuffer[searchBufferSize]{'\0'};
 	};
 }

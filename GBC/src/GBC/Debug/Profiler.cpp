@@ -1,4 +1,5 @@
 #include "gbcpch.h"
+#if GBC_ENABLE_PROFILE_RUNTIME || GBC_ENABLE_PROFILE
 #include "Profiler.h"
 #include <filesystem>
 
@@ -115,3 +116,4 @@ namespace gbc
 		stopped = true;
 	}
 }
+#endif

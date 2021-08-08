@@ -106,6 +106,29 @@ namespace gbc
 
 			return closed;
 		}
+
+		template<typename... Args>
+		static bool Inform(const char* name, const char* messageFormat, Args&&... args)
+		{
+			bool closed = false;
+
+			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, {0.5f, 0.5f});
+			ImGui::OpenPopup(name);
+
+			if (ImGui::BeginPopupModal(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
+			{
+				ImGui::Text(messageFormat, std::forward<Args>(args)...);
+
+				ImGui::PushItemWidth(-FLT_MIN);
+				if (ImGui::Button("OK", {ImGui::GetContentRegionAvail().x, 0.0f}))
+					closed = true;
+				ImGui::PopItemWidth();
+
+				ImGui::EndPopup();
+			}
+
+			return closed;
+		}
 	};
 }
 #endif

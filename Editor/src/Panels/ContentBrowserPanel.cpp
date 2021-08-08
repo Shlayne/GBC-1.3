@@ -2,15 +2,18 @@
 #include "imgui/imgui.h"
 #include "GBC/ImGui/ImGuiHelper.h"
 #include "GBC/Core/Input.h"
+#include "GBC/Events/MouseEvents.h"
 
 namespace gbc
 {
-	const std::filesystem::path assetDirectory = "Assets";
+	const std::filesystem::path projectAssetDirectory = "Assets";
 
 	ContentBrowserPanel::ContentBrowserPanel(const std::string& name)
-		: Panel(name), currentDirectory(assetDirectory)
+		: Panel(name), assetDirectory{projectAssetDirectory}
 	{
-		RefreshDirectory();
+		cachedDirectories.push_back(projectAssetDirectory);
+		currentCachedDirectory = cachedDirectories.begin();
+		RefreshDirectory(true);
 
 		directoryTexture = Texture::CreateRef(CreateRef<LocalTexture2D>("Resources/Icons/ContentBrowserPanel/DirectoryIcon.png", 4));
 		fileTexture = Texture::CreateRef(CreateRef<LocalTexture2D>("Resources/Icons/ContentBrowserPanel/FileIcon.png", 4));
@@ -23,7 +26,7 @@ namespace gbc
 			ImGui::Begin(name.c_str(), &enabled, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 			Update();
 
-			if (ImGui::BeginTable(name.c_str(), 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV))
+			if (ImGui::BeginTable("ContentBrowserTable1", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV))
 			{
 				ImGui::TableNextColumn();
 				ImGui::BeginChild("ContentBrowserHierarchy", {0, 0}, false, ImGuiWindowFlags_HorizontalScrollbar);
@@ -41,51 +44,65 @@ namespace gbc
 		}
 	}
 
-	void ContentBrowserPanel::DrawHierarchy(const std::filesystem::path& path)
+	void ContentBrowserPanel::DrawHierarchy(const Directory& directory)
 	{
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-		if (currentDirectory == path)
+		if (*currentCachedDirectory == directory.path)
 			flags |= ImGuiTreeNodeFlags_Selected;
-
-		bool hasSubDirectories = false;
-		for (const auto& entry : std::filesystem::directory_iterator(path))
-		{
-			if (entry.is_directory())
-			{
-				hasSubDirectories = true;
-				break;
-			}
-		}
-		if (!hasSubDirectories)
+		if (directory.subdirectories.empty())
 			flags |= ImGuiTreeNodeFlags_Leaf;
 
 		std::string filenameString;
-		if (path == assetDirectory)
+		if (directory.path == projectAssetDirectory)
 		{
-			filenameString = assetDirectory.filename().string();
+			filenameString = projectAssetDirectory.filename().string();
 			flags |= ImGuiTreeNodeFlags_DefaultOpen;
 		}
 		else
-			filenameString = std::filesystem::relative(path, assetDirectory).filename().string();
+			filenameString = std::filesystem::relative(directory.path, projectAssetDirectory).filename().string();
 
 		bool opened = ImGui::TreeNodeEx(filenameString.c_str(), flags, filenameString.c_str());
 
+		bool setDirectory = false;
 		if (!(ImGui::GetMousePos().x - ImGui::GetItemRectMin().x < ImGui::GetTreeNodeToLabelSpacing()) && ImGui::IsItemClicked())
-			SetDirectory(path);
+			setDirectory = true;
 
 		if (opened)
 		{
-			for (const auto& entry : std::filesystem::directory_iterator(path))
-				if (entry.is_directory())
-					DrawHierarchy(entry.path());
+			for (const Directory& subdirectory : directory.subdirectories)
+				DrawHierarchy(subdirectory);
 			ImGui::TreePop();
 		}
+
+		if (setDirectory)
+			PushDirectory(directory.path);
 	}
 
 	void ContentBrowserPanel::DrawBrowser()
 	{
-		static constexpr float padding = 1.0f;
-		static float thumbnailSize = 96.0f;
+		ImVec2 spacing = ImGui::GetStyle().ItemSpacing;
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {spacing.x / 2.0f, spacing.y});
+
+		if (ImGui::Button("<") || (ImGui::IsMouseReleased(3) && ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows)))
+			BackwardDirectory();
+
+		ImGui::SameLine();
+		if (ImGui::Button(">") || (ImGui::IsMouseReleased(4) && ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows)))
+			ForwardDirectory();
+
+		ImGui::SameLine();
+		if (ImGui::Button("Refresh"))
+			RefreshDirectory(true);
+
+		ImGui::SameLine();
+		ImGui::InputTextWithHint("", "Search...", searchBuffer, searchBufferSize);
+		// TODO
+
+		ImGui::PopStyleVar();
+		ImGui::Separator();
+
+		float padding = ImGui::GetStyle().CellPadding.x;
+		float thumbnailSize = 96.0f;
 		int columnCount = std::max(1, static_cast<int>(ImGui::GetContentRegionAvail().x / (thumbnailSize + 2.0f * padding)));
 
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, {padding, padding});
@@ -96,8 +113,9 @@ namespace gbc
 			ImGui::TableNextColumn();
 
 			bool deferredChange = false;
+			bool directoriesAltered = false;
 
-			if (creatingFolder)
+			if (creatingDirectory)
 			{
 				ImGui::PushID(-1);
 
@@ -114,15 +132,16 @@ namespace gbc
 
 					try
 					{
-						std::filesystem::create_directory(currentDirectory / fileNameBuffer);
+						std::filesystem::create_directory(*currentCachedDirectory / fileNameBuffer);
 						deferredChange = true;
+						directoriesAltered = true;
 					}
 					catch (std::filesystem::filesystem_error& error)
 					{
 						GBC_ERROR("Failed to create directory: {0}", error.what());
 					}
 
-					creatingFolder = false;
+					creatingDirectory = false;
 				}
 
 				ImGui::TableNextColumn();
@@ -136,7 +155,7 @@ namespace gbc
 
 				File& file = files[i];
 
-				auto relativePath = std::filesystem::relative(file.path, assetDirectory);
+				auto relativePath = std::filesystem::relative(file.path, projectAssetDirectory);
 				auto filename = relativePath.filename();
 				auto filenameString = filename.string();
 
@@ -148,7 +167,7 @@ namespace gbc
 
 				if (ImGui::BeginDragDropSource())
 				{
-					auto relativePathString = (assetDirectory / relativePath).string();
+					auto relativePathString = (projectAssetDirectory / relativePath).string();
 					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", relativePathString.c_str(), relativePathString.size() + 1, ImGuiCond_Once);
 					ImGui::EndDragDropSource();
 				}
@@ -159,7 +178,7 @@ namespace gbc
 					{
 						if (file.directory)
 						{
-							SetDirectory(currentDirectory / filename);
+							PushDirectory(*currentCachedDirectory / filename);
 							changed = true;
 						}
 					}
@@ -168,24 +187,6 @@ namespace gbc
 						ImGui::OpenPopup("ContentBrowserFileOptions");
 						clickedFileIndex = i;
 					}
-				}
-
-				if (ImGui::BeginPopupContextWindow(nullptr, ImGuiMouseButton_Right | ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_NoOpenOverExistingPopup))
-				{
-					if (ImGui::BeginMenu("New"))
-					{
-						if (ImGui::MenuItem("Folder"))
-						{
-							memcpy_s(fileNameBuffer, fileNameBufferSize, defaultFolderName, defaultFolderNameSize);
-							if (fileNameSize > defaultFolderNameSize)
-								memset(fileNameBuffer + defaultFolderNameSize, 0, fileNameSize - defaultFolderNameSize);
-							fileNameSize = 0;
-							creatingFolder = true;
-						}
-
-						ImGui::EndMenu();
-					}
-					ImGui::EndPopup();
 				}
 
 				if (ImGui::BeginPopup("ContentBrowserFileOptions"))
@@ -202,7 +203,6 @@ namespace gbc
 						memcpy_s(fileNameBuffer, fileNameBufferSize, filenameString.c_str(), filenameString.size() + 1);
 						renamingFile = true;
 					}
-
 					ImGui::EndPopup();
 				}
 
@@ -212,8 +212,9 @@ namespace gbc
 					{
 						try
 						{
-							std::filesystem::rename(file.path, currentDirectory / fileNameBuffer);
+							std::filesystem::rename(file.path, *currentCachedDirectory / fileNameBuffer);
 							deferredChange = true;
+							directoriesAltered = file.directory;
 						}
 						catch (std::filesystem::filesystem_error& error)
 						{
@@ -239,9 +240,8 @@ namespace gbc
 							try
 							{
 								std::filesystem::remove(file.path);
-								files.erase(files.begin() + i);
-								i--;
-								//deferredChange = true; // not necessary
+								deferredChange = true;
+								directoriesAltered = file.directory;
 							}
 							catch (std::filesystem::filesystem_error& error)
 							{
@@ -256,28 +256,99 @@ namespace gbc
 				}
 			}
 
+			if (ImGui::BeginPopupContextWindow(nullptr, ImGuiMouseButton_Right | ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_NoOpenOverExistingPopup))
+			{
+				if (ImGui::BeginMenu("New"))
+				{
+					if (ImGui::MenuItem("Folder"))
+					{
+						memcpy_s(fileNameBuffer, fileNameBufferSize, defaultFolderName, defaultFolderNameSize);
+						if (fileNameSize > defaultFolderNameSize)
+							memset(fileNameBuffer + defaultFolderNameSize, 0, fileNameSize - defaultFolderNameSize);
+						fileNameSize = 0;
+						creatingDirectory = true;
+					}
+
+					ImGui::EndMenu();
+				}
+				ImGui::EndPopup();
+			}
+
 			ImGui::EndTable();
 
 			if (deferredChange)
-				RefreshDirectory();
+				RefreshDirectory(directoriesAltered);
 		}
 
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar();
 	}
 
-	void ContentBrowserPanel::SetDirectory(const std::filesystem::path& path)
+	void ContentBrowserPanel::ForwardDirectory()
 	{
-		currentDirectory = path;
+		auto lastDirectory = currentCachedDirectory;
+		++currentCachedDirectory;
+		if (currentCachedDirectory == cachedDirectories.end())
+			currentCachedDirectory = lastDirectory;
+		else if (!std::filesystem::exists(*currentCachedDirectory))
+		{
+			cachedDirectories.erase(currentCachedDirectory);
+			currentCachedDirectory = lastDirectory;
+		}
+		else
+			RefreshDirectory();
+	}
+
+	void ContentBrowserPanel::BackwardDirectory()
+	{
+		if (currentCachedDirectory != cachedDirectories.begin())
+		{
+			auto lastDirectory = currentCachedDirectory;
+			if (!std::filesystem::exists(*--currentCachedDirectory))
+			{
+				cachedDirectories.erase(cachedDirectories.begin(), lastDirectory);
+				currentCachedDirectory = cachedDirectories.begin();
+			}
+			else
+				RefreshDirectory();
+		}
+	}
+
+	void ContentBrowserPanel::PushDirectory(const std::filesystem::path& path)
+	{
+		if (currentCachedDirectory != cachedDirectories.end())
+		{
+			auto temp = currentCachedDirectory;
+			cachedDirectories.erase(++currentCachedDirectory, cachedDirectories.end());
+			currentCachedDirectory = temp;
+		}
+
+		if (cachedDirectories.size() == maxCachedDirectories)
+		{
+			cachedDirectories.pop_front();
+			cachedDirectories.push_back(path);
+		}
+		else
+		{
+			cachedDirectories.push_back(path);
+			++currentCachedDirectory;
+		}
+
 		RefreshDirectory();
 	}
 
-	void ContentBrowserPanel::RefreshDirectory()
+	void ContentBrowserPanel::RefreshDirectory(bool refreshAssetDirectory)
 	{
+		if (refreshAssetDirectory)
+		{
+			assetDirectory.subdirectories.clear();
+			RefreshDirectory(assetDirectory);
+		}
+
 		files.clear();
 		directoryInsert = 0;
 
-		for (const auto& entry : std::filesystem::directory_iterator(currentDirectory))
+		for (const auto& entry : std::filesystem::directory_iterator(*currentCachedDirectory))
 		{
 			bool isDirectory = entry.is_directory();
 
@@ -291,5 +362,12 @@ namespace gbc
 		}
 
 		clickedFileIndex = files.size();
+	}
+
+	void ContentBrowserPanel::RefreshDirectory(Directory& subdirectory)
+	{
+		for (const auto& entry : std::filesystem::directory_iterator(subdirectory.path))
+			if (entry.is_directory())
+				RefreshDirectory(subdirectory.subdirectories.emplace_back(entry.path()));
 	}
 }
