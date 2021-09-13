@@ -117,7 +117,7 @@ namespace gbc
 					ImGuiHelper::Checkbox("Primary", &component.primary);
 					ImGuiHelper::NextTableColumn();
 
-					static constexpr const char* names[] {"Perspective", "Orthographic"};
+					static constexpr const char* names[] { "Perspective", "Orthographic" };
 					int selectedItem = static_cast<int>(camera.GetProjectionType());
 					ImGuiHelper::Combo("Projection", &selectedItem, names, sizeof(names) / sizeof(*names));
 					ImGuiHelper::NextTableColumn();
@@ -204,14 +204,71 @@ namespace gbc
 						std::string filepath = (const char*)(payload->Data);
 						auto localTexture = CreateRef<LocalTexture2D>(filepath);
 						if (localTexture)
-							component.texture = Texture::CreateRef(localTexture);
+						{
+							TextureSpecification specs = component.texture ? component.texture->GetSpecification() : TextureSpecification{};
+							specs.texture = localTexture;
+							component.texture = Texture2D::CreateRef(specs);
+						}
 					});
 					ImGuiHelper::NextTableColumn();
 
 					ImGuiHelper::FloatEdit("Tiling Factor", &component.tilingFactor);
+					ImGuiHelper::NextTableColumn();
+
+					// TODO: all of what's in this if statement should be moved to another panel similar to unity
+					// because there are going to be way more than just these things in a texture
+					if (component.texture)
+					{
+						TextureSpecification specs = component.texture->GetSpecification();
+						bool changed = false;
+
+						static constexpr const char* names1[]{ "Linear", "Nearest" };
+						static constexpr const char* names2[]{ "ClampToEdge", "Repeat" };
+
+						int selectedItem = static_cast<int>(specs.minFilter);
+						if (changed = ImGuiHelper::Combo("Min Filter", &selectedItem, names1, sizeof(names1) / sizeof(*names1)))
+						{
+							specs.minFilter = static_cast<TextureFilterMode>(selectedItem);
+							changed = true;
+						}
+						ImGuiHelper::NextTableColumn();
+						selectedItem = static_cast<int>(specs.magFilter);
+						if (ImGuiHelper::Combo("Mag Filter", &selectedItem, names1, sizeof(names1) / sizeof(*names1)) && !changed)
+						{
+							specs.magFilter = static_cast<TextureFilterMode>(selectedItem);
+							changed = true;
+						}
+						ImGuiHelper::NextTableColumn();
+						selectedItem = static_cast<int>(specs.wrapS);
+						if (ImGuiHelper::Combo("Wrap S", &selectedItem, names2, sizeof(names2) / sizeof(*names2)) && !changed)
+						{
+							specs.wrapS = static_cast<TextureWrapMode>(selectedItem);
+							changed = true;
+						}
+						ImGuiHelper::NextTableColumn();
+						selectedItem = static_cast<int>(specs.wrapT);
+						if (ImGuiHelper::Combo("Wrap T", &selectedItem, names2, sizeof(names2) / sizeof(*names2)) && !changed)
+						{
+							specs.wrapT = static_cast<TextureWrapMode>(selectedItem);
+							changed = true;
+						}
+						ImGuiHelper::NextTableColumn();
+
+						if (changed)
+							component.texture = Texture2D::CreateRef(specs);
+					}
 				});
 
-				if (ImGui::Button("Add Component", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight())))
+				ImGui::Separator();
+
+				static constexpr char addComponentText[] = "Add Component";
+				ImGuiStyle& style = ImGui::GetStyle();
+				ImVec2 addComponentButtonSize = ImGui::CalcTextSize(addComponentText);
+				addComponentButtonSize.x += style.FramePadding.x * 2.0f;
+				addComponentButtonSize.y += style.FramePadding.y * 2.0f;
+
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetWindowContentRegionWidth() - addComponentButtonSize.x) * 0.5f);
+				if (ImGui::Button(addComponentText, addComponentButtonSize))
 					ImGui::OpenPopup("AddComponent");
 				if (ImGui::BeginPopup("AddComponent"))
 				{

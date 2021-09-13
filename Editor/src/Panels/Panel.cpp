@@ -14,10 +14,10 @@ namespace gbc
 		ImVec2 imguiSize = ImGui::GetContentRegionAvail();
 		sizeChanged = imguiSize.x != size.x || imguiSize.y != size.y;
 		if (sizeChanged)
-			size = {imguiSize.x, imguiSize.y};
+			size = { imguiSize.x, imguiSize.y };
 
 		ImVec2 windowPos = ImGui::GetWindowPos();
 		ImVec2 viewportOffset = ImGui::GetCursorPos();
-		position = {windowPos.x + viewportOffset.x, windowPos.y + viewportOffset.y};
+		position = { windowPos.x + viewportOffset.x, windowPos.y + viewportOffset.y };
 	}
 }

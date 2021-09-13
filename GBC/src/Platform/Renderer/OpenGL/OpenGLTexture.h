@@ -4,7 +4,7 @@
 
 namespace gbc
 {
-	class OpenGLTexture : public Texture
+	class OpenGLTexture : public Texture2D
 	{
 	public:
 		OpenGLTexture(const TextureSpecification& specification);

@@ -17,7 +17,8 @@ namespace gbc
 		static constexpr float defaultResetValue = 0.0f;
 		static constexpr float defaultSpeed = 0.1f;
 	public:
-		static void SetDarkthemeColors();
+		static void SetScenePlayColors();
+		static void SetSceneEditColors();
 
 		static bool BeginTable(const char* id, int columnCount, ImGuiTableFlags tableFlags = ImGuiTableFlags_BordersInnerV);
 		static void NextTableColumn();
@@ -82,10 +83,12 @@ namespace gbc
 			{
 				ImGui::Text(messageFormat, std::forward<Args>(args)...);
 
+				ImGuiStyle& style = ImGui::GetStyle();
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x / 2.0f, style.ItemSpacing.y));
 				float availableWidth = ImGui::GetContentRegionAvail().x;
 				float padding = ImGui::GetStyle().FramePadding.x;
-				auto width = availableWidth * 0.5f - padding;
-				ImVec2 buttonSize = {width, 0.0f};
+				auto width = (availableWidth - padding) * 0.5f;
+				ImVec2 buttonSize = { width, 0.0f };
 
 				if (ImGui::Button("Yes", buttonSize))
 				{
@@ -100,6 +103,8 @@ namespace gbc
 					*action = false;
 					closed = true;
 				}
+
+				ImGui::PopStyleVar();
 
 				ImGui::EndPopup();
 			}

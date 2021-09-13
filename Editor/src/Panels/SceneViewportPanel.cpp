@@ -10,16 +10,17 @@
 
 namespace gbc
 {
-	SceneViewportPanel::SceneViewportPanel(const std::string& name, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, bool& canUseGizmos, EditorCamera& editorCamera, const OpenSceneFunc& openScene)
-		: Panel(name), framebuffer(framebuffer), context(context), selectedEntity(selectedEntity), gizmoType(gizmoType), canUseGizmos(canUseGizmos), editorCamera(editorCamera), openScene(openScene) {}
+	SceneViewportPanel::SceneViewportPanel(const std::string& name, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, bool& canUseGizmos, bool& canRenderGizmos, EditorCamera& editorCamera, const OpenSceneFunc& openScene)
+		: Panel(name), framebuffer(framebuffer), context(context), selectedEntity(selectedEntity), gizmoType(gizmoType), canUseGizmos(canUseGizmos), canRenderGizmos(canRenderGizmos), editorCamera(editorCamera), openScene(openScene) {}
 
 	void SceneViewportPanel::OnImGuiRender()
 	{
 		if (enabled)
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+			ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
 			ImGui::Begin(name.c_str(), &enabled);
-			ImGui::PopStyleVar();
+			ImGui::PopStyleVar(2);
 			Update();
 
 			auto textureID = (void*)static_cast<size_t>(framebuffer->GetColorAttachment());
@@ -38,7 +39,7 @@ namespace gbc
 			}
 
 			// Gizmos
-			if (selectedEntity && gizmoType != -1)
+			if (selectedEntity && gizmoType != -1 && canRenderGizmos)
 			{
 				// TODO: orthographic projections
 				ImGuizmo::SetOrthographic(false);
@@ -66,7 +67,7 @@ namespace gbc
 				float snapValue = 0.5f;
 				if (gizmoType == ImGuizmo::OPERATION::ROTATE)
 					snapValue = 45.0f;
-				float snapValues[3] {snapValue, snapValue, snapValue};
+				float snapValues[3] { snapValue, snapValue, snapValue };
 
 				// Draw gizmos
 				if (ImGuizmo::Manipulate(&view[0].x, &projection[0].x, static_cast<ImGuizmo::OPERATION>(gizmoType),

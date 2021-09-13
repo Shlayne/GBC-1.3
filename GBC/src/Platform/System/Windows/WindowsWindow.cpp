@@ -139,7 +139,7 @@ namespace gbc
 
 	void WindowsWindow::SetIcon(const Ref<LocalTexture2D>& texture)
 	{
-		GLFWimage image{texture->GetWidth(), texture->GetHeight(), texture->GetData()};
+		GLFWimage image{ texture->GetWidth(), texture->GetHeight(), texture->GetData() };
 		glfwSetWindowIcon(window, 1, &image);
 	}
 

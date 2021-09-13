@@ -15,8 +15,8 @@ namespace gbc
 		currentCachedDirectory = cachedDirectories.begin();
 		RefreshDirectory(true);
 
-		directoryTexture = Texture::CreateRef(CreateRef<LocalTexture2D>("Resources/Icons/ContentBrowserPanel/DirectoryIcon.png", 4));
-		fileTexture = Texture::CreateRef(CreateRef<LocalTexture2D>("Resources/Icons/ContentBrowserPanel/FileIcon.png", 4));
+		directoryTexture = Texture2D::CreateRef(CreateRef<LocalTexture2D>("Resources/Icons/ContentBrowserPanel/DirectoryIcon.png", 4));
+		fileTexture = Texture2D::CreateRef(CreateRef<LocalTexture2D>("Resources/Icons/ContentBrowserPanel/FileIcon.png", 4));
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -163,7 +163,7 @@ namespace gbc
 				if (file.directory)
 					textureID = (void*)static_cast<size_t>(directoryTexture->GetRendererID());
 
-				ImGui::ImageButton(textureID, {thumbnailSize, thumbnailSize}, {0.0f, 1.0f}, {1.0f, 0.0f});
+				ImGui::ImageButton(textureID, { thumbnailSize, thumbnailSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f });
 
 				if (ImGui::BeginDragDropSource())
 				{

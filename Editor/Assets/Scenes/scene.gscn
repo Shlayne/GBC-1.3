@@ -5,11 +5,33 @@ Entities:
       Filepath: Assets\Models\cube.obj
     RenderableComponent:
       TintColor: [1, 1, 1, 1]
-      Texture: Assets\Textures\grass_side.png
+      Texture: Assets\Textures\dirt.png
       TilingFactor: 1
+      Specification:
+        MinFilter: 0
+        MagFilter: 1
+        WrapS: 0
+        WrapT: 0
     TagComponent:
       Tag: Cube
     TransformComponent:
       Translation: [0, 0, 0]
-      Rotation: [0.785398185, 0.610865235, 0.52359879]
+      Rotation: [0.575958669, 0.488692194, 0.52359879]
       Scale: [3.5, 3.5, 3.5]
+  - Entity: 0
+    CameraComponent:
+      Camera:
+        ProjectionType: 0
+        PerspectiveFOV: 1.57079637
+        PerspectiveNear: 0.00100000005
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [2, 0, 5]
+      Rotation: [0, 0.279252678, 0]
+      Scale: [1, 1, 1]

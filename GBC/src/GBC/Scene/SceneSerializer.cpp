@@ -117,15 +117,21 @@ namespace gbc
 		//SerializeComponent<NativeScriptComponent>(out, entity, "NativeScriptComponent", [&](NativeScriptComponent& component) {});
 		SerializeComponent<RenderableComponent>(out, entity, "RenderableComponent", [&out](RenderableComponent& component)
 		{
-			out << YAML::Key << "TintColor" << YAML::Value << component.color;
-
 			// TODO: reference texture by UUID
 			std::string filepath;
 			if (component.texture && component.texture->GetTexture())
 				filepath = component.texture->GetTexture()->GetFilepath();
-			out << YAML::Key << "Texture" << YAML::Value << filepath;
+			const auto& specs = component.texture->GetSpecification();
 
-			out << YAML::Key << "TilingFactor" << YAML::Value << component.tilingFactor;
+			out << YAML::Key << "TintColor" << YAML::Value << component.color
+				<< YAML::Key << "Texture" << YAML::Value << filepath
+				<< YAML::Key << "TilingFactor" << YAML::Value << component.tilingFactor
+				<< YAML::Key << "Specification" << YAML::BeginMap
+				<< YAML::Key << "MinFilter" << YAML::Value << static_cast<int>(specs.minFilter)
+				<< YAML::Key << "MagFilter" << YAML::Value << static_cast<int>(specs.magFilter)
+				<< YAML::Key << "WrapS" << YAML::Value << static_cast<int>(specs.wrapS)
+				<< YAML::Key << "WrapT" << YAML::Value << static_cast<int>(specs.wrapT)
+				<< YAML::EndMap;
 		});
 		SerializeComponent<TagComponent>(out, entity, "TagComponent", [&out](TagComponent& component)
 		{
@@ -237,15 +243,25 @@ namespace gbc
 						// TODO: this is not at all what should happen; I'm just doing this right now so
 						// I can save and load a scene and have it keep the texture.
 						// This requires an asset system that uses the path and/or the uuid of the texture
-						// to return the correct Ref<Texture>
+						// to return the correct Ref<Texture2D>
 						// something like this:
 						// AssetManager::GetAssetByUUID(renderableComponentNode["Texture"].as<uint64_t>())
 						// or maybe this:
-						// Texture::CreateRef(renderableComponentNode["Texture"].as<uint64_t>());
-						// and that would use the asset manager to get the correct Ref<Texture>
+						// Texture2D::CreateRef(renderableComponentNode["Texture"].as<uint64_t>());
+						// and that would use the asset manager to get the correct Ref<Texture2D>
+
 						renderableComponent.color = renderableComponentNode["TintColor"].as<glm::vec4>();
-						renderableComponent.texture = Texture::CreateRef(CreateRef<LocalTexture2D>(renderableComponentNode["Texture"].as<std::string>(), 4));
 						renderableComponent.tilingFactor = renderableComponentNode["TilingFactor"].as<float>();
+
+						auto specsNode = renderableComponentNode["Specification"];
+						TextureSpecification specs;
+						specs.texture = CreateRef<LocalTexture2D>(renderableComponentNode["Texture"].as<std::string>(), 4);
+						specs.minFilter = static_cast<TextureFilterMode>(specsNode["MinFilter"].as<int>());
+						specs.magFilter = static_cast<TextureFilterMode>(specsNode["MagFilter"].as<int>());
+						specs.wrapS = static_cast<TextureWrapMode>(specsNode["WrapS"].as<int>());
+						specs.wrapT = static_cast<TextureWrapMode>(specsNode["WrapT"].as<int>());
+						renderableComponent.texture = Texture2D::CreateRef(specs);
+
 					}
 
 					auto transformComponentNode = entityNode["TransformComponent"];

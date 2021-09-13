@@ -50,13 +50,12 @@ namespace gbc
 		FramebufferTextureSpecification() = default;
 		FramebufferTextureSpecification(FramebufferTextureFormat format)
 			: format(format) {}
-		FramebufferTextureSpecification(FramebufferTextureFormat format, FramebufferFilterMode minFilter, FramebufferFilterMode magFilter, FramebufferWrapMode wrapR, FramebufferWrapMode wrapS, FramebufferWrapMode wrapT)
-			: format(format), minFilter(minFilter), magFilter(magFilter), wrapR(wrapR), wrapS(wrapS), wrapT(wrapT) {}
+		FramebufferTextureSpecification(FramebufferTextureFormat format, FramebufferFilterMode minFilter, FramebufferFilterMode magFilter, FramebufferWrapMode wrapS, FramebufferWrapMode wrapT)
+			: format(format), minFilter(minFilter), magFilter(magFilter), wrapS(wrapS), wrapT(wrapT) {}
 
 		FramebufferTextureFormat format = FramebufferTextureFormat::None;
 		FramebufferFilterMode minFilter = FramebufferFilterMode::Linear;
-		FramebufferFilterMode magFilter = FramebufferFilterMode::Nearest;
-		FramebufferWrapMode wrapR = FramebufferWrapMode::ClampToEdge;
+		FramebufferFilterMode magFilter = FramebufferFilterMode::Linear;
 		FramebufferWrapMode wrapS = FramebufferWrapMode::ClampToEdge;
 		FramebufferWrapMode wrapT = FramebufferWrapMode::ClampToEdge;
 	};

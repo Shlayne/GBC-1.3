@@ -45,8 +45,8 @@ namespace gbc
 		size_t clickedFileIndex = 0;
 		bool deletingFile = false;
 
-		Ref<Texture> directoryTexture;
-		Ref<Texture> fileTexture;
+		Ref<Texture2D> directoryTexture;
+		Ref<Texture2D> fileTexture;
 
 		bool creatingDirectory = false;
 		bool renamingFile = false;

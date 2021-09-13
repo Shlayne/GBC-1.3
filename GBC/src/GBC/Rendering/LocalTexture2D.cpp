@@ -11,17 +11,17 @@ namespace gbc
 		return RendererAPI::GetAPI() == RendererAPI::API::OpenGL;
 	}
 
-	LocalTexture2D::LocalTexture2D(const std::string& filepath, int requiredChannels)
+	LocalTexture2D::LocalTexture2D(const std::string& filepath, int32_t requiredChannels)
 	{
 		ReadFile(filepath, requiredChannels);
 	}
 
-	LocalTexture2D::LocalTexture2D(const std::string& filepath, bool flipVertically, int requiredChannels)
+	LocalTexture2D::LocalTexture2D(const std::string& filepath, bool flipVertically, int32_t requiredChannels)
 	{
 		ReadFile(filepath, flipVertically, requiredChannels);
 	}
 
-	LocalTexture2D::LocalTexture2D(int width, int height, int channels)
+	LocalTexture2D::LocalTexture2D(int32_t width, int32_t height, int32_t channels)
 	{
 		Create(width, height, channels);
 	}
@@ -31,17 +31,51 @@ namespace gbc
 		Copy(texture);
 	}
 
+	LocalTexture2D::LocalTexture2D(LocalTexture2D&& texture) noexcept
+		: filepath(std::move(texture.filepath)), width(width), height(height), channels(channels), data(data)
+	{
+		width = 0;
+		height = 0;
+		channels = 0;
+		texture.data = nullptr;
+	}
+
+	LocalTexture2D& LocalTexture2D::operator=(const LocalTexture2D& texture)
+	{
+		if (this != &texture)
+			Copy(texture);
+		return *this;
+	}
+
+	LocalTexture2D& LocalTexture2D::operator=(LocalTexture2D&& texture) noexcept
+	{
+		if (this != &texture)
+		{
+			filepath = std::move(texture.filepath);
+			width = texture.width;
+			height = texture.height;
+			channels = texture.channels;
+			data = texture.data;
+
+			width = 0;
+			height = 0;
+			channels = 0;
+			texture.data = nullptr;
+		}
+		return *this;
+	}
+
 	LocalTexture2D::~LocalTexture2D()
 	{
 		delete[] data;
 	}
 
-	bool LocalTexture2D::ReadFile(const std::string& filepath, int requiredChannels)
+	bool LocalTexture2D::ReadFile(const std::string& filepath, int32_t requiredChannels)
 	{
 		return ReadFile(filepath, GetDefaultVerticalFlip(), requiredChannels);
 	}
 
-	bool LocalTexture2D::ReadFile(const std::string& filepath, bool flipVertically, int requiredChannels)
+	bool LocalTexture2D::ReadFile(const std::string& filepath, bool flipVertically, int32_t requiredChannels)
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -75,7 +109,7 @@ namespace gbc
 		return data != nullptr && stbi_write_png(filepath.c_str(), width, height, channels, data, 0) != 0;
 	}
 
-	void LocalTexture2D::Create(int width, int height, int channels)
+	void LocalTexture2D::Create(int32_t width, int32_t height, int32_t channels)
 	{
 		if (data != nullptr)
 		{
@@ -110,7 +144,7 @@ namespace gbc
 		return false;
 	}
 
-	bool LocalTexture2D::SetSubregion(const LocalTexture2D& texture, int positionX, int positionY)
+	bool LocalTexture2D::SetSubregion(const LocalTexture2D& texture, int32_t positionX, int32_t positionY)
 	{
 		if (channels == texture.channels && positionX + texture.width <= width && positionX >= 0 && positionY + texture.height <= height && positionY >= 0)
 		{
@@ -119,7 +153,7 @@ namespace gbc
 
 			unsigned char* source = texture.data;
 			unsigned char* destination = data + ((static_cast<size_t>(positionY) * width + positionX) * channels);
-			for (int y = 0; y < texture.height; y++, source += textureIncrement, destination += increment)
+			for (int32_t y = 0; y < texture.height; y++, source += textureIncrement, destination += increment)
 				memcpy_s(destination, textureIncrement, source, textureIncrement);
 			return true;
 		}

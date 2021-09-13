@@ -21,8 +21,8 @@ namespace gbc
 		Entity CreateEntity(const std::string& tag = std::string());
 		void DestroyEntity(Entity entity);
 
-		void OnCreate();
-		void OnDestroy();
+		void OnPlay();
+		void OnStop();
 		void OnUpdateRuntime(Timestep timestep);
 		void OnRenderRuntime();
 		void OnUpdateEditor(Timestep timestep);

@@ -17,7 +17,7 @@ namespace gbc
 		GBC_PROFILE_FUNCTION();
 
 		Window& window = Application::Get().GetWindow();
-		viewportSize = {window.GetWidth(), window.GetHeight()};
+		viewportSize = { window.GetWidth(), window.GetHeight() };
 	}
 
 	Scene::~Scene()
@@ -42,19 +42,19 @@ namespace gbc
 		registry.destroy(entity);
 	}
 
-	void Scene::OnCreate()
+	void Scene::OnPlay()
 	{
 		GBC_PROFILE_FUNCTION();
 
 		registry.view<NativeScriptComponent>().each([this](entt::entity entity, NativeScriptComponent& nsc)
 		{
 			nsc.instance = nsc.createFunc();
-			nsc.instance->entity = {entity, this};
+			nsc.instance->entity = { entity, this };
 			nsc.instance->OnCreate();
 		});
 	}
 
-	void Scene::OnDestroy()
+	void Scene::OnStop()
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -105,7 +105,8 @@ namespace gbc
 			for (auto entity : group)
 			{
 				auto [mesh, transform, renderable] = group.get<MeshComponent, TransformComponent, RenderableComponent>(entity);
-				BasicRenderer::Submit(mesh, transform, renderable);
+				if (mesh.mesh)
+					BasicRenderer::Submit(mesh, transform, renderable);
 			}
 
 			BasicRenderer::EndScene();
@@ -115,11 +116,6 @@ namespace gbc
 	void Scene::OnUpdateEditor(Timestep timestep)
 	{
 		GBC_PROFILE_FUNCTION();
-
-		registry.view<NativeScriptComponent>().each([timestep = timestep](entt::entity entity, NativeScriptComponent& nsc)
-		{
-			nsc.instance->OnUpdate(timestep);
-		});
 	}
 
 	void Scene::OnRenderEditor(const EditorCamera& camera)
@@ -132,7 +128,8 @@ namespace gbc
 		for (auto entity : group)
 		{
 			auto [mesh, transform, renderable] = group.get<MeshComponent, TransformComponent, RenderableComponent>(entity);
-			BasicRenderer::Submit(mesh, transform, renderable);
+			if (mesh.mesh)
+				BasicRenderer::Submit(mesh, transform, renderable);
 		}
 
 		BasicRenderer::EndScene();
@@ -163,7 +160,7 @@ namespace gbc
 		auto view = registry.view<CameraComponent>();
 		for (auto handle : view)
 			if (view.get<CameraComponent>(handle).primary)
-				return {handle, this};
+				return { handle, this };
 		return {};
 	}
 

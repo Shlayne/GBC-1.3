@@ -1,1 +1,15 @@
 * text=auto
+*.txt text
+*.md text
+*.natvis text
+*.c text
+*.h text
+*.cpp text
+*.hpp text
+*.inl text
+*.lua text
+*.bat text
+*.obj text
+
+*.exe binary
+*.png binary

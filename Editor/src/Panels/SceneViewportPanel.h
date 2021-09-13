@@ -14,7 +14,7 @@ namespace gbc
 	class SceneViewportPanel : public Panel
 	{
 	public:
-		SceneViewportPanel(const std::string& name, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, bool& canUseGizmos, EditorCamera& editorCamera, const OpenSceneFunc& openScene);
+		SceneViewportPanel(const std::string& name, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, bool& canUseGizmos, bool& canRenderGizmos, EditorCamera& editorCamera, const OpenSceneFunc& openScene);
 
 		virtual void OnImGuiRender() override;
 	private:
@@ -23,6 +23,7 @@ namespace gbc
 		Entity& selectedEntity;
 		int& gizmoType;
 		bool& canUseGizmos;
+		bool& canRenderGizmos;
 		EditorCamera& editorCamera;
 		OpenSceneFunc openScene;
 	};

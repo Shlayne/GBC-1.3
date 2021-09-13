@@ -10,8 +10,8 @@ namespace gbc
 {
 	struct WindowSpecifications
 	{
-		int width = 1280;
-		int height = 720;
+		int width = 1600;
+		int height = 900;
 		const char* title = "GBC v1.3";
 		bool vsync = true;
 		bool resizable = true;

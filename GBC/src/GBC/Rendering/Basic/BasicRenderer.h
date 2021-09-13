@@ -36,6 +36,6 @@ namespace gbc
 		static void EnsureBatch(uint32_t vertexCount, uint32_t indexCount, uint32_t texIndex = 0);
 		static void Reset();
 
-		static uint32_t GetTexIndex(const Ref<Texture>& texture);
+		static uint32_t GetTexIndex(const Ref<Texture2D>& texture);
 	};
 }

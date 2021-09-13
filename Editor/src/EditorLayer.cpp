@@ -19,6 +19,9 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
+		playButtonTexture = Texture2D::CreateRef(CreateRef<LocalTexture2D>("Resources/Icons/PlayButton.png"));
+		stopButtonTexture = Texture2D::CreateRef(CreateRef<LocalTexture2D>("Resources/Icons/StopButton.png"));
+
 		Window& window = Application::Get().GetWindow();
 
 		editorCamera = EditorCamera(90.0f, 0.001f, 1000.0f);
@@ -27,14 +30,13 @@ namespace gbc
 		FramebufferSpecification framebufferSpecification;
 		framebufferSpecification.width = window.GetWidth();
 		framebufferSpecification.height = window.GetHeight();
-		framebufferSpecification.attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth24Stencil8};
+		framebufferSpecification.attachments = { { FramebufferTextureFormat::RGBA8 }, { FramebufferTextureFormat::Depth24Stencil8 } };
 		framebuffer = Framebuffer::CreateRef(framebufferSpecification);
 
 		scene = CreateRef<Scene>();
-		scene->OnCreate();
 
 		// TODO: Figure out a different way to have Panels change values in EditorLayer
-		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer, scene, selectedEntity, gizmoType, canUseGizmos, editorCamera, GBC_BIND_FUNC(OpenSceneFile));
+		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer, scene, selectedEntity, gizmoType, canUseGizmos, canRenderGizmos, editorCamera, GBC_BIND_FUNC(OpenSceneFile));
 		sceneHierarchyPanel = AddPanel<SceneHierarchyPanel>("Scene Hierarchy", scene, selectedEntity);
 		scenePropertiesPanel = AddPanel<ScenePropertiesPanel>("Scene Properties", selectedEntity);
 		contentBrowserPanel = AddPanel<ContentBrowserPanel>("Content Browser");
@@ -52,8 +54,6 @@ namespace gbc
 	void EditorLayer::OnDetach()
 	{
 		GBC_PROFILE_FUNCTION();
-
-		scene->OnDestroy();
 
 		for (auto& [name, panel] : panels)
 			delete panel;
@@ -78,8 +78,16 @@ namespace gbc
 			scene->OnViewportResize(viewportSize.x, viewportSize.y);
 		}
 
-		editorCamera.OnUpdate(viewportHovered ? timestep : Timestep());
-		scene->OnUpdateEditor(timestep);
+		switch (sceneState)
+		{
+			case SceneState::Edit:
+				editorCamera.OnUpdate(viewportHovered ? timestep : Timestep());
+				scene->OnUpdateEditor(timestep);
+				break;
+			case SceneState::Play:
+				scene->OnUpdateRuntime(timestep);
+				break;
+		}
 	}
 
 	void EditorLayer::OnRender()
@@ -95,20 +103,35 @@ namespace gbc
 		Renderer::SetClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		Renderer::Clear();
 
-		scene->OnRenderEditor(editorCamera);
+		switch (sceneState)
+		{
+			case SceneState::Edit:
+				scene->OnRenderEditor(editorCamera);
+				break;
+			case SceneState::Play:
+				scene->OnRenderRuntime();
+				break;
+		}
 
 		framebuffer->Unbind();
 	}
 
-#if GBC_ENABLE_IMGUI
 	void EditorLayer::OnImGuiRender()
 	{
 		GBC_PROFILE_FUNCTION();
 
+		UI_Dockspace();
+
+		for (auto& [name, panel] : panels)
+			panel->OnImGuiRender();
+	}
+
+	void EditorLayer::UI_Dockspace()
+	{
 		ImGuiWindowFlags dockspaceFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking
 			| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
 			| ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-		
+
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->GetWorkPos());
 		ImGui::SetNextWindowSize(viewport->GetWorkSize());
@@ -118,15 +141,17 @@ namespace gbc
 		ImGui::Begin("Dockspace", nullptr, dockspaceFlags);
 		ImGui::PopStyleVar(2);
 
-		ImGuiStyle& style = ImGui::GetStyle();
-		ImVec2 prevWindowMinSize = style.WindowMinSize;
-		style.WindowMinSize.x = 200.0f;
-		// TODO: resizing main window with short panels at the bottom causes tables
-		// to have zero or negative size, which makes imgui assert
-		//style.WindowMinSize.y = 200.0f;
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(200.0f, ImGui::GetFontSize()));
 		ImGui::DockSpace(ImGui::GetID("Dockspace"));
-		style.WindowMinSize = prevWindowMinSize;
+		ImGui::PopStyleVar();
 
+		UI_MenuBar();
+		//UI_ToolBar();
+		ImGui::End();
+	}
+
+	void EditorLayer::UI_MenuBar()
+	{
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("File"))
@@ -166,14 +191,39 @@ namespace gbc
 				ImGui::EndMenu();
 			}
 
+			UI_ToolBar();
+
 			ImGui::EndMenuBar();
 		}
-		ImGui::End();
-
-		for (auto& [name, panel] : panels)
-			panel->OnImGuiRender();
 	}
-#endif
+
+	void EditorLayer::UI_ToolBar()
+	{
+		ImGuiStyle& style = ImGui::GetStyle();
+		auto& colors = style.Colors;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0.0f, 0.0f));
+
+		float buttonSize = ImGui::GetItemRectSize().y;
+		Ref<Texture2D> icon = sceneState == SceneState::Edit ? playButtonTexture : stopButtonTexture;
+
+		ImGui::SetCursorPos(ImVec2((ImGui::GetWindowContentRegionWidth() - buttonSize) * 0.5f, 2.0f));
+		if (ImGui::ImageButton((void*)(size_t)icon->GetRendererID(), { buttonSize, buttonSize }, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), 0))
+		{
+			switch (sceneState)
+			{
+				case SceneState::Edit:
+					OnScenePlay();
+					break;
+				case SceneState::Play:
+					OnSceneStop();
+					break;
+			}
+		}
+
+		ImGui::PopStyleVar(2);
+	}
 
 	void EditorLayer::OnEvent(Event& event)
 	{
@@ -289,6 +339,22 @@ namespace gbc
 	{
 		canUseGizmos = true;
 		return false;
+	}
+
+	void EditorLayer::OnScenePlay()
+	{
+		sceneState = SceneState::Play;
+		canRenderGizmos = false;
+		ImGuiHelper::SetScenePlayColors();
+		scene->OnPlay();
+	}
+
+	void EditorLayer::OnSceneStop()
+	{
+		sceneState = SceneState::Edit;
+		canRenderGizmos = true;
+		ImGuiHelper::SetSceneEditColors();
+		scene->OnStop();
 	}
 
 	void EditorLayer::ClearScene()

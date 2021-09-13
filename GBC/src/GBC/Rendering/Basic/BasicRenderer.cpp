@@ -29,7 +29,7 @@ namespace gbc
 		Vertex* localVertexBufferStart = nullptr;
 		Vertex* localVertexBufferCurrent = nullptr;
 
-		Ref<Texture>* textures = nullptr;
+		Ref<Texture2D>* textures = nullptr;
 		uint32_t textureCount = 1;
 
 		uint32_t maxVertices = 0;
@@ -50,7 +50,7 @@ namespace gbc
 
 		// Setup texture slots
 		data.maxTextures = static_cast<uint32_t>(RendererCapabilities::GetMaxTextureSlots());
-		data.textures = new Ref<Texture>[data.maxTextures];
+		data.textures = new Ref<Texture2D>[data.maxTextures];
 
 		// Setup local buffers
 		data.maxVertices = 900000; // TODO: query drivers
@@ -86,7 +86,7 @@ namespace gbc
 		// Setup white texture
 		Ref<LocalTexture2D> whiteTexture = CreateRef<LocalTexture2D>(1, 1, 4);
 		*(uint32_t*)whiteTexture->GetData() = 0xffffffff;
-		data.textures[0] = Texture::CreateRef(whiteTexture);
+		data.textures[0] = Texture2D::CreateRef(whiteTexture);
 	}
 
 	void BasicRenderer::Shutdown()
@@ -159,7 +159,7 @@ namespace gbc
 		data.textureCount = 1;
 	}
 
-	uint32_t BasicRenderer::GetTexIndex(const Ref<Texture>& texture)
+	uint32_t BasicRenderer::GetTexIndex(const Ref<Texture2D>& texture)
 	{
 		if (!texture || !texture->GetTexture() || !*texture->GetTexture())
 			return 0;
@@ -173,9 +173,6 @@ namespace gbc
 
 	void BasicRenderer::Submit(const Ref<BasicMesh>& mesh, const glm::mat4& transform, const RenderableComponent& renderableComponent)
 	{
-		if (!mesh)
-			return;
-
 		// Handle renderable
 		uint32_t vertexCount = static_cast<uint32_t>(mesh->vertices.size());
 		uint32_t indexCount = static_cast<uint32_t>(mesh->indices.size());

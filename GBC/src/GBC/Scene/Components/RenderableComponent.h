@@ -11,7 +11,7 @@ namespace gbc
 		RenderableComponent(const RenderableComponent&) noexcept = default;
 
 		glm::vec4 color{1.0f};
-		Ref<Texture> texture;
+		Ref<Texture2D> texture;
 		float tilingFactor = 1.0f;
 	};
 }

@@ -5,7 +5,20 @@
 
 namespace gbc
 {
-	Ref<Texture> Texture::CreateRef(const TextureSpecification& specification)
+	TextureSpecification& TextureSpecification::operator=(const TextureSpecification& specs)
+	{
+		if (this != &specs)
+		{
+			texture = specs.texture;
+			minFilter = specs.minFilter;
+			magFilter = specs.magFilter;
+			wrapS = specs.wrapS;
+			wrapT = specs.wrapT;
+		}
+		return *this;
+	}
+
+	Ref<Texture2D> Texture2D::CreateRef(const TextureSpecification& specification)
 	{
 		switch (RendererAPI::GetAPI())
 		{
@@ -17,7 +30,7 @@ namespace gbc
 		return nullptr;
 	}
 
-	Scope<Texture> Texture::CreateScope(const TextureSpecification& specification)
+	Scope<Texture2D> Texture2D::CreateScope(const TextureSpecification& specification)
 	{
 		switch (RendererAPI::GetAPI())
 		{
@@ -29,7 +42,7 @@ namespace gbc
 		return nullptr;
 	}
 
-	Ref<Texture> Texture::CreateRef(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
+	Ref<Texture2D> Texture2D::CreateRef(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
 	{
 		GBC_CORE_ASSERT(specification.texture == nullptr, "Texture Specification texture not nullptr when constructing with framebuffer!");
 
@@ -43,7 +56,7 @@ namespace gbc
 		return nullptr;
 	}
 
-	Scope<Texture> Texture::CreateScope(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
+	Scope<Texture2D> Texture2D::CreateScope(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
 	{
 		GBC_CORE_ASSERT(specification.texture == nullptr, "Texture Specification texture not nullptr when constructing with framebuffer!");
 

@@ -53,7 +53,7 @@ namespace gbc
 		virtual int GetMaxFramebufferColorAttachments() = 0;
 
 		enum class API { Headless, OpenGL, Vulkan, Direct3D, Metal };
-		inline static API GetAPI() { return api; }
+		static API GetAPI() { return api; }
 	private:
 		static API api;
 

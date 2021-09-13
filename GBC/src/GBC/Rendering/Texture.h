@@ -30,15 +30,17 @@ namespace gbc
 		TextureSpecification() = default;
 		TextureSpecification(const Ref<LocalTexture2D>& texture)
 			: texture(texture) {}
-		TextureSpecification(const Ref<LocalTexture2D>& texture, TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapR, TextureWrapMode wrapS, TextureWrapMode wrapT)
-			: texture(texture), minFilter(minFilter), magFilter(magFilter), wrapR(wrapR), wrapS(wrapS), wrapT(wrapT) {}
-		TextureSpecification(TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapR, TextureWrapMode wrapS, TextureWrapMode wrapT)
-			: minFilter(minFilter), magFilter(magFilter), wrapR(wrapR), wrapS(wrapS), wrapT(wrapT) {}
+		TextureSpecification(const Ref<LocalTexture2D>& texture, TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapS, TextureWrapMode wrapT)
+			: texture(texture), minFilter(minFilter), magFilter(magFilter), wrapS(wrapS), wrapT(wrapT) {}
+		TextureSpecification(TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapS, TextureWrapMode wrapT)
+			: minFilter(minFilter), magFilter(magFilter), wrapS(wrapS), wrapT(wrapT) {}
+		TextureSpecification(const TextureSpecification& specs)
+			: texture(specs.texture), minFilter(specs.minFilter), magFilter(specs.magFilter), wrapS(specs.wrapS), wrapT(specs.wrapT) {}
+		TextureSpecification& operator=(const TextureSpecification& specs);
 
 		Ref<LocalTexture2D> texture = nullptr;
 		TextureFilterMode minFilter = TextureFilterMode::Linear;
-		TextureFilterMode magFilter = TextureFilterMode::Nearest;
-		TextureWrapMode wrapR = TextureWrapMode::ClampToEdge;
+		TextureFilterMode magFilter = TextureFilterMode::Linear;
 		TextureWrapMode wrapS = TextureWrapMode::ClampToEdge;
 		TextureWrapMode wrapT = TextureWrapMode::ClampToEdge;
 	};
@@ -59,11 +61,15 @@ namespace gbc
 		// texture after the the local texture has updated.
 		// Only call if this was not constructed with a Framebuffer.
 		virtual void Update() = 0;
+	};
 
-		static Ref<Texture> CreateRef(const TextureSpecification& specification);
-		static Scope<Texture> CreateScope(const TextureSpecification& specification);
+	class Texture2D : public Texture
+	{
+	public:
+		static Ref<Texture2D> CreateRef(const TextureSpecification& specification);
+		static Scope<Texture2D> CreateScope(const TextureSpecification& specification);
 
-		static Ref<Texture> CreateRef(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
-		static Scope<Texture> CreateScope(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
+		static Ref<Texture2D> CreateRef(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
+		static Scope<Texture2D> CreateScope(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
 	};
 }

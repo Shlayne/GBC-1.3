@@ -19,58 +19,71 @@ namespace gbc
 		io.FontDefault = io.Fonts->AddFontFromFileTTF("resources/fonts/OpenSans/OpenSans-Regular.ttf", 18.0f);
 		data.boldFont = io.Fonts->AddFontFromFileTTF("resources/fonts/OpenSans/OpenSans-Bold.ttf", 18.0f);
 
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard
-			| ImGuiConfigFlags_DockingEnable
-			| ImGuiConfigFlags_ViewportsEnable
-			| ImGuiConfigFlags_NavEnableGamepad;
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable
+			| ImGuiConfigFlags_ViewportsEnable;
 		io.ConfigWindowsMoveFromTitleBarOnly = true;
 
 		style.WindowRounding = 0.0f;
-		style.FramePadding = {4.0f, 4.0f};
-		style.WindowPadding = {4.0f, 4.0f};
+		style.FramePadding = { 4.0f, 4.0f };
+		style.WindowPadding = { 4.0f, 4.0f };
 
-		SetDarkthemeColors();
+		SetSceneEditColors();
 	}
 
-	void ImGuiHelper::SetDarkthemeColors()
+	void ImGuiHelper::SetScenePlayColors()
 	{
-		// Colors
+		auto& colors = ImGui::GetStyle().Colors;
+
+		SetSceneEditColors();
+
+		// TODO: this could most definitely use some actual hardcoded colors and not just a tint
+		for (int i = 0; i < ImGuiCol_COUNT; i++)
+			colors[i] = ImVec4(colors[i].x * 0.8f, colors[i].y * 0.8f, colors[i].z * 1.0f, colors[i].w);
+	}
+
+	void ImGuiHelper::SetSceneEditColors()
+	{
+		auto& colors = ImGui::GetStyle().Colors;
+
+		// Start with dark theme
 		ImGui::StyleColorsDark();
 
-		auto& colors = ImGui::GetStyle().Colors;
-		colors[ImGuiCol_WindowBg] = {0.1f, 0.105f, 0.11f, 1.0f};
-
-		// Headers
-		colors[ImGuiCol_Header] = {0.2f, 0.205f, 0.21f, 1.0f};
-		colors[ImGuiCol_HeaderHovered] = {0.3f, 0.305f, 0.31f, 1.0f};
-		colors[ImGuiCol_HeaderActive] = {0.15f, 0.155f, 0.16f, 1.0f};
-
-		// Buttons
-		colors[ImGuiCol_Button] = {0.2f, 0.205f, 0.21f, 1.0f};
-		colors[ImGuiCol_ButtonHovered] = {0.3f, 0.305f, 0.31f, 1.0f};
-		colors[ImGuiCol_ButtonActive] = {0.15f, 0.155f, 0.16f, 1.0f};
-		colors[ImGuiCol_CheckMark] = {0.4f, 0.405f, 0.41f, 1.0f};
+		// Window
+		colors[ImGuiCol_WindowBg]           = { 0.100f, 0.105f, 0.110f, 1.000f };
 
 		// Frame Background
-		colors[ImGuiCol_FrameBg] = {0.165f, 0.170f, 0.175f, 1.0f};
-		colors[ImGuiCol_FrameBgHovered] = {0.2f, 0.205f, 0.21f, 1.0f};
-		colors[ImGuiCol_FrameBgActive] = {0.15f, 0.155f, 0.16f, 1.0f};
-
-		// Tabs
-		colors[ImGuiCol_Tab] = {0.15f, 0.155f, 0.16f, 1.0f};
-		colors[ImGuiCol_TabHovered] = {0.38f, 0.385f, 0.39f, 1.0f};
-		colors[ImGuiCol_TabActive] = {0.28f, 0.285f, 0.29f, 1.0f};
-		colors[ImGuiCol_TabUnfocused] = {0.15f, 0.155f, 0.16f, 1.0f};
-		colors[ImGuiCol_TabUnfocusedActive] = {0.2f, 0.205f, 0.21f, 1.0f};
+		colors[ImGuiCol_FrameBg]            = { 0.165f, 0.170f, 0.175f, 1.000f };
+		colors[ImGuiCol_FrameBgHovered]     = { 0.200f, 0.205f, 0.210f, 1.000f };
+		colors[ImGuiCol_FrameBgActive]      = { 0.150f, 0.155f, 0.160f, 1.000f };
 
 		// Title Background
-		colors[ImGuiCol_TitleBg] = {0.15f, 0.155f, 0.16f, 1.0f};
-		colors[ImGuiCol_TitleBgActive] = {0.15f, 0.155f, 0.16f, 1.0f};
-		colors[ImGuiCol_TitleBgCollapsed] = {0.15f, 0.155f, 0.16f, 1.0f};
+		colors[ImGuiCol_TitleBg]            = { 0.150f, 0.155f, 0.160f, 1.000f };
+		colors[ImGuiCol_TitleBgActive]      = { 0.150f, 0.155f, 0.160f, 1.000f };
+		colors[ImGuiCol_TitleBgCollapsed]   = { 0.150f, 0.155f, 0.160f, 1.000f };
+		
+		// Checkbox
+		colors[ImGuiCol_CheckMark]          = { 0.400f, 0.405f, 0.410f, 1.000f };
 
 		// Slider
-		colors[ImGuiCol_SliderGrab] = {0.338f, 0.338f, 0.338f, 1.0f};
-		colors[ImGuiCol_SliderGrabActive] = {0.338f, 0.338f, 0.338f, 1.0f};
+		colors[ImGuiCol_SliderGrab]         = { 0.338f, 0.338f, 0.338f, 1.000f };
+		colors[ImGuiCol_SliderGrabActive]   = { 0.338f, 0.338f, 0.338f, 1.000f };
+
+		// Buttons
+		colors[ImGuiCol_Button]             = { 0.200f, 0.205f, 0.210f, 1.000f };
+		colors[ImGuiCol_ButtonHovered]      = { 0.300f, 0.305f, 0.310f, 1.000f };
+		colors[ImGuiCol_ButtonActive]       = { 0.150f, 0.155f, 0.160f, 1.000f };
+
+		// Headers
+		colors[ImGuiCol_Header]             = { 0.200f, 0.205f, 0.210f, 1.000f };
+		colors[ImGuiCol_HeaderHovered]      = { 0.300f, 0.305f, 0.310f, 1.000f };
+		colors[ImGuiCol_HeaderActive]       = { 0.150f, 0.155f, 0.160f, 1.000f };
+
+		// Tabs
+		colors[ImGuiCol_Tab]                = { 0.150f, 0.155f, 0.160f, 1.000f };
+		colors[ImGuiCol_TabHovered]         = { 0.380f, 0.385f, 0.390f, 1.000f };
+		colors[ImGuiCol_TabActive]          = { 0.280f, 0.285f, 0.290f, 1.000f };
+		colors[ImGuiCol_TabUnfocused]       = { 0.150f, 0.155f, 0.160f, 1.000f };
+		colors[ImGuiCol_TabUnfocusedActive] = { 0.200f, 0.205f, 0.210f, 1.000f };
 	}
 
 	bool ImGuiHelper::BeginTable(const char* id, int columnCount, ImGuiTableFlags tableFlags)
@@ -322,7 +335,7 @@ namespace gbc
 		ImGui::PushItemWidth(-FLT_MIN);
 
 		static constexpr size_t bufferSize = 256;
-		char buffer[bufferSize]{0};
+		char buffer[bufferSize]{ 0 };
 		GBC_CORE_ASSERT(value->size() < bufferSize);
 		strcpy_s(buffer, sizeof(buffer), value->c_str());
 
@@ -355,8 +368,8 @@ namespace gbc
 	{
 		bool changed = false;
 
-		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, {0.0f, 0.5f});
-		changed |= ImGui::Button(buttonText, {ImGui::GetContentRegionAvail().x, 0.0f});
+		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, { 0.0f, 0.5f });
+		changed |= ImGui::Button(buttonText, { ImGui::GetContentRegionAvail().x, 0.0f });
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(dragDropType))

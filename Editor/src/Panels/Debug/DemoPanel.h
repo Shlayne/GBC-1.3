@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Panels/Panel.h"
-
+#if GBC_CONFIG_DEBUG
 namespace gbc
 {
 	class DemoPanel : public Panel
@@ -12,3 +12,4 @@ namespace gbc
 		virtual void OnImGuiRender() override;
 	};
 }
+#endif

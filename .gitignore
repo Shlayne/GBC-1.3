@@ -11,6 +11,6 @@ Editor/ProfileSessions/**
 # ImGui
 **/imgui.ini
 
-# Binaries
+# Output Binaries
 bin/**
 bin-int/**

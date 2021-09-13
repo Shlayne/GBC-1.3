@@ -23,7 +23,7 @@ namespace gbc
 		inline bool IsFocused() const noexcept { return focused; }
 		inline bool IsHovered() const noexcept { return hovered; }
 
-		inline bool HasSizeChanged() const noexcept { return sizeChanged && size.x && size.y; }
+		inline bool HasSizeChanged() const noexcept { return sizeChanged && size.x > 0 && size.y > 0; }
 		inline const glm::ivec2& GetSize() const noexcept { return size; }
 		inline const glm::vec2& GetPosition() const noexcept { return position; }
 

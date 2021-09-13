@@ -17,9 +17,7 @@ namespace gbc
 		virtual void OnDetach() override;
 		virtual void OnUpdate(Timestep timestep) override;
 		virtual void OnRender() override;
-	#if GBC_ENABLE_IMGUI
 		virtual void OnImGuiRender() override;
-	#endif
 		virtual void OnEvent(Event& event) override;
 	private:
 		bool OnWindowCloseEvent(WindowCloseEvent& event);
@@ -27,6 +25,9 @@ namespace gbc
 		bool OnMouseButtonPressEvent(MouseButtonPressEvent& event);
 		bool OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& event);
 
+		// Scene
+		void OnScenePlay();
+		void OnSceneStop();
 		void ClearScene();
 
 		void NewScene();
@@ -37,6 +38,12 @@ namespace gbc
 
 		std::string currentFilepath;
 		bool hasUnsavedChanges = false;
+
+		enum class SceneState : uint8_t
+		{
+			Edit = 0, Play = 1
+		};
+		SceneState sceneState = SceneState::Edit;
 		
 		EditorCamera editorCamera;
 		Ref<Scene> scene;
@@ -45,8 +52,13 @@ namespace gbc
 		Entity selectedEntity;
 		int gizmoType = -1;
 		bool canUseGizmos = true;
+		bool canRenderGizmos = true;
 
 		// Panels
+		void UI_Dockspace();
+		void UI_MenuBar();
+		void UI_ToolBar();
+
 		template<typename T, typename... Args>
 		T* AddPanel(const std::string& name, Args&&... args)
 		{
@@ -60,14 +72,9 @@ namespace gbc
 		SceneHierarchyPanel* sceneHierarchyPanel = nullptr;
 		ScenePropertiesPanel* scenePropertiesPanel = nullptr;
 		ContentBrowserPanel* contentBrowserPanel = nullptr;
+
+		// Resources
+		Ref<Texture2D> playButtonTexture;
+		Ref<Texture2D> stopButtonTexture;
 	};
 }
-
-// TODO:
-// 1) Scene base class, then EditorScene and RuntimeScene inherit from Scene
-// 
-// BUGS:
-// 1) resizing main window with short panels at the bottom causes tables
-// to have zero or negative size, which makes imgui assert
-
-// Waiting for episode 100 https://www.youtube.com/watch?v=CU9v3uUgRaE&list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT&index=99

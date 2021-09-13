@@ -1,4 +1,5 @@
 #include "DemoPanel.h"
+#if GBC_CONFIG_DEBUG
 #include "imgui/imgui.h"
 
 namespace gbc
@@ -15,3 +16,4 @@ namespace gbc
 			ImGui::ShowDemoWindow(&enabled);
 	}
 }
+#endif

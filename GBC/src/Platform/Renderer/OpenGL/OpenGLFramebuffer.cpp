@@ -68,7 +68,6 @@ namespace gbc
 			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, nullptr);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GetOpenGLFilterMode(textureSpecification.minFilter));
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GetOpenGLFilterMode(textureSpecification.magFilter));
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GetOpenGLWrapMode(textureSpecification.wrapR));
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GetOpenGLWrapMode(textureSpecification.wrapS));
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GetOpenGLWrapMode(textureSpecification.wrapT));
 		}
@@ -88,7 +87,6 @@ namespace gbc
 			glTexStorage2D(GL_TEXTURE_2D, 1, format, width, height);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GetOpenGLFilterMode(textureSpecification.minFilter));
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GetOpenGLFilterMode(textureSpecification.magFilter));
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GetOpenGLWrapMode(textureSpecification.wrapR));
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GetOpenGLWrapMode(textureSpecification.wrapS));
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GetOpenGLWrapMode(textureSpecification.wrapT));
 		}
