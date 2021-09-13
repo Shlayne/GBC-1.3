@@ -9,7 +9,7 @@ namespace gbc
 	const std::filesystem::path projectAssetDirectory = "Assets";
 
 	ContentBrowserPanel::ContentBrowserPanel(const std::string& name)
-		: Panel(name), assetDirectory{projectAssetDirectory}
+		: Panel(name), assetDirectory{ projectAssetDirectory }
 	{
 		cachedDirectories.push_back(projectAssetDirectory);
 		currentCachedDirectory = cachedDirectories.begin();
@@ -29,7 +29,7 @@ namespace gbc
 			if (ImGui::BeginTable("ContentBrowserTable1", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV))
 			{
 				ImGui::TableNextColumn();
-				ImGui::BeginChild("ContentBrowserHierarchy", {0, 0}, false, ImGuiWindowFlags_HorizontalScrollbar);
+				ImGui::BeginChild("ContentBrowserHierarchy", { 0.0f, 0.0f }, false, ImGuiWindowFlags_HorizontalScrollbar);
 				DrawHierarchy(assetDirectory);
 				ImGui::EndChild();
 
@@ -81,7 +81,7 @@ namespace gbc
 	void ContentBrowserPanel::DrawBrowser()
 	{
 		ImVec2 spacing = ImGui::GetStyle().ItemSpacing;
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {spacing.x / 2.0f, spacing.y});
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { spacing.x / 2.0f, spacing.y });
 
 		if (ImGui::Button("<") || (ImGui::IsMouseReleased(3) && ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows)))
 			BackwardDirectory();
@@ -105,8 +105,8 @@ namespace gbc
 		float thumbnailSize = 96.0f;
 		int columnCount = std::max(1, static_cast<int>(ImGui::GetContentRegionAvail().x / (thumbnailSize + 2.0f * padding)));
 
-		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, {padding, padding});
-		ImGui::PushStyleColor(ImGuiCol_Button, {0.0f, 0.0f, 0.0f, 0.0f});
+		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { padding, padding });
+		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 
 		if (ImGui::BeginTable("ContentBrowserExplorer", columnCount, ImGuiTableFlags_SameWidths))
 		{
@@ -120,7 +120,7 @@ namespace gbc
 				ImGui::PushID(-1);
 
 				auto textureID = (void*)static_cast<size_t>(directoryTexture->GetRendererID());
-				ImGui::ImageButton(textureID, {thumbnailSize, thumbnailSize}, {0.0f, 1.0f}, {1.0f, 0.0f});
+				ImGui::ImageButton(textureID, { thumbnailSize, thumbnailSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f });
 
 				if (ImGuiHelper::InputText(fileNameBuffer))
 				{
@@ -136,7 +136,11 @@ namespace gbc
 						deferredChange = true;
 						directoriesAltered = true;
 					}
+#if GBC_ENABLE_LOGGING
 					catch (std::filesystem::filesystem_error& error)
+#else
+					catch (...)
+#endif
 					{
 						GBC_ERROR("Failed to create directory: {0}", error.what());
 					}
@@ -216,7 +220,11 @@ namespace gbc
 							deferredChange = true;
 							directoriesAltered = file.directory;
 						}
+#if GBC_ENABLE_LOGGING
 						catch (std::filesystem::filesystem_error& error)
+#else
+						catch (...)
+#endif
 						{
 							GBC_ERROR("Failed to rename {0}: {1}", file.directory ? "directory" : "file", error.what());
 						}
@@ -243,7 +251,11 @@ namespace gbc
 								deferredChange = true;
 								directoriesAltered = file.directory;
 							}
+#if GBC_ENABLE_LOGGING
 							catch (std::filesystem::filesystem_error& error)
+#else
+							catch (...)
+#endif
 							{
 								GBC_ERROR("Failed to remove {0}: {1}", file.directory ? "directory" : "file", error.what());
 							}

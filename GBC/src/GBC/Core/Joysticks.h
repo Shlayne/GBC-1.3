@@ -71,7 +71,7 @@ namespace gbc
 		Count
 	};
 
-	enum JoystickHatState : uint8_t
+	enum class JoystickHatState : uint8_t
 	{
 		Centered  = 0,
 		Up        = 1,

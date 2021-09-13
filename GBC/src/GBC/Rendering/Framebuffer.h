@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vector>
+#include "GBC/Core/Core.h"
+
 namespace gbc
 {
 	enum class FramebufferTextureFormat

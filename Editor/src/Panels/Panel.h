@@ -34,8 +34,8 @@ namespace gbc
 		bool focused = false;
 		bool hovered = false;
 		bool sizeChanged = false;
-		glm::ivec2 size{1};
-		glm::vec2 position{0.0f};
+		glm::ivec2 size{ 1 };
+		glm::vec2 position{ 0.0f };
 	};
 }
 #endif

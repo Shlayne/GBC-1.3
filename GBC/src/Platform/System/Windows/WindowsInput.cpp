@@ -1,6 +1,6 @@
 #include "gbcpch.h"
 #include "GBC/Core/Input.h"
-#include "glfw/glfw3.h"
+#include <glfw/glfw3.h>
 #include <array>
 #include "GBC/Core/Application.h"
 
@@ -177,7 +177,7 @@ namespace gbc
 		double cursorX, cursorY;
 		glfwGetWindowPos(window, &windowX, &windowY);
 		glfwGetCursorPos(window, &cursorX, &cursorY);
-		return {static_cast<float>(windowX + cursorX), static_cast<float>(windowY + cursorY)};
+		return { static_cast<float>(windowX + cursorX), static_cast<float>(windowY + cursorY) };
 	}
 
 	glm::vec2 Input::GetRelativeMousePosition(void* nativeWindow)
@@ -185,7 +185,7 @@ namespace gbc
 		GLFWwindow* window = static_cast<GLFWwindow*>(nativeWindow);
 		double cursorX, cursorY;
 		glfwGetCursorPos(window, &cursorX, &cursorY);
-		return {static_cast<float>(cursorX), static_cast<float>(cursorY)};
+		return { static_cast<float>(cursorX), static_cast<float>(cursorY) };
 	}
 
 	// Joystick

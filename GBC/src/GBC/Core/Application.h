@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Window.h"
-#include "GBC/ImGui/ImGuiWrapper.h"
+#include "GBC/Core/LayerStack.h"
+#include "GBC/Core/Window.h"
 #include "GBC/Events/DeviceEvents.h"
 #include "GBC/Events/WindowEvents.h"
-#include "LayerStack.h"
+#include "GBC/ImGui/ImGuiWrapper.h"
 
 namespace gbc
 {
@@ -34,7 +34,7 @@ namespace gbc
 	private:
 		void OnEvent(Event& event);
 		bool OnWindowCloseEvent(WindowCloseEvent& event);
-		bool OnWindowResizeEvent(WindowResizeEvent& event);
+		bool OnWindowFramebufferResizeEvent(WindowFramebufferResizeEvent& event);
 		bool OnWindowFocusEvent(WindowFocusEvent& event);
 		bool OnWindowMinimizeEvent(WindowMinimizeEvent& event);
 

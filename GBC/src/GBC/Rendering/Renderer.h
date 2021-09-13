@@ -1,7 +1,7 @@
 #pragma once
 
-#include "VertexArray.h"
-#include "RendererAPI.h"
+#include "GBC/Rendering/RendererAPI.h"
+#include "GBC/Rendering/VertexArray.h"
 
 namespace gbc
 {

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "glm/glm.hpp"
-#include "GBC/Events/KeyEvents.h"
-#include "GBC/Events/MouseEvents.h"
+#include <glm/glm.hpp>
+#include "GBC/Core/Joysticks.h"
 #include "GBC/Core/Keycodes.h"
 #include "GBC/Core/MouseButtons.h"
-#include "GBC/Core/Joysticks.h"
 #include "GBC/Core/Window.h"
+#include "GBC/Events/KeyEvents.h"
+#include "GBC/Events/MouseEvents.h"
 
 namespace gbc
 {

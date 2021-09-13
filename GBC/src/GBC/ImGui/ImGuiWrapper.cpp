@@ -1,13 +1,13 @@
 #include "gbcpch.h"
 #if GBC_ENABLE_IMGUI
 #include "ImGuiWrapper.h"
-#include "ImGuiHelper.h"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
-#include "imguizmo/ImGuizmo.h"
-#include "glfw/glfw3.h"
+#include <glfw/glfw3.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+#include <imguizmo/ImGuizmo.h>
 #include "GBC/Core/Application.h"
+#include "GBC/ImGui/ImGuiHelper.h"
 
 namespace gbc
 {

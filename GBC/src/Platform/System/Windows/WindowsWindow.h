@@ -15,8 +15,8 @@ namespace gbc
 		virtual void PollEvents() override;
 		virtual void SwapBuffers() override;
 
-		virtual int GetWidth() const override { return state.current.width; }
-		virtual int GetHeight() const override { return state.current.height; }
+		virtual int32_t GetWidth() const override { return state.framebufferSize.x; }
+		virtual int32_t GetHeight() const override { return state.framebufferSize.y; }
 
 		virtual bool IsFocused() const override { return state.focused; };
 		virtual bool ContainsMouse() const override { return state.containsMouse; }
@@ -52,11 +52,10 @@ namespace gbc
 		{
 			struct
 			{
-				int x = 0;
-				int y = 0;
-				int width = 0;
-				int height = 0;
+				glm::ivec2 position{ 0 };
+				glm::ivec2 size{ 0 };
 			} current, preFullscreen;
+			glm::ivec2 framebufferSize{ 0 };
 
 			const char* title = nullptr;
 

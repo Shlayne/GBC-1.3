@@ -16,7 +16,7 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		glm::ivec2 textureSize = glm::ivec2(texture->GetWidth(), texture->GetHeight());
+		glm::ivec2 textureSize{ texture->GetWidth(), texture->GetHeight() };
 
 		while ((textureSize.x < atlasTextureSize.x || textureSize.y < atlasTextureSize.y) ||
 			(atlasTextureSize.x < maxTextureSize.x || atlasTextureSize.y < maxTextureSize.y))
@@ -28,7 +28,7 @@ namespace gbc
 				atlasTextureSize << 1; // Keep the texture size a power of 2
 		}
 
-		// If this happens, the texture can not fit on the GPU, this is very bad
+		// If this happens, the texture can not fit on the GPU, this is very bad, but also very unlikely
 		return glm::ivec2(-1);
 	}
 
@@ -76,13 +76,13 @@ namespace gbc
 				// Get the right position and size of the opening and empty space
 				if (splitVertically)
 				{
-					node->left = new TextureNode(node->position, {node->size.x, size.y});
-					node->right = new TextureNode({node->position.x, node->position.y + size.y}, {node->size.x, node->size.y - size.y});
+					node->left = new TextureNode(node->position, { node->size.x, size.y });
+					node->right = new TextureNode({ node->position.x, node->position.y + size.y }, { node->size.x, node->size.y - size.y });
 				}
 				else
 				{
-					node->left = new TextureNode(node->position, {size.x, node->size.y});
-					node->right = new TextureNode({node->position.x + size.x, node->position.y}, {node->size.x - size.x, node->size.y});
+					node->left = new TextureNode(node->position, { size.x, node->size.y });
+					node->right = new TextureNode({ node->position.x + size.x, node->position.y }, { node->size.x - size.x, node->size.y });
 				}
 
 				return AddTexture(node->left, texture, size);

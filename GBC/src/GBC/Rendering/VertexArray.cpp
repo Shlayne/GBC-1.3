@@ -1,6 +1,6 @@
 #include "gbcpch.h"
 #include "VertexArray.h"
-#include "RendererAPI.h"
+#include "GBC/Rendering/RendererAPI.h"
 #include "Platform/Renderer/OpenGL/OpenGLVertexArray.h"
 
 namespace gbc

@@ -34,7 +34,7 @@ namespace gbc
 		virtual void SetFloat2 (const std::string& name, const glm::vec2&   value) override;
 		virtual void SetFloat3 (const std::string& name, const glm::vec3&   value) override;
 		virtual void SetFloat4 (const std::string& name, const glm::vec4&   value) override;
-		virtual void SetInt    (const std::string& name, int                value) override;
+		virtual void SetInt    (const std::string& name, int32_t            value) override;
 		virtual void SetInt2   (const std::string& name, const glm::ivec2&  value) override;
 		virtual void SetInt3   (const std::string& name, const glm::ivec3&  value) override;
 		virtual void SetInt4   (const std::string& name, const glm::ivec4&  value) override;
@@ -55,16 +55,16 @@ namespace gbc
 		virtual void SetMat4x2 (const std::string& name, const glm::mat4x2& value) override;
 		virtual void SetMat4x3 (const std::string& name, const glm::mat4x3& value) override;
 		virtual void SetMat4   (const std::string& name, const glm::mat4&   value) override;
-		virtual void SetInts   (const std::string& name, const int*          values, int count) override;
-		virtual void SetUInts  (const std::string& name, const uint32_t*     values, int count) override;
+		virtual void SetInts   (const std::string& name, const int32_t*     values, int count) override;
+		virtual void SetUInts  (const std::string& name, const uint32_t*    values, int count) override;
 	private:
 		std::vector<ShaderFile> ParseFile(const std::string& filepath);
 		void CreateProgram(const std::vector<ShaderFile>& shaders);
 		RendererID CompileShader(const ShaderFile& shader);
 		bool LinkAndValidate();
-		int GetUniformLocation(const std::string& name);
+		int32_t GetUniformLocation(const std::string& name);
 
 		RendererID rendererID = 0;
-		std::unordered_map<std::string, int> uniformLocations;
+		std::unordered_map<std::string, int32_t> uniformLocations;
 	};
 }

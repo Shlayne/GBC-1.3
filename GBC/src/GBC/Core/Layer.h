@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Timestep.h"
+#include "GBC/Core/Core.h"
+#include "GBC/Core/Timestep.h"
 #include "GBC/Events/Event.h"
 
 namespace gbc

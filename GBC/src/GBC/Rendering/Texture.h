@@ -1,7 +1,7 @@
 #pragma once
 
-#include "LocalTexture2D.h"
-#include "Framebuffer.h"
+#include "GBC/Rendering/Framebuffer.h"
+#include "GBC/Rendering/LocalTexture2D.h"
 
 namespace gbc
 {

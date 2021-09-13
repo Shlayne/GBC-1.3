@@ -1,7 +1,7 @@
 #pragma once
 
-#include "BasicVertex.h"
 #include "GBC/IO/OBJLoader.h"
+#include "GBC/Rendering/Basic/BasicVertex.h"
 
 namespace gbc
 {

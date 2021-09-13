@@ -137,16 +137,15 @@ namespace gbc
 		ImGui::SetNextWindowSize(viewport->GetWorkSize());
 		ImGui::SetNextWindowViewport(viewport->ID);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGui::Begin("Dockspace", nullptr, dockspaceFlags);
 		ImGui::PopStyleVar(2);
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(200.0f, ImGui::GetFontSize()));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, { 200.0f, ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f });
 		ImGui::DockSpace(ImGui::GetID("Dockspace"));
 		ImGui::PopStyleVar();
 
 		UI_MenuBar();
-		//UI_ToolBar();
 		ImGui::End();
 	}
 
@@ -179,13 +178,15 @@ namespace gbc
 				if (ImGui::MenuItem(window.IsFullscreen() ? "Windowed" : "Fullscreen"))
 					window.ToggleFullscreen();
 
-				ImGui::Separator();
-
-				for (auto& [name, panel] : panels)
+				if (ImGui::BeginMenu("Panels"))
 				{
-					bool enabled = panel->IsEnabled();
-					if (ImGui::MenuItem(name.c_str(), nullptr, &enabled))
-						panel->ToggleEnabled();
+					for (auto& [name, panel] : panels)
+					{
+						bool enabled = panel->IsEnabled();
+						if (ImGui::MenuItem(name.c_str(), nullptr, &enabled))
+							panel->ToggleEnabled();
+					}
+					ImGui::EndMenu();
 				}
 
 				ImGui::EndMenu();
@@ -202,14 +203,14 @@ namespace gbc
 		ImGuiStyle& style = ImGui::GetStyle();
 		auto& colors = style.Colors;
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2(0.0f, 0.0f));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, { 0.0f, 0.0f });
 
 		float buttonSize = ImGui::GetItemRectSize().y;
 		Ref<Texture2D> icon = sceneState == SceneState::Edit ? playButtonTexture : stopButtonTexture;
 
 		ImGui::SetCursorPos(ImVec2((ImGui::GetWindowContentRegionWidth() - buttonSize) * 0.5f, 2.0f));
-		if (ImGui::ImageButton((void*)(size_t)icon->GetRendererID(), { buttonSize, buttonSize }, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), 0))
+		if (ImGui::ImageButton((void*)(size_t)icon->GetRendererID(), { buttonSize, buttonSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
 		{
 			switch (sceneState)
 			{
@@ -270,36 +271,57 @@ namespace gbc
 			// Scene
 			case Keycode::N:
 				if (control)
+				{
 					NewScene();
+					return true;
+				}
 				break;
 			case Keycode::O:
 				if (control)
+				{
 					OpenScene();
-				break;
+					return true;
+				}
+				return true;
 			case Keycode::S:
 				if (control || controlShift)
 				{
-					if (shiftPressed) SaveAsScene();
-					else SaveScene();
+					if (shiftPressed)
+						SaveAsScene();
+					else
+						SaveScene();
+					return true;
 				}
 				break;
 
 			// Gizmos
 			case Keycode::Q:
 				if (sceneViewportPanel->IsFocused())
+				{
 					gizmoType = -1;
+					return true;
+				}
 				break;
 			case Keycode::W:
 				if (sceneViewportPanel->IsFocused())
+				{
 					gizmoType = ImGuizmo::OPERATION::TRANSLATE;
+					return true;
+				}
 				break;
 			case Keycode::E:
 				if (sceneViewportPanel->IsFocused())
+				{
 					gizmoType = ImGuizmo::OPERATION::ROTATE;
+					return true;
+				}
 				break;
 			case Keycode::R:
 				if (sceneViewportPanel->IsFocused())
+				{
 					gizmoType = ImGuizmo::OPERATION::SCALE;
+					return true;
+				}
 				break;
 		}
 
@@ -427,8 +449,7 @@ namespace gbc
 		if (filepath)
 		{
 			// Add extension to extensionless path
-			size_t index = filepath->find_last_of(".gscn");
-			if (index != filepath->size() - 1)
+			if (!filepath->ends_with(".gscn"))
 				*filepath += ".gscn";
 
 			currentFilepath = *filepath;

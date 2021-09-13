@@ -22,9 +22,9 @@ namespace gbc
 		this->axisCount = axisCount;
 		this->hatCount = hatCount;
 
-		buttons = buttonCount ? new uint8_t[1 + (buttonCount - 1) / 8] : nullptr;
-		axes = axisCount ? new float[axisCount] : nullptr;
-		hats = hatCount ? new JoystickHatState[1 + (hatCount - 1) / 2] : nullptr;
+		buttons = buttonCount ? new uint8_t[1 + (buttonCount - 1) / 8]() : nullptr;
+		axes = axisCount ? new float[axisCount]() : nullptr;
+		hats = hatCount ? new JoystickHatState[1 + (hatCount - 1) / 2]() : nullptr;
 	}
 
 	void JoystickState::OnDisconnect()
@@ -61,7 +61,7 @@ namespace gbc
 		GBC_CORE_ASSERT(static_cast<uint32_t>(hat) < hatCount, "Joystick hat index out of bounds!");
 
 		uint8_t hatBits = static_cast<uint8_t>(hat);
-		return static_cast<JoystickHatState>(hats[hatBits / 2] & (0xf << (hatBits % 2)));
+		return static_cast<JoystickHatState>(static_cast<uint8_t>(hats[hatBits / 2]) & (0xf << (hatBits % 2)));
 	}
 
 	void JoystickState::SetButton(JoystickButton button, bool value)
@@ -88,7 +88,7 @@ namespace gbc
 
 		uint8_t hatBits = static_cast<uint8_t>(hat);
 		uint8_t bits = 4 * (hatBits % 2);
-		uint8_t newValue = (hats[hatBits / 2] & ~(0xf << bits)) | (value << bits);
+		uint8_t newValue = (static_cast<uint8_t>(hats[hatBits / 2]) & ~(0xf << bits)) | (static_cast<uint8_t>(value) << bits);
 		hats[hatBits / 2] = static_cast<JoystickHatState>(newValue);
 	}
 }

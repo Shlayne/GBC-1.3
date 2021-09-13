@@ -1,6 +1,8 @@
 Scene: Untitled
 Entities:
   - Entity: 0
+    MeshComponent:
+      Filepath: Assets\Models\square.obj
     RenderableComponent:
       TintColor: [1, 1, 1, 1]
       Texture: Assets\Textures\grass_side.png
@@ -39,12 +41,12 @@ Entities:
     RenderableComponent:
       TintColor: [1, 1, 1, 1]
       Texture: Assets\Textures\dirt.png
-      TilingFactor: 1
+      TilingFactor: 3
       Specification:
         MinFilter: 0
         MagFilter: 1
-        WrapS: 0
-        WrapT: 0
+        WrapS: 1
+        WrapT: 1
     TagComponent:
       Tag: Cube
     TransformComponent:

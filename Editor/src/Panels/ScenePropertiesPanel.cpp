@@ -26,11 +26,12 @@ namespace gbc
 			float lineHeight = ImGui::GetFrameHeight();
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
-			bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), flags, label.c_str());
+			void* id = (void*)(((size_t)(void*)label.c_str()) ^ typeid(T).hash_code());
+			bool open = ImGui::TreeNodeEx(id, flags, label.c_str());
 
 			// TODO: This will eventually have more than just remove component, i.e. other settings.
 			ImGui::SameLine(contentRegionAvailable.x - lineHeight + style.FramePadding.x);
-			if (ImGui::Button("+", {lineHeight, lineHeight}))
+			if (ImGui::Button("+", { lineHeight, lineHeight }))
 				ImGui::OpenPopup("ComponentSettings");
 
 			bool removeComponent = false;
@@ -117,7 +118,7 @@ namespace gbc
 					ImGuiHelper::Checkbox("Primary", &component.primary);
 					ImGuiHelper::NextTableColumn();
 
-					static constexpr const char* names[] { "Perspective", "Orthographic" };
+					static constexpr const char* names[]{ "Perspective", "Orthographic" };
 					int selectedItem = static_cast<int>(camera.GetProjectionType());
 					ImGuiHelper::Combo("Projection", &selectedItem, names, sizeof(names) / sizeof(*names));
 					ImGuiHelper::NextTableColumn();

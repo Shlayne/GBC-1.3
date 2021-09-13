@@ -1,7 +1,7 @@
 #include "gbcpch.h"
 #include "OpenGLContext.h"
-#include "glad/glad.h"
-#include "glfw/glfw3.h"
+#include <glad/glad.h>
+#include <glfw/glfw3.h>
 
 #define GBC_OPENGL_VERSION_MAJOR 4
 #define GBC_OPENGL_VERSION_MINOR 6

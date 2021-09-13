@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include "Core.h"
+#include "GBC/Core/Core.h"
 #include "GBC/Events/Event.h"
 #include "GBC/Rendering/Context.h"
 #include "GBC/Rendering/LocalTexture2D.h"
@@ -10,8 +10,8 @@ namespace gbc
 {
 	struct WindowSpecifications
 	{
-		int width = 1600;
-		int height = 900;
+		int32_t width = 1600;
+		int32_t height = 900;
 		const char* title = "GBC v1.3";
 		bool vsync = true;
 		bool resizable = true;
@@ -28,8 +28,8 @@ namespace gbc
 		virtual void PollEvents() = 0;
 		virtual void SwapBuffers() = 0;
 
-		virtual int GetWidth() const = 0;
-		virtual int GetHeight() const = 0;
+		virtual int32_t GetWidth() const = 0;
+		virtual int32_t GetHeight() const = 0;
 
 		virtual bool IsFocused() const = 0;
 		virtual bool ContainsMouse() const = 0;

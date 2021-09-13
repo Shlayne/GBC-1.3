@@ -1,7 +1,7 @@
 #pragma once
 
-#include "VertexArray.h"
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
+#include "GBC/Rendering/VertexArray.h"
 
 namespace gbc
 {

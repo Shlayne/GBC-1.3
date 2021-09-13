@@ -1,14 +1,14 @@
 #include "gbcpch.h"
 #include "Scene.h"
 #include "GBC/Core/Application.h"
-#include "GBC/Rendering/Basic/BasicRenderer.h"
 #include "GBC/Rendering/Renderer.h"
-#include "Components/TransformComponent.h"
-#include "Components/TagComponent.h"
-#include "Components/MeshComponent.h"
-#include "Components/RenderableComponent.h"
-#include "Components/CameraComponent.h"
-#include "Components/NativeScriptComponent.h"
+#include "GBC/Rendering/Basic/BasicRenderer.h"
+#include "GBC/Scene/Components/CameraComponent.h"
+#include "GBC/Scene/Components/MeshComponent.h"
+#include "GBC/Scene/Components/NativeScriptComponent.h"
+#include "GBC/Scene/Components/RenderableComponent.h"
+#include "GBC/Scene/Components/TagComponent.h"
+#include "GBC/Scene/Components/TransformComponent.h"
 
 namespace gbc
 {

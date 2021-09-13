@@ -29,7 +29,7 @@ namespace gbc
 		}
 
 		translation = localMatrix[3];
-		localMatrix[3] = glm::vec4(0.0f, 0.0f, 0.0f, localMatrix[3].w);
+		localMatrix[3] = { 0.0f, 0.0f, 0.0f, localMatrix[3].w };
 
 		// Get scale and shear
 		glm::vec3 row[3];
@@ -51,15 +51,15 @@ namespace gbc
 		row[2] = glm::detail::scale(row[2], 1.0f);
 
 		// Get rotation
-		rotation.y = asinf(-row[0].z);
-		if (cosf(rotation.y) != 0.0f)
+		rotation.y = asin(-row[0].z);
+		if (cos(rotation.y) != 0.0f)
 		{
-			rotation.x = atan2f(row[1].z, row[2].z);
-			rotation.z = atan2f(row[0].y, row[0].x);
+			rotation.x = atan2(row[1].z, row[2].z);
+			rotation.z = atan2(row[0].y, row[0].x);
 		}
 		else
 		{
-			rotation.x = atan2f(-row[2].x, row[1].y);
+			rotation.x = atan2(-row[2].x, row[1].y);
 			rotation.z = 0.0f;
 		}
 

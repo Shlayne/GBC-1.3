@@ -59,6 +59,6 @@ namespace gbc
 		Directory assetDirectory;
 
 		static constexpr size_t searchBufferSize = fileNameBufferSize;
-		char searchBuffer[searchBufferSize]{'\0'};
+		char searchBuffer[searchBufferSize]{ '\0' };
 	};
 }

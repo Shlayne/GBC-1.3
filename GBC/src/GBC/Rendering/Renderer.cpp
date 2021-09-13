@@ -1,6 +1,6 @@
 #include "gbcpch.h"
 #include "Renderer.h"
-#include "Basic/BasicRenderer.h"
+#include "GBC/Rendering/Basic/BasicRenderer.h"
 
 namespace gbc
 {

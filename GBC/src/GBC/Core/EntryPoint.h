@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Application.h"
-#include "Logger.h"
+#include "GBC/Core/Application.h"
+#include "GBC/Core/Logger.h"
 #include "GBC/Debug/Profiler.h"
 
 #if GBC_PLATFORM_WINDOWS

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Scene.h"
 #include "GBC/Core/Core.h"
+#include "GBC/Scene/Scene.h"
 
 namespace gbc
 {

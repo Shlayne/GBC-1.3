@@ -1,7 +1,7 @@
 #include "gbcpch.h"
 #if GBC_ENABLE_IMGUI
 #include "ImGuiHelper.h"
-#include "imgui/imgui_internal.h"
+#include <imgui/imgui_internal.h>
 
 namespace gbc
 {
@@ -19,8 +19,7 @@ namespace gbc
 		io.FontDefault = io.Fonts->AddFontFromFileTTF("resources/fonts/OpenSans/OpenSans-Regular.ttf", 18.0f);
 		data.boldFont = io.Fonts->AddFontFromFileTTF("resources/fonts/OpenSans/OpenSans-Bold.ttf", 18.0f);
 
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable
-			| ImGuiConfigFlags_ViewportsEnable;
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
 		io.ConfigWindowsMoveFromTitleBarOnly = true;
 
 		style.WindowRounding = 0.0f;
@@ -38,7 +37,7 @@ namespace gbc
 
 		// TODO: this could most definitely use some actual hardcoded colors and not just a tint
 		for (int i = 0; i < ImGuiCol_COUNT; i++)
-			colors[i] = ImVec4(colors[i].x * 0.8f, colors[i].y * 0.8f, colors[i].z * 1.0f, colors[i].w);
+			colors[i] = { colors[i].x * 0.8f, colors[i].y * 0.8f, colors[i].z * 1.0f, colors[i].w };
 	}
 
 	void ImGuiHelper::SetSceneEditColors()
@@ -221,7 +220,7 @@ namespace gbc
 			for (int i = 0; i < count; i++)
 			{
 				bool selected = *selectedItem == i;
-				if (ImGui::Selectable(names[i], &selected))
+				if (ImGui::Selectable(names[i], &selected) && *selectedItem != i)
 				{
 					*selectedItem = i;
 					changed = true;
@@ -335,7 +334,7 @@ namespace gbc
 		ImGui::PushItemWidth(-FLT_MIN);
 
 		static constexpr size_t bufferSize = 256;
-		char buffer[bufferSize]{ 0 };
+		char buffer[bufferSize]{ '\0' };
 		GBC_CORE_ASSERT(value->size() < bufferSize);
 		strcpy_s(buffer, sizeof(buffer), value->c_str());
 

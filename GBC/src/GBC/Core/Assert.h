@@ -2,7 +2,7 @@
 
 #if GBC_ENABLE_ASSERTS
 	#include <filesystem>
-	#define GBC_INTERNAL_ASSERT_IMPL(type, check, msg, ...) { if(!(check)) { GBC##type##ERROR(msg, __VA_ARGS__); GBC_DEBUGBREAK(); } }
+	#define GBC_INTERNAL_ASSERT_IMPL(type, check, msg, ...) { if (!(check)) { GBC##type##ERROR(msg, __VA_ARGS__); GBC_DEBUGBREAK(); } }
 	#define GBC_INTERNAL_ASSERT_WITH_MSG(type, check, ...) GBC_INTERNAL_ASSERT_IMPL(type, check, "Assertion failed: {0}", __VA_ARGS__)
 	#define GBC_INTERNAL_ASSERT_NO_MSG(type, check) GBC_INTERNAL_ASSERT_IMPL(type, check, "Assertion '{0}' failed at {1}:{2}", GBC_STRINGIFY_MACRO(check), std::filesystem::path(__FILE__).filename().string(), __LINE__)
 	#define GBC_INTERNAL_ASSERT_GET_MACRO_NAME(arg1, arg2, macro, ...) macro

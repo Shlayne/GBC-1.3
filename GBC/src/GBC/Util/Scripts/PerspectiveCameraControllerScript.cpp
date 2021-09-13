@@ -15,7 +15,7 @@ namespace gbc
 		int movementRight = 0;
 		int movementUp = 0;
 		glm::vec3 forward = movementSpeed * glm::vec3(cosf(transform.rotation.y), 0.0f, sinf(transform.rotation.y));
-		glm::vec3 right = glm::cross(forward, glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::vec3 right = glm::cross(forward, { 0.0f, 1.0f, 0.0f });
 
 		if (Input::IsKeyPressed(Keycode::W)) movementForward--;
 		if (Input::IsKeyPressed(Keycode::S)) movementForward++;

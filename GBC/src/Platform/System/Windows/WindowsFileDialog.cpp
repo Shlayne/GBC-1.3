@@ -2,9 +2,9 @@
 #include "GBC/IO/FileDialog.h"
 #include <commdlg.h>
 #include <filesystem>
-#include "glfw/glfw3.h"
+#include <glfw/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
-#include "glfw/glfw3native.h"
+#include <glfw/glfw3native.h>
 #include "GBC/Core/Application.h"
 
 namespace gbc
@@ -19,7 +19,7 @@ namespace gbc
 		}
 
 		OPENFILENAMEA ofn;
-		CHAR szFile[260] = {0};
+		CHAR szFile[260] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAMEA));
 		ofn.lStructSize = sizeof(OPENFILENAMEA);
 		ofn.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()));
@@ -45,7 +45,7 @@ namespace gbc
 		}
 
 		OPENFILENAMEA ofn;
-		CHAR szFile[260] = {0};
+		CHAR szFile[260] = { 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAMEA));
 		ofn.lStructSize = sizeof(OPENFILENAMEA);
 		ofn.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()));

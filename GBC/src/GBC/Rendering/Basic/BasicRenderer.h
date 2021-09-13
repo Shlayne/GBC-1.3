@@ -1,10 +1,10 @@
 #pragma once
 
-#include "BasicMesh.h"
-#include "GBC/Scene/Components/RenderableComponent.h"
 #include "GBC/Rendering/Texture.h"
 #include "GBC/Rendering/Camera.h"
 #include "GBC/Rendering/EditorCamera.h"
+#include "GBC/Rendering/Basic/BasicMesh.h"
+#include "GBC/Scene/Components/RenderableComponent.h"
 
 namespace gbc
 {

@@ -1,6 +1,6 @@
 #include "gbcpch.h"
 #include "Shader.h"
-#include "RendererAPI.h"
+#include "GBC/Rendering/RendererAPI.h"
 #include "Platform/Renderer/OpenGL/OpenGLShader.h"
 
 namespace gbc

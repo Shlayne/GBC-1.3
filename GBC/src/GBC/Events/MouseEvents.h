@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Event.h"
 #include "GBC/Core/MouseButtons.h"
+#include "GBC/Events/Event.h"
 
 namespace gbc
 {

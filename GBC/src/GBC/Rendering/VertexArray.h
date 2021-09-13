@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Buffer.h"
+#include <vector>
+#include "GBC/Rendering/Buffer.h"
 
 namespace gbc
 {

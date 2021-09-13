@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Event.h"
+#include "GBC/Events/Event.h"
 
 namespace gbc
 {

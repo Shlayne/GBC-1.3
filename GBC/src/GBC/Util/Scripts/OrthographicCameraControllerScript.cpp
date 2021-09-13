@@ -21,7 +21,7 @@ namespace gbc
 		if (rotationDirection != 0)
 		{
 			transform.rotation.z += rotationDirection * sensitivity * timestep;
-			forward = glm::vec3(sinf(transform.rotation.z), cosf(transform.rotation.z), 0.0f);
+			forward = { sin(transform.rotation.z), cos(transform.rotation.z), 0.0f };
 		}
 	}
 }

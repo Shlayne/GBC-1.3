@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
 #include "GBC/Rendering/LocalTexture2D.h"
 
 namespace gbc
@@ -12,18 +12,16 @@ namespace gbc
 		~TextureAtlas();
 
 		// Returns the texture coordinates, in pixel space, of the texture atlas.
-		// These coordinates are for the first texture in the texture array returned
-		// by create. For successive textures in that array, their subtexture coordinates
-		// are just this divided by a power of two each time.
-		// After you have added all of your textures, before you even call create(),
-		// you can get normalized texture coordinates by dividing this return value
-		// by getTextureSize(). Don't forget to cast to a float or double!
+		// These coordinates are for the texture returned by Create(). After you
+		// have added all of your textures, before you even call Create(), you
+		// can get normalized texture coordinates by dividing this return value
+		// by GetTextureSize(). Don't forget to cast to a float!
 		glm::ivec2 AddTexture(const Ref<LocalTexture2D>& texture);
 
-		// Returns mipmapLevels number of textures in an array. Each texture has
-		// the smallest possible size that contains every texture provided through
-		// addTexture. The returned textures will have an aspect ratio of 1, and
-		// their size will be constrained to powers of 2, e.g.: 256x256, 512x512...
+		// Returns a texture that has the smallest possible size that contains
+		// every texture provided through addTexture. The returned textures will
+		// have an aspect ratio of 1, and their size will be constrained to
+		// powers of 2, e.g.: 1x1, 2x2, 4x4... 256x256, 512x512, 1024x1024...
 		Ref<LocalTexture2D> Create();
 
 		inline const glm::ivec2& GetTextureSize() const noexcept { return atlasTextureSize; }
@@ -50,6 +48,6 @@ namespace gbc
 
 		glm::ivec2 maxTextureSize;
 		TextureNode* root;
-		glm::ivec2 atlasTextureSize{256, 256};
+		glm::ivec2 atlasTextureSize{ 1 };
 	};
 }

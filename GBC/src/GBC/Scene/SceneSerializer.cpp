@@ -1,13 +1,13 @@
 #include "gbcpch.h"
 #include "SceneSerializer.h"
-#include "yaml-cpp/yaml.h"
-#include "Entity.h"
-#include "Components/CameraComponent.h"
-#include "Components/MeshComponent.h"
-#include "Components/NativeScriptComponent.h"
-#include "Components/RenderableComponent.h"
-#include "Components/TagComponent.h"
-#include "Components/TransformComponent.h"
+#include <yaml-cpp/yaml.h>
+#include "GBC/Scene/Entity.h"
+#include "GBC/Scene/Components/CameraComponent.h"
+#include "GBC/Scene/Components/MeshComponent.h"
+#include "GBC/Scene/Components/NativeScriptComponent.h"
+#include "GBC/Scene/Components/RenderableComponent.h"
+#include "GBC/Scene/Components/TagComponent.h"
+#include "GBC/Scene/Components/TransformComponent.h"
 
 // Deserialization stuff
 namespace YAML

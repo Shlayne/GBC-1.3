@@ -1,8 +1,8 @@
 #pragma once
 
+#include <entt/entt.hpp>
+#include <glm/glm.hpp>
 #include <string>
-#include "entt/entt.hpp"
-#include "glm/glm.hpp"
 #include "GBC/Core/Timestep.h"
 #include "GBC/Events/Event.h"
 #include "GBC/Events/WindowEvents.h"
@@ -18,7 +18,7 @@ namespace gbc
 		Scene();
 		~Scene();
 
-		Entity CreateEntity(const std::string& tag = std::string());
+		Entity CreateEntity(const std::string& tag = {});
 		void DestroyEntity(Entity entity);
 
 		void OnPlay();

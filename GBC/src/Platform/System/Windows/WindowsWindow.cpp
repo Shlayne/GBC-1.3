@@ -1,12 +1,12 @@
 #include "gbcpch.h"
 #include "WindowsWindow.h"
-#include "glfw/glfw3.h"
-#include "GBC/Events/WindowEvents.h"
-#include "GBC/Events/KeyEvents.h"
-#include "GBC/Events/MouseEvents.h"
-#include "GBC/Events/DeviceEvents.h"
+#include <glfw/glfw3.h>
 #include "GBC/Core/Application.h"
 #include "GBC/Core/Input.h"
+#include "GBC/Events/DeviceEvents.h"
+#include "GBC/Events/KeyEvents.h"
+#include "GBC/Events/MouseEvents.h"
+#include "GBC/Events/WindowEvents.h"
 
 namespace gbc
 {
@@ -60,8 +60,7 @@ namespace gbc
 			Input::Init();
 		}
 
-		state.current.width = specs.width;
-		state.current.height = specs.height;
+		state.current.size = { specs.width, specs.height };
 		state.title = specs.title;
 		state.resizable = specs.resizable;
 		state.fullscreen = specs.fullscreen;
@@ -74,34 +73,42 @@ namespace gbc
 		glfwWindowHint(GLFW_FOCUS_ON_SHOW, state.focused);
 
 		GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
-		const GLFWvidmode* videoMode = glfwGetVideoMode(primaryMonitor);
-
-		// Calculate the offset needed for the window to be centered in the primary monitor
-		state.current.x = (videoMode->width - state.current.width) / 2;
-		state.current.y = (videoMode->height - state.current.height) / 2;
 
 		if (state.fullscreen)
 		{
 			SaveDimensions();
-			state.current.x = 0;
-			state.current.y = 0;
-			state.current.width = videoMode->width;
-			state.current.height = videoMode->height;
+			state.current.position = { 0, 0 };
+
+			const GLFWvidmode* videoMode = glfwGetVideoMode(primaryMonitor);
+			state.current.size = { videoMode->width, videoMode->height };
 		}
 
-		window = glfwCreateWindow(state.current.width, state.current.height, state.title, state.fullscreen ? primaryMonitor : nullptr, nullptr);
+		window = glfwCreateWindow(state.current.size.x, state.current.size.y, state.title, state.fullscreen ? primaryMonitor : nullptr, nullptr);
 		GBC_CORE_ASSERT(window != nullptr, "Failed to create window!");
 		glfwWindowCount++;
 
-		glfwSetWindowPos(window, state.current.x, state.current.y);
+		if (!state.fullscreen)
+		{
+			int left, top, right, bottom;
+			glfwGetMonitorWorkarea(primaryMonitor, &left, &top, &right, &bottom);
+			glm::ivec2 monitorWorkArea(right - left, bottom - top);
+			glfwGetWindowFrameSize(window, &left, &top, &right, &bottom);
+			glm::ivec2 windowFrameSize(right + left, bottom + top);
+
+			// Calculate the offset needed for the window to be centered in the primary monitor
+			state.current.position = glm::ivec2(left, top) + (monitorWorkArea - (state.current.size + windowFrameSize)) / 2;
+		}
+
+		glfwGetFramebufferSize(window, &state.framebufferSize.x, &state.framebufferSize.y);
+		glfwSetWindowPos(window, state.current.position.x, state.current.position.y);
 		glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
 		glfwSetWindowUserPointer(window, &state);
 
 		context->Init(window);
-
 		SetVSync(specs.vsync);
 		SetCaptureMouse(specs.captureMouse);
 		SetCallbacks(window);
+
 		glfwShowWindow(window);
 	}
 
@@ -176,8 +183,8 @@ namespace gbc
 				int monitorX, monitorY;
 				glfwGetMonitorPos(monitors[i], &monitorX, &monitorY);
 
-				int overlapX = std::max(0, std::min(state.current.x + state.current.width, monitorX + videoMode->width) - std::max(state.current.x, monitorX));
-				int overlapY = std::max(0, std::min(state.current.y + state.current.height, monitorY + videoMode->height) - std::max(state.current.y, monitorY));
+				int overlapX = std::max(0, std::min(state.current.position.x + state.current.size.x, monitorX + videoMode->width) - std::max(state.current.position.x, monitorX));
+				int overlapY = std::max(0, std::min(state.current.position.y + state.current.size.y, monitorY + videoMode->height) - std::max(state.current.position.y, monitorY));
 				int overlap = overlapX * overlapY;
 
 				if (overlap > largestOverlap)
@@ -191,7 +198,7 @@ namespace gbc
 			glfwSetWindowMonitor(window, monitor, 0, 0, videoMode->width, videoMode->height, videoMode->refreshRate);
 		}
 		else
-			glfwSetWindowMonitor(window, nullptr, state.preFullscreen.x, state.preFullscreen.y, state.preFullscreen.width, state.preFullscreen.height, GLFW_DONT_CARE);
+			glfwSetWindowMonitor(window, nullptr, state.preFullscreen.position.x, state.preFullscreen.position.y, state.preFullscreen.size.x, state.preFullscreen.size.y, GLFW_DONT_CARE);
 
 		SetVSync(IsVSync());
 
@@ -206,10 +213,10 @@ namespace gbc
 
 	void WindowsWindow::SaveDimensions()
 	{
-		state.preFullscreen.x = state.current.x;
-		state.preFullscreen.y = state.current.y;
-		state.preFullscreen.width = state.current.width;
-		state.preFullscreen.height = state.current.height;
+		state.preFullscreen.position.x = state.current.position.x;
+		state.preFullscreen.position.y = state.current.position.y;
+		state.preFullscreen.size.x = state.current.size.x;
+		state.preFullscreen.size.y = state.current.size.y;
 	}
 
 	// Callbacks
@@ -247,8 +254,13 @@ namespace gbc
 	{
 		BEGIN_EVENT_CALLBACK;
 
-		WindowCloseEvent event(window);
-		Application::EventCallback(event);
+		// Since ImGui's glfw implementation doesn't set a window user pointer, this is fine
+		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
+		{
+			// Only send a close event if the window is not ImGui's
+			WindowCloseEvent event(window);
+			Application::EventCallback(event);
+		}
 
 		END_EVENT_CALLBACK;
 	}
@@ -257,12 +269,8 @@ namespace gbc
 	{
 		BEGIN_EVENT_CALLBACK;
 
-		// Since ImGui's glfw implementation doesn't set a window user pointer, this is fine.
 		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
-		{
-			state->current.width = width;
-			state->current.height = height;
-		}
+			state->current.size = { width, height };
 
 		WindowResizeEvent event(window, width, height);
 		Application::EventCallback(event);
@@ -275,10 +283,7 @@ namespace gbc
 		BEGIN_EVENT_CALLBACK;
 
 		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
-		{
-			state->current.x = x;
-			state->current.y = y;
-		}
+			state->current.position = { x, y };
 
 		WindowMoveEvent event(window, x, y);
 		Application::EventCallback(event);
@@ -336,6 +341,8 @@ namespace gbc
 	{
 		BEGIN_EVENT_CALLBACK;
 
+		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
+			state->framebufferSize = { width, height };
 		WindowFramebufferResizeEvent event(window, width, height);
 		Application::EventCallback(event);
 

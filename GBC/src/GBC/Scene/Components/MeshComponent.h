@@ -1,8 +1,8 @@
 #pragma once
 
 #include "GBC/Core/Core.h"
-#include "GBC/Rendering/Basic/BasicMesh.h"
 #include "GBC/IO/OBJLoader.h"
+#include "GBC/Rendering/Basic/BasicMesh.h"
 
 namespace gbc
 {

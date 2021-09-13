@@ -62,13 +62,13 @@ namespace gbc
 		float nearClip = 0.001f;
 		float farClip = 1000.0f;
 
-		glm::mat4 view{1.0f};
-		glm::vec3 position{0.0f};
-		glm::vec3 focalPoint{0.0f};
+		glm::mat4 view{ 1.0f };
+		glm::vec3 position{ 0.0f };
+		glm::vec3 focalPoint{ 0.0f };
 		
-		glm::vec2 mousePosition{0.0f};
-		glm::vec2 prevMousePosition{0.0f};
-		glm::vec2 viewportSize{1.0f};
+		glm::vec2 mousePosition{ 0.0f };
+		glm::vec2 prevMousePosition{ 0.0f };
+		glm::vec2 viewportSize{ 1.0f };
 
 		float distance = 5.0f;
 		float pitch = 0.0f;

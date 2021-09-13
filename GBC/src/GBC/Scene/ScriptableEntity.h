@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Entity.h"
 #include "GBC/Core/Timestep.h"
+#include "GBC/Scene/Entity.h"
 
 namespace gbc
 {

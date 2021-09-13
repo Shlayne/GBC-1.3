@@ -13,6 +13,7 @@ namespace gbc
 		glm::vec4 tintColor;
 		glm::vec2 texCoord;
 		uint32_t texIndex;
+		float tilingFactor;
 	};
 
 	struct BasicRendererData
@@ -63,10 +64,11 @@ namespace gbc
 		// Setup internal buffers
 		data.vertexBuffer = VertexBuffer::CreateRef(data.maxVertices * sizeof(Vertex), nullptr, BufferUsage::DynamicDraw);
 		data.vertexBuffer->SetLayout({
-			{VertexBufferElementType::Float3, "position"},
-			{VertexBufferElementType::Float4, "tintColor"},
-			{VertexBufferElementType::Float2, "texCoord"},
-			{VertexBufferElementType::UInt,   "texIndex"}
+			{ VertexBufferElementType::Float3, "position" },
+			{ VertexBufferElementType::Float4, "tintColor" },
+			{ VertexBufferElementType::Float2, "texCoord" },
+			{ VertexBufferElementType::UInt,   "texIndex" },
+			{ VertexBufferElementType::Float,  "tilingFactor" }
 		});
 
 		data.vertexArray = VertexArray::CreateRef();
@@ -85,7 +87,7 @@ namespace gbc
 
 		// Setup white texture
 		Ref<LocalTexture2D> whiteTexture = CreateRef<LocalTexture2D>(1, 1, 4);
-		*(uint32_t*)whiteTexture->GetData() = 0xffffffff;
+		*(uint32_t*)whiteTexture->GetData() = 0xFFFFFFFF;
 		data.textures[0] = Texture2D::CreateRef(whiteTexture);
 	}
 
@@ -153,7 +155,7 @@ namespace gbc
 		data.localIndexCount = 0;
 		data.localIndexBufferCurrent = data.localIndexBufferStart;
 
-		// Remove the references once the renderables has been rendered
+		// Remove the references once the textures has been rendered
 		for (uint32_t i = 1; i < data.textureCount; i++)
 			data.textures[i] = nullptr;
 		data.textureCount = 1;
@@ -195,6 +197,7 @@ namespace gbc
 			data.localVertexBufferCurrent->texCoord = mesh->vertices[i].texCoord;
 			data.localVertexBufferCurrent->tintColor = mesh->vertices[i].tintColor * renderableComponent.color;
 			data.localVertexBufferCurrent->texIndex = texIndex;
+			data.localVertexBufferCurrent->tilingFactor = renderableComponent.tilingFactor;
 		}
 
 		// Handle indices

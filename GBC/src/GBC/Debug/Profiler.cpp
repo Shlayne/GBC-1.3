@@ -111,7 +111,7 @@ namespace gbc
 		FloatingPointMicroseconds highResStart = startTimepoint.time_since_epoch();
 		auto elapsedTime = std::chrono::time_point_cast<std::chrono::microseconds>(endTimepoint).time_since_epoch() - std::chrono::time_point_cast<std::chrono::microseconds>(startTimepoint).time_since_epoch();
 
-		Profiler::Get().WriteProfile({name, highResStart, elapsedTime, std::this_thread::get_id()});
+		Profiler::Get().WriteProfile({ name, highResStart, elapsedTime, std::this_thread::get_id() });
 
 		stopped = true;
 	}

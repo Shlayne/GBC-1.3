@@ -1,9 +1,9 @@
 #include "gbcpch.h"
 #include "Application.h"
-#include "GBC/Rendering/Renderer.h"
+#include "GBC/Core/Input.h"
+#include "GBC/Core/Timestep.h"
 #include "GBC/Events/WindowEvents.h"
-#include "Timestep.h"
-#include "Input.h"
+#include "GBC/Rendering/Renderer.h"
 
 namespace gbc
 {
@@ -141,7 +141,7 @@ namespace gbc
 		dispatcher.Dispatch(&Input::OnMouseButtonPressEvent);
 		dispatcher.Dispatch(&Input::OnMouseButtonReleaseEvent);
 
-		dispatcher.Dispatch(this, &Application::OnWindowResizeEvent);
+		dispatcher.Dispatch(this, &Application::OnWindowFramebufferResizeEvent);
 		dispatcher.Dispatch(this, &Application::OnWindowFocusEvent);
 		dispatcher.Dispatch(this, &Application::OnWindowMinimizeEvent);
 
@@ -166,12 +166,12 @@ namespace gbc
 			focusedNativeWindow = nullptr;
 
 		// TODO: shouldn't close when a window closes.
-		// For example, two window applications, one closes and it closes the entire application. Not supposed to happen.
+		// For example, multiwindow applications, one closes and it closes the entire application. Not supposed to happen.
 		Close();
 		return true;
 	}
 
-	bool Application::OnWindowResizeEvent(WindowResizeEvent& event)
+	bool Application::OnWindowFramebufferResizeEvent(WindowFramebufferResizeEvent& event)
 	{
 		GBC_PROFILE_FUNCTION();
 

@@ -2,9 +2,9 @@
 
 #include "GBC/Core/Core.h"
 #if GBC_ENABLE_IMGUI
+#include <imgui/imgui.h>
 #include <string>
 #include <functional>
-#include "imgui/imgui.h"
 
 namespace gbc
 {
@@ -117,7 +117,7 @@ namespace gbc
 		{
 			bool closed = false;
 
-			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, {0.5f, 0.5f});
+			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, { 0.5f, 0.5f });
 			ImGui::OpenPopup(name);
 
 			if (ImGui::BeginPopupModal(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
@@ -125,7 +125,7 @@ namespace gbc
 				ImGui::Text(messageFormat, std::forward<Args>(args)...);
 
 				ImGui::PushItemWidth(-FLT_MIN);
-				if (ImGui::Button("OK", {ImGui::GetContentRegionAvail().x, 0.0f}))
+				if (ImGui::Button("OK", { ImGui::GetContentRegionAvail().x, 0.0f }))
 					closed = true;
 				ImGui::PopItemWidth();
 

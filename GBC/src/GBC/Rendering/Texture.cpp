@@ -1,6 +1,6 @@
 #include "gbcpch.h"
 #include "Texture.h"
-#include "RendererAPI.h"
+#include "GBC/Rendering/RendererAPI.h"
 #include "Platform/Renderer/OpenGL/OpenGLTexture.h"
 
 namespace gbc

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Debugbreak.h"
+#include "GBC/Core/Debugbreak.h"
 
 #if GBC_CONFIG_DEBUG
 	#define GBC_ENABLE_ASSERTS 1
@@ -56,5 +56,5 @@ namespace gbc
 	using RendererID = uint32_t;
 }
 
-#include "Logger.h"
-#include "Assert.h"
+#include "GBC/Core/Logger.h"
+#include "GBC/Core/Assert.h"

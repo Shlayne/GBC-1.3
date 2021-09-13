@@ -1,7 +1,7 @@
 #include "gbcpch.h"
 #include "LocalTexture2D.h"
-#include "stb/stb_image.h"
-#include "stb/stb_image_write.h"
+#include <stb/stb_image.h>
+#include <stb/stb_image_write.h>
 #include "GBC/Rendering/RendererAPI.h"
 
 namespace gbc
@@ -80,7 +80,7 @@ namespace gbc
 		GBC_PROFILE_FUNCTION();
 
 		stbi_set_flip_vertically_on_load(flipVertically);
-		stbi_uc* stbiData = stbi_load(filepath.c_str(), &width, &height, &channels, requiredChannels);
+		uint8_t* stbiData = stbi_load(filepath.c_str(), &width, &height, &channels, requiredChannels);
 		if (stbiData != nullptr)
 		{
 			if (data != nullptr)
@@ -118,7 +118,7 @@ namespace gbc
 		}
 
 		size_t size = (size_t)width * height * channels;
-		data = new unsigned char[size]{ 0 };
+		data = new uint8_t[size]{ 0 };
 		this->width = width;
 		this->height = height;
 		this->channels = channels;
@@ -146,13 +146,15 @@ namespace gbc
 
 	bool LocalTexture2D::SetSubregion(const LocalTexture2D& texture, int32_t positionX, int32_t positionY)
 	{
+		GBC_PROFILE_FUNCTION();
+
 		if (channels == texture.channels && positionX + texture.width <= width && positionX >= 0 && positionY + texture.height <= height && positionY >= 0)
 		{
 			size_t textureIncrement = static_cast<size_t>(texture.width) * channels;
 			size_t increment = static_cast<size_t>(width) * channels;
 
-			unsigned char* source = texture.data;
-			unsigned char* destination = data + ((static_cast<size_t>(positionY) * width + positionX) * channels);
+			uint8_t* source = texture.data;
+			uint8_t* destination = data + ((static_cast<size_t>(positionY) * width + positionX) * channels);
 			for (int32_t y = 0; y < texture.height; y++, source += textureIncrement, destination += increment)
 				memcpy_s(destination, textureIncrement, source, textureIncrement);
 			return true;

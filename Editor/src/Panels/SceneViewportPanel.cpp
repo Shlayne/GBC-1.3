@@ -17,15 +17,15 @@ namespace gbc
 	{
 		if (enabled)
 		{
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2());
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f , 0.0f });
 			ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
 			ImGui::Begin(name.c_str(), &enabled);
 			ImGui::PopStyleVar(2);
 			Update();
 
 			auto textureID = (void*)static_cast<size_t>(framebuffer->GetColorAttachment());
-			auto textureSize = ImVec2(static_cast<float>(size.x), static_cast<float>(size.y));
-			ImGui::Image(textureID, textureSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+			ImVec2 textureSize{ static_cast<float>(size.x), static_cast<float>(size.y) };
+			ImGui::Image(textureID, textureSize, { 0.0f, 1.0f }, { 1.0f, 0.0f });
 
 			if (ImGui::BeginDragDropTarget())
 			{
@@ -48,12 +48,6 @@ namespace gbc
 				// Get window info
 				ImGuizmo::SetRect(position.x, position.y, static_cast<float>(size.x), static_cast<float>(size.y));
 
-				// Get camera info
-				//Entity cameraEntity = context->GetPrimaryCameraEntity();
-				//const auto& camera = cameraEntity.GetComponent<CameraComponent>().camera;
-				//const glm::mat4& projection = camera.GetProjection();
-				//glm::mat4 view = glm::inverse((glm::mat4)cameraEntity.GetComponent<TransformComponent>());
-
 				// Get editor camera info
 				glm::mat4 view = editorCamera.GetView();
 				glm::mat4 projection = editorCamera.GetProjection();
@@ -67,7 +61,7 @@ namespace gbc
 				float snapValue = 0.5f;
 				if (gizmoType == ImGuizmo::OPERATION::ROTATE)
 					snapValue = 45.0f;
-				float snapValues[3] { snapValue, snapValue, snapValue };
+				float snapValues[3]{ snapValue, snapValue, snapValue };
 
 				// Draw gizmos
 				if (ImGuizmo::Manipulate(&view[0].x, &projection[0].x, static_cast<ImGuizmo::OPERATION>(gizmoType),

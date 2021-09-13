@@ -1,7 +1,6 @@
 #include "gbcpch.h"
 #include "OpenGLShader.h"
-#include "glad/glad.h"
-#include "glm/gtc/type_ptr.hpp"
+#include <glad/glad.h>
 #include "GBC/IO/FileIO.h"
 
 namespace gbc
@@ -60,7 +59,7 @@ namespace gbc
 	{
 		std::vector<ShaderFile> shaders;
 
-		std::optional<std::string> file = FileIO::ReadFile(filepath);
+		auto file = FileIO::ReadFile(filepath);
 		GBC_CORE_ASSERT(file, "Could not read shader file!");
 
 		static constexpr const char* typeToken = "#type";
@@ -76,10 +75,10 @@ namespace gbc
 			std::string typeString = file->substr(typeStart, lineEnd - typeStart);
 			ShaderType type = GetType(typeString);
 
-			size_t nestLineStart = file->find_first_not_of("\r\n", lineEnd);
-			GBC_CORE_ASSERT(nestLineStart != std::string::npos, "Must include code for a shader!");
-			position = file->find(typeToken, nestLineStart);
-			shaders.push_back({type, position == std::string::npos ? file->substr(nestLineStart) : file->substr(nestLineStart, position - nestLineStart)});
+			size_t nextLineStart = file->find_first_not_of("\r\n", lineEnd);
+			GBC_CORE_ASSERT(nextLineStart != std::string::npos, "Must include code for a shader!");
+			position = file->find(typeToken, nextLineStart);
+			shaders.push_back({type, position == std::string::npos ? file->substr(nextLineStart) : file->substr(nextLineStart, position - nextLineStart)});
 		}
 
 		return shaders;
@@ -173,13 +172,13 @@ namespace gbc
 		return true;
 	}
 
-	int OpenGLShader::GetUniformLocation(const std::string& name)
+	int32_t OpenGLShader::GetUniformLocation(const std::string& name)
 	{
 		auto it = uniformLocations.find(name);
 		if (it != uniformLocations.end())
 			return it->second;
 
-		int location = glGetUniformLocation(rendererID, name.c_str());
+		int32_t location = glGetUniformLocation(rendererID, name.c_str());
 #if GBC_ENABLE_LOGGING // to remove warning of empty if statement in release and dist
 		if (location == -1)
 			GBC_CORE_WARN("Unused shader uniform: {0}", name);
@@ -190,163 +189,163 @@ namespace gbc
 
 	void OpenGLShader::SetFloat(const std::string& name, float value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform1f(location, value);
 	}
 
 	void OpenGLShader::SetFloat2(const std::string& name, const glm::vec2& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform2fv(location, 1, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform3fv(location, 1, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform4fv(location, 1, glm::value_ptr(value));
 	}
 
-	void OpenGLShader::SetInt(const std::string& name, int value)
+	void OpenGLShader::SetInt(const std::string& name, int32_t value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform1i(location, value);
 	}
 
 	void OpenGLShader::SetInt2(const std::string& name, const glm::ivec2& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform2iv(location, 1, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetInt3(const std::string& name, const glm::ivec3& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform3iv(location, 1, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetInt4(const std::string& name, const glm::ivec4& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform4iv(location, 1, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetUInt(const std::string& name, uint32_t value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform1ui(location, value);
 	}
 
 	void OpenGLShader::SetUInt2(const std::string& name, const glm::uvec2& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform2uiv(location, 1, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetUInt3(const std::string& name, const glm::uvec3& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform3uiv(location, 1, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetUInt4(const std::string& name, const glm::uvec4& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform4uiv(location, 1, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetBool(const std::string& name, bool value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform1i(location, (int)value);
 	}
 
 	void OpenGLShader::SetBool2(const std::string& name, const glm::bvec2& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform2i(location, (int)value.x, (int)value.y);
 	}
 
 	void OpenGLShader::SetBool3(const std::string& name, const glm::bvec3& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform3i(location, (int)value.x, (int)value.y, (int)value.z);
 	}
 
 	void OpenGLShader::SetBool4(const std::string& name, const glm::bvec4& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform4i(location, (int)value.x, (int)value.y, (int)value.z, (int)value.w);
 	}
 
 	void OpenGLShader::SetMat2(const std::string& name, const glm::mat2& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniformMatrix2fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetMat2x3(const std::string& name, const glm::mat2x3& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniformMatrix2x3fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetMat2x4(const std::string& name, const glm::mat2x4& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniformMatrix2x4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetMat3x2(const std::string& name, const glm::mat3x2& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniformMatrix3x2fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetMat3(const std::string& name, const glm::mat3& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetMat3x4(const std::string& name, const glm::mat3x4& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniformMatrix3x4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetMat4x2(const std::string& name, const glm::mat4x2& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniformMatrix4x2fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetMat4x3(const std::string& name, const glm::mat4x3& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniformMatrix4x3fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& value)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
-	void OpenGLShader::SetInts(const std::string& name, const int* values, int count)
+	void OpenGLShader::SetInts(const std::string& name, const int32_t* values, int count)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform1iv(location, count, values);
 	}
 
 	void OpenGLShader::SetUInts(const std::string& name, const uint32_t* values, int count)
 	{
-		int location = GetUniformLocation(name);
+		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform1uiv(location, count, values);
 	}
 }
