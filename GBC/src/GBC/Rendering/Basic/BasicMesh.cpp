@@ -14,7 +14,7 @@ namespace gbc
 	}
 
 	BasicMesh::BasicMesh(BasicMesh&& mesh) noexcept
-		:vertices(std::move(mesh.vertices)), indices(std::move(mesh.indices)) {}
+		: vertices(std::move(mesh.vertices)), indices(std::move(mesh.indices)) {}
 
 	BasicMesh& BasicMesh::operator=(BasicMesh&& mesh) noexcept
 	{

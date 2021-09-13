@@ -7,10 +7,10 @@ namespace gbc
 {
 	struct RenderableComponent
 	{
-		RenderableComponent() noexcept = default;
-		RenderableComponent(const RenderableComponent&) noexcept = default;
+		RenderableComponent() = default;
+		RenderableComponent(const RenderableComponent& component);
 
-		glm::vec4 color{1.0f};
+		glm::vec4 color{ 1.0f };
 		Ref<Texture2D> texture;
 		float tilingFactor = 1.0f;
 	};

@@ -42,7 +42,7 @@ namespace gbc
 		}
 
 		inline operator bool() const noexcept { return handle != entt::null; }
-		inline operator ENTT_ID_TYPE() const noexcept { return static_cast<ENTT_ID_TYPE>(handle); }
+		inline operator uint32_t() const noexcept { return static_cast<uint32_t>(handle); }
 		inline operator entt::entity() const noexcept { return handle; }
 
 		inline bool operator==(const Entity& entity) const noexcept { return handle == entity.handle && context == entity.context; }

@@ -12,11 +12,11 @@ namespace gbc
 		MeshComponent(MeshComponent&& mesh) noexcept;
 		MeshComponent& operator=(MeshComponent&& mesh) noexcept;
 
-		MeshComponent(const Ref<BasicMesh>& mesh) noexcept;
+		MeshComponent(const Ref<BasicMesh>& mesh);
 		MeshComponent(Ref<BasicMesh>&& mesh) noexcept;
 		MeshComponent& operator=(Ref<BasicMesh>&& mesh) noexcept;
 
-		MeshComponent(const OBJModel& model) noexcept;
+		MeshComponent(const OBJModel& model);
 		MeshComponent(OBJModel&& model) noexcept;
 		MeshComponent& operator=(OBJModel&& model) noexcept;
 
