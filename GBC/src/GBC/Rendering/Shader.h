@@ -40,10 +40,9 @@ namespace gbc
 		virtual void SetMat4x2 (const std::string& name, const glm::mat4x2& value) = 0;
 		virtual void SetMat4x3 (const std::string& name, const glm::mat4x3& value) = 0;
 		virtual void SetMat4   (const std::string& name, const glm::mat4&   value) = 0;
-		virtual void SetInts   (const std::string& name, const int32_t*     values, int count) = 0;
-		virtual void SetUInts  (const std::string& name, const uint32_t*    values, int count) = 0;
+		virtual void SetInts   (const std::string& name, const int32_t*     values, int32_t count) = 0;
+		virtual void SetUInts  (const std::string& name, const uint32_t*    values, int32_t count) = 0;
 
-		static Ref<Shader> CreateRef(const std::string& filepath);
-		static Scope<Shader> CreateScope(const std::string& filepath);
+		static Ref<Shader> Create(const std::string& filepath);
 	};
 }

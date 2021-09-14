@@ -3,26 +3,26 @@
 
 namespace gbc
 {
-	MouseButtonPressEvent::MouseButtonPressEvent(MouseButton button, int mods)
+	MouseButtonPressEvent::MouseButtonPressEvent(MouseButton button, int32_t mods)
 		: button(button), mods(mods) {}
 
 #if GBC_ENABLE_LOGGING
 	std::string MouseButtonPressEvent::ToString() const
 	{
 		std::stringstream stream;
-		stream << "MouseButtonPressEvent: button=" << static_cast<unsigned short>(button) << " mods=" << mods;
+		stream << "MouseButtonPressEvent: button=" << static_cast<uint16_t>(button) << " mods=" << mods;
 		return stream.str();
 	}
 #endif
 
-	MouseButtonReleaseEvent::MouseButtonReleaseEvent(MouseButton button, int mods)
+	MouseButtonReleaseEvent::MouseButtonReleaseEvent(MouseButton button, int32_t mods)
 		: button(button), mods(mods) {}
 
 #if GBC_ENABLE_LOGGING
 	std::string MouseButtonReleaseEvent::ToString() const
 	{
 		std::stringstream stream;
-		stream << "MouseButtonReleaseEvent: button=" << static_cast<unsigned short>(button) << " mods=" << mods;
+		stream << "MouseButtonReleaseEvent: button=" << static_cast<uint16_t>(button) << " mods=" << mods;
 		return stream.str();
 	}
 #endif

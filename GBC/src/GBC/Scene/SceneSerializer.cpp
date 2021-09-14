@@ -98,7 +98,7 @@ namespace gbc
 		{
 			auto& camera = component.camera;
 			out << YAML::Key << "Camera" << YAML::Value << YAML::BeginMap
-				<< YAML::Key << "ProjectionType" << YAML::Value << static_cast<int>(camera.GetProjectionType())
+				<< YAML::Key << "ProjectionType" << YAML::Value << static_cast<int32_t>(camera.GetProjectionType())
 				<< YAML::Key << "PerspectiveFOV" << YAML::Value << camera.GetPerspectiveFOV()
 				<< YAML::Key << "PerspectiveNear" << YAML::Value << camera.GetPerspectiveNearClip()
 				<< YAML::Key << "PerspectiveFar" << YAML::Value << camera.GetPerspectiveFarClip()
@@ -127,10 +127,10 @@ namespace gbc
 				<< YAML::Key << "Texture" << YAML::Value << filepath
 				<< YAML::Key << "TilingFactor" << YAML::Value << component.tilingFactor
 				<< YAML::Key << "Specification" << YAML::BeginMap
-				<< YAML::Key << "MinFilter" << YAML::Value << static_cast<int>(specs.minFilter)
-				<< YAML::Key << "MagFilter" << YAML::Value << static_cast<int>(specs.magFilter)
-				<< YAML::Key << "WrapS" << YAML::Value << static_cast<int>(specs.wrapS)
-				<< YAML::Key << "WrapT" << YAML::Value << static_cast<int>(specs.wrapT)
+				<< YAML::Key << "MinFilter" << YAML::Value << static_cast<int32_t>(specs.minFilter)
+				<< YAML::Key << "MagFilter" << YAML::Value << static_cast<int32_t>(specs.magFilter)
+				<< YAML::Key << "WrapS" << YAML::Value << static_cast<int32_t>(specs.wrapS)
+				<< YAML::Key << "WrapT" << YAML::Value << static_cast<int32_t>(specs.wrapT)
 				<< YAML::EndMap;
 		});
 		SerializeComponent<TagComponent>(out, entity, "TagComponent", [&out](TagComponent& component)
@@ -213,7 +213,7 @@ namespace gbc
 
 						auto cameraNode = cameraComponentNode["Camera"];
 						auto& camera = cameraComponent.camera;
-						camera.SetProjectionType(static_cast<SceneCamera::ProjectionType>(cameraNode["ProjectionType"].as<int>()));
+						camera.SetProjectionType(static_cast<SceneCamera::ProjectionType>(cameraNode["ProjectionType"].as<int32_t>()));
 						camera.SetPerspectiveFOV(cameraNode["PerspectiveFOV"].as<float>());
 						camera.SetPerspectiveNearClip(cameraNode["PerspectiveNear"].as<float>());
 						camera.SetPerspectiveFarClip(cameraNode["PerspectiveFar"].as<float>());
@@ -247,7 +247,7 @@ namespace gbc
 						// something like this:
 						// AssetManager::GetAssetByUUID(renderableComponentNode["Texture"].as<uint64_t>())
 						// or maybe this:
-						// Texture2D::CreateRef(renderableComponentNode["Texture"].as<uint64_t>());
+						// Texture2D::Create(renderableComponentNode["Texture"].as<uint64_t>());
 						// and that would use the asset manager to get the correct Ref<Texture2D>
 
 						renderableComponent.color = renderableComponentNode["TintColor"].as<glm::vec4>();
@@ -255,12 +255,12 @@ namespace gbc
 
 						auto specsNode = renderableComponentNode["Specification"];
 						TextureSpecification specs;
-						specs.texture = CreateRef<LocalTexture2D>(renderableComponentNode["Texture"].as<std::string>(), 4);
-						specs.minFilter = static_cast<TextureFilterMode>(specsNode["MinFilter"].as<int>());
-						specs.magFilter = static_cast<TextureFilterMode>(specsNode["MagFilter"].as<int>());
-						specs.wrapS = static_cast<TextureWrapMode>(specsNode["WrapS"].as<int>());
-						specs.wrapT = static_cast<TextureWrapMode>(specsNode["WrapT"].as<int>());
-						renderableComponent.texture = Texture2D::CreateRef(specs);
+						specs.texture = LocalTexture2D::Create(renderableComponentNode["Texture"].as<std::string>(), 4);
+						specs.minFilter = static_cast<TextureFilterMode>(specsNode["MinFilter"].as<int32_t>());
+						specs.magFilter = static_cast<TextureFilterMode>(specsNode["MagFilter"].as<int32_t>());
+						specs.wrapS = static_cast<TextureWrapMode>(specsNode["WrapS"].as<int32_t>());
+						specs.wrapT = static_cast<TextureWrapMode>(specsNode["WrapT"].as<int32_t>());
+						renderableComponent.texture = Texture2D::Create(specs);
 
 					}
 

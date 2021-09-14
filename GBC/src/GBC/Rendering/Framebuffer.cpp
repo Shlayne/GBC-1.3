@@ -5,24 +5,12 @@
 
 namespace gbc
 {
-	Ref<Framebuffer> Framebuffer::CreateRef(const FramebufferSpecification& specification)
+	Ref<Framebuffer> Framebuffer::Create(const FramebufferSpecification& specification)
 	{
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::Headless: return nullptr;
-			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLFramebuffer>(specification);
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
-		return nullptr;
-	}
-
-	Scope<Framebuffer> Framebuffer::CreateScope(const FramebufferSpecification& specification)
-	{
-		switch (RendererAPI::GetAPI())
-		{
-			case RendererAPI::API::Headless: return nullptr;
-			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLFramebuffer>(specification);
+			case RendererAPI::API::OpenGL: return CreateRef<OpenGLFramebuffer>(specification);
 		}
 
 		GBC_CORE_ASSERT(false, "Unknown Renderer API!");

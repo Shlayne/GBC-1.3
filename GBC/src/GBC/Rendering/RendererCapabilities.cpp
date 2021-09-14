@@ -4,18 +4,18 @@
 
 namespace gbc
 {
-	int RendererCapabilities::GetMaxTextureSlots()
+	int32_t RendererCapabilities::GetMaxTextureSlots()
 	{ return Renderer::api->GetMaxTextureSlots(); }
 
-	int RendererCapabilities::GetMaxTextureSize()
+	int32_t RendererCapabilities::GetMaxTextureSize()
 	{ return Renderer::api->GetMaxTextureSize(); }
 
-	int RendererCapabilities::GetMaxFramebufferWidth()
+	int32_t RendererCapabilities::GetMaxFramebufferWidth()
 	{ return Renderer::api->GetMaxFramebufferWidth(); }
 
-	int RendererCapabilities::GetMaxFramebufferHeight()
+	int32_t RendererCapabilities::GetMaxFramebufferHeight()
 	{ return Renderer::api->GetMaxFramebufferHeight(); }
 
-	int RendererCapabilities::GetMaxFramebufferColorAttachments()
+	int32_t RendererCapabilities::GetMaxFramebufferColorAttachments()
 	{ return Renderer::api->GetMaxFramebufferColorAttachments(); }
 }

@@ -1,6 +1,6 @@
 #include "DemoPanel.h"
 #if GBC_CONFIG_DEBUG
-#include "imgui/imgui.h"
+#include <imgui/imgui.h>
 
 namespace gbc
 {

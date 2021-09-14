@@ -42,7 +42,7 @@ namespace gbc
 		GBC_CORE_ASSERT(false, "Unknown Projection Type!");
 	}
 
-	void SceneCamera::OnViewportResize(int width, int height)
+	void SceneCamera::OnViewportResize(int32_t width, int32_t height)
 	{
 		aspectRatio = static_cast<float>(width) / height;
 		Recalculate();

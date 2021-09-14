@@ -1,8 +1,9 @@
 #include "ContentBrowserPanel.h"
-#include "imgui/imgui.h"
-#include "GBC/ImGui/ImGuiHelper.h"
+#include <imgui/imgui.h>
+#include <regex>
 #include "GBC/Core/Input.h"
 #include "GBC/Events/MouseEvents.h"
+#include "GBC/ImGui/ImGuiHelper.h"
 
 namespace gbc
 {
@@ -15,14 +16,15 @@ namespace gbc
 		currentCachedDirectory = cachedDirectories.begin();
 		RefreshDirectory(true);
 
-		directoryTexture = Texture2D::CreateRef(CreateRef<LocalTexture2D>("Resources/Icons/ContentBrowserPanel/DirectoryIcon.png", 4));
-		fileTexture = Texture2D::CreateRef(CreateRef<LocalTexture2D>("Resources/Icons/ContentBrowserPanel/FileIcon.png", 4));
+		directoryTexture = Texture2D::Create(CreateRef<LocalTexture2D>("Resources/Icons/ContentBrowserPanel/DirectoryIcon.png", 4));
+		fileTexture = Texture2D::Create(CreateRef<LocalTexture2D>("Resources/Icons/ContentBrowserPanel/FileIcon.png", 4));
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
 	{
 		if (enabled)
 		{
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 4.0f, 2.0f });
 			ImGui::Begin(name.c_str(), &enabled, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 			Update();
 
@@ -34,13 +36,28 @@ namespace gbc
 				ImGui::EndChild();
 
 				ImGui::TableNextColumn();
-				ImGui::BeginChild("ContentBrowserExplorer");
-				DrawBrowser();
+				ImGui::BeginChild("ContentBrowserSearchBarExplorer", { 0.0f, 0.0f }, false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+				if (ImGui::BeginTable("ContentBrowserSearchBar", 1, ImGuiTableFlags_NoPadOuterX))
+				{
+					ImGui::TableNextColumn();
+					DrawSearchBar();
+					ImGui::Separator();
+					ImGui::TableNextColumn();
+					if (ImGui::BeginChild("ContentBrowserExplorer"))
+					{
+						ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
+						DrawExplorer();
+						ImGui::EndChild();
+					}
+					ImGui::EndTable();
+				}
 				ImGui::EndChild();
 
 				ImGui::EndTable();
 			}
+
 			ImGui::End();
+			ImGui::PopStyleVar();
 		}
 	}
 
@@ -78,10 +95,12 @@ namespace gbc
 			PushDirectory(directory.path);
 	}
 
-	void ContentBrowserPanel::DrawBrowser()
+	void ContentBrowserPanel::DrawSearchBar()
 	{
-		ImVec2 spacing = ImGui::GetStyle().ItemSpacing;
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { spacing.x / 2.0f, spacing.y });
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
+
+		auto itemSpacing = ImGui::GetStyle().ItemSpacing;
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { itemSpacing.x * 0.5f, itemSpacing.y });
 
 		if (ImGui::Button("<") || (ImGui::IsMouseReleased(3) && ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows)))
 			BackwardDirectory();
@@ -95,18 +114,24 @@ namespace gbc
 			RefreshDirectory(true);
 
 		ImGui::SameLine();
-		ImGui::InputTextWithHint("", "Search...", searchBuffer, searchBufferSize);
-		// TODO
+		ImGui::PushItemWidth(200.0f);
+		if (ImGui::InputTextWithHint("", "Search...", searchBuffer, searchBufferSize))
+			searchSize = std::strlen(searchBuffer);
+
+		ImGui::SameLine();
+		ImGui::Text(currentCachedDirectoryText.c_str());
 
 		ImGui::PopStyleVar();
-		ImGui::Separator();
+	}
+
+	void ContentBrowserPanel::DrawExplorer()
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 2.0f, 2.0f });
+		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 
 		float padding = ImGui::GetStyle().CellPadding.x;
 		float thumbnailSize = 96.0f;
-		int columnCount = std::max(1, static_cast<int>(ImGui::GetContentRegionAvail().x / (thumbnailSize + 2.0f * padding)));
-
-		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { padding, padding });
-		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
+		int columnCount = std::max(1, static_cast<int>((ImGui::GetContentRegionAvail().x - padding) / (thumbnailSize + 2.0f * padding)));
 
 		if (ImGui::BeginTable("ContentBrowserExplorer", columnCount, ImGuiTableFlags_SameWidths))
 		{
@@ -163,79 +188,98 @@ namespace gbc
 				auto filename = relativePath.filename();
 				auto filenameString = filename.string();
 
-				void* textureID = (void*)static_cast<size_t>(fileTexture->GetRendererID());
-				if (file.directory)
-					textureID = (void*)static_cast<size_t>(directoryTexture->GetRendererID());
-
-				ImGui::ImageButton(textureID, { thumbnailSize, thumbnailSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f });
-
-				if (ImGui::BeginDragDropSource())
-				{
-					auto relativePathString = (projectAssetDirectory / relativePath).string();
-					ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", relativePathString.c_str(), relativePathString.size() + 1, ImGuiCond_Once);
-					ImGui::EndDragDropSource();
-				}
-
-				if (ImGui::IsItemHovered())
-				{
-					if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-					{
-						if (file.directory)
-						{
-							PushDirectory(*currentCachedDirectory / filename);
-							changed = true;
-						}
-					}
-					else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-					{
-						ImGui::OpenPopup("ContentBrowserFileOptions");
-						clickedFileIndex = i;
-					}
-				}
-
-				if (ImGui::BeginPopup("ContentBrowserFileOptions"))
-				{
-					if (ImGui::MenuItem("Delete"))
-					{
-						ImGui::CloseCurrentPopup();
-						deletingFile = true;
-					}
-					if (ImGui::MenuItem("Rename"))
-					{
-						ImGui::CloseCurrentPopup();
-
-						memcpy_s(fileNameBuffer, fileNameBufferSize, filenameString.c_str(), filenameString.size() + 1);
-						renamingFile = true;
-					}
-					ImGui::EndPopup();
-				}
-
-				if (clickedFileIndex == i && renamingFile)
-				{
-					if (ImGuiHelper::InputText(fileNameBuffer))
-					{
-						try
-						{
-							std::filesystem::rename(file.path, *currentCachedDirectory / fileNameBuffer);
-							deferredChange = true;
-							directoriesAltered = file.directory;
-						}
-#if GBC_ENABLE_LOGGING
-						catch (std::filesystem::filesystem_error& error)
-#else
-						catch (...)
-#endif
-						{
-							GBC_ERROR("Failed to rename {0}: {1}", file.directory ? "directory" : "file", error.what());
-						}
-
-						renamingFile = false;
-					}
-				}
+				bool passedSearch = false;
+				if (searchSize == 0)
+					passedSearch = true;
 				else
-					ImGui::TextWrapped(filenameString.c_str());
+				{
+					// Apparently, when an unescaped backslash is at the end of the regex, it throws an error, which is what this check is for.
+					std::string_view searchBufferStringView(searchBuffer, searchSize);
+					if (!(searchBufferStringView.ends_with('\\') && (searchBufferStringView.size() == 1 || searchBufferStringView[searchBufferStringView.size() - 2] != '\\')))
+					{
+						std::regex regex(searchBuffer, searchSize, std::regex_constants::icase);
+						if (std::regex_search(filenameString.c_str(), regex, std::regex_constants::match_any))
+							passedSearch = true;
+					}
+				}
 
-				ImGui::TableNextColumn();
+				if (passedSearch)
+				{
+					void* textureID = (void*)static_cast<size_t>((file.directory ? directoryTexture : fileTexture)->GetRendererID());
+					ImGui::ImageButton(textureID, { thumbnailSize, thumbnailSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f });
+
+					if (ImGui::BeginDragDropSource())
+					{
+						auto relativePathString = (projectAssetDirectory / relativePath).string();
+						ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", relativePathString.c_str(), relativePathString.size() + 1, ImGuiCond_Once);
+						ImGui::EndDragDropSource();
+					}
+
+					if (ImGui::IsItemHovered())
+					{
+						if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+						{
+							if (file.directory)
+							{
+								PushDirectory(*currentCachedDirectory / filename);
+								changed = true;
+							}
+						}
+						else if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+						{
+							ImGui::OpenPopup("ContentBrowserFileOptions");
+							clickedFileIndex = i;
+						}
+					}
+
+					if (ImGui::BeginPopup("ContentBrowserFileOptions"))
+					{
+						if (ImGui::MenuItem("Delete"))
+						{
+							ImGui::CloseCurrentPopup();
+							deletingFile = true;
+						}
+						if (ImGui::MenuItem("Rename"))
+						{
+							ImGui::CloseCurrentPopup();
+
+							memcpy_s(fileNameBuffer, fileNameBufferSize, filenameString.c_str(), filenameString.size() + 1);
+							renamingFile = true;
+						}
+						ImGui::EndPopup();
+					}
+
+					if (clickedFileIndex == i && renamingFile)
+					{
+						if (ImGuiHelper::InputText(fileNameBuffer))
+						{
+							try
+							{
+								std::filesystem::rename(file.path, *currentCachedDirectory / fileNameBuffer);
+								deferredChange = true;
+								directoriesAltered = file.directory;
+							}
+	#if GBC_ENABLE_LOGGING
+							catch (std::filesystem::filesystem_error& error)
+	#else
+							catch (...)
+	#endif
+							{
+								GBC_ERROR("Failed to rename {0}: {1}", file.directory ? "directory" : "file", error.what());
+							}
+
+							renamingFile = false;
+						}
+					}
+					else
+					{
+						ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 1.5f * padding);
+						ImGui::TextWrapped(filenameString.c_str());
+					}
+
+					ImGui::TableNextColumn();
+				}
+
 				ImGui::PopID();
 
 				if (clickedFileIndex == i && deletingFile)
@@ -351,6 +395,20 @@ namespace gbc
 
 	void ContentBrowserPanel::RefreshDirectory(bool refreshAssetDirectory)
 	{
+		// Whenever currentCachedDirectory is updated, update currentCachedDirectoryText
+		{
+			currentCachedDirectoryText.clear();
+			auto& directoryString = currentCachedDirectory->native();
+			for (auto wc : directoryString)
+			{
+				char c = static_cast<char>(wc);
+				if (c == '\\' || c == '/')
+					currentCachedDirectoryText += "  /  ";
+				else
+					currentCachedDirectoryText += c;
+			}
+		}
+
 		if (refreshAssetDirectory)
 		{
 			assetDirectory.subdirectories.clear();

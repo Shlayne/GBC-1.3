@@ -4,6 +4,19 @@
 
 namespace gbc
 {
+	static void DebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+	{
+		switch (severity)
+		{
+			case GL_DEBUG_SEVERITY_HIGH:         GBC_CORE_FATAL(message); return;
+			case GL_DEBUG_SEVERITY_MEDIUM:       GBC_CORE_ERROR(message); return;
+			case GL_DEBUG_SEVERITY_LOW:          GBC_CORE_WARN (message); return;
+			case GL_DEBUG_SEVERITY_NOTIFICATION: GBC_CORE_TRACE(message); return;
+		}
+
+		GBC_CORE_ASSERT(false, "Unknown OpenGL severity level.");
+	}
+
 	static GLenum GetOpenGLPrimitive(RendererPrimitive primitive)
 	{
 		switch (primitive)
@@ -40,10 +53,19 @@ namespace gbc
 
 	void OpenGLRendererAPI::Init()
 	{
+		GBC_PROFILE_FUNCTION();
+
 		clearBits |= GL_COLOR_BUFFER_BIT;
 
 		// TODO: this should be abstracted (shouldn't go here)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+#if GBC_CONFIG_DEBUG
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(DebugMessageCallback, nullptr);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+#endif
 	}
 
 	void OpenGLRendererAPI::Shutdown()
@@ -87,7 +109,7 @@ namespace gbc
 		glDisable(GL_CULL_FACE);
 	}
 
-	void OpenGLRendererAPI::SetViewport(int x, int y, int width, int height)
+	void OpenGLRendererAPI::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
 	{
 		glViewport(x, y, width, height);
 	}
@@ -99,7 +121,6 @@ namespace gbc
 
 	void OpenGLRendererAPI::Clear()
 	{
-		// TODO: abstract this
 		glClear(clearBits);
 	}
 
@@ -113,37 +134,37 @@ namespace gbc
 
 	// Renderer capabilities
 
-	int OpenGLRendererAPI::GetMaxTextureSlots()
+	int32_t OpenGLRendererAPI::GetMaxTextureSlots()
 	{
-		int maxTextureSlots = 0;
+		int32_t maxTextureSlots = 0;
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureSlots);
 		return maxTextureSlots;
 	}
 
-	int OpenGLRendererAPI::GetMaxTextureSize()
+	int32_t OpenGLRendererAPI::GetMaxTextureSize()
 	{
-		int maxTextureSize = 0;
+		int32_t maxTextureSize = 0;
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 		return maxTextureSize;
 	}
 
-	int OpenGLRendererAPI::GetMaxFramebufferWidth()
+	int32_t OpenGLRendererAPI::GetMaxFramebufferWidth()
 	{
-		int maxFramebufferWidth = 0;
+		int32_t maxFramebufferWidth = 0;
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_WIDTH, &maxFramebufferWidth);
 		return maxFramebufferWidth;
 	}
 
-	int OpenGLRendererAPI::GetMaxFramebufferHeight()
+	int32_t OpenGLRendererAPI::GetMaxFramebufferHeight()
 	{
-		int maxFramebufferHeight = 0;
+		int32_t maxFramebufferHeight = 0;
 		glGetIntegerv(GL_MAX_FRAMEBUFFER_HEIGHT, &maxFramebufferHeight);
 		return maxFramebufferHeight;
 	}
 
-	int OpenGLRendererAPI::GetMaxFramebufferColorAttachments()
+	int32_t OpenGLRendererAPI::GetMaxFramebufferColorAttachments()
 	{
-		int maxFramebufferColorAttachments = 0;
+		int32_t maxFramebufferColorAttachments = 0;
 		glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxFramebufferColorAttachments);
 		return maxFramebufferColorAttachments;
 	}

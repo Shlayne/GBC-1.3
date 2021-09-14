@@ -101,7 +101,7 @@ namespace gbc
 		return false;
 	}
 
-	void EditorCamera::OnViewportResize(int width, int height)
+	void EditorCamera::OnViewportResize(int32_t width, int32_t height)
 	{
 		viewportSize.x = static_cast<float>(width);
 		viewportSize.y = static_cast<float>(height);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <entt/entt.hpp>
+#include "GBC/Core/Core.h"
 #include "GBC/Scene/Scene.h"
 
 namespace gbc

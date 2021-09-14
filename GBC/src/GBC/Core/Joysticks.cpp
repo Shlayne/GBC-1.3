@@ -33,9 +33,9 @@ namespace gbc
 
 		connected = false;
 
-		this->buttonCount = 0;
-		this->axisCount = 0;
-		this->hatCount = 0;
+		buttonCount = 0;
+		axisCount = 0;
+		hatCount = 0;
 
 		delete[] buttons;
 		delete[] axes;

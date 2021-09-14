@@ -51,12 +51,12 @@ namespace gbc
 		glCreateTextures(textureTarget, count, id);
 	}
 
-	static void BindTextures(GLenum textureTarget, uint32_t id)
+	static void BindTexture(GLenum textureTarget, uint32_t id)
 	{
 		glBindTexture(textureTarget, id);
 	}
 
-	static void AttachColorTexture(uint32_t id, int samples, GLenum internalFormat, GLenum format, int width, int height, FramebufferTextureSpecification textureSpecification, int index)
+	static void AttachColorTexture(uint32_t id, int32_t samples, GLenum internalFormat, GLenum format, int32_t width, int32_t height, FramebufferTextureSpecification textureSpecification, uint32_t index)
 	{
 		bool multisampled = samples > 1;
 		if (multisampled)
@@ -75,7 +75,7 @@ namespace gbc
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GetTextureTarget(multisampled), id, 0);
 	}
 
-	static void AttachDepthTexture(uint32_t id, int samples, GLenum format, GLenum attachmentType, int width, int height, FramebufferTextureSpecification textureSpecification)
+	static void AttachDepthTexture(uint32_t id, int32_t samples, GLenum format, GLenum attachmentType, int32_t width, int32_t height, FramebufferTextureSpecification textureSpecification)
 	{
 		bool multisampled = samples > 1;
 		if (multisampled)
@@ -100,7 +100,10 @@ namespace gbc
 		for (const auto& specification : this->specification.attachments.attachments)
 		{
 			if (IsDepthFormat(specification.format))
+			{
+				GBC_CORE_ASSERT(depthAttachmentSpecification.format == FramebufferTextureFormat::None, "Framebuffer already has depth attachment!");
 				depthAttachmentSpecification = specification;
+			}
 			else
 				colorAttachmentSpecifications.push_back(specification);
 		}
@@ -129,17 +132,17 @@ namespace gbc
 			colorAttachments.resize(colorAttachmentSpecifications.size());
 			CreateTextures(textureTarget, colorAttachments.data(), static_cast<uint32_t>(colorAttachments.size()));
 
-			for (size_t i = 0; i < colorAttachments.size(); i++)
+			for (uint32_t i = 0; i < static_cast<uint32_t>(colorAttachments.size()); i++)
 			{
-				BindTextures(textureTarget, colorAttachments[i]);
+				BindTexture(textureTarget, colorAttachments[i]);
 
 				switch (colorAttachmentSpecifications[i].format)
 				{
 					case FramebufferTextureFormat::RGBA8:
-						AttachColorTexture(colorAttachments[i], specification.samples, GL_RGBA8, GL_RGBA, specification.width, specification.height, colorAttachmentSpecifications[i], (int)i);
+						AttachColorTexture(colorAttachments[i], specification.samples, GL_RGBA8, GL_RGBA, specification.width, specification.height, colorAttachmentSpecifications[i], i);
 						break;
 					case FramebufferTextureFormat::RedInteger:
-						AttachColorTexture(colorAttachments[i], specification.samples, GL_R32I, GL_RED_INTEGER, specification.width, specification.height, colorAttachmentSpecifications[i], (int)i);
+						AttachColorTexture(colorAttachments[i], specification.samples, GL_R32I, GL_RED_INTEGER, specification.width, specification.height, colorAttachmentSpecifications[i], i);
 						break;
 				}
 			}
@@ -148,7 +151,7 @@ namespace gbc
 		if (depthAttachmentSpecification.format != FramebufferTextureFormat::None)
 		{
 			CreateTextures(textureTarget, &depthAttachment, 1);
-			BindTextures(textureTarget, depthAttachment);
+			BindTexture(textureTarget, depthAttachment);
 
 			switch (depthAttachmentSpecification.format)
 			{
@@ -167,15 +170,14 @@ namespace gbc
 		{
 			int maxColorAttachments = RendererCapabilities::GetMaxFramebufferColorAttachments();
 			GBC_CORE_ASSERT(colorAttachments.size() <= maxColorAttachments, "Too many Framebuffer color attachments!");
-			GLenum* buffers = new GLenum[colorAttachments.size()];
+			GLenum* buffers = (GLenum*)alloca(colorAttachments.size() * sizeof(GLenum));
 			for (uint32_t i = 0; i < static_cast<uint32_t>(colorAttachments.size()); i++)
 				buffers[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
 
 			glDrawBuffers(static_cast<GLsizei>(colorAttachments.size()), buffers);
-			delete[] buffers;
 		}
 
-		GBC_CORE_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer incomplete!");
+		GBC_CORE_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete!");
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
@@ -205,7 +207,7 @@ namespace gbc
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void OpenGLFramebuffer::OnViewportResize(int width, int height)
+	void OpenGLFramebuffer::OnViewportResize(int32_t width, int32_t height)
 	{
 		GBC_CORE_ASSERT(width <= RendererCapabilities::GetMaxFramebufferWidth() && height <= RendererCapabilities::GetMaxFramebufferHeight(), "Framebuffer too large!");
 		specification.width = width;
@@ -213,20 +215,23 @@ namespace gbc
 		Recreate();
 	}
 
-	void OpenGLFramebuffer::GetColorPixel(void* pixel, int x, int y, uint32_t index) const
+	int32_t OpenGLFramebuffer::GetColorPixel(int32_t x, int32_t y, uint32_t index) const
 	{
-		GBC_CORE_ASSERT(index < colorAttachments.size() && x >= 0 && x < specification.width && y >= 0 && y < specification.height, "Framebuffer index or position out of bounds!");
+		GBC_CORE_ASSERT(index < colorAttachments.size(), "Framebuffer attachment index out of bounds!");
+		GBC_CORE_ASSERT(x >= 0 && x < specification.width && y >= 0 && y < specification.height, "Framebuffer position out of bounds!");
 
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + index);
-		// TODO: abstract this---VVVVVVVVVVVVVV--VVVVVV
-		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, pixel);
+		GLenum format = GetOpenGLFormat(colorAttachmentSpecifications[index].format);
+		int32_t pixel;
+		glReadPixels(x, y, 1, 1, format, GL_INT, &pixel);
+		return pixel;
 	}
 
-	void OpenGLFramebuffer::ClearColorAttachment(int value, uint32_t index)
+	void OpenGLFramebuffer::ClearColorAttachment(int32_t value, uint32_t index)
 	{
-		GBC_CORE_ASSERT(index < colorAttachments.size(), "Framebuffer index out of bounds!");
+		GBC_CORE_ASSERT(index < colorAttachments.size(), "Framebuffer attachment index out of bounds!");
 
-		// TODO: abstract this------------------------------------------------------------------------------------VVVVVV
-		glClearTexImage(colorAttachments[index], 0, GetOpenGLFormat(colorAttachmentSpecifications[index].format), GL_INT, &value);
+		GLenum format = GetOpenGLFormat(colorAttachmentSpecifications[index].format);
+		glClearTexImage(colorAttachments[index], 0, format, GL_INT, &value);
 	}
 }

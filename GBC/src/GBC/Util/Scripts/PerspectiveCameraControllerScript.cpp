@@ -11,9 +11,9 @@ namespace gbc
 
 		float movementSpeed = speed * timestep;
 
-		int movementForward = 0;
-		int movementRight = 0;
-		int movementUp = 0;
+		int32_t movementForward = 0;
+		int32_t movementRight = 0;
+		int32_t movementUp = 0;
 		glm::vec3 forward = movementSpeed * glm::vec3(cosf(transform.rotation.y), 0.0f, sinf(transform.rotation.y));
 		glm::vec3 right = glm::cross(forward, { 0.0f, 1.0f, 0.0f });
 
@@ -26,27 +26,23 @@ namespace gbc
 
 		if (movementForward != 0)
 		{
-			transform.translation.z += (float)movementForward * forward.x;
-			transform.translation.x += (float)movementForward * forward.z;
+			transform.translation.z += static_cast<float>(movementForward) * forward.x;
+			transform.translation.x += static_cast<float>(movementForward) * forward.z;
 		}
 		if (movementRight != 0)
 		{
-			transform.translation.x += (float)movementRight * right.z;
-			transform.translation.z += (float)movementRight * right.x;
+			transform.translation.x += static_cast<float>(movementRight) * right.z;
+			transform.translation.z += static_cast<float>(movementRight) * right.x;
 		}
 		if (movementUp != 0)
-			transform.translation.y += (float)movementUp * movementSpeed;
+			transform.translation.y += static_cast<float>(movementUp) * movementSpeed;
 
 		glm::vec2 mousePos = Input::GetAbsoluteMousePosition();
 		glm::vec2 mouseDPos = mousePos - lastMousePos;
 		lastMousePos = mousePos;
 
-		// TODO: remove this check when editor camera is in place
-		if (Input::IsMouseButtonPressed(MouseButton::ButtonLeft))
-		{
-			float rotationSpeed = sensitivity * timestep;
-			transform.rotation.y -= mouseDPos.x * rotationSpeed;
-			transform.rotation.x = std::min(std::max(transform.rotation.x - mouseDPos.y * rotationSpeed, minPitch), maxPitch);
-		}
+		float rotationSpeed = sensitivity * timestep;
+		transform.rotation.y -= mouseDPos.x * rotationSpeed;
+		transform.rotation.x = std::min(std::max(transform.rotation.x - mouseDPos.y * rotationSpeed, minPitch), maxPitch);
 	}
 }

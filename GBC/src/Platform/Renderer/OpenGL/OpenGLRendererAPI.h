@@ -17,7 +17,7 @@ namespace gbc
 		virtual void EnableCullFace() override;
 		virtual void DisableCullFace() override;
 
-		virtual void SetViewport(int x, int y, int width, int height) override;
+		virtual void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height) override;
 
 		virtual void SetClearColor(float red, float green, float blue, float alpha) override;
 		virtual void Clear() override;
@@ -25,11 +25,11 @@ namespace gbc
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, uint32_t offset, uint32_t count, RendererPrimitive primitive) override;
 
 		// Renderer capabilities
-		virtual int GetMaxTextureSlots() override;
-		virtual int GetMaxTextureSize() override;
-		virtual int GetMaxFramebufferWidth() override;
-		virtual int GetMaxFramebufferHeight() override;
-		virtual int GetMaxFramebufferColorAttachments() override;
+		virtual int32_t GetMaxTextureSlots() override;
+		virtual int32_t GetMaxTextureSize() override;
+		virtual int32_t GetMaxFramebufferWidth() override;
+		virtual int32_t GetMaxFramebufferHeight() override;
+		virtual int32_t GetMaxFramebufferColorAttachments() override;
 	private:
 		uint32_t clearBits = 0;
 	};

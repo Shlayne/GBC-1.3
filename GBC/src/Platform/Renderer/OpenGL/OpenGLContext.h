@@ -9,7 +9,6 @@ namespace gbc
 	class OpenGLContext : public Context
 	{
 	public:
-		virtual void PreInit() override;
 		virtual void Init(void* nativeWindow) override;
 		virtual void SwapBuffers() override;
 		virtual Timestep GetElapsedTime() const override;

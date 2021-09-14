@@ -135,7 +135,7 @@ namespace gbc
 		BasicRenderer::EndScene();
 	}
 
-	void Scene::OnViewportResize(int width, int height)
+	void Scene::OnViewportResize(int32_t width, int32_t height)
 	{
 		GBC_PROFILE_FUNCTION();
 

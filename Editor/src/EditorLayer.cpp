@@ -1,6 +1,6 @@
 #include "EditorLayer.h"
-#include "imgui/imgui.h"
-#include "imguizmo/ImGuizmo.h"
+#include <imgui/imgui.h>
+#include <imguizmo/ImGuizmo.h>
 #include "GBC/Scene/SceneSerializer.h"
 #include "Panels/ContentBrowserPanel.h"
 #if GBC_ENABLE_STATS
@@ -19,8 +19,8 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		playButtonTexture = Texture2D::CreateRef(CreateRef<LocalTexture2D>("Resources/Icons/PlayButton.png"));
-		stopButtonTexture = Texture2D::CreateRef(CreateRef<LocalTexture2D>("Resources/Icons/StopButton.png"));
+		playButtonTexture = Texture2D::Create(CreateRef<LocalTexture2D>("Resources/Icons/PlayButton.png"));
+		stopButtonTexture = Texture2D::Create(CreateRef<LocalTexture2D>("Resources/Icons/StopButton.png"));
 
 		Window& window = Application::Get().GetWindow();
 
@@ -31,7 +31,7 @@ namespace gbc
 		framebufferSpecification.width = window.GetWidth();
 		framebufferSpecification.height = window.GetHeight();
 		framebufferSpecification.attachments = { { FramebufferTextureFormat::RGBA8 }, { FramebufferTextureFormat::Depth24Stencil8 } };
-		framebuffer = Framebuffer::CreateRef(framebufferSpecification);
+		framebuffer = Framebuffer::Create(framebufferSpecification);
 
 		scene = CreateRef<Scene>();
 
@@ -174,10 +174,6 @@ namespace gbc
 
 			if (ImGui::BeginMenu("View"))
 			{
-				Window& window = Application::Get().GetWindow();
-				if (ImGui::MenuItem(window.IsFullscreen() ? "Windowed" : "Fullscreen"))
-					window.ToggleFullscreen();
-
 				if (ImGui::BeginMenu("Panels"))
 				{
 					for (auto& [name, panel] : panels)
@@ -206,10 +202,10 @@ namespace gbc
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, { 0.0f, 0.0f });
 
-		float buttonSize = ImGui::GetItemRectSize().y;
+		float buttonSize = ImGui::GetItemRectSize().y + 4.0f;
 		Ref<Texture2D> icon = sceneState == SceneState::Edit ? playButtonTexture : stopButtonTexture;
 
-		ImGui::SetCursorPos(ImVec2((ImGui::GetWindowContentRegionWidth() - buttonSize) * 0.5f, 2.0f));
+		ImGui::SetCursorPos({ (ImGui::GetWindowContentRegionWidth() - buttonSize) * 0.5f, 0.0f });
 		if (ImGui::ImageButton((void*)(size_t)icon->GetRendererID(), { buttonSize, buttonSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
 		{
 			switch (sceneState)

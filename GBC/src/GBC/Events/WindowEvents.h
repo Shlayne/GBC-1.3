@@ -29,37 +29,37 @@ namespace gbc
 	class WindowResizeEvent : public WindowEvent
 	{
 	public:
-		WindowResizeEvent(void* nativeWindow, int width, int height);
+		WindowResizeEvent(void* nativeWindow, int32_t width, int32_t height);
 		EVENT_CLASS_TYPE(EventType::WindowResize);
 		EVENT_CLASS_CATEGORY(EventCategory_Window | EventCategory_Application);
 
-		inline int GetWidth() const noexcept { return width; }
-		inline int GetHeight() const noexcept { return height; }
+		inline int32_t GetWidth() const noexcept { return width; }
+		inline int32_t GetHeight() const noexcept { return height; }
 
 #if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
 #endif
 	private:
-		int width;
-		int height;
+		int32_t width;
+		int32_t height;
 	};
 
 	class WindowMoveEvent : public WindowEvent
 	{
 	public:
-		WindowMoveEvent(void* nativeWindow, int x, int y);
+		WindowMoveEvent(void* nativeWindow, int32_t x, int32_t y);
 		EVENT_CLASS_TYPE(EventType::WindowMove);
 		EVENT_CLASS_CATEGORY(EventCategory_Window);
 
-		inline int GetX() const noexcept { return x; }
-		inline int GetY() const noexcept { return y; }
+		inline int32_t GetX() const noexcept { return x; }
+		inline int32_t GetY() const noexcept { return y; }
 
 #if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
 #endif
 	private:
-		int x;
-		int y;
+		int32_t x;
+		int32_t y;
 	};
 
 	class WindowFocusEvent : public WindowEvent
@@ -113,37 +113,37 @@ namespace gbc
 	class WindowDropEvent : public WindowEvent
 	{
 	public:
-		WindowDropEvent(void* nativeWindow, int pathCount, const char** paths);
+		WindowDropEvent(void* nativeWindow, int32_t pathCount, const char** paths);
 		EVENT_CLASS_TYPE(EventType::WindowDrop);
 		EVENT_CLASS_CATEGORY(EventCategory_Window);
 
-		inline int GetPathCount() const noexcept { return pathCount; }
+		inline int32_t GetPathCount() const noexcept { return pathCount; }
 		inline const char** GetPaths() const noexcept { return paths; }
 
 #if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
 #endif
 	private:
-		int pathCount;
+		int32_t pathCount;
 		const char** paths;
 	};
 
 	class WindowFramebufferResizeEvent : public WindowEvent
 	{
 	public:
-		WindowFramebufferResizeEvent(void* nativeWindow, int width, int height);
+		WindowFramebufferResizeEvent(void* nativeWindow, int32_t width, int32_t height);
 		EVENT_CLASS_TYPE(EventType::WindowFramebufferResize);
 		EVENT_CLASS_CATEGORY(EventCategory_Window);
 
-		inline int GetWidth() const noexcept { return width; }
-		inline int GetHeight() const noexcept { return height; }
+		inline int32_t GetWidth() const noexcept { return width; }
+		inline int32_t GetHeight() const noexcept { return height; }
 
 #if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
 #endif
 	private:
-		int width;
-		int height;
+		int32_t width;
+		int32_t height;
 	};
 
 	class WindowContentScaleEvent : public WindowEvent

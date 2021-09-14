@@ -1,5 +1,7 @@
-# ProfileSessions
+# GBC
 Editor/ProfileSessions/**
+Editor/GBC.log
+**/imgui.ini
 
 # Visual Studio
 .vs/**
@@ -7,9 +9,6 @@ Editor/ProfileSessions/**
 **.vcxproj
 **.vcxproj.filters
 **.vcxproj.user
-
-# ImGui
-**/imgui.ini
 
 # Output Binaries
 bin/**

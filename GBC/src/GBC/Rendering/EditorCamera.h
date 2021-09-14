@@ -19,7 +19,7 @@ namespace gbc
 		inline float GetDistance() const noexcept { return distance; }
 		inline void SetDistance(float distance) noexcept { this->distance = distance; }
 
-		virtual void OnViewportResize(int width, int height) override;
+		virtual void OnViewportResize(int32_t width, int32_t height) override;
 
 		inline const glm::mat4& GetView() const noexcept { return view; }
 		inline glm::mat4 GetViewProjection() const noexcept { return projection * view; }

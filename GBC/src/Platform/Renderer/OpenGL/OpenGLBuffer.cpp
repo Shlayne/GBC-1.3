@@ -45,7 +45,7 @@ namespace gbc
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	void OpenGLVertexBuffer::SetData(uint32_t size, const void* data)
+	void OpenGLVertexBuffer::SetData(const void* data, uint32_t size)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, rendererID);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
@@ -74,11 +74,28 @@ namespace gbc
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
-	void OpenGLIndexBuffer::SetData(uint32_t count, const void* data)
+	void OpenGLIndexBuffer::SetData(const void* data, uint32_t count)
 	{
 		GBC_CORE_ASSERT(count <= this->count, "Index buffer SetData count out of bounds!");
 
-		glBindBuffer(GL_ARRAY_BUFFER, rendererID);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID);
 		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, count * static_cast<GLsizeiptr>(GetIndexBufferElementSize(type)), data);
+	}
+
+	OpenGLUniformBuffer::OpenGLUniformBuffer(uint32_t size, uint32_t binding, const void* data, BufferUsage usage)
+	{
+		glCreateBuffers(1, &rendererID);
+		glNamedBufferData(rendererID, size, data, GetOpenGLUsage(usage));
+		glBindBufferBase(GL_UNIFORM_BUFFER, binding, rendererID);
+	}
+
+	OpenGLUniformBuffer::~OpenGLUniformBuffer()
+	{
+		glDeleteBuffers(1, &rendererID);
+	}
+
+	void OpenGLUniformBuffer::SetData(const void* data, uint32_t size, uint32_t offset)
+	{
+		glNamedBufferSubData(rendererID, offset, size, data);
 	}
 }

@@ -5,24 +5,12 @@
 
 namespace gbc
 {
-	Ref<VertexArray> VertexArray::CreateRef()
+	Ref<VertexArray> VertexArray::Create()
 	{
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::Headless: return nullptr;
-			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLVertexArray>();
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
-		return nullptr;
-	}
-
-	Scope<VertexArray> VertexArray::CreateScope()
-	{
-		switch (RendererAPI::GetAPI())
-		{
-			case RendererAPI::API::Headless: return nullptr;
-			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLVertexArray>();
+			case RendererAPI::API::OpenGL: return CreateRef<OpenGLVertexArray>();
 		}
 
 		GBC_CORE_ASSERT(false, "Unknown Renderer API!");

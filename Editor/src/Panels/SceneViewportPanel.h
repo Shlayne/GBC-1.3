@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Panel.h"
+#include "Panels/Panel.h"
+#include <glm/glm.hpp>
 #include <functional>
-#include "glm/glm.hpp"
-#include "GBC/Rendering/Framebuffer.h"
 #include "GBC/Rendering/EditorCamera.h"
+#include "GBC/Rendering/Framebuffer.h"
 #include "GBC/Scene/Entity.h"
 
 namespace gbc

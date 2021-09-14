@@ -11,15 +11,14 @@ namespace gbc
 {
 	std::optional<std::string> FileDialog::OpenFile(const char* filter, const char* initialDirectory)
 	{
-		std::string initDir;
 		if (initialDirectory == nullptr)
 		{
-			initDir = std::filesystem::absolute("./").string();
-			initialDirectory = initDir.c_str();
+			initialDirectory = (const CHAR*)alloca(256 * sizeof(CHAR));
+			GetCurrentDirectoryA(256, (LPSTR)initialDirectory);
 		}
 
 		OPENFILENAMEA ofn;
-		CHAR szFile[260] = { 0 };
+		CHAR szFile[260]{ 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAMEA));
 		ofn.lStructSize = sizeof(OPENFILENAMEA);
 		ofn.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()));
@@ -37,15 +36,14 @@ namespace gbc
 
 	std::optional<std::string> FileDialog::SaveFile(const char* filter, const char* initialDirectory)
 	{
-		std::string initDir;
 		if (initialDirectory == nullptr)
 		{
-			initDir = std::filesystem::absolute("./").string();
-			initialDirectory = initDir.c_str();
+			initialDirectory = (const CHAR*)alloca(256 * sizeof(CHAR));
+			GetCurrentDirectoryA(256, (LPSTR)initialDirectory);
 		}
 
 		OPENFILENAMEA ofn;
-		CHAR szFile[260] = { 0 };
+		CHAR szFile[260]{ 0 };
 		ZeroMemory(&ofn, sizeof(OPENFILENAMEA));
 		ofn.lStructSize = sizeof(OPENFILENAMEA);
 		ofn.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()));
@@ -55,6 +53,7 @@ namespace gbc
 		ofn.nFilterIndex = 1;
 		ofn.lpstrInitialDir = initialDirectory;
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+		ofn.lpstrDefExt = strchr(filter, '\0') + 1;
 
 		if (GetSaveFileNameA(&ofn) == TRUE)
 			return ofn.lpstrFile;

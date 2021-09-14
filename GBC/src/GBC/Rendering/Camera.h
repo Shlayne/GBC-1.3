@@ -11,7 +11,7 @@ namespace gbc
 		Camera(const glm::mat4& projection) : projection(projection) {}
 		virtual ~Camera() = default;
 
-		virtual void OnViewportResize(int width, int height) {}
+		virtual void OnViewportResize(int32_t width, int32_t height) {}
 
 		inline const glm::mat4& GetProjection() const noexcept { return projection; }
 	protected:

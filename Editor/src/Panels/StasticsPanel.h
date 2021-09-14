@@ -2,7 +2,7 @@
 
 #include "GBC/Core/Core.h"
 #if GBC_ENABLE_STATS
-#include "Panel.h"
+#include "Panels/Panel.h"
 #include "GBC/Rendering/Basic/BasicRenderer.h"
 
 namespace gbc

@@ -39,14 +39,16 @@ namespace gbc
 		static float GetJoystickAxis(Joystick joystick, JoystickAxis axis);
 
 		static JoystickHatState GetJoystickHat(Joystick joystick, JoystickHat hat);
+
 	private:
 		friend class Application;
+		static void SetEventCallback(const EventCallbackFunc& callback);
 		static bool OnKeyPressEvent(KeyPressEvent& event);
 		static bool OnKeyReleaseEvent(KeyReleaseEvent& event);
 		static bool OnMouseButtonPressEvent(MouseButtonPressEvent& event);
 		static bool OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& event);
 
-		static void OnJoystickConnected(int jid);
-		static void OnJoystickDisconnected(int jid);
+		static void OnJoystickConnected(int32_t jid);
+		static void OnJoystickDisconnected(int32_t jid);
 	};
 }

@@ -3,22 +3,14 @@
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
 
-#define GBC_OPENGL_VERSION_MAJOR 4
-#define GBC_OPENGL_VERSION_MINOR 6
-#define GBC_OPENGL_VERSION "#version " GBC_STRINGIFY_MACRO(GBC_OPENGL_VERSION_MAJOR) GBC_STRINGIFY_MACRO(GBC_OPENGL_VERSION_MINOR) "0 core"
-
 namespace gbc
 {
-	void OpenGLContext::PreInit()
-	{
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GBC_OPENGL_VERSION_MAJOR);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GBC_OPENGL_VERSION_MINOR);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	}
-
 	const char* OpenGLContext::GetVersion() const
 	{
-		return GBC_OPENGL_VERSION;
+		static char buffer[] = "#version XX0 core";
+		buffer[9] = static_cast<char>(GLVersion.major + '0');
+		buffer[10] = static_cast<char>(GLVersion.minor + '0');
+		return buffer;
 	}
 
 	void OpenGLContext::Init(void* nativeWindow)

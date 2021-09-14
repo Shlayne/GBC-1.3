@@ -9,19 +9,22 @@ namespace gbc
 	struct InputData
 	{
 		// Key
-		std::array<bool, GLFW_KEY_LAST + 1> keys;
+		std::array<bool, GLFW_KEY_LAST + 1> keys{};
 
 		// Mouse
-		std::array<bool, GLFW_MOUSE_BUTTON_LAST + 1> mouseButtons;
+		std::array<bool, GLFW_MOUSE_BUTTON_LAST + 1> mouseButtons{};
 
 		// Joystick
-		std::array<JoystickState, GLFW_JOYSTICK_LAST + 1> joysticks;
+		std::array<JoystickState, GLFW_JOYSTICK_LAST + 1> joysticks{};
+
+		// Callback
+		EventCallbackFunc eventCallback;
 	};
 	static InputData data;
 
 	void Input::PreInit()
 	{
-		data.keys.fill(0);
+		data.keys.fill(false);
 		data.mouseButtons.fill(false);
 
 		glfwInitHint(GLFW_JOYSTICK_HAT_BUTTONS, GLFW_FALSE);
@@ -29,7 +32,7 @@ namespace gbc
 
 	void Input::Init()
 	{
-		glfwSetJoystickCallback([](int jid, int deviceEvent)
+		glfwSetJoystickCallback([](int32_t jid, int32_t deviceEvent)
 		{
 			switch (deviceEvent)
 			{
@@ -45,13 +48,13 @@ namespace gbc
 				OnJoystickConnected(jid);
 	}
 
-	void Input::OnJoystickConnected(int jid)
+	void Input::OnJoystickConnected(int32_t jid)
 	{
 		uint32_t buttonCount = 0;
 		uint32_t axisCount = 0;
 		uint32_t hatCount = 0;
 
-		(void)glfwGetJoystickHats(jid, (int*)&hatCount);
+		(void)glfwGetJoystickHats(jid, (int32_t*)&hatCount);
 
 		if (glfwJoystickIsGamepad(jid) == GLFW_TRUE)
 		{
@@ -60,25 +63,25 @@ namespace gbc
 		}
 		else
 		{
-			(void)glfwGetJoystickButtons(jid, (int*)&buttonCount);
-			(void)glfwGetJoystickAxes(jid, (int*)&axisCount);
+			(void)glfwGetJoystickButtons(jid, (int32_t*)&buttonCount);
+			(void)glfwGetJoystickAxes(jid, (int32_t*)&axisCount);
 		}
 
 		data.joysticks[jid].OnConnect(buttonCount, axisCount, hatCount);
 		JoystickConnectEvent event(jid, true);
-		Application::EventCallback(event);
+		data.eventCallback(event);
 	}
 
-	void Input::OnJoystickDisconnected(int jid)
+	void Input::OnJoystickDisconnected(int32_t jid)
 	{
 		data.joysticks[jid].OnDisconnect();
 		JoystickConnectEvent event(jid, false);
-		Application::EventCallback(event);
+		data.eventCallback(event);
 	}
 
 	void Input::Update()
 	{
-		for (int jid = GLFW_JOYSTICK_1; jid <= GLFW_JOYSTICK_LAST; jid++)
+		for (int32_t jid = GLFW_JOYSTICK_1; jid <= GLFW_JOYSTICK_LAST; jid++)
 		{
 			JoystickState& joystick = data.joysticks[jid];
 
@@ -86,9 +89,9 @@ namespace gbc
 			{
 				GLFWgamepadstate state;
 
-				int buttonCount;
-				int axisCount;
-				int hatCount;
+				int32_t buttonCount;
+				int32_t axisCount;
+				int32_t hatCount;
 
 				const unsigned char* buttons;
 				const float* axes;
@@ -108,14 +111,19 @@ namespace gbc
 					axes = glfwGetJoystickAxes(jid, &axisCount);
 				}
 
-				for (int i = 0; i < buttonCount; i++)
+				for (int32_t i = 0; i < buttonCount; i++)
 					joystick.SetButton(static_cast<JoystickButton>(i), buttons[i]);
-				for (int i = 0; i < axisCount; i++)
+				for (int32_t i = 0; i < axisCount; i++)
 					joystick.SetAxis(static_cast<JoystickAxis>(i), axes[i]);
-				for (int i = 0; i < hatCount; i++)
+				for (int32_t i = 0; i < hatCount; i++)
 					joystick.SetHat(static_cast<JoystickHat>(i), static_cast<JoystickHatState>(hats[i]));
 			}
 		}
+	}
+	
+	void Input::SetEventCallback(const EventCallbackFunc& callback)
+	{
+		data.eventCallback = callback;
 	}
 
 	bool Input::OnKeyPressEvent(KeyPressEvent& event)
@@ -173,7 +181,7 @@ namespace gbc
 	glm::vec2 Input::GetAbsoluteMousePosition()
 	{
 		GLFWwindow* window = glfwGetCurrentContext();
-		int windowX, windowY;
+		int32_t windowX, windowY;
 		double cursorX, cursorY;
 		glfwGetWindowPos(window, &windowX, &windowY);
 		glfwGetCursorPos(window, &cursorX, &cursorY);
@@ -199,7 +207,7 @@ namespace gbc
 	static bool IsJoystickButtonInState(Joystick joystick, JoystickButton button, bool buttonPressed)
 	{
 		GBC_CORE_ASSERT(joystick < Joystick::Count, "Joystick index out of bounds!");
-		int jid = static_cast<int>(joystick);
+		int32_t jid = static_cast<int>(joystick);
 		const JoystickState& joystickState = data.joysticks[jid];
 		return joystickState.IsConnected() && joystickState.GetButton(button) == buttonPressed;
 	}
@@ -213,7 +221,7 @@ namespace gbc
 	float Input::GetJoystickAxis(Joystick joystick, JoystickAxis axis)
 	{
 		GBC_CORE_ASSERT(joystick < Joystick::Count, "Joystick index out of bounds!");
-		int jid = static_cast<int>(joystick);
+		int32_t jid = static_cast<int>(joystick);
 		const JoystickState& joystickState = data.joysticks[jid];
 		return joystickState.IsConnected() ? joystickState.GetAxis(axis) : 0.0f;
 	}
@@ -221,7 +229,7 @@ namespace gbc
 	JoystickHatState Input::GetJoystickHat(Joystick joystick, JoystickHat hat)
 	{
 		GBC_CORE_ASSERT(joystick < Joystick::Count, "Joystick index out of bounds!");
-		int jid = static_cast<int>(joystick);
+		int32_t jid = static_cast<int>(joystick);
 		const JoystickState& joystickState = data.joysticks[jid];
 		return joystickState.IsConnected() ? joystickState.GetHat(hat) : JoystickHatState::Centered;
 	}

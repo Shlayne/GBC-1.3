@@ -22,28 +22,55 @@ namespace gbc
 	}
 
 	LocalTexture2D::LocalTexture2D(int32_t width, int32_t height, int32_t channels)
+		: width(width), height(height), channels(channels)
 	{
-		Create(width, height, channels);
+		size_t size = static_cast<size_t>(width) * height * channels;
+		data = new uint8_t[size]{ 0 };
 	}
 
 	LocalTexture2D::LocalTexture2D(const LocalTexture2D& texture)
+		: filepath(texture.filepath), width(texture.width), height(texture.height), channels(texture.channels)
 	{
-		Copy(texture);
+		if (texture)
+		{
+			size_t size = static_cast<size_t>(width) * height * channels;
+			data = new uint8_t[size];
+			memcpy_s(data, size, texture.data, size);
+		}
+		else
+			data = nullptr;
 	}
 
 	LocalTexture2D::LocalTexture2D(LocalTexture2D&& texture) noexcept
-		: filepath(std::move(texture.filepath)), width(width), height(height), channels(channels), data(data)
+		: filepath(std::move(texture.filepath)), width(texture.width), height(texture.height), channels(texture.channels), data(texture.data)
 	{
-		width = 0;
-		height = 0;
-		channels = 0;
+		texture.width = 0;
+		texture.height = 0;
+		texture.channels = 0;
 		texture.data = nullptr;
 	}
 
 	LocalTexture2D& LocalTexture2D::operator=(const LocalTexture2D& texture)
 	{
 		if (this != &texture)
-			Copy(texture);
+		{
+			if (data != nullptr)
+				delete[] data;
+
+			width = texture.width;
+			height = texture.height;
+			channels = texture.channels;
+			filepath = texture.filepath;
+
+			if (texture)
+			{
+				size_t size = static_cast<size_t>(width) * height * channels;
+				data = new uint8_t[size];
+				memcpy_s(data, size, texture.data, size);
+			}
+			else
+				data = nullptr;
+		}
 		return *this;
 	}
 
@@ -57,9 +84,9 @@ namespace gbc
 			channels = texture.channels;
 			data = texture.data;
 
-			width = 0;
-			height = 0;
-			channels = 0;
+			texture.width = 0;
+			texture.height = 0;
+			texture.channels = 0;
 			texture.data = nullptr;
 		}
 		return *this;
@@ -109,41 +136,6 @@ namespace gbc
 		return data != nullptr && stbi_write_png(filepath.c_str(), width, height, channels, data, 0) != 0;
 	}
 
-	void LocalTexture2D::Create(int32_t width, int32_t height, int32_t channels)
-	{
-		if (data != nullptr)
-		{
-			delete[] data;
-			filepath.clear();
-		}
-
-		size_t size = (size_t)width * height * channels;
-		data = new uint8_t[size]{ 0 };
-		this->width = width;
-		this->height = height;
-		this->channels = channels;
-	}
-
-	bool LocalTexture2D::Copy(const LocalTexture2D& texture)
-	{
-		if (texture)
-		{
-			if (data != nullptr)
-				delete[] data;
-
-			width = texture.width;
-			height = texture.height;
-			channels = texture.channels;
-			filepath = texture.filepath;
-
-			size_t size = (size_t)width * height * channels;
-			data = new unsigned char[size];
-			memcpy_s(data, size, texture.data, size);
-			return true;
-		}
-		return false;
-	}
-
 	bool LocalTexture2D::SetSubregion(const LocalTexture2D& texture, int32_t positionX, int32_t positionY)
 	{
 		GBC_PROFILE_FUNCTION();
@@ -161,4 +153,16 @@ namespace gbc
 		}
 		return false;
 	}
+
+	Ref<LocalTexture2D> LocalTexture2D::Create()
+	{ return CreateRef<LocalTexture2D>(); }
+
+	Ref<LocalTexture2D> LocalTexture2D::Create(const std::string& filepath, int32_t requiredChannels)
+	{ return CreateRef<LocalTexture2D>(filepath, requiredChannels); }
+
+	Ref<LocalTexture2D> LocalTexture2D::Create(const std::string& filepath, bool flipVertically, int32_t requiredChannels)
+	{ return CreateRef<LocalTexture2D>(filepath, flipVertically, requiredChannels); }
+
+	Ref<LocalTexture2D> LocalTexture2D::Create(int32_t width, int32_t height, int32_t channels)
+	{ return CreateRef<LocalTexture2D>(width, height, channels); }
 }

@@ -62,7 +62,7 @@ namespace gbc
 		data.localIndexBufferCurrent = data.localIndexBufferStart;
 
 		// Setup internal buffers
-		data.vertexBuffer = VertexBuffer::CreateRef(data.maxVertices * sizeof(Vertex), nullptr, BufferUsage::DynamicDraw);
+		data.vertexBuffer = VertexBuffer::Create(data.maxVertices * sizeof(Vertex), nullptr, BufferUsage::DynamicDraw);
 		data.vertexBuffer->SetLayout({
 			{ VertexBufferElementType::Float3, "position" },
 			{ VertexBufferElementType::Float4, "tintColor" },
@@ -71,24 +71,24 @@ namespace gbc
 			{ VertexBufferElementType::Float,  "tilingFactor" }
 		});
 
-		data.vertexArray = VertexArray::CreateRef();
+		data.vertexArray = VertexArray::Create();
 		data.vertexArray->AddVertexBuffer(data.vertexBuffer);
 
-		data.indexBuffer = IndexBuffer::CreateRef(data.maxIndices, nullptr, BufferUsage::DynamicDraw, IndexBufferElementType::UInt32);
+		data.indexBuffer = IndexBuffer::Create(data.maxIndices, nullptr, BufferUsage::DynamicDraw, IndexBufferElementType::UInt32);
 
 		// Setup shader
-		data.shader = Shader::CreateRef("Resources/Shaders/BasicShader.glsl");
+		data.shader = Shader::Create("Resources/Shaders/BasicShader.glsl");
 		data.shader->Bind();
-		int* samplers = new int[data.maxTextures];
+		int32_t* samplers = new int32_t[data.maxTextures];
 		for (uint32_t i = 0; i < data.maxTextures; i++)
-			samplers[i] = static_cast<int>(i);
+			samplers[i] = static_cast<int32_t>(i);
 		data.shader->SetInts("textures", samplers, data.maxTextures);
 		delete[] samplers;
 
 		// Setup white texture
 		Ref<LocalTexture2D> whiteTexture = CreateRef<LocalTexture2D>(1, 1, 4);
 		*(uint32_t*)whiteTexture->GetData() = 0xFFFFFFFF;
-		data.textures[0] = Texture2D::CreateRef(whiteTexture);
+		data.textures[0] = Texture2D::Create(whiteTexture);
 	}
 
 	void BasicRenderer::Shutdown()
@@ -120,8 +120,8 @@ namespace gbc
 		if (vertexBufferSize != 0 && indexBufferSize != 0)
 		{
 			// Copy local buffers to internal buffers
-			data.vertexBuffer->SetData(vertexBufferSize, data.localVertexBufferStart);
-			data.indexBuffer->SetData(indexBufferSize, data.localIndexBufferStart);
+			data.vertexBuffer->SetData(data.localVertexBufferStart, vertexBufferSize);
+			data.indexBuffer->SetData(data.localIndexBufferStart, indexBufferSize);
 
 			// Bind renderables
 			for (uint32_t i = 0; i < data.textureCount; i++)

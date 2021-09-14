@@ -18,5 +18,6 @@ namespace gbc
 	private:
 		RendererID rendererID = 0;
 		std::vector<Ref<VertexBuffer>> vertexBuffers;
+		uint32_t vertexAttributeIndex = 0;
 	};
 }

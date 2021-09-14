@@ -28,7 +28,7 @@ namespace gbc
 		return 0;
 	}
 
-	TextureFormat GetTextureFormat(int channels)
+	TextureFormat GetTextureFormat(int32_t channels)
 	{
 		switch (channels)
 		{
@@ -78,7 +78,7 @@ namespace gbc
 		}
 	}
 
-	OpenGLTexture::OpenGLTexture(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
+	OpenGLTexture::OpenGLTexture(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int32_t attachmentIndex)
 		: specification(specification), ownsRendererID(false), rendererID(framebuffer->GetColorAttachment(attachmentIndex)) {}
 
 	OpenGLTexture::~OpenGLTexture()

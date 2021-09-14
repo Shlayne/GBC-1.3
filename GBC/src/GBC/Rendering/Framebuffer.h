@@ -74,9 +74,9 @@ namespace gbc
 
 	struct FramebufferSpecification
 	{
-		int width = 0;
-		int height = 0;
-		int samples = 1;
+		int32_t width = 0;
+		int32_t height = 0;
+		int32_t samples = 1;
 		FramebufferAttachmentSpecification attachments;
 	};
 
@@ -88,17 +88,16 @@ namespace gbc
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
 
-		virtual void OnViewportResize(int width, int height) = 0;
+		virtual void OnViewportResize(int32_t width, int32_t height) = 0;
 		virtual const FramebufferSpecification& GetSpecification() const = 0;
 
 		virtual RendererID GetColorAttachment(uint32_t index = 0) const = 0;
 		virtual RendererID GetDepthAttachment() const = 0;
 
-		virtual void GetColorPixel(void* pixel, int x, int y, uint32_t index = 0) const = 0;
+		virtual int32_t GetColorPixel(int32_t x, int32_t y, uint32_t index = 0) const = 0;
 
-		virtual void ClearColorAttachment(int value, uint32_t index = 0) = 0;
+		virtual void ClearColorAttachment(int32_t value, uint32_t index = 0) = 0;
 
-		static Ref<Framebuffer> CreateRef(const FramebufferSpecification& specification); 
-		static Scope<Framebuffer> CreateScope(const FramebufferSpecification& specification);
+		static Ref<Framebuffer> Create(const FramebufferSpecification& specification); 
 	};
 }

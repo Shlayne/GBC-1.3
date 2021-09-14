@@ -16,7 +16,17 @@ namespace gbc
 		GBC_CORE_ASSERT(instance == nullptr, "Application already exists!");
 		instance = this;
 
-		window = Window::CreateScope(windowSpecs);
+		window = Window::Create(windowSpecs);
+
+		auto eventCallback = GBC_BIND_FUNC(OnEvent);
+		window->SetEventCallback(eventCallback);
+		Input::SetEventCallback(eventCallback);
+
+		if (windowSpecs.focusOnShow)
+		{
+			WindowFocusEvent event(window->GetNativeWindow(), true);
+			OnEvent(event);
+		}
 
 		Renderer::Init();
 
@@ -121,12 +131,6 @@ namespace gbc
 		if (overlay)
 			overlay->OnDetach();
 		return overlay;
-	}
-
-	void Application::EventCallback(Event& event)
-	{
-		GBC_CORE_ASSERT(instance != nullptr, "Application does not yet exist for events to be fired!");
-		instance->OnEvent(event);
 	}
 
 	void Application::OnEvent(Event& event)

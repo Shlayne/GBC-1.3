@@ -5,7 +5,8 @@ namespace gbc
 	class Timestep
 	{
 	public:
-		constexpr Timestep(float seconds = 0.0f) noexcept : seconds(seconds) {}
+		constexpr Timestep() noexcept = default;
+		constexpr Timestep(float seconds) noexcept : seconds(seconds) {}
 		constexpr Timestep& operator=(float seconds) noexcept { this->seconds = seconds; return *this; }
 		constexpr Timestep& operator=(Timestep timestep) noexcept { seconds = timestep.seconds; return *this; }
 		constexpr operator float() const noexcept { return seconds; }
@@ -21,9 +22,9 @@ namespace gbc
 		constexpr Timestep& operator-=(Timestep timestep) noexcept { seconds -= timestep.seconds; return *this; }
 		constexpr Timestep operator*(Timestep timestep) const noexcept { return seconds * timestep.seconds; }
 		constexpr Timestep& operator*=(Timestep timestep) noexcept { seconds *= timestep.seconds; return *this; }
-		constexpr Timestep operator/(Timestep timestep) const { return seconds / timestep.seconds; }
-		constexpr Timestep& operator/=(Timestep timestep) { seconds /= timestep.seconds; return *this; }
+		constexpr Timestep operator/(Timestep timestep) const noexcept { return seconds / timestep.seconds; }
+		constexpr Timestep& operator/=(Timestep timestep) noexcept { seconds /= timestep.seconds; return *this; }
 	private:
-		float seconds;
+		float seconds = 0.0f;
 	};
 }

@@ -1,6 +1,6 @@
 #include "StasticsPanel.h"
 #if GBC_ENABLE_STATS
-#include "imgui/imgui.h"
+#include <imgui/imgui.h>
 #include "GBC/ImGui/ImGuiHelper.h"
 
 namespace gbc

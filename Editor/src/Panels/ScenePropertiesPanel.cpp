@@ -1,12 +1,12 @@
 #include "ScenePropertiesPanel.h"
-#include "imgui/imgui.h"
+#include <imgui/imgui.h>
 #include "GBC/ImGui/ImGuiHelper.h"
-#include "GBC/Scene/Components/TagComponent.h"
-#include "GBC/Scene/Components/TransformComponent.h"
+#include "GBC/IO/FileDialog.h"
 #include "GBC/Scene/Components/CameraComponent.h"
 #include "GBC/Scene/Components/MeshComponent.h"
 #include "GBC/Scene/Components/RenderableComponent.h"
-#include "GBC/IO/FileDialog.h"
+#include "GBC/Scene/Components/TagComponent.h"
+#include "GBC/Scene/Components/TransformComponent.h"
 
 namespace gbc
 {
@@ -208,7 +208,7 @@ namespace gbc
 						{
 							TextureSpecification specs = component.texture ? component.texture->GetSpecification() : TextureSpecification{};
 							specs.texture = localTexture;
-							component.texture = Texture2D::CreateRef(specs);
+							component.texture = Texture2D::Create(specs);
 						}
 					});
 					ImGuiHelper::NextTableColumn();
@@ -256,7 +256,7 @@ namespace gbc
 						ImGuiHelper::NextTableColumn();
 
 						if (changed)
-							component.texture = Texture2D::CreateRef(specs);
+							component.texture = Texture2D::Create(specs);
 					}
 				});
 

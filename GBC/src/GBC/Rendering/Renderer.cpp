@@ -10,7 +10,7 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		api = RendererAPI::CreateScope();
+		api = RendererAPI::Create();
 		api->Init();
 		BasicRenderer::Init();
 	}
@@ -43,7 +43,7 @@ namespace gbc
 
 	void Renderer::SetViewport(const glm::ivec2& position, const glm::ivec2& size)
 	{ api->SetViewport(position.x, position.y, size.x, size.y); }
-	void Renderer::SetViewport(int x, int y, int width, int height)
+	void Renderer::SetViewport(int32_t x, int32_t y, int32_t width, int32_t height)
 	{ api->SetViewport(x, y, width, height); }
 
 	void Renderer::Clear()

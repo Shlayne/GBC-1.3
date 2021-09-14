@@ -66,10 +66,7 @@ namespace gbc
 	class Texture2D : public Texture
 	{
 	public:
-		static Ref<Texture2D> CreateRef(const TextureSpecification& specification);
-		static Scope<Texture2D> CreateScope(const TextureSpecification& specification);
-
-		static Ref<Texture2D> CreateRef(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
-		static Scope<Texture2D> CreateScope(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex);
+		static Ref<Texture2D> Create(const TextureSpecification& specification);
+		static Ref<Texture2D> Create(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int32_t attachmentIndex);
 	};
 }

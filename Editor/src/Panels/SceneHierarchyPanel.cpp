@@ -1,9 +1,9 @@
 #include "SceneHierarchyPanel.h"
-#include "imgui/imgui.h"
+#include <imgui/imgui.h>
+#include "GBC/Core/Input.h"
 #include "GBC/Scene/Components/CameraComponent.h"
 #include "GBC/Scene/Components/MeshComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
-#include "GBC/Core/Input.h"
 
 namespace gbc
 {

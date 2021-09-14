@@ -55,8 +55,8 @@ namespace gbc
 		virtual void SetMat4x2 (const std::string& name, const glm::mat4x2& value) override;
 		virtual void SetMat4x3 (const std::string& name, const glm::mat4x3& value) override;
 		virtual void SetMat4   (const std::string& name, const glm::mat4&   value) override;
-		virtual void SetInts   (const std::string& name, const int32_t*     values, int count) override;
-		virtual void SetUInts  (const std::string& name, const uint32_t*    values, int count) override;
+		virtual void SetInts   (const std::string& name, const int32_t*     values, int32_t count) override;
+		virtual void SetUInts  (const std::string& name, const uint32_t*    values, int32_t count) override;
 	private:
 		std::vector<ShaderFile> ParseFile(const std::string& filepath);
 		void CreateProgram(const std::vector<ShaderFile>& shaders);

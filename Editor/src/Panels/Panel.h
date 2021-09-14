@@ -1,9 +1,7 @@
 #pragma once
 
-#include "GBC/Core/Core.h"
-#if GBC_ENABLE_IMGUI
+#include <glm/glm.hpp>
 #include <string>
-#include "glm/glm.hpp"
 
 namespace gbc
 {
@@ -38,4 +36,3 @@ namespace gbc
 		glm::vec2 position{ 0.0f };
 	};
 }
-#endif

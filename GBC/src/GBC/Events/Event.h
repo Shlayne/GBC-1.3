@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <functional>
+#include "GBC/Core/Core.h"
 
 namespace gbc
 {
@@ -76,4 +78,6 @@ namespace gbc
 	private:
 		Event& event;
 	};
+
+	using EventCallbackFunc = std::function<void(Event&)>;
 }

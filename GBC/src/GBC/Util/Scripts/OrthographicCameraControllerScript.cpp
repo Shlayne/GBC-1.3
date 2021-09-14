@@ -9,13 +9,13 @@ namespace gbc
 	{
 		TransformComponent& transform = GetComponent<TransformComponent>();
 
-		int movementDirection = 0;
+		int32_t movementDirection = 0;
 		if (Input::IsKeyPressed(Keycode::W)) movementDirection++; 
 		if (Input::IsKeyPressed(Keycode::S)) movementDirection--;
 		if (movementDirection != 0)
 			transform.translation += movementDirection * speed * timestep * forward;
 
-		int rotationDirection = 0;
+		int32_t rotationDirection = 0;
 		if (Input::IsKeyPressed(Keycode::A)) rotationDirection--;
 		if (Input::IsKeyPressed(Keycode::D)) rotationDirection++;
 		if (rotationDirection != 0)

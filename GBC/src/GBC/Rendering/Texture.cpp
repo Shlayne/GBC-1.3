@@ -18,52 +18,26 @@ namespace gbc
 		return *this;
 	}
 
-	Ref<Texture2D> Texture2D::CreateRef(const TextureSpecification& specification)
+	Ref<Texture2D> Texture2D::Create(const TextureSpecification& specification)
 	{
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::Headless: return nullptr;
-			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLTexture>(specification);
+			case RendererAPI::API::OpenGL: return CreateRef<OpenGLTexture>(specification);
 		}
 
 		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
 		return nullptr;
 	}
 
-	Scope<Texture2D> Texture2D::CreateScope(const TextureSpecification& specification)
-	{
-		switch (RendererAPI::GetAPI())
-		{
-			case RendererAPI::API::Headless: return nullptr;
-			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLTexture>(specification);
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
-		return nullptr;
-	}
-
-	Ref<Texture2D> Texture2D::CreateRef(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
+	Ref<Texture2D> Texture2D::Create(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int32_t attachmentIndex)
 	{
 		GBC_CORE_ASSERT(specification.texture == nullptr, "Texture Specification texture not nullptr when constructing with framebuffer!");
 
 		switch (RendererAPI::GetAPI())
 		{
 			case RendererAPI::API::Headless: return nullptr;
-			case RendererAPI::API::OpenGL: return ::gbc::CreateRef<OpenGLTexture>(specification, framebuffer, attachmentIndex);
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
-		return nullptr;
-	}
-
-	Scope<Texture2D> Texture2D::CreateScope(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int attachmentIndex)
-	{
-		GBC_CORE_ASSERT(specification.texture == nullptr, "Texture Specification texture not nullptr when constructing with framebuffer!");
-
-		switch (RendererAPI::GetAPI())
-		{
-			case RendererAPI::API::Headless: return nullptr;
-			case RendererAPI::API::OpenGL: return ::gbc::CreateScope<OpenGLTexture>(specification, framebuffer, attachmentIndex);
+			case RendererAPI::API::OpenGL: return CreateRef<OpenGLTexture>(specification, framebuffer, attachmentIndex);
 		}
 
 		GBC_CORE_ASSERT(false, "Unknown Renderer API!");

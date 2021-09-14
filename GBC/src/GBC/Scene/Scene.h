@@ -28,8 +28,8 @@ namespace gbc
 		void OnUpdateEditor(Timestep timestep);
 		void OnRenderEditor(const EditorCamera& camera);
 
-		void OnViewportResize(int width, int height);
-		inline glm::ivec2 GetViewportSize() const noexcept { return viewportSize; }
+		void OnViewportResize(int32_t width, int32_t height);
+		inline const glm::ivec2& GetViewportSize() const noexcept { return viewportSize; }
 
 		Entity GetPrimaryCameraEntity();
 	private:

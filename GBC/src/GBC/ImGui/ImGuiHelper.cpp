@@ -36,7 +36,7 @@ namespace gbc
 		SetSceneEditColors();
 
 		// TODO: this could most definitely use some actual hardcoded colors and not just a tint
-		for (int i = 0; i < ImGuiCol_COUNT; i++)
+		for (int32_t i = 0; i < ImGuiCol_COUNT; i++)
 			colors[i] = { colors[i].x * 0.8f, colors[i].y * 0.8f, colors[i].z * 1.0f, colors[i].w };
 	}
 
@@ -85,7 +85,7 @@ namespace gbc
 		colors[ImGuiCol_TabUnfocusedActive] = { 0.200f, 0.205f, 0.210f, 1.000f };
 	}
 
-	bool ImGuiHelper::BeginTable(const char* id, int columnCount, ImGuiTableFlags tableFlags)
+	bool ImGuiHelper::BeginTable(const char* id, int32_t columnCount, ImGuiTableFlags tableFlags)
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x / 2.0f, style.ItemSpacing.y));
@@ -101,7 +101,7 @@ namespace gbc
 		ImGuiTableColumnFlags columnFlags = ImGuiTableColumnFlags_WidthAuto;
 		ImGui::TableSetupColumn(nullptr, columnFlags);
 		ImGui::TableSetupColumn(nullptr, ImGuiTableColumnFlags_None);
-		for (int i = 2; i < columnCount; i++)
+		for (int32_t i = 2; i < columnCount; i++)
 			ImGui::TableSetupColumn(nullptr, columnFlags);
 
 		NextTableColumn();
@@ -210,14 +210,14 @@ namespace gbc
 		return changed;
 	}
 
-	bool ImGuiHelper::Combo(int* selectedItem, const char* const* names, int count)
+	bool ImGuiHelper::Combo(int32_t* selectedItem, const char* const* names, int32_t count)
 	{
 		bool changed = false;
 		ImGui::PushItemWidth(-FLT_MIN);
 
 		if (ImGui::BeginCombo("", names[*selectedItem]))
 		{
-			for (int i = 0; i < count; i++)
+			for (int32_t i = 0; i < count; i++)
 			{
 				bool selected = *selectedItem == i;
 				if (ImGui::Selectable(names[i], &selected) && *selectedItem != i)
@@ -235,7 +235,7 @@ namespace gbc
 		return changed;
 	}
 
-	bool ImGuiHelper::Combo(const char* label, int* selectedItem, const char* const* names, int count)
+	bool ImGuiHelper::Combo(const char* label, int32_t* selectedItem, const char* const* names, int32_t count)
 	{
 		bool changed = false;
 		ImGui::PushID(label);

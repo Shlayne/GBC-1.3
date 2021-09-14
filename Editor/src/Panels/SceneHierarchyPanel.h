@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Panel.h"
-#include "GBC/Scene/Scene.h"
-#include "GBC/Scene/Entity.h"
+#include "Panels/Panel.h"
 #include "GBC/Core/Core.h"
+#include "GBC/Scene/Entity.h"
+#include "GBC/Scene/Scene.h"
 
 namespace gbc
 {

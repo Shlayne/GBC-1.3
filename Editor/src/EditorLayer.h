@@ -1,8 +1,8 @@
 #pragma once
 
-#include "gbc.h"
-#include "GBC/Rendering/EditorCamera.h"
+#include <gbc.h>
 #include <map>
+#include "GBC/Rendering/EditorCamera.h"
 #include "Panels/SceneViewportPanel.h"
 #include "Panels/SceneHierarchyPanel.h"
 #include "Panels/ScenePropertiesPanel.h"

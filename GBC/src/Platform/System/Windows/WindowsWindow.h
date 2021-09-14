@@ -42,6 +42,8 @@ namespace gbc
 
 		virtual void* GetNativeWindow() override { return window; }
 		virtual Context& GetContext() override { return *context; }
+
+		virtual void SetEventCallback(const EventCallbackFunc& callback) override { state.eventCallback = callback; }
 	private:
 		void SaveDimensions();
 
@@ -75,29 +77,32 @@ namespace gbc
 					char containsMouse : 1;
 				};
 			};
+
+			EventCallbackFunc eventCallback;
 		} state;
+		friend class Window;
 
 		// Callbacks
 		static void SetCallbacks(GLFWwindow* window);
 
 		static void WindowCloseCallback(GLFWwindow* window);
-		static void WindowSizeCallback(GLFWwindow* window, int width, int height);
-		static void WindowPosCallback(GLFWwindow* window, int x, int y);
-		static void WindowFocusCallback(GLFWwindow* window, int focused);
-		static void WindowIconifyCallback(GLFWwindow* window, int iconified);
-		static void WindowMaximizeCallback(GLFWwindow* window, int maximized);
-		static void DropCallback(GLFWwindow* window, int pathCount, const char** paths);
-		static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+		static void WindowSizeCallback(GLFWwindow* window, int32_t width, int32_t height);
+		static void WindowPosCallback(GLFWwindow* window, int32_t x, int32_t y);
+		static void WindowFocusCallback(GLFWwindow* window, int32_t focused);
+		static void WindowIconifyCallback(GLFWwindow* window, int32_t iconified);
+		static void WindowMaximizeCallback(GLFWwindow* window, int32_t maximized);
+		static void DropCallback(GLFWwindow* window, int32_t pathCount, const char** paths);
+		static void FramebufferSizeCallback(GLFWwindow* window, int32_t width, int32_t height);
 		static void WindowContentScaleCallback(GLFWwindow* window, float scaleX, float scaleY);
 		static void WindowRefreshCallback(GLFWwindow* window);
 
-		static void KeyCallback(GLFWwindow* window, int keycode, int scancode, int action, int mods);
+		static void KeyCallback(GLFWwindow* window, int32_t keycode, int32_t scancode, int32_t action, int32_t mods);
 		static void CharCallback(GLFWwindow* window, uint32_t codepoint);
-		static void CharModsCallback(GLFWwindow* window, uint32_t codepoint, int mods);
+		static void CharModsCallback(GLFWwindow* window, uint32_t codepoint, int32_t mods);
 
-		static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+		static void MouseButtonCallback(GLFWwindow* window, int32_t button, int32_t action, int32_t mods);
 		static void CursorPosCallback(GLFWwindow* window, double x, double y);
 		static void ScrollCallback(GLFWwindow* window, double offsetX, double offsetY);
-		static void CursorEnterCallback(GLFWwindow* window, int entered);
+		static void CursorEnterCallback(GLFWwindow* window, int32_t entered);
 	};
 }

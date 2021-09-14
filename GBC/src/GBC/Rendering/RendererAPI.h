@@ -38,7 +38,7 @@ namespace gbc
 		virtual void EnableCullFace() = 0;
 		virtual void DisableCullFace() = 0;
 
-		virtual void SetViewport(int x, int y, int width, int height) = 0;
+		virtual void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height) = 0;
 
 		virtual void SetClearColor(float red, float green, float blue, float alpha) = 0;
 		virtual void Clear() = 0;
@@ -57,7 +57,7 @@ namespace gbc
 	private:
 		static API api;
 
-		static Scope<RendererAPI> CreateScope();
+		static Scope<RendererAPI> Create();
 		friend class Renderer;
 	};
 }

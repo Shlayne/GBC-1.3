@@ -1,12 +1,12 @@
 #include "SceneViewportPanel.h"
-#include "imgui/imgui.h"
-#include "imguizmo/ImGuizmo.h"
+#include <imgui/imgui.h>
+#include <imguizmo/ImGuizmo.h>
+#include <glm/gtx/matrix_decompose.hpp>
+#include "GBC/Core/Application.h"
+#include "GBC/Core/Input.h"
+#include "GBC/Math/Math.h"
 #include "GBC/Scene/Components/CameraComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
-#include "GBC/Math/Math.h"
-#include "glm/gtx/matrix_decompose.hpp"
-#include "GBC/Core/Application.h"
-#include "GBC/Core/input.h"
 
 namespace gbc
 {

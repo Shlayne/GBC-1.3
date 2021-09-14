@@ -6,6 +6,8 @@
 #include "GBC/Events/WindowEvents.h"
 #include "GBC/ImGui/ImGuiWrapper.h"
 
+int main(int argc, char** argv);
+
 namespace gbc
 {
 	class Application
@@ -21,16 +23,12 @@ namespace gbc
 		inline ImGuiWrapper& GetImGuiWrapper() { return *imguiWrapper; }
 #endif
 
-		void Run();
 		void Close();
 	protected:
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 		Layer* PopLayer();
 		Layer* PopOverlay();
-	public:
-		using EventCallbackFunc = std::function<void(Event&)>;
-		static void EventCallback(Event& event);
 	private:
 		void OnEvent(Event& event);
 		bool OnWindowCloseEvent(WindowCloseEvent& event);
@@ -50,6 +48,9 @@ namespace gbc
 		ImGuiWrapper* imguiWrapper;
 #endif
 		LayerStack layerStack;
+	private:
+		void Run();
+		friend int ::main(int argc, char** argv);
 	};
 
 	Application* CreateApplication();

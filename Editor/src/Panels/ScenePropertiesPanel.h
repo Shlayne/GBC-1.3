@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Panel.h"
+#include "Panels/Panel.h"
 #include "GBC/Scene/Entity.h"
 
 namespace gbc

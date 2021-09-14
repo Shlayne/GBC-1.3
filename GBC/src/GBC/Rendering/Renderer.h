@@ -19,7 +19,7 @@ namespace gbc
 		static void DisableCullFace();
 
 		static void SetViewport(const glm::ivec2& position, const glm::ivec2& size);
-		static void SetViewport(int x, int y, int width, int height);
+		static void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height);
 
 		static void Clear();
 		static void SetClearColor(const glm::vec4& color);

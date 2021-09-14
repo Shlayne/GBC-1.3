@@ -28,7 +28,7 @@ namespace gbc
 		inline ProjectionType GetProjectionType() const noexcept { return projectionType; }
 		inline void SetProjectionType(ProjectionType type) { projectionType = type; Recalculate(); }
 
-		virtual void OnViewportResize(int width, int height) override;
+		virtual void OnViewportResize(int32_t width, int32_t height) override;
 	private:
 		void Recalculate();
 

@@ -20,7 +20,7 @@ namespace gbc
 		static void SetScenePlayColors();
 		static void SetSceneEditColors();
 
-		static bool BeginTable(const char* id, int columnCount, ImGuiTableFlags tableFlags = ImGuiTableFlags_BordersInnerV);
+		static bool BeginTable(const char* id, int32_t columnCount, ImGuiTableFlags tableFlags = ImGuiTableFlags_BordersInnerV);
 		static void NextTableColumn();
 		static void PrevTableColumn();
 		static void EndTable();
@@ -53,8 +53,8 @@ namespace gbc
 		static bool SliderFloat(float* value, float minValue = 0.0f, float maxValue = 1.0f);
 		static bool SliderFloat(const char* label, float* value, float minValue = 0.0f, float maxValue = 1.0f);
 		
-		static bool Combo(int* selectedItem, const char* const* names, int count);
-		static bool Combo(const char* label, int* selectedItem, const char* const* names, int count);
+		static bool Combo(int32_t* selectedItem, const char* const* names, int32_t count);
+		static bool Combo(const char* label, int32_t* selectedItem, const char* const* names, int32_t count);
 		
 		static bool Checkbox(bool* value);
 		static bool Checkbox(const char* label, bool* value);
@@ -76,7 +76,7 @@ namespace gbc
 		{
 			bool closed = false;
 
-			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, {0.5f, 0.5f});
+			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, { 0.5f, 0.5f });
 			ImGui::OpenPopup(name);
 
 			if (ImGui::BeginPopupModal(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
@@ -84,9 +84,9 @@ namespace gbc
 				ImGui::Text(messageFormat, std::forward<Args>(args)...);
 
 				ImGuiStyle& style = ImGui::GetStyle();
-				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x / 2.0f, style.ItemSpacing.y));
+				ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { style.ItemSpacing.x * 0.5f, style.ItemSpacing.y });
 				float availableWidth = ImGui::GetContentRegionAvail().x;
-				float padding = ImGui::GetStyle().FramePadding.x;
+				float padding = style.FramePadding.x;
 				auto width = (availableWidth - padding) * 0.5f;
 				ImVec2 buttonSize = { width, 0.0f };
 

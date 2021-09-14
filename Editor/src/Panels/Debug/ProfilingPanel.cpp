@@ -1,8 +1,8 @@
 #include "ProfilingPanel.h"
 #if GBC_ENABLE_PROFILE_RUNTIME
-#include "imgui/imgui.h"
-#include "GBC/ImGui/ImGuiHelper.h"
+#include <imgui/imgui.h>
 #include "GBC/Debug/Profiler.h"
+#include "GBC/ImGui/ImGuiHelper.h"
 
 namespace gbc
 {

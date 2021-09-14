@@ -5,10 +5,10 @@ namespace gbc
 	class RendererCapabilities
 	{
 	public:
-		static int GetMaxTextureSlots();
-		static int GetMaxTextureSize();
-		static int GetMaxFramebufferWidth();
-		static int GetMaxFramebufferHeight();
-		static int GetMaxFramebufferColorAttachments();
+		static int32_t GetMaxTextureSlots();
+		static int32_t GetMaxTextureSize();
+		static int32_t GetMaxFramebufferWidth();
+		static int32_t GetMaxFramebufferHeight();
+		static int32_t GetMaxFramebufferColorAttachments();
 	};
 }

@@ -3,7 +3,7 @@
 
 namespace gbc
 {
-	JoystickConnectEvent::JoystickConnectEvent(int jid, bool connect)
+	JoystickConnectEvent::JoystickConnectEvent(int32_t jid, bool connect)
 		: jid(jid), connect(connect) {}
 
 #if GBC_ENABLE_LOGGING

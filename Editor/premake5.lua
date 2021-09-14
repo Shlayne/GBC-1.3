@@ -50,3 +50,7 @@ project "Editor"
 		defines "GBC_CONFIG_DIST"
 		runtime "Release"
 		optimize "on"
+
+-- Remove the console in Dist on Windows
+	filter { "configurations:Dist", "system:windows" }
+		linkoptions "/SUBSYSTEM:windows /ENTRY:mainCRTStartup"

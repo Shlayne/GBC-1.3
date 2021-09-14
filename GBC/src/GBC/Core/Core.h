@@ -5,7 +5,6 @@
 #if GBC_CONFIG_DEBUG
 	#define GBC_ENABLE_ASSERTS 1
 	#define GBC_ENABLE_LOGGING 1
-	#define GBC_LOGGING_LEVEL spdlog::level::trace
 	#define GBC_ENABLE_IMGUI 1
 	#define GBC_ENABLE_STATS 1
 	#define GBC_ENABLE_PROFILE_RUNTIME 1
@@ -13,7 +12,6 @@
 #elif GBC_CONFIG_RELEASE
 	#define GBC_ENABLE_ASSERTS 0
 	#define GBC_ENABLE_LOGGING 1
-	#define GBC_LOGGING_LEVEL spdlog::level::warn
 	#define GBC_ENABLE_IMGUI 1
 	#define GBC_ENABLE_STATS 1
 	#define GBC_ENABLE_PROFILE_RUNTIME 0
@@ -21,7 +19,6 @@
 #elif GBC_CONFIG_DIST
 	#define GBC_ENABLE_ASSERTS 0
 	#define GBC_ENABLE_LOGGING 0
-	#define GBC_LOGGING_LEVEL spdlog::level::off
 	#define GBC_ENABLE_IMGUI 1
 	#define GBC_ENABLE_STATS 0
 	#define GBC_ENABLE_PROFILE_RUNTIME 0

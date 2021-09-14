@@ -8,37 +8,37 @@ namespace gbc
 	class MouseButtonPressEvent : public Event
 	{
 	public:
-		MouseButtonPressEvent(MouseButton button, int mods);
+		MouseButtonPressEvent(MouseButton button, int32_t mods);
 		EVENT_CLASS_TYPE(EventType::MouseButtonPress);
 		EVENT_CLASS_CATEGORY(EventCategory_Mouse | EventCategory_MouseButton);
 
 		inline MouseButton GetButton() const noexcept { return button; }
-		inline int GetMods() const noexcept { return mods; }
+		inline int32_t GetMods() const noexcept { return mods; }
 
 #if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
 #endif
 	private:
 		MouseButton button;
-		int mods;
+		int32_t mods;
 	};
 
 	class MouseButtonReleaseEvent : public Event
 	{
 	public:
-		MouseButtonReleaseEvent(MouseButton button, int mods);
+		MouseButtonReleaseEvent(MouseButton button, int32_t mods);
 		EVENT_CLASS_TYPE(EventType::MouseButtonRelease);
 		EVENT_CLASS_CATEGORY(EventCategory_Mouse | EventCategory_MouseButton);
 
 		inline MouseButton GetButton() const noexcept { return button; }
-		inline int GetMods() const noexcept { return mods; }
+		inline int32_t GetMods() const noexcept { return mods; }
 
 #if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
 #endif
 	private:
 		MouseButton button;
-		int mods;
+		int32_t mods;
 	};
 
 	class MouseMoveEvent : public Event

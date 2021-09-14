@@ -179,7 +179,7 @@ namespace gbc
 			return it->second;
 
 		int32_t location = glGetUniformLocation(rendererID, name.c_str());
-#if GBC_ENABLE_LOGGING // to remove warning of empty if statement in release and dist
+#if GBC_ENABLE_LOGGING // to remove warning of empty if statement
 		if (location == -1)
 			GBC_CORE_WARN("Unused shader uniform: {0}", name);
 #endif
@@ -337,13 +337,13 @@ namespace gbc
 		if (location != -1) glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
-	void OpenGLShader::SetInts(const std::string& name, const int32_t* values, int count)
+	void OpenGLShader::SetInts(const std::string& name, const int32_t* values, int32_t count)
 	{
 		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform1iv(location, count, values);
 	}
 
-	void OpenGLShader::SetUInts(const std::string& name, const uint32_t* values, int count)
+	void OpenGLShader::SetUInts(const std::string& name, const uint32_t* values, int32_t count)
 	{
 		int32_t location = GetUniformLocation(name);
 		if (location != -1) glUniform1uiv(location, count, values);

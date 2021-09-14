@@ -16,7 +16,7 @@ namespace gbc
 	}
 #endif
 
-	WindowResizeEvent::WindowResizeEvent(void* nativeWindow, int width, int height)
+	WindowResizeEvent::WindowResizeEvent(void* nativeWindow, int32_t width, int32_t height)
 		: WindowEvent(nativeWindow), width(width), height(height) {}
 
 #if GBC_ENABLE_LOGGING
@@ -28,7 +28,7 @@ namespace gbc
 	}
 #endif
 
-	WindowMoveEvent::WindowMoveEvent(void* nativeWindow, int x, int y)
+	WindowMoveEvent::WindowMoveEvent(void* nativeWindow, int32_t x, int32_t y)
 		: WindowEvent(nativeWindow), x(x), y(y) {}
 
 #if GBC_ENABLE_LOGGING
@@ -76,7 +76,7 @@ namespace gbc
 	}
 #endif
 
-	WindowDropEvent::WindowDropEvent(void* nativeWindow, int pathCount, const char** paths)
+	WindowDropEvent::WindowDropEvent(void* nativeWindow, int32_t pathCount, const char** paths)
 		: WindowEvent(nativeWindow), pathCount(pathCount), paths(paths) {}
 
 #if GBC_ENABLE_LOGGING
@@ -90,7 +90,7 @@ namespace gbc
 	}
 #endif
 
-	WindowFramebufferResizeEvent::WindowFramebufferResizeEvent(void* nativeWindow, int width, int height)
+	WindowFramebufferResizeEvent::WindowFramebufferResizeEvent(void* nativeWindow, int32_t width, int32_t height)
 		: WindowEvent(nativeWindow), width(width), height(height) {}
 
 #if GBC_ENABLE_LOGGING
