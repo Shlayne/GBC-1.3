@@ -1,5 +1,5 @@
 #type vertex
-#version 460 core
+#version 450 core
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec4 tintColor;
@@ -7,37 +7,50 @@ layout(location = 2) in vec2 texCoord;
 layout(location = 3) in uint texIndex;
 layout(location = 4) in float tilingFactor;
 
-out vec2 _texCoord;
-out vec4 _tintColor;
-out flat uint _texIndex;
-out flat float _tilingFactor;
+layout(std140, binding = 0) uniform Camera
+{
+	mat4 viewProjection;
+};
 
-uniform mat4 viewProjection;
+struct VertexOutput
+{
+	vec2 texCoord;
+	vec4 tintColor;
+};
+
+layout(location = 0) out VertexOutput Output;
+layout(location = 2) out flat uint Output_texIndex;
+layout(location = 3) out flat float Output_tilingFactor;
 
 void main()
 {
-	_texCoord = texCoord;
-	_tintColor = tintColor;
-	_texIndex = texIndex;
-	_tilingFactor = tilingFactor;
+	Output.texCoord = texCoord;
+	Output.tintColor = tintColor;
+	Output_texIndex = texIndex;
+	Output_tilingFactor = tilingFactor;
 	gl_Position = viewProjection * vec4(position, 1.0);
 }
 
 #type fragment
-#version 460 core
+#version 450 core
 
-in vec2 _texCoord;
-in vec4 _tintColor;
-in flat uint _texIndex;
-in flat float _tilingFactor;
+struct VertexOutput
+{
+	vec2 texCoord;
+	vec4 tintColor;
+};
+
+layout(location = 0) in VertexOutput Input;
+layout(location = 2) in flat uint Input_texIndex;
+layout(location = 3) in flat float Input_tilingFactor;
 
 layout(location = 0) out vec4 outColor;
 
 layout(binding = 0) uniform sampler2D textures[32];
 
-vec4 GetTextureColor(vec2 uv)
+vec4 GetTextureColor(uint index, vec2 uv)
 {
-	switch (_texIndex)
+	switch (index)
 	{
 		case 0: return texture(textures[0], uv);
 		case 1: return texture(textures[1], uv);
@@ -77,7 +90,7 @@ vec4 GetTextureColor(vec2 uv)
 
 void main()
 {
-	outColor = _tintColor * GetTextureColor(_texCoord * _tilingFactor);
+	outColor = Input.tintColor * GetTextureColor(Input_texIndex, Input.texCoord * Input_tilingFactor);
 	if (outColor.a == 0.0)
 		discard;
 }

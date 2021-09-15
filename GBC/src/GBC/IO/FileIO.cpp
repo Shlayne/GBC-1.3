@@ -3,7 +3,7 @@
 
 namespace gbc
 {
-	std::optional<std::string> FileIO::Read(const std::string& filepath, std::ios_base::openmode mode)
+	std::optional<std::string> FileIO::Read(const std::filesystem::path& filepath, std::ios_base::openmode mode)
 	{
 		std::ifstream file(filepath, mode);
 		if (file.is_open())
@@ -16,7 +16,7 @@ namespace gbc
 		return std::nullopt;
 	}
 
-	bool FileIO::Write(const std::string& filepath, std::string_view contents, std::ios_base::openmode mode)
+	bool FileIO::Write(const std::filesystem::path& filepath, std::string_view contents, std::ios_base::openmode mode)
 	{
 		std::ofstream file(filepath, mode);
 		if (file.is_open())

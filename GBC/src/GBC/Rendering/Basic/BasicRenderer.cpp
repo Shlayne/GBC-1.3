@@ -37,6 +37,13 @@ namespace gbc
 		uint32_t maxIndices = 0;
 		uint32_t maxTextures = 0;
 
+		struct CameraBuffer
+		{
+			glm::mat4 viewProjection;
+		};
+		CameraBuffer cameraBuffer;
+		Ref<UniformBuffer> cameraUniformBuffer;
+
 #if GBC_ENABLE_STATS
 		BasicRenderer::Statistics statistics;
 #endif
@@ -61,7 +68,7 @@ namespace gbc
 		data.localIndexBufferStart = new uint32_t[data.maxIndices];
 		data.localIndexBufferCurrent = data.localIndexBufferStart;
 
-		// Setup internal buffers
+		// Setup buffers
 		data.vertexBuffer = VertexBuffer::Create(data.maxVertices * sizeof(Vertex), nullptr, BufferUsage::DynamicDraw);
 		data.vertexBuffer->SetLayout({
 			{ VertexBufferElementType::Float3, "position" },
@@ -76,14 +83,9 @@ namespace gbc
 
 		data.indexBuffer = IndexBuffer::Create(data.maxIndices, nullptr, BufferUsage::DynamicDraw, IndexBufferElementType::UInt32);
 
-		// Setup shader
+		data.cameraUniformBuffer = UniformBuffer::Create(sizeof(BasicRendererData::CameraBuffer), 0, nullptr, BufferUsage::DynamicDraw);
+
 		data.shader = Shader::Create("Resources/Shaders/BasicShader.glsl");
-		data.shader->Bind();
-		int32_t* samplers = new int32_t[data.maxTextures];
-		for (uint32_t i = 0; i < data.maxTextures; i++)
-			samplers[i] = static_cast<int32_t>(i);
-		data.shader->SetInts("textures", samplers, data.maxTextures);
-		delete[] samplers;
 
 		// Setup white texture
 		auto whiteTexture = LocalTexture2D::Create(1, 1, 4);
@@ -101,15 +103,15 @@ namespace gbc
 	void BasicRenderer::BeginScene(const Camera& camera, const glm::mat4& view)
 	{
 		// Set shader uniforms
-		data.shader->Bind();
-		data.shader->SetMat4("viewProjection", camera.GetProjection() * view);
+		data.cameraBuffer.viewProjection = camera.GetProjection() * view;
+		data.cameraUniformBuffer->SetData(&data.cameraBuffer, sizeof(BasicRendererData::CameraBuffer));
 	}
 
 	void BasicRenderer::BeginScene(const EditorCamera& camera)
 	{
 		// Set shader uniforms
-		data.shader->Bind();
-		data.shader->SetMat4("viewProjection", camera.GetViewProjection());
+		data.cameraBuffer.viewProjection = camera.GetViewProjection();
+		data.cameraUniformBuffer->SetData(&data.cameraBuffer, sizeof(BasicRendererData::CameraBuffer));
 	}
 
 	void BasicRenderer::EndScene()
@@ -128,6 +130,7 @@ namespace gbc
 				data.textures[i]->Bind(i);
 
 			// Actually render
+			data.shader->Bind();
 			Renderer::DrawIndexed(data.vertexArray, data.indexBuffer, 0, data.localIndexCount);
 
 #if GBC_ENABLE_STATS

@@ -2,7 +2,7 @@ project "GBC"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++latest"
-	staticruntime "on"
+	staticruntime "off"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -13,7 +13,7 @@ project "GBC"
 -- Headless=0 OpenGL=1 Vulkan=2 Direct3D=3 Metal=4
 	defines "GBC_RENDERER_API_ID=1"
 -- Only link this if GBC_RENDERER_API_ID == 1 (OpenGL)
-	links "opengl32.lib"
+--	links "opengl32.lib"
 
 	files {
 		"src/**.h",
@@ -22,6 +22,7 @@ project "GBC"
 
 	includedirs {
 		"src",
+
 		"%{includedir.glad}",
 		"%{includedir.glfw}",
 		"%{includedir.imgui}",
@@ -32,7 +33,9 @@ project "GBC"
 		"%{includedir.entt}",
 		"%{includedir.glm}",
 		"%{includedir.siv}",
-		"%{includedir.stb}"
+		"%{includedir.stb}",
+
+		"%{includedir.VulkanSDK}"
 	}
 
 	links {
@@ -55,15 +58,33 @@ project "GBC"
 		runtime "Debug"
 		symbols "on"
 
+		links {
+			"%{library.ShaderC_Debug}",
+			"%{library.SPIRV_Cross_Debug}",
+			"%{library.SPIRV_Cross_GLSL_Debug}"
+		}
+
 	filter "configurations:Release"
 		defines "GBC_CONFIG_RELEASE"
 		runtime "Release"
 		optimize "on"
 
+		links {
+			"%{library.ShaderC_Release}",
+			"%{library.SPIRV_Cross_Release}",
+			"%{library.SPIRV_Cross_GLSL_Release}"
+		}
+
 	filter "configurations:Dist"
 		defines "GBC_CONFIG_DIST"
 		runtime "Release"
 		optimize "on"
+
+		links {
+			"%{library.ShaderC_Release}",
+			"%{library.SPIRV_Cross_Release}",
+			"%{library.SPIRV_Cross_GLSL_Release}"
+		}
 
 	filter "system:not windows"
 		excludes "src/Platform/System/Windows/**"

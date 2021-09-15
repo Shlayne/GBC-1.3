@@ -16,13 +16,12 @@ namespace gbc
 			InternalEndSession();
 
 		// Create any directories that need to be created before opening the file
-		for (size_t beginIndex = 0, endIndex = 0; (endIndex = filepath.find_first_of("/\\", beginIndex)) != std::string::npos; beginIndex = endIndex + 1)
+		size_t lastSlashIndex = filepath.find_last_of("/\\");
+		if (lastSlashIndex != std::string::npos)
 		{
-			if (beginIndex != endIndex)
-			{
-				std::filesystem::path path(filepath.begin() + beginIndex, filepath.begin() + endIndex - beginIndex);
-				std::filesystem::create_directory(path);
-			}
+			std::filesystem::path directoryPath = std::string_view(filepath).substr(0, lastSlashIndex);
+			if (!std::filesystem::exists(directoryPath))
+				std::filesystem::create_directories(directoryPath);
 		}
 
 		outputStream.open(filepath);

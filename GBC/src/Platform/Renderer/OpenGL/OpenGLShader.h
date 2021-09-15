@@ -4,23 +4,6 @@
 
 namespace gbc
 {
-	enum class ShaderType
-	{
-		None = 0,
-		Vertex,
-		TessolationControl,
-		TessolationEvaluation,
-		Geometry,
-		Fragment,
-		Compute
-	};
-
-	struct ShaderFile
-	{
-		ShaderType type;
-		std::string source;
-	};
-
 	class OpenGLShader : public Shader
 	{
 	public:
@@ -58,13 +41,21 @@ namespace gbc
 		virtual void SetInts   (const std::string& name, const int32_t*     values, int32_t count) override;
 		virtual void SetUInts  (const std::string& name, const uint32_t*    values, int32_t count) override;
 	private:
-		std::vector<ShaderFile> ParseFile(const std::string& filepath);
-		void CreateProgram(const std::vector<ShaderFile>& shaders);
-		RendererID CompileShader(const ShaderFile& shader);
+		std::unordered_map<uint32_t, std::string> PreProcess(const std::string& sourceCode);
+		void CompileOrGetVulkanBinaries(const std::unordered_map<uint32_t, std::string>& shaderSources);
+		void CompileOrGetOpenGLBinaries();
+		void Reflect(uint32_t stage, const std::vector<uint32_t>& data);
+		void CreateProgram();
 		bool LinkAndValidate();
 		int32_t GetUniformLocation(const std::string& name);
-
+	private:
 		RendererID rendererID = 0;
+		std::string filepath;
+
+		std::unordered_map<uint32_t, std::vector<uint32_t>> vulkanSPIRV;
+		std::unordered_map<uint32_t, std::vector<uint32_t>> openglSPIRV;
+		std::unordered_map<uint32_t, std::string> openglSourceCode;
+
 		std::unordered_map<std::string, int32_t> uniformLocations;
 	};
 }

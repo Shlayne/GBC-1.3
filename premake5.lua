@@ -1,3 +1,6 @@
+include "vendor/premake/solution_items.lua"
+include "Dependencies.lua"
+
 workspace "GBC-1.3"
 	architecture "x86_64"
 	startproject "Editor"
@@ -8,24 +11,19 @@ workspace "GBC-1.3"
 		"Dist"
 	}
 
+	solution_items {
+		"premake5.lua",
+		"Dependencies.lua",
+		".editorconfig",
+		".gitignore",
+		".gitattributes"
+	}
+
 	flags {
 		"MultiProcessorCompile"
 	}
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-
-includedir = {}
-includedir["glad"] = "%{wks.location}/GBC/vendor/glad/include"
-includedir["glfw"] = "%{wks.location}/GBC/vendor/glfw/include"
-includedir["imgui"] = "%{wks.location}/GBC/vendor/imgui/include"
-includedir["imguizmo"] = "%{wks.location}/GBC/vendor/imguizmo/include"
-includedir["stb"] = "%{wks.location}/GBC/vendor/stb/include"
-includedir["yaml"] = "%{wks.location}/GBC/vendor/yaml/include"
--- Header-only; they don't have their own project
-includedir["entt"] = "%{wks.location}/GBC/vendor/entt/include"
-includedir["glm"] = "%{wks.location}/GBC/vendor/glm/include"
-includedir["siv"] = "%{wks.location}/GBC/vendor/siv/include"
-includedir["spdlog"] = "%{wks.location}/GBC/vendor/spdlog/include"
 
 group "Dependencies"
 	include "GBC/vendor/glad"

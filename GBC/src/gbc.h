@@ -64,3 +64,4 @@
 #include "GBC/Util/Scripts/OrthographicCameraControllerScript.h"
 #include "GBC/Util/Scripts/PerspectiveCameraControllerScript.h"
 #include "GBC/Util/TextureAtlas.h"
+#include "GBC/Util/Timer.h"

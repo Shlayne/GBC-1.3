@@ -2,7 +2,7 @@ project "Editor"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++latest"
-	staticruntime "on"
+	staticruntime "off"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -40,6 +40,12 @@ project "Editor"
 		defines "GBC_CONFIG_DEBUG"
 		runtime "Debug"
 		symbols "on"
+
+		postbuildcommands {
+			"pushd \"%{librarydir.VulkanSDK_DebugDLL}\"",
+			"copy *.dll \"%{wks.location}/bin/" .. outputdir .. "/%{prj.name}\"",
+			"popd"
+		}
 
 	filter "configurations:Release"
 		defines "GBC_CONFIG_RELEASE"

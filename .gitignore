@@ -2,6 +2,7 @@
 Editor/ProfileSessions/**
 Editor/GBC.log
 **/imgui.ini
+**/Cache/**
 
 # Visual Studio
 .vs/**
