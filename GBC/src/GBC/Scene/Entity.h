@@ -10,6 +10,7 @@ namespace gbc
 	{
 	public:
 		Entity() = default;
+		Entity(const Entity&) = default;
 		Entity(entt::entity handle, Scene* context) noexcept
 			: handle(handle), context(context) {}
 
@@ -25,14 +26,14 @@ namespace gbc
 		template<typename T>
 		void RemoveComponent()
 		{
-			GBC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
+			GBC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component to remove!");
 			context->registry.remove<T>(handle);
 		}
 
 		template<typename T>
 		T& GetComponent()
 		{
-			GBC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component!");
+			GBC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component to get!");
 			return context->registry.get<T>(handle);
 		}
 
@@ -51,6 +52,5 @@ namespace gbc
 	private:
 		entt::entity handle = entt::null;
 		Scene* context = nullptr;
-		friend class Scene;
 	};
 }

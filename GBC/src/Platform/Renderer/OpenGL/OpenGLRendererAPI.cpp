@@ -114,14 +114,14 @@ namespace gbc
 		glViewport(x, y, width, height);
 	}
 
-	void OpenGLRendererAPI::SetClearColor(float red, float green, float blue, float alpha)
-	{
-		glClearColor(red, green, blue, alpha);
-	}
-
 	void OpenGLRendererAPI::Clear()
 	{
 		glClear(clearBits);
+	}
+
+	void OpenGLRendererAPI::SetClearColor(float red, float green, float blue, float alpha)
+	{
+		glClearColor(red, green, blue, alpha);
 	}
 
 	void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, uint32_t offset, uint32_t count, RendererPrimitive primitive)

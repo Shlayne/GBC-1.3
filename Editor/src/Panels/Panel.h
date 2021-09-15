@@ -24,9 +24,9 @@ namespace gbc
 		inline bool HasSizeChanged() const noexcept { return sizeChanged && size.x > 0 && size.y > 0; }
 		inline const glm::ivec2& GetSize() const noexcept { return size; }
 		inline const glm::vec2& GetPosition() const noexcept { return position; }
-
-		void Update();
 	protected:
+		void Update();
+
 		std::string name;
 		bool enabled = true;
 		bool focused = false;

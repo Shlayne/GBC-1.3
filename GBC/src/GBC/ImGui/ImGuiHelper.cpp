@@ -16,8 +16,8 @@ namespace gbc
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuiStyle& style = ImGui::GetStyle();
 
-		io.FontDefault = io.Fonts->AddFontFromFileTTF("resources/fonts/OpenSans/OpenSans-Regular.ttf", 18.0f);
-		data.boldFont = io.Fonts->AddFontFromFileTTF("resources/fonts/OpenSans/OpenSans-Bold.ttf", 18.0f);
+		io.FontDefault = io.Fonts->AddFontFromFileTTF("Resources/Fonts/OpenSans/OpenSans-Regular.ttf", 18.0f);
+		data.boldFont = io.Fonts->AddFontFromFileTTF("Resources/Fonts/OpenSans/OpenSans-Bold.ttf", 18.0f);
 
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
 		io.ConfigWindowsMoveFromTitleBarOnly = true;

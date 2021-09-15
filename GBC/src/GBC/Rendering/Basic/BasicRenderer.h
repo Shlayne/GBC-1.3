@@ -10,10 +10,11 @@ namespace gbc
 {
 	class BasicRenderer
 	{
-	public:
+	private:
+		friend class Renderer;
 		static void Init();
 		static void Shutdown();
-
+	public:
 		static void BeginScene(const Camera& camera, const glm::mat4& view);
 		static void BeginScene(const EditorCamera& camera);
 		static void EndScene();

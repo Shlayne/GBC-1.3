@@ -32,7 +32,6 @@ namespace gbc
 				: position(position), size(size) {}
 
 			Ref<LocalTexture2D> texture = nullptr;
-			bool childrenFull = false;
 
 			// These are unnormalized texture coordinates and sizes
 			glm::ivec2 position;

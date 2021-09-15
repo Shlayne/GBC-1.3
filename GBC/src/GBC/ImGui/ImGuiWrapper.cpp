@@ -49,18 +49,15 @@ namespace gbc
 
 		ImGuiIO& io = ImGui::GetIO();
 		Window& window = Application::Get().GetWindow();
-		io.DisplaySize = ImVec2(static_cast<float>(window.GetWidth()), static_cast<float>(window.GetHeight()));
+		io.DisplaySize = { static_cast<float>(window.GetWidth()), static_cast<float>(window.GetHeight()) };
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			GLFWwindow* context = glfwGetCurrentContext();
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault();
-			glfwMakeContextCurrent(context);
-		}
+		GLFWwindow* context = glfwGetCurrentContext();
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+		glfwMakeContextCurrent(context);
 	}
 
 	void ImGuiWrapper::OnEvent(Event& event)

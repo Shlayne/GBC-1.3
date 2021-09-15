@@ -12,7 +12,7 @@ namespace gbc
 			WindowDrop, WindowFramebufferResize, WindowContentScale, WindowRefresh,
 		KeyPress, KeyRepeat, KeyRelease, KeyChar, KeyCharMods,
 		MouseButtonPress, MouseButtonRelease, MouseMove, MouseScroll, MouseEnter,
-		JoystickConnect, MonitorConnect
+		JoystickConnect
 	};
 
 	using EventCategoryFlags = uint32_t;

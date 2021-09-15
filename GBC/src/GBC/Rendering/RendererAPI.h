@@ -27,10 +27,10 @@ namespace gbc
 
 	class RendererAPI
 	{
-	public:
+	private:
 		virtual void Init() = 0;
 		virtual void Shutdown() = 0;
-
+	public:
 		virtual void EnableDepthTest() = 0;
 		virtual void DisableDepthTest() = 0;
 		virtual void EnableBlending() = 0;
@@ -55,9 +55,9 @@ namespace gbc
 		enum class API { Headless, OpenGL, Vulkan, Direct3D, Metal };
 		static API GetAPI() { return api; }
 	private:
+		friend class Renderer;
 		static API api;
 
 		static Scope<RendererAPI> Create();
-		friend class Renderer;
 	};
 }

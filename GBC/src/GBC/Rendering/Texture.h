@@ -5,7 +5,7 @@
 
 namespace gbc
 {
-	enum class TextureFormat
+	enum class TextureFormat : uint8_t
 	{
 		None = 0,
 
@@ -13,13 +13,13 @@ namespace gbc
 		RGBA8
 	};
 
-	enum class TextureFilterMode
+	enum class TextureFilterMode : uint8_t
 	{
 		Linear,
 		Nearest
 	};
 
-	enum class TextureWrapMode
+	enum class TextureWrapMode : uint8_t
 	{
 		ClampToEdge,
 		Repeat
@@ -67,6 +67,6 @@ namespace gbc
 	{
 	public:
 		static Ref<Texture2D> Create(const TextureSpecification& specification);
-		static Ref<Texture2D> Create(const TextureSpecification& specification, const Ref<Framebuffer>& framebuffer, int32_t attachmentIndex);
+		static Ref<Texture2D> Create(const Ref<Framebuffer>& framebuffer, int32_t attachmentIndex);
 	};
 }

@@ -8,7 +8,7 @@ namespace gbc
 	class SceneSerializer
 	{
 	public:
-		SceneSerializer(const Ref<Scene>& scene);
+		SceneSerializer(const Ref<Scene>& scene) : scene(scene) {}
 
 		// These serialize into yaml format
 		bool Serialize(const std::string& filepath);

@@ -34,9 +34,9 @@ namespace gbc
 		VertexBufferElementType type;
 		std::string name;
 		bool normalized;
-		int32_t count;
-		int32_t size;
-		int32_t offset = 0;
+		uint32_t count;
+		uint32_t size;
+		uint64_t offset = 0;
 	};
 
 	class VertexBufferLayout
@@ -46,15 +46,18 @@ namespace gbc
 		constexpr VertexBufferLayout(std::initializer_list<VertexBufferElement> elements) noexcept
 			: elements(elements)
 		{
+			uint64_t offset = 0;
+
 			for (VertexBufferElement& element : this->elements)
 			{
-				element.offset = stride;
+				element.offset = offset;
+				offset += element.size;
 				stride += element.size;
 			}
 		}
 
 		constexpr const std::vector<VertexBufferElement>& GetElements() const noexcept { return elements; }
-		constexpr int32_t GetStride() const noexcept { return stride; }
+		constexpr uint32_t GetStride() const noexcept { return stride; }
 
 		constexpr auto begin() noexcept { return elements.begin(); }
 		constexpr auto begin() const noexcept { return elements.begin(); }
@@ -70,7 +73,7 @@ namespace gbc
 		constexpr auto crend() const noexcept { return elements.crend(); }
 	private:
 		std::vector<VertexBufferElement> elements;
-		int32_t stride = 0;
+		uint32_t stride = 0;
 	};
 
 	class VertexBuffer

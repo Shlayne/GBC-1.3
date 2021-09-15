@@ -69,7 +69,7 @@ namespace gbc
 				case VertexBufferElementType::Float3:
 				case VertexBufferElementType::Float4:
 					glEnableVertexAttribArray(vertexAttributeIndex);
-					glVertexAttribPointer(vertexAttributeIndex, element.count, elementType, element.normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)static_cast<size_t>(element.offset));
+					glVertexAttribPointer(vertexAttributeIndex, element.count, elementType, element.normalized ? GL_TRUE : GL_FALSE, layout.GetStride(), (const void*)element.offset);
 					vertexAttributeIndex++;
 					break;
 				case VertexBufferElementType::Int:
@@ -81,7 +81,7 @@ namespace gbc
 				case VertexBufferElementType::UInt3:
 				case VertexBufferElementType::UInt4:
 					glEnableVertexAttribArray(vertexAttributeIndex);
-					glVertexAttribIPointer(vertexAttributeIndex, element.count, elementType, layout.GetStride(), (const void*)static_cast<size_t>(element.offset));
+					glVertexAttribIPointer(vertexAttributeIndex, element.count, elementType, layout.GetStride(), (const void*)element.offset);
 					vertexAttributeIndex++;
 					break;
 			}

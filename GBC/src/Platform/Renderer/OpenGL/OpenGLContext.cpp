@@ -5,15 +5,11 @@
 
 namespace gbc
 {
-	const char* OpenGLContext::GetVersion() const
-	{
-		static char buffer[] = "#version XX0 core";
-		buffer[9] = static_cast<char>(GLVersion.major + '0');
-		buffer[10] = static_cast<char>(GLVersion.minor + '0');
-		return buffer;
-	}
+#if GBC_ENABLE_IMGUI
+	static char version[] = "#version XX0 core";
+#endif
 
-	void OpenGLContext::Init(void* nativeWindow)
+	OpenGLContext::OpenGLContext(void* nativeWindow)
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -28,6 +24,11 @@ namespace gbc
 		GBC_CORE_INFO("  Vendor:   {0}", glGetString(GL_VENDOR));
 		GBC_CORE_INFO("  Renderer: {0}", glGetString(GL_RENDERER));
 		GBC_CORE_INFO("  Version:  {0}", glGetString(GL_VERSION));
+
+#if GBC_ENABLE_IMGUI
+		version[9] = static_cast<char>(GLVersion.major + '0');
+		version[10] = static_cast<char>(GLVersion.minor + '0');
+#endif
 	}
 
 	void OpenGLContext::SwapBuffers()
@@ -44,4 +45,8 @@ namespace gbc
 		lastTime = time;
 		return elapsedTime;
 	}
+
+#if GBC_ENABLE_IMGUI
+	const char* OpenGLContext::GetVersion() const { return version; }
+#endif
 }

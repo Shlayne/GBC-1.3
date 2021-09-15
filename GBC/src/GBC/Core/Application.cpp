@@ -25,7 +25,7 @@ namespace gbc
 		if (windowSpecs.focusOnShow)
 		{
 			WindowFocusEvent event(window->GetNativeWindow(), true);
-			OnEvent(event);
+			OnWindowFocusEvent(event);
 		}
 
 		Renderer::Init();
@@ -183,6 +183,7 @@ namespace gbc
 		if (windowZeroSize)
 		{
 			rendering = false;
+			// Don't resize anything with zero size.
 			return true;
 		}
 		else

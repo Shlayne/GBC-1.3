@@ -67,7 +67,10 @@ namespace gbc
 			state.current.size = { videoMode->width, videoMode->height };
 		}
 
-		window = glfwCreateWindow(state.current.size.x, state.current.size.y, state.title, state.fullscreen ? primaryMonitor : nullptr, nullptr);
+		{
+			GBC_PROFILE_SCOPE("glfwCreateWindow");
+			window = glfwCreateWindow(state.current.size.x, state.current.size.y, state.title, state.fullscreen ? primaryMonitor : nullptr, nullptr);
+		}
 		GBC_CORE_ASSERT(window != nullptr, "Failed to create window!");
 		glfwWindowCount++;
 
@@ -83,13 +86,11 @@ namespace gbc
 			state.current.position = glm::ivec2(left, top) + (monitorWorkArea - (state.current.size + windowFrameSize)) / 2;
 		}
 
-		glfwGetFramebufferSize(window, &state.framebufferSize.x, &state.framebufferSize.y);
 		glfwSetWindowPos(window, state.current.position.x, state.current.position.y);
 		glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
 		glfwSetWindowUserPointer(window, &state);
 
-		context = Context::Create();
-		context->Init(window);
+		context = Context::Create(window);
 		SetVSync(specs.vsync);
 		SetCaptureMouse(specs.captureMouse);
 		SetCallbacks(window);
@@ -336,7 +337,6 @@ namespace gbc
 		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
 		{
 			WindowFramebufferResizeEvent event(window, width, height);
-			state->framebufferSize = { width, height };
 			state->eventCallback(event);
 		}
 

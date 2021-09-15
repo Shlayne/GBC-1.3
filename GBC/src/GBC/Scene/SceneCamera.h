@@ -7,7 +7,7 @@ namespace gbc
 	class SceneCamera : public Camera
 	{
 	public:
-		enum class ProjectionType { Perspective, Orthographic };
+		enum class ProjectionType : uint8_t { Perspective, Orthographic };
 
 		void SetPerspective(float fov, float nearClip, float farClip);
 		inline float GetPerspectiveFOV() const noexcept { return perspectiveFOV; }

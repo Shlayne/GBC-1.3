@@ -3,18 +3,21 @@
 #include "GBC/Core/Core.h"
 #include <spdlog/spdlog.h>
 
+int main(int argc, char** argv);
+
 namespace gbc
 {
 	class Logger
 	{
 	public:
-		static void Init();
-
 		inline static Ref<spdlog::logger>& GetCoreLogger() { return coreLogger; }
 		inline static Ref<spdlog::logger>& GetClientLogger() { return clientLogger; }
 	private:
 		static Ref<spdlog::logger> coreLogger;
 		static Ref<spdlog::logger> clientLogger;
+	private:
+		friend int ::main(int argc, char** argv);
+		static void Init();
 	};
 }
 

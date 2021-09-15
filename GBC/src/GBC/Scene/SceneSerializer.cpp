@@ -21,6 +21,7 @@ namespace YAML
 			node.push_back(v.x);
 			node.push_back(v.y);
 			node.push_back(v.z);
+			node.SetStyle(YAML::EmitterStyle::Flow);
 			return node;
 		}
 
@@ -46,6 +47,8 @@ namespace YAML
 			node.push_back(v.x);
 			node.push_back(v.y);
 			node.push_back(v.z);
+			node.push_back(v.w);
+			node.SetStyle(YAML::EmitterStyle::Flow);
 			return node;
 		}
 
@@ -94,6 +97,18 @@ namespace gbc
 		out << YAML::BeginMap
 			<< YAML::Key << "Entity" << YAML::Value << "0"; // TODO: entity ID goes here
 
+		// An entity always has these two components
+		SerializeComponent<TagComponent>(out, entity, "TagComponent", [&out](TagComponent& component)
+		{
+			out << YAML::Key << "Tag" << YAML::Value << component.tag;
+		});
+		SerializeComponent<TransformComponent>(out, entity, "TransformComponent", [&out](TransformComponent& component)
+		{
+			out << YAML::Key << "Translation" << YAML::Value << component.translation
+				<< YAML::Key << "Rotation" << YAML::Value << component.rotation
+				<< YAML::Key << "Scale" << YAML::Value << component.scale;
+		});
+
 		SerializeComponent<CameraComponent>(out, entity, "CameraComponent", [&out](CameraComponent& component)
 		{
 			auto& camera = component.camera;
@@ -114,7 +129,7 @@ namespace gbc
 			out << YAML::Key << "Filepath" << YAML::Value << component.filepath;
 		});
 		// TODO: how do this ???
-		//SerializeComponent<NativeScriptComponent>(out, entity, "NativeScriptComponent", [&](NativeScriptComponent& component) {});
+		//SerializeComponent<NativeScriptComponent>(out, entity, "NativeScriptComponent", [&out](NativeScriptComponent& component) {});
 		SerializeComponent<RenderableComponent>(out, entity, "RenderableComponent", [&out](RenderableComponent& component)
 		{
 			// TODO: reference texture by UUID
@@ -133,22 +148,9 @@ namespace gbc
 				<< YAML::Key << "WrapT" << YAML::Value << static_cast<int32_t>(specs.wrapT)
 				<< YAML::EndMap;
 		});
-		SerializeComponent<TagComponent>(out, entity, "TagComponent", [&out](TagComponent& component)
-		{
-			out << YAML::Key << "Tag" << YAML::Value << component.tag;
-		});
-		SerializeComponent<TransformComponent>(out, entity, "TransformComponent", [&out](TransformComponent& component)
-		{
-			out << YAML::Key << "Translation" << YAML::Value << component.translation
-				<< YAML::Key << "Rotation" << YAML::Value << component.rotation
-				<< YAML::Key << "Scale" << YAML::Value << component.scale;
-		});
 
 		out << YAML::EndMap;
 	}
-
-	SceneSerializer::SceneSerializer(const Ref<Scene>& scene)
-		: scene(scene) {}
 
 	bool SceneSerializer::Serialize(const std::string& filepath)
 	{
@@ -182,6 +184,7 @@ namespace gbc
 	bool SceneSerializer::Deserialize(const std::string& filepath)
 	{
 		std::ifstream file(filepath);
+
 		if (file.is_open())
 		{
 			YAML::Node data = YAML::Load(file);
@@ -205,6 +208,15 @@ namespace gbc
 						name = tagComponent["Tag"].as<std::string>();
 
 					Entity entity = scene->CreateEntity(name);
+
+					auto transformComponentNode = entityNode["TransformComponent"];
+					if (transformComponentNode)
+					{
+						auto& transformComponent = entity.GetComponent<TransformComponent>();
+						transformComponent.translation = transformComponentNode["Translation"].as<glm::vec3>();
+						transformComponent.rotation = transformComponentNode["Rotation"].as<glm::vec3>();
+						transformComponent.scale = transformComponentNode["Scale"].as<glm::vec3>();
+					}
 
 					auto cameraComponentNode = entityNode["CameraComponent"];
 					if (cameraComponentNode)
@@ -263,15 +275,6 @@ namespace gbc
 						renderableComponent.texture = Texture2D::Create(specs);
 
 					}
-
-					auto transformComponentNode = entityNode["TransformComponent"];
-					if (transformComponentNode)
-					{
-						auto& transformComponent = entity.GetComponent<TransformComponent>();
-						transformComponent.translation = transformComponentNode["Translation"].as<glm::vec3>();
-						transformComponent.rotation = transformComponentNode["Rotation"].as<glm::vec3>();
-						transformComponent.scale = transformComponentNode["Scale"].as<glm::vec3>();
-					}
 				}
 			}
 
@@ -282,9 +285,93 @@ namespace gbc
 		return false;
 	}
 
+	static std::ostream& operator<<(std::ostream& out, const glm::vec1& value) { return out << value.x; }
+	static std::istream& operator>>(std::istream& in,        glm::vec1& value) { return in  >> value.x; }
+	static std::ostream& operator<<(std::ostream& out, const glm::vec2& value) { return out << value.x << value.y; }
+	static std::istream& operator>>(std::istream& in,        glm::vec2& value) { return in  >> value.x >> value.y; }
+	static std::ostream& operator<<(std::ostream& out, const glm::vec3& value) { return out << value.x << value.y << value.z; }
+	static std::istream& operator>>(std::istream& in,        glm::vec3& value) { return in  >> value.x >> value.y >> value.z; }
+	static std::ostream& operator<<(std::ostream& out, const glm::vec4& value) { return out << value.x << value.y << value.z << value.w; }
+	static std::istream& operator>>(std::istream& in,        glm::vec4& value) { return in  >> value.x >> value.y >> value.z >> value.w; }
+
+	template<typename T, typename Func>
+	static void SerializeComponent(std::ofstream& out, Entity entity, Func func)
+	{
+		if (entity.HasComponent<T>())
+		{
+			// TODO: Figure out if this component ID system is ok or not.
+			out << typeid(T).hash_code();
+			func(entity.GetComponent<T>());
+		}
+	}
+
+	static void SerializeEntity(std::ofstream& out, Entity entity)
+	{
+		// TODO: entity ID goes here
+		uint64_t uuid = 0;
+		out << uuid;
+		
+		// An entity always has these two components
+		TagComponent tagComponent = entity.GetComponent<TagComponent>();
+		out << tagComponent.tag.size() << tagComponent.tag;
+		TransformComponent transformComponent = entity.GetComponent<TransformComponent>();
+		out << transformComponent.translation << transformComponent.rotation << transformComponent.scale;
+
+		SerializeComponent<CameraComponent>(out, entity, [&out](CameraComponent& component)
+		{
+			auto& camera = component.camera;
+			out << static_cast<int32_t>(camera.GetProjectionType()) << camera.GetPerspectiveFOV()
+				<< camera.GetPerspectiveNearClip() << camera.GetPerspectiveFarClip()
+				<< camera.GetOrthographicSize() << camera.GetOrthographicNearClip()
+				<< camera.GetOrthographicFarClip() << component.primary;
+		});
+		// TODO: reference mesh by ID
+		SerializeComponent<MeshComponent>(out, entity, [&out](MeshComponent& component)
+		{
+			out << component.filepath.size() << component.filepath;
+		});
+		// TODO: how do this ???
+		//SerializeComponent<NativeScriptComponent>(out, entity, [&out](NativeScriptComponent& component) {});
+		SerializeComponent<RenderableComponent>(out, entity, [&out](RenderableComponent& component)
+		{
+			// TODO: reference texture by UUID
+			std::string filepath;
+			if (component.texture && component.texture->GetTexture())
+				filepath = component.texture->GetTexture()->GetFilepath();
+			const auto& specs = component.texture->GetSpecification();
+
+			out << component.color << filepath.size() << filepath << component.tilingFactor
+				<< static_cast<int32_t>(specs.minFilter) << static_cast<int32_t>(specs.magFilter)
+				<< static_cast<int32_t>(specs.wrapS) << static_cast<int32_t>(specs.wrapT);
+		});
+
+		uint64_t endOfEntity = 0;
+		out << endOfEntity;
+	}
+
 	bool SceneSerializer::SerializeRuntime(const std::string& filepath)
 	{
-		// TODO: implement
+		std::ofstream file = std::ofstream(filepath, std::ios::out | std::ios::binary);
+
+		if (file.is_open())
+		{
+			static constexpr char sceneName[] = "Untitled";
+			static constexpr size_t sceneNameLength = sizeof(sceneName) / sizeof(*sceneName);
+			size_t entityCount = scene->registry.size();
+			file << sceneNameLength << sceneName << entityCount;
+
+			auto view = scene->registry.view<TagComponent>();
+			for (auto it = view.rbegin(); it != view.rend(); ++it)
+			{
+				Entity entity(*it, scene.get());
+				if (entity)
+					SerializeEntity(file, entity);
+			}
+
+			file.close();
+			return true;
+		}
+
 		return false;
 	}
 

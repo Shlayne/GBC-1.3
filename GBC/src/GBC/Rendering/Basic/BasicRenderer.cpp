@@ -86,7 +86,7 @@ namespace gbc
 		delete[] samplers;
 
 		// Setup white texture
-		Ref<LocalTexture2D> whiteTexture = CreateRef<LocalTexture2D>(1, 1, 4);
+		auto whiteTexture = LocalTexture2D::Create(1, 1, 4);
 		*(uint32_t*)whiteTexture->GetData() = 0xFFFFFFFF;
 		data.textures[0] = Texture2D::Create(whiteTexture);
 	}
@@ -194,8 +194,8 @@ namespace gbc
 		for (uint32_t i = 0; i < vertexCount; i++, data.localVertexBufferCurrent++)
 		{
 			data.localVertexBufferCurrent->position = transform * glm::vec4(mesh->vertices[i].position, 1.0f);
-			data.localVertexBufferCurrent->texCoord = mesh->vertices[i].texCoord;
 			data.localVertexBufferCurrent->tintColor = mesh->vertices[i].tintColor * renderableComponent.color;
+			data.localVertexBufferCurrent->texCoord = mesh->vertices[i].texCoord;
 			data.localVertexBufferCurrent->texIndex = texIndex;
 			data.localVertexBufferCurrent->tilingFactor = renderableComponent.tilingFactor;
 		}

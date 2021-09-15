@@ -37,7 +37,6 @@ namespace gbc
 		void OnComponentAdded(Entity entity, T& component);
 
 		entt::registry registry;
-
 		glm::ivec2 viewportSize;
 
 		friend class Entity;

@@ -5,7 +5,7 @@
 
 namespace gbc
 {
-	enum class FramebufferTextureFormat
+	enum class FramebufferTextureFormat : uint8_t
 	{
 		None = 0,
 
@@ -36,13 +36,13 @@ namespace gbc
 		return false;
 	}
 
-	enum class FramebufferFilterMode
+	enum class FramebufferFilterMode : uint8_t
 	{
 		Linear,
 		Nearest
 	};
 
-	enum class FramebufferWrapMode
+	enum class FramebufferWrapMode : uint8_t
 	{
 		ClampToEdge,
 		Repeat

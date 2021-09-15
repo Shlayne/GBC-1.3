@@ -20,7 +20,7 @@ namespace gbc
 		{
 			if (beginIndex != endIndex)
 			{
-				std::filesystem::path path = std::filesystem::path(filepath.begin() + beginIndex, filepath.begin() + endIndex - beginIndex);
+				std::filesystem::path path(filepath.begin() + beginIndex, filepath.begin() + endIndex - beginIndex);
 				std::filesystem::create_directory(path);
 			}
 		}

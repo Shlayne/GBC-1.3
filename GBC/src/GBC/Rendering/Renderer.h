@@ -7,10 +7,11 @@ namespace gbc
 {
 	class Renderer
 	{
-	public:
+	private:
+		friend class Application;
 		static void Init();
 		static void Shutdown();
-
+	public:
 		static void EnableDepthTest();
 		static void DisableDepthTest();
 		static void EnableBlending();

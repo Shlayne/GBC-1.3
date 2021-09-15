@@ -5,7 +5,7 @@
 
 namespace gbc
 {
-	static int32_t GetElementCount(VertexBufferElementType type)
+	static uint32_t GetElementCount(VertexBufferElementType type)
 	{
 		switch (type)
 		{
@@ -27,7 +27,7 @@ namespace gbc
 		return 0;
 	}
 
-	static int32_t GetElementSize(VertexBufferElementType type)
+	static uint32_t GetElementSize(VertexBufferElementType type)
 	{
 		switch (type)
 		{

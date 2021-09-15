@@ -49,8 +49,8 @@ namespace gbc
 #endif
 		LayerStack layerStack;
 	private:
-		void Run();
 		friend int ::main(int argc, char** argv);
+		void Run();
 	};
 
 	Application* CreateApplication();
