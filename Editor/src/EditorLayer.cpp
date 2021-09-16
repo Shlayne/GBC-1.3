@@ -412,6 +412,7 @@ namespace gbc
 
 		if (allowedDiscard)
 		{
+			// TODO: open from assets directory
 			auto filepath = FileDialog::OpenFile("GBC Scene (*.gscn)\0*.gscn\0");
 			if (filepath)
 				OpenSceneFile(*filepath);

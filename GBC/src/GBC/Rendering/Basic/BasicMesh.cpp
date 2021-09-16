@@ -48,28 +48,6 @@ namespace gbc
 		}
 	}
 
-	BasicMesh::BasicMesh(OBJModel&& model) noexcept
-		: vertices(model.indices.size()), indices(model.indices.size())
-	{
-		if (model.texCoords.empty())
-		{
-			for (size_t i = 0; i < model.indices.size(); i++)
-			{
-				vertices[i].position = model.positions[model.indices[i].x];
-				indices[i] = static_cast<uint32_t>(i);
-			}
-		}
-		else
-		{
-			for (size_t i = 0; i < model.indices.size(); i++)
-			{
-				vertices[i].position = model.positions[model.indices[i].x];
-				vertices[i].texCoord = model.texCoords[model.indices[i].y];
-				indices[i] = static_cast<uint32_t>(i);
-			}
-		}
-	}
-
 	void BasicMesh::Create(uint32_t vertexCount, uint32_t indexCount)
 	{
 		vertices.clear();

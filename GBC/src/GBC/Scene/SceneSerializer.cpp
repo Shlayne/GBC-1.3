@@ -240,9 +240,10 @@ namespace gbc
 					if (meshComponentNode)
 					{
 						OBJModel model;
-						auto result = OBJLoader::LoadOBJ(meshComponentNode["Filepath"].as<std::string>(), model);
+						std::string modelFilepath = meshComponentNode["Filepath"].as<std::string>();
+						auto result = OBJLoader::LoadOBJ(modelFilepath, model);
 						if (result)
-							entity.AddComponent<MeshComponent>() = std::move(model);
+							entity.AddComponent<MeshComponent>(std::move(model));
 						else
 							OBJLoader::LogError(result);
 					}
@@ -273,7 +274,6 @@ namespace gbc
 						specs.wrapS = static_cast<TextureWrapMode>(specsNode["WrapS"].as<int32_t>());
 						specs.wrapT = static_cast<TextureWrapMode>(specsNode["WrapT"].as<int32_t>());
 						renderableComponent.texture = Texture2D::Create(specs);
-
 					}
 				}
 			}

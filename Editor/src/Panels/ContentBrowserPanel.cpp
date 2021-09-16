@@ -4,6 +4,7 @@
 #include "GBC/Core/Input.h"
 #include "GBC/Events/MouseEvents.h"
 #include "GBC/ImGui/ImGuiHelper.h"
+#include "GBC/IO/FileDialog.h"
 
 namespace gbc
 {
@@ -26,6 +27,7 @@ namespace gbc
 		{
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 4.0f, 2.0f });
 			ImGui::Begin(name.c_str(), &enabled, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+			ImGui::PopStyleVar();
 			Update();
 
 			if (ImGui::BeginTable("ContentBrowserTable1", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV))
@@ -57,7 +59,6 @@ namespace gbc
 			}
 
 			ImGui::End();
-			ImGui::PopStyleVar();
 		}
 	}
 
@@ -167,7 +168,7 @@ namespace gbc
 					catch (...)
 #endif
 					{
-						GBC_ERROR("Failed to create directory: {0}", error.what());
+						GBC_CORE_ERROR("Failed to create directory: {0}", error.what());
 					}
 
 					creatingDirectory = false;
@@ -193,13 +194,15 @@ namespace gbc
 					passedSearch = true;
 				else
 				{
-					// Apparently, when an unescaped backslash is at the end of the regex, it throws an error, which is what this check is for.
-					std::string_view searchBufferStringView(searchBuffer, searchSize);
-					if (!(searchBufferStringView.ends_with('\\') && (searchBufferStringView.size() == 1 || searchBufferStringView[searchBufferStringView.size() - 2] != '\\')))
+					try
 					{
 						std::regex regex(searchBuffer, searchSize, std::regex_constants::icase);
 						if (std::regex_search(filenameString.c_str(), regex, std::regex_constants::match_any))
 							passedSearch = true;
+					}
+					catch (...)
+					{
+						// Apparently, when an unescaped backslash is at the end of the regex, it throws an error, which is complete bullshit.
 					}
 				}
 
@@ -246,6 +249,15 @@ namespace gbc
 							memcpy_s(fileNameBuffer, fileNameBufferSize, filenameString.c_str(), filenameString.size() + 1);
 							renamingFile = true;
 						}
+
+						if (file.directory)
+						{
+							if (ImGui::MenuItem("Open In Explorer"))
+							{
+								std::string directoryPath = (*currentCachedDirectory / filename).string();
+								FileDialog::OpenFolder(directoryPath);
+							}
+						}
 						ImGui::EndPopup();
 					}
 
@@ -265,7 +277,7 @@ namespace gbc
 							catch (...)
 	#endif
 							{
-								GBC_ERROR("Failed to rename {0}: {1}", file.directory ? "directory" : "file", error.what());
+								GBC_CORE_ERROR("Failed to rename {0}: {1}", file.directory ? "directory" : "file", error.what());
 							}
 
 							renamingFile = false;
@@ -301,7 +313,7 @@ namespace gbc
 							catch (...)
 #endif
 							{
-								GBC_ERROR("Failed to remove {0}: {1}", file.directory ? "directory" : "file", error.what());
+								GBC_CORE_ERROR("Failed to remove {0}: {1}", file.directory ? "directory" : "file", error.what());
 							}
 						}
 
@@ -327,6 +339,13 @@ namespace gbc
 
 					ImGui::EndMenu();
 				}
+
+				if (ImGui::MenuItem("Open In Explorer"))
+				{
+					std::string directoryPath = currentCachedDirectory->string();
+					FileDialog::OpenFolder(directoryPath);
+				}
+
 				ImGui::EndPopup();
 			}
 

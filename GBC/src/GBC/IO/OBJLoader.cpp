@@ -69,7 +69,7 @@ OBJResult OBJLoader::LoadOBJ(const std::string& filepath, OBJModel& outModel)
 		else if (token0 == "f")
 		{
 			std::string originalVertex;
-			glm::uvec3 index(0);
+			glm::uvec3 index{ 0 };
 			std::vector<glm::uvec3> indices;
 			uint32_t vertexCount = 0;
 

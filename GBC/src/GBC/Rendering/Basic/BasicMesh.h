@@ -14,7 +14,6 @@ namespace gbc
 		BasicMesh(BasicMesh&& mesh) noexcept;
 		BasicMesh& operator=(BasicMesh&& mesh) noexcept;
 		BasicMesh(const OBJModel& model);
-		BasicMesh(OBJModel&& model) noexcept;
 
 		void Create(uint32_t vertexCount, uint32_t indexCount);
 

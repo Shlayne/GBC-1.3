@@ -16,6 +16,7 @@ namespace gbc
 		if (entity.HasComponent<T>())
 		{
 			ImGui::PushID(label.c_str());
+			ImGui::PushID(static_cast<uint32_t>(entity));
 
 			ImFont* font = ImGui::GetFont();
 			ImGuiStyle& style = ImGui::GetStyle();
@@ -55,6 +56,7 @@ namespace gbc
 			if (removeComponent)
 				entity.RemoveComponent<T>();
 
+			ImGui::PopID();
 			ImGui::PopID();
 		}
 	}

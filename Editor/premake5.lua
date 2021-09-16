@@ -15,6 +15,7 @@ project "Editor"
 	includedirs {
 		"src",
 		"%{wks.location}/GBC/src",
+
 		"%{includedir.imgui}",
 		"%{includedir.imguizmo}",
 		"%{includedir.stb}",

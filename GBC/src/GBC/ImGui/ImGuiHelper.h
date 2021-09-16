@@ -79,6 +79,7 @@ namespace gbc
 			ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, { 0.5f, 0.5f });
 			ImGui::OpenPopup(name);
 
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, { 0.5f, 0.5f });
 			if (ImGui::BeginPopupModal(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
 			{
 				ImGui::Text(messageFormat, std::forward<Args>(args)...);
@@ -108,6 +109,7 @@ namespace gbc
 
 				ImGui::EndPopup();
 			}
+			ImGui::PopStyleVar();
 
 			return closed;
 		}

@@ -12,6 +12,7 @@ project "GBC"
 
 -- Headless=0 OpenGL=1 Vulkan=2 Direct3D=3 Metal=4
 	defines "GBC_RENDERER_API_ID=1"
+-- Apparently the VulkanSDK has this already.
 -- Only link this if GBC_RENDERER_API_ID == 1 (OpenGL)
 --	links "opengl32.lib"
 

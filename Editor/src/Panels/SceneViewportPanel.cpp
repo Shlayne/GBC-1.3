@@ -31,6 +31,7 @@ namespace gbc
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
 				{
+					// TODO: calling this openScene method can caused unsaved work to be lost!
 					std::string filepath = static_cast<const char*>(payload->Data);
 					if (filepath.ends_with(".gscn"))
 						openScene(filepath);
