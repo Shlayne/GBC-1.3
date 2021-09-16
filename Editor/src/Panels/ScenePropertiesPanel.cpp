@@ -3,8 +3,7 @@
 #include "GBC/ImGui/ImGuiHelper.h"
 #include "GBC/IO/FileDialog.h"
 #include "GBC/Scene/Components/CameraComponent.h"
-#include "GBC/Scene/Components/MeshComponent.h"
-#include "GBC/Scene/Components/RenderableComponent.h"
+#include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
 
@@ -171,29 +170,7 @@ namespace gbc
 					}
 				});
 
-				DrawComponent<MeshComponent>("Mesh", 2, selectedEntity, true, [](MeshComponent& component)
-				{
-					const char* buttonText = "Null";
-					if (!component.filepath.empty())
-						buttonText = component.filepath.c_str();
-
-					ImGuiHelper::ButtonDragDropTarget("Model", buttonText, "CONTENT_BROWSER_ITEM", [&component](const ImGuiPayload* payload)
-					{
-						std::string filepath = static_cast<const char*>(payload->Data);
-
-						if (filepath.ends_with(".obj"))
-						{
-							OBJModel model;
-							if (OBJLoader::LoadOBJ(filepath, model))
-							{
-								component.mesh = CreateRef<BasicMesh>(std::move(model));
-								component.filepath = std::move(filepath);
-							}
-						}
-					});
-				});
-
-				DrawComponent<RenderableComponent>("Renderable", 2, selectedEntity, true, [](RenderableComponent& component)
+				DrawComponent<SpriteRendererComponent>("Sprite Renderer", 2, selectedEntity, true, [](SpriteRendererComponent& component)
 				{
 					ImGuiHelper::ColorEdit4("Tint Color", &component.color.x);
 					ImGuiHelper::NextTableColumn();
@@ -277,8 +254,7 @@ namespace gbc
 				{
 					bool allComponentsAdded = true;
 					allComponentsAdded &= DrawAddComponent<CameraComponent>("Camera", selectedEntity);
-					allComponentsAdded &= DrawAddComponent<MeshComponent>("Mesh", selectedEntity);
-					allComponentsAdded &= DrawAddComponent<RenderableComponent>("Renderable", selectedEntity);
+					allComponentsAdded &= DrawAddComponent<SpriteRendererComponent>("Sprite Renderer", selectedEntity);
 					allComponentsAdded &= DrawAddComponent<TransformComponent>("Transform", selectedEntity);
 					if (allComponentsAdded)
 						ImGui::CloseCurrentPopup();

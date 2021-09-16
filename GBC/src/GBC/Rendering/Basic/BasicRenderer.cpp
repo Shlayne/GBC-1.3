@@ -1,6 +1,5 @@
 #include "gbcpch.h"
 #include "BasicRenderer.h"
-#include "GBC/IO/FileIO.h"
 #include "GBC/Rendering/Renderer.h"
 #include "GBC/Rendering/RendererCapabilities.h"
 #include "GBC/Rendering/Shader.h"
@@ -23,23 +22,36 @@ namespace gbc
 		Ref<VertexBuffer> vertexBuffer;
 		Ref<IndexBuffer> indexBuffer;
 
-		uint32_t localIndexCount = 0;
-		uint32_t* localIndexBufferStart = nullptr;
-		uint32_t* localIndexBufferCurrent = nullptr;
-		uint32_t localVertexCount = 0;
 		Vertex* localVertexBufferStart = nullptr;
 		Vertex* localVertexBufferCurrent = nullptr;
 
 		Ref<Texture2D>* textures = nullptr;
 		uint32_t textureCount = 1;
-
-		uint32_t maxVertices = 0;
-		uint32_t maxIndices = 0;
 		uint32_t maxTextures = 0;
+
+		static constexpr uint32_t maxQuads = 65536;
+		static constexpr uint32_t maxVertices = maxQuads * 4;
+		static constexpr uint32_t maxIndices = maxQuads * 6;
+
+		uint32_t quadCount = 0;
+		static constexpr glm::vec4 quadVertexPositions[4]
+		{
+			{ -0.5f, -0.5f, 0.0f, 1.0f },
+			{ +0.5f, -0.5f, 0.0f, 1.0f },
+			{ +0.5f, +0.5f, 0.0f, 1.0f },
+			{ -0.5f, +0.5f, 0.0f, 1.0f }
+		};
+		static constexpr glm::vec2 quadVertexTexCoords[4]
+		{
+			{ 0.0f, 0.0f },
+			{ 1.0f, 0.0f },
+			{ 1.0f, 1.0f },
+			{ 0.0f, 1.0f }
+		};
 
 		struct CameraBuffer
 		{
-			glm::mat4 viewProjection;
+			glm::mat4 viewProjection{ 1.0f };
 		};
 		CameraBuffer cameraBuffer;
 		Ref<UniformBuffer> cameraUniformBuffer;
@@ -52,23 +64,17 @@ namespace gbc
 
 	void BasicRenderer::Init()
 	{
-		Renderer::EnableDepthTest();
-		Renderer::EnableBlending();
+		Renderer::DisableDepthTest();
 		Renderer::EnableCullFace();
+		Renderer::EnableBlending();
 
 		// Setup texture slots
 		data.maxTextures = static_cast<uint32_t>(RendererCapabilities::GetMaxTextureSlots());
 		data.textures = new Ref<Texture2D>[data.maxTextures];
 
-		// Setup local buffers
-		data.maxVertices = 900000; // TODO: query drivers
-		data.maxIndices  = 600000; // TODO: query drivers
+		// Setup vertex buffer
 		data.localVertexBufferStart = new Vertex[data.maxVertices];
 		data.localVertexBufferCurrent = data.localVertexBufferStart;
-		data.localIndexBufferStart = new uint32_t[data.maxIndices];
-		data.localIndexBufferCurrent = data.localIndexBufferStart;
-
-		// Setup buffers
 		data.vertexBuffer = VertexBuffer::Create(data.maxVertices * sizeof(Vertex), nullptr, BufferUsage::DynamicDraw);
 		data.vertexBuffer->SetLayout({
 			{ VertexBufferElementType::Float3, "position" },
@@ -81,7 +87,19 @@ namespace gbc
 		data.vertexArray = VertexArray::Create();
 		data.vertexArray->AddVertexBuffer(data.vertexBuffer);
 
-		data.indexBuffer = IndexBuffer::Create(data.maxIndices, nullptr, BufferUsage::DynamicDraw, IndexBufferElementType::UInt32);
+		// Setup index buffer
+		uint32_t* indices = new uint32_t[data.maxIndices];
+		for (uint32_t index = 0, offset = 0; index < data.maxIndices; index += 6, offset += 4)
+		{
+			indices[index + 0] = offset + 0;
+			indices[index + 1] = offset + 1;
+			indices[index + 2] = offset + 2;
+			indices[index + 3] = offset + 2;
+			indices[index + 4] = offset + 3;
+			indices[index + 5] = offset + 0;
+		}
+		data.indexBuffer = IndexBuffer::Create(data.maxIndices, indices);
+		delete[] indices;
 
 		data.cameraUniformBuffer = UniformBuffer::Create(sizeof(BasicRendererData::CameraBuffer), 0, nullptr, BufferUsage::DynamicDraw);
 
@@ -96,8 +114,14 @@ namespace gbc
 	void BasicRenderer::Shutdown()
 	{
 		delete[] data.localVertexBufferStart;
-		delete[] data.localIndexBufferStart;
+
+		// Make sure to free GPU memory
 		delete[] data.textures;
+		data.shader.reset();
+		data.vertexArray.reset();
+		data.vertexBuffer.reset();
+		data.indexBuffer.reset();
+		data.cameraUniformBuffer.reset();
 	}
 
 	void BasicRenderer::BeginScene(const Camera& camera, const glm::mat4& view)
@@ -116,47 +140,32 @@ namespace gbc
 
 	void BasicRenderer::EndScene()
 	{
-		uint32_t vertexBufferSize = static_cast<uint32_t>((data.localVertexCount * sizeof(Vertex)));
-		uint32_t indexBufferSize = static_cast<uint32_t>((data.localIndexCount * sizeof(uint32_t)));
-
-		if (vertexBufferSize != 0 && indexBufferSize != 0)
+		uint32_t vertexBufferSize = static_cast<uint32_t>((data.quadCount * (4 * sizeof(Vertex))));
+		if (vertexBufferSize != 0)
 		{
-			// Copy local buffers to internal buffers
+			// Copy vertices to GPU
 			data.vertexBuffer->SetData(data.localVertexBufferStart, vertexBufferSize);
-			data.indexBuffer->SetData(data.localIndexBufferStart, indexBufferSize);
 
-			// Bind renderables
+			// Bind textures
 			for (uint32_t i = 0; i < data.textureCount; i++)
 				data.textures[i]->Bind(i);
 
 			// Actually render
 			data.shader->Bind();
-			Renderer::DrawIndexed(data.vertexArray, data.indexBuffer, 0, data.localIndexCount);
+			Renderer::DrawIndexed(data.vertexArray, data.indexBuffer, 0, data.quadCount * 6);
 
 #if GBC_ENABLE_STATS
-			data.statistics.drawCalls++;
+			data.statistics.drawCallCount++;
 #endif
 		}
 
 		Reset();
 	}
 
-	void BasicRenderer::EnsureBatch(uint32_t vertexCount, uint32_t indexCount, uint32_t texIndex)
-	{
-		if (data.localVertexCount + vertexCount > data.maxVertices ||
-			data.localIndexCount + indexCount > data.maxIndices ||
-			texIndex >= data.maxTextures)
-			EndScene();
-	}
-
 	void BasicRenderer::Reset()
 	{
-		// Reset local buffers
-		data.localVertexCount = 0;
+		data.quadCount = 0;
 		data.localVertexBufferCurrent = data.localVertexBufferStart;
-
-		data.localIndexCount = 0;
-		data.localIndexBufferCurrent = data.localIndexBufferStart;
 
 		// Remove the references once the textures has been rendered
 		for (uint32_t i = 1; i < data.textureCount; i++)
@@ -164,9 +173,38 @@ namespace gbc
 		data.textureCount = 1;
 	}
 
+	void BasicRenderer::DrawQuad(const glm::vec3& translation, const glm::vec4& color, const Ref<Texture2D>& texture, float tilingFactor)
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation);
+		DrawQuad(transform, color, texture, tilingFactor);
+	}
+
+	void BasicRenderer::DrawQuad(const glm::vec3& translation, float rotation, const glm::vec4& color, const Ref<Texture2D>& texture, float tilingFactor)
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+							* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f));
+		DrawQuad(transform, color, texture, tilingFactor);
+	}
+
+	void BasicRenderer::DrawQuad(const glm::vec3& translation, const glm::vec2& scale, const glm::vec4& color, const Ref<Texture2D>& texture, float tilingFactor)
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+							* glm::scale(glm::mat4(1.0f), glm::vec3(scale, 1.0f));
+		DrawQuad(transform, color, texture, tilingFactor);
+	}
+
+	void BasicRenderer::DrawQuad(const glm::vec3& translation, float rotation, const glm::vec2& scale, const glm::vec4& color, const Ref<Texture2D>& texture, float tilingFactor)
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+							* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
+							* glm::scale(glm::mat4(1.0f), glm::vec3(scale, 1.0f));
+		DrawQuad(transform, color, texture, tilingFactor);
+	}
+
 	uint32_t BasicRenderer::GetTexIndex(const Ref<Texture2D>& texture)
 	{
-		if (!texture || !texture->GetTexture() || !*texture->GetTexture())
+		// If texture is null or it has a null local texture, then use white texture
+		if (!texture || (!texture->IsFramebufferTexture() && (!texture->GetTexture() || !*texture->GetTexture())))
 			return 0;
 
 		for (uint32_t i = 1; i < data.textureCount; i++)
@@ -176,44 +214,41 @@ namespace gbc
 		return data.textureCount;
 	}
 
-	void BasicRenderer::Submit(const Ref<BasicMesh>& mesh, const glm::mat4& transform, const RenderableComponent& renderableComponent)
+	void BasicRenderer::EnsureBatch(uint32_t texIndex)
 	{
-		// Handle renderable
-		uint32_t vertexCount = static_cast<uint32_t>(mesh->vertices.size());
-		uint32_t indexCount = static_cast<uint32_t>(mesh->indices.size());
-		auto& texture = renderableComponent.texture;
-		uint32_t texIndex = GetTexIndex(texture);
+		if (data.quadCount + 1 > data.maxQuads && texIndex >= data.maxTextures)
+			EndScene();
+	}
 
-		EnsureBatch(vertexCount, indexCount, texIndex);
+	void BasicRenderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color, const Ref<Texture2D>& texture, float tilingFactor)
+	{
+		// Handle texture
+		uint32_t texIndex = GetTexIndex(texture);
+		EnsureBatch(texIndex);
 		if (texIndex >= data.textureCount)
 		{
-			data.textures[texIndex = data.textureCount++] = texture;
+			texIndex = data.textureCount;
+			data.textures[texIndex] = texture;
+			data.textureCount++;
 #if GBC_ENABLE_STATS
 			data.statistics.textureCount++;
 #endif
 		}
 
 		// Handle vertices
-		for (uint32_t i = 0; i < vertexCount; i++, data.localVertexBufferCurrent++)
+		for (uint32_t i = 0; i < 4; i++, data.localVertexBufferCurrent++)
 		{
-			data.localVertexBufferCurrent->position = transform * glm::vec4(mesh->vertices[i].position, 1.0f);
-			data.localVertexBufferCurrent->tintColor = mesh->vertices[i].tintColor * renderableComponent.color;
-			data.localVertexBufferCurrent->texCoord = mesh->vertices[i].texCoord;
+			data.localVertexBufferCurrent->position = transform * data.quadVertexPositions[i];
+			data.localVertexBufferCurrent->tintColor = color;
+			data.localVertexBufferCurrent->texCoord = data.quadVertexTexCoords[i];
 			data.localVertexBufferCurrent->texIndex = texIndex;
-			data.localVertexBufferCurrent->tilingFactor = renderableComponent.tilingFactor;
+			data.localVertexBufferCurrent->tilingFactor = tilingFactor;
 		}
 
-		// Handle indices
-		for (uint32_t i = 0; i < indexCount; i++, data.localIndexBufferCurrent++)
-			*data.localIndexBufferCurrent = data.localVertexCount + mesh->indices[i];
-
-		// Update local counts
-		data.localVertexCount += vertexCount;
-		data.localIndexCount += indexCount;
-
+		// Update counts
+		data.quadCount++;
 #if GBC_ENABLE_STATS
-		data.statistics.indexCount += indexCount;
-		data.statistics.vertexCount += vertexCount;
+		data.statistics.quadCount++;
 #endif
 	}
 
@@ -225,9 +260,8 @@ namespace gbc
 
 	void BasicRenderer::ResetStatistics()
 	{
-		data.statistics.drawCalls = 0;
-		data.statistics.indexCount = 0;
-		data.statistics.vertexCount = 0;
+		data.statistics.drawCallCount = 0;
+		data.statistics.quadCount = 0;
 		data.statistics.textureCount = 0;
 	}
 #endif

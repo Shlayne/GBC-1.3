@@ -29,13 +29,10 @@
 
 #include "GBC/IO/FileDialog.h"
 #include "GBC/IO/FileIO.h"
-#include "GBC/IO/OBJLoader.h"
 
 #include "GBC/Math/Math.h"
 
-#include "GBC/Rendering/Basic/BasicMesh.h"
 #include "GBC/Rendering/Basic/BasicRenderer.h"
-#include "GBC/Rendering/Basic/BasicVertex.h"
 
 #include "GBC/Rendering/Buffer.h"
 #include "GBC/Rendering/Camera.h"
@@ -50,9 +47,8 @@
 #include "GBC/Rendering/VertexArray.h"
 
 #include "GBC/Scene/Components/CameraComponent.h"
-#include "GBC/Scene/Components/MeshComponent.h"
 #include "GBC/Scene/Components/NativeScriptComponent.h"
-#include "GBC/Scene/Components/RenderableComponent.h"
+#include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
 #include "GBC/Scene/Entity.h"
@@ -61,7 +57,5 @@
 #include "GBC/Scene/SceneSerializer.h"
 #include "GBC/Scene/ScriptableEntity.h"
 
-#include "GBC/Util/Scripts/OrthographicCameraControllerScript.h"
-#include "GBC/Util/Scripts/PerspectiveCameraControllerScript.h"
 #include "GBC/Util/TextureAtlas.h"
 #include "GBC/Util/Timer.h"

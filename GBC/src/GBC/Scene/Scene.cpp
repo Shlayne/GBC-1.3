@@ -4,9 +4,8 @@
 #include "GBC/Rendering/Renderer.h"
 #include "GBC/Rendering/Basic/BasicRenderer.h"
 #include "GBC/Scene/Components/CameraComponent.h"
-#include "GBC/Scene/Components/MeshComponent.h"
 #include "GBC/Scene/Components/NativeScriptComponent.h"
-#include "GBC/Scene/Components/RenderableComponent.h"
+#include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
 
@@ -101,12 +100,11 @@ namespace gbc
 		{
 			BasicRenderer::BeginScene(*primaryCamera, glm::inverse(primaryCameraTransform));
 
-			auto group = registry.group(entt::get<MeshComponent, TransformComponent, RenderableComponent>);
+			auto group = registry.group(entt::get<TransformComponent, SpriteRendererComponent>);
 			for (auto entity : group)
 			{
-				auto [mesh, transform, renderable] = group.get<MeshComponent, TransformComponent, RenderableComponent>(entity);
-				if (mesh.mesh)
-					BasicRenderer::Submit(mesh, transform, renderable);
+				auto [transform, renderable] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+				BasicRenderer::DrawQuad(transform, renderable);
 			}
 
 			BasicRenderer::EndScene();
@@ -124,12 +122,11 @@ namespace gbc
 
 		BasicRenderer::BeginScene(camera);
 
-		auto group = registry.group(entt::get<MeshComponent, TransformComponent, RenderableComponent>);
+		auto group = registry.group(entt::get<TransformComponent, SpriteRendererComponent>);
 		for (auto entity : group)
 		{
-			auto [mesh, transform, renderable] = group.get<MeshComponent, TransformComponent, RenderableComponent>(entity);
-			if (mesh.mesh)
-				BasicRenderer::Submit(mesh, transform, renderable);
+			auto [transform, renderable] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+			BasicRenderer::DrawQuad(transform, renderable);
 		}
 
 		BasicRenderer::EndScene();
@@ -173,12 +170,10 @@ namespace gbc
 
 	template<> void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent& component) {}
 	template<> void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component) {}
-	template<> void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& component) {}
-	template<> void Scene::OnComponentAdded<RenderableComponent>(Entity entity, RenderableComponent& component) {}
+	template<> void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component) {}
 	template<> void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
 
-	template<>
-	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
+	template<> void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
 	{
 		component.camera.OnViewportResize(viewportSize.x, viewportSize.y);
 	}

@@ -61,6 +61,9 @@ namespace gbc
 		// texture after the the local texture has updated.
 		// Only call if this was not constructed with a Framebuffer.
 		virtual void Update() = 0;
+
+		// Returns true if this texture was constructed with a Framebuffer, false otherwise.
+		virtual bool IsFramebufferTexture() const = 0;
 	};
 
 	class Texture2D : public Texture

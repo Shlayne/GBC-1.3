@@ -1,0 +1,51 @@
+Scene: Untitled
+Entities:
+  - Entity: 0
+    TagComponent:
+      Tag: Quad
+    TransformComponent:
+      Translation: [2.5, 0, 0]
+      Rotation: [0, 0, -0.680678427]
+      Scale: [4, 4, 1]
+    SpriteRendererComponent:
+      TintColor: [1, 1, 1, 1]
+      Texture: Assets\Textures\dirt.png
+      TilingFactor: 4
+      Specification:
+        MinFilter: 0
+        MagFilter: 1
+        WrapS: 1
+        WrapT: 1
+  - Entity: 0
+    TagComponent:
+      Tag: Quad2
+    TransformComponent:
+      Translation: [-1.79999995, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      TintColor: [1, 1, 1, 1]
+      Texture: Assets\Textures\grass_side.png
+      TilingFactor: 1
+      Specification:
+        MinFilter: 0
+        MagFilter: 1
+        WrapS: 0
+        WrapT: 0
+  - Entity: 0
+    TagComponent:
+      Tag: Camera
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        ProjectionType: 1
+        PerspectiveFOV: 1.57079637
+        PerspectiveNear: 0.00100000005
+        PerspectiveFar: 1000
+        OrthographicSize: 10
+        OrthographicNear: -1
+        OrthographicFar: 1
+      Primary: true

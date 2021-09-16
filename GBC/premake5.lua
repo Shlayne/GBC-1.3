@@ -24,6 +24,7 @@ project "GBC"
 	includedirs {
 		"src",
 
+		"%{includedir.box2d}",
 		"%{includedir.glad}",
 		"%{includedir.glfw}",
 		"%{includedir.imgui}",
@@ -40,6 +41,7 @@ project "GBC"
 	}
 
 	links {
+		"box2d",
 		"glad",
 		"glfw",
 		"imgui",

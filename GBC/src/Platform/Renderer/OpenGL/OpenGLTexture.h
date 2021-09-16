@@ -19,6 +19,7 @@ namespace gbc
 		virtual const TextureSpecification& GetSpecification() const override { return specification; }
 
 		virtual void Update() override;
+		virtual bool IsFramebufferTexture() const override { return !ownsRendererID; }
 	private:
 		TextureSpecification specification;
 		bool ownsRendererID = true;

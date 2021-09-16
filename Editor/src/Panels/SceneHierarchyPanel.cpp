@@ -2,7 +2,7 @@
 #include <imgui/imgui.h>
 #include "GBC/Core/Input.h"
 #include "GBC/Scene/Components/CameraComponent.h"
-#include "GBC/Scene/Components/MeshComponent.h"
+#include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 
 namespace gbc
@@ -40,14 +40,10 @@ namespace gbc
 						Entity entity = context->CreateEntity("Camera");
 						entity.AddComponent<CameraComponent>();
 					}
-					if (ImGui::BeginMenu("Mesh"))
-					{
-						if (ImGui::MenuItem("Empty Mesh"))
-						{
-							Entity entity = context->CreateEntity("Empty Mesh");
-							entity.AddComponent<MeshComponent>();
-						}
-						ImGui::EndMenu();
+					if (ImGui::MenuItem("Quad"))
+				{
+						Entity entity = context->CreateEntity("Quad");
+						entity.AddComponent<SpriteRendererComponent>();
 					}
 
 					ImGui::EndMenu();

@@ -3,9 +3,8 @@
 #include <yaml-cpp/yaml.h>
 #include "GBC/Scene/Entity.h"
 #include "GBC/Scene/Components/CameraComponent.h"
-#include "GBC/Scene/Components/MeshComponent.h"
 #include "GBC/Scene/Components/NativeScriptComponent.h"
-#include "GBC/Scene/Components/RenderableComponent.h"
+#include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
 
@@ -123,14 +122,9 @@ namespace gbc
 				<< YAML::EndMap
 				<< YAML::Key << "Primary" << YAML::Value << component.primary;
 		});
-		// TODO: reference mesh by ID
-		SerializeComponent<MeshComponent>(out, entity, "MeshComponent", [&out](MeshComponent& component)
-		{
-			out << YAML::Key << "Filepath" << YAML::Value << component.filepath;
-		});
 		// TODO: how do this ???
 		//SerializeComponent<NativeScriptComponent>(out, entity, "NativeScriptComponent", [&out](NativeScriptComponent& component) {});
-		SerializeComponent<RenderableComponent>(out, entity, "RenderableComponent", [&out](RenderableComponent& component)
+		SerializeComponent<SpriteRendererComponent>(out, entity, "SpriteRendererComponent", [&out](SpriteRendererComponent& component)
 		{
 			// TODO: reference texture by UUID
 			std::string filepath;
@@ -236,44 +230,32 @@ namespace gbc
 						cameraComponent.primary = cameraComponentNode["Primary"].as<bool>();
 					}
 
-					auto meshComponentNode = entityNode["MeshComponent"];
-					if (meshComponentNode)
+					auto spriteRendererComponentNode = entityNode["SpriteRendererComponent"];
+					if (spriteRendererComponentNode)
 					{
-						OBJModel model;
-						std::string modelFilepath = meshComponentNode["Filepath"].as<std::string>();
-						auto result = OBJLoader::LoadOBJ(modelFilepath, model);
-						if (result)
-							entity.AddComponent<MeshComponent>(std::move(model));
-						else
-							OBJLoader::LogError(result);
-					}
-
-					auto renderableComponentNode = entityNode["RenderableComponent"];
-					if (renderableComponentNode)
-					{
-						auto& renderableComponent = entity.AddComponent<RenderableComponent>();
+						auto& spriteRendererComponent = entity.AddComponent<SpriteRendererComponent>();
 
 						// TODO: this is not at all what should happen; I'm just doing this right now so
 						// I can save and load a scene and have it keep the texture.
 						// This requires an asset system that uses the path and/or the uuid of the texture
 						// to return the correct Ref<Texture2D>
 						// something like this:
-						// AssetManager::GetAssetByUUID(renderableComponentNode["Texture"].as<uint64_t>())
+						// AssetManager::GetAssetByUUID(spriteRendererComponentNode["Texture"].as<uint64_t>())
 						// or maybe this:
-						// Texture2D::Create(renderableComponentNode["Texture"].as<uint64_t>());
+						// Texture2D::Create(spriteRendererComponentNode["Texture"].as<uint64_t>());
 						// and that would use the asset manager to get the correct Ref<Texture2D>
 
-						renderableComponent.color = renderableComponentNode["TintColor"].as<glm::vec4>();
-						renderableComponent.tilingFactor = renderableComponentNode["TilingFactor"].as<float>();
+						spriteRendererComponent.color = spriteRendererComponentNode["TintColor"].as<glm::vec4>();
+						spriteRendererComponent.tilingFactor = spriteRendererComponentNode["TilingFactor"].as<float>();
 
-						auto specsNode = renderableComponentNode["Specification"];
+						auto specsNode = spriteRendererComponentNode["Specification"];
 						TextureSpecification specs;
-						specs.texture = LocalTexture2D::Create(renderableComponentNode["Texture"].as<std::string>(), 4);
+						specs.texture = LocalTexture2D::Create(spriteRendererComponentNode["Texture"].as<std::string>(), 4);
 						specs.minFilter = static_cast<TextureFilterMode>(specsNode["MinFilter"].as<int32_t>());
 						specs.magFilter = static_cast<TextureFilterMode>(specsNode["MagFilter"].as<int32_t>());
 						specs.wrapS = static_cast<TextureWrapMode>(specsNode["WrapS"].as<int32_t>());
 						specs.wrapT = static_cast<TextureWrapMode>(specsNode["WrapT"].as<int32_t>());
-						renderableComponent.texture = Texture2D::Create(specs);
+						spriteRendererComponent.texture = Texture2D::Create(specs);
 					}
 				}
 			}
@@ -325,14 +307,9 @@ namespace gbc
 				<< camera.GetOrthographicSize() << camera.GetOrthographicNearClip()
 				<< camera.GetOrthographicFarClip() << component.primary;
 		});
-		// TODO: reference mesh by ID
-		SerializeComponent<MeshComponent>(out, entity, [&out](MeshComponent& component)
-		{
-			out << component.filepath.size() << component.filepath;
-		});
 		// TODO: how do this ???
 		//SerializeComponent<NativeScriptComponent>(out, entity, [&out](NativeScriptComponent& component) {});
-		SerializeComponent<RenderableComponent>(out, entity, [&out](RenderableComponent& component)
+		SerializeComponent<SpriteRendererComponent>(out, entity, [&out](SpriteRendererComponent& component)
 		{
 			// TODO: reference texture by UUID
 			std::string filepath;

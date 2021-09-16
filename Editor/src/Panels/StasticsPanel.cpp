@@ -19,9 +19,9 @@ namespace gbc
 			{
 				char buffer[10];
 
-				ImGuiHelper::Text("Draw Calls");
+				ImGuiHelper::Text("Draw Call Count");
 				ImGuiHelper::NextTableColumn();
-				if (_ultoa_s(statistics.drawCalls, buffer, 10))
+				if (_ultoa_s(statistics.GetDrawCallCount(), buffer, 10))
 				{
 					buffer[0] = '0';
 					buffer[1] = '\0';
@@ -29,9 +29,9 @@ namespace gbc
 				ImGuiHelper::Text(buffer);
 				ImGuiHelper::NextTableColumn();
 
-				ImGuiHelper::Text("Index Count");
+				ImGuiHelper::Text("Quad Count");
 				ImGuiHelper::NextTableColumn();
-				if (_ultoa_s(statistics.indexCount, buffer, 10))
+				if (_ultoa_s(statistics.GetQuadCount(), buffer, 10))
 				{
 					buffer[0] = '0';
 					buffer[1] = '\0';
@@ -41,7 +41,17 @@ namespace gbc
 
 				ImGuiHelper::Text("Vertex Count");
 				ImGuiHelper::NextTableColumn();
-				if (_ultoa_s(statistics.vertexCount, buffer, 10))
+				if (_ultoa_s(statistics.GetVertexCount(), buffer, 10))
+				{
+					buffer[0] = '0';
+					buffer[1] = '\0';
+				}
+				ImGuiHelper::Text(buffer);
+				ImGuiHelper::NextTableColumn();
+
+				ImGuiHelper::Text("Index Count");
+				ImGuiHelper::NextTableColumn();
+				if (_ultoa_s(statistics.GetIndexCount(), buffer, 10))
 				{
 					buffer[0] = '0';
 					buffer[1] = '\0';
@@ -51,7 +61,7 @@ namespace gbc
 
 				ImGuiHelper::Text("Texture Count");
 				ImGuiHelper::NextTableColumn();
-				if (_ultoa_s(statistics.textureCount, buffer, 10))
+				if (_ultoa_s(statistics.GetTextureCount(), buffer, 10))
 				{
 					buffer[0] = '0';
 					buffer[1] = '\0';
