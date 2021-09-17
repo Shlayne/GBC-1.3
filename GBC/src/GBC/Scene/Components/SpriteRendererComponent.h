@@ -12,6 +12,6 @@ namespace gbc
 
 		glm::vec4 color{ 1.0f };
 		Ref<Texture2D> texture;
-		float tilingFactor = 1.0f;
+		glm::vec2 tilingFactor{ 1.0f };
 	};
 }

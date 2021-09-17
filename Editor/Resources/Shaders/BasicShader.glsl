@@ -5,7 +5,7 @@ layout(location = 0) in vec3 position;
 layout(location = 1) in vec4 tintColor;
 layout(location = 2) in vec2 texCoord;
 layout(location = 3) in uint texIndex;
-layout(location = 4) in float tilingFactor;
+layout(location = 4) in vec2 tilingFactor;
 
 layout(std140, binding = 0) uniform Camera
 {
@@ -20,7 +20,7 @@ struct VertexOutput
 
 layout(location = 0) out VertexOutput Output;
 layout(location = 2) out flat uint Output_texIndex;
-layout(location = 3) out flat float Output_tilingFactor;
+layout(location = 3) out flat vec2 Output_tilingFactor;
 
 void main()
 {
@@ -42,7 +42,7 @@ struct VertexOutput
 
 layout(location = 0) in VertexOutput Input;
 layout(location = 2) in flat uint Input_texIndex;
-layout(location = 3) in flat float Input_tilingFactor;
+layout(location = 3) in flat vec2 Input_tilingFactor;
 
 layout(location = 0) out vec4 outColor;
 

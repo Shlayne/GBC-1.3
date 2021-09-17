@@ -14,20 +14,20 @@ namespace gbc
 		static void BeginScene(const EditorCamera& camera);
 		static void EndScene();
 	public:
-		static void DrawQuad(const glm::vec3& translation, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, float tilingFactor = 1.0f);
-		static void DrawQuad(const glm::vec3& translation, float rotation, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, float tilingFactor = 1.0f);
-		static void DrawQuad(const glm::vec3& translation, const glm::vec2& scale, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, float tilingFactor = 1.0f);
-		static void DrawQuad(const glm::vec3& translation, float rotation, const glm::vec2& scale, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, float tilingFactor = 1.0f);
+		static void DrawQuad(const glm::vec3& translation, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, const glm::vec2& tilingFactor = glm::vec2(1.0f));
+		static void DrawQuad(const glm::vec3& translation, float rotation, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, const glm::vec2& tilingFactor = glm::vec2(1.0f));
+		static void DrawQuad(const glm::vec3& translation, const glm::vec2& scale, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, const glm::vec2& tilingFactor = glm::vec2(1.0f));
+		static void DrawQuad(const glm::vec3& translation, float rotation, const glm::vec2& scale, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, const glm::vec2& tilingFactor = glm::vec2(1.0f));
 
 		// Aliases
 		static inline void DrawQuad(const glm::vec3& translation, const SpriteRendererComponent& sprite) { DrawQuad(translation, sprite.color, sprite.texture, sprite.tilingFactor); }
 		static inline void DrawQuad(const glm::vec3& translation, float rotation, const SpriteRendererComponent& sprite) { DrawQuad(translation, rotation, sprite.color, sprite.texture, sprite.tilingFactor); }
 		static inline void DrawQuad(const glm::vec3& translation, const glm::vec2& scale, const SpriteRendererComponent& sprite) { DrawQuad(translation, scale, sprite.color, sprite.texture, sprite.tilingFactor); }
 		static inline void DrawQuad(const glm::vec3& translation, float rotation, const glm::vec2& scale, const SpriteRendererComponent& sprite) { DrawQuad(translation, rotation, scale, sprite.color, sprite.texture, sprite.tilingFactor); }
-		static inline void DrawQuad(const glm::vec2& translation, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, float tilingFactor = 1.0f) { DrawQuad(glm::vec3(translation, 0.0f), color, texture, tilingFactor); }
-		static inline void DrawQuad(const glm::vec2& translation, float rotation, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, float tilingFactor = 1.0f) { DrawQuad(glm::vec3(translation, 0.0f), rotation, color, texture, tilingFactor); }
-		static inline void DrawQuad(const glm::vec2& translation, const glm::vec2& scale, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, float tilingFactor = 1.0f) { DrawQuad(glm::vec3(translation, 0.0f), scale, color, texture, tilingFactor); }
-		static inline void DrawQuad(const glm::vec2& translation, float rotation, const glm::vec2& scale, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, float tilingFactor = 1.0f) { DrawQuad(glm::vec3(translation, 0.0f), rotation, scale, color, texture, tilingFactor); }
+		static inline void DrawQuad(const glm::vec2& translation, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, const glm::vec2& tilingFactor = glm::vec2(1.0f)) { DrawQuad(glm::vec3(translation, 0.0f), color, texture, tilingFactor); }
+		static inline void DrawQuad(const glm::vec2& translation, float rotation, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, const glm::vec2& tilingFactor = glm::vec2(1.0f)) { DrawQuad(glm::vec3(translation, 0.0f), rotation, color, texture, tilingFactor); }
+		static inline void DrawQuad(const glm::vec2& translation, const glm::vec2& scale, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, const glm::vec2& tilingFactor = glm::vec2(1.0f)) { DrawQuad(glm::vec3(translation, 0.0f), scale, color, texture, tilingFactor); }
+		static inline void DrawQuad(const glm::vec2& translation, float rotation, const glm::vec2& scale, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, const glm::vec2& tilingFactor = glm::vec2(1.0f)) { DrawQuad(glm::vec3(translation, 0.0f), rotation, scale, color, texture, tilingFactor); }
 		static inline void DrawQuad(const glm::vec2& translation, const SpriteRendererComponent& sprite) { DrawQuad(glm::vec3(translation, 0.0f), sprite); }
 		static inline void DrawQuad(const glm::vec2& translation, float rotation, const SpriteRendererComponent& sprite) { DrawQuad(glm::vec3(translation, 0.0f), rotation, sprite); }
 		static inline void DrawQuad(const glm::vec2& translation, const glm::vec2& scale, const SpriteRendererComponent& sprite) { DrawQuad(glm::vec3(translation, 0.0f), scale, sprite); }
@@ -35,7 +35,7 @@ namespace gbc
 		static inline void DrawQuad(const glm::mat4& transform, const SpriteRendererComponent& sprite) { DrawQuad(transform, sprite.color, sprite.texture, sprite.tilingFactor); }
 		
 		// Everything eventually feeds to here
-		static void DrawQuad(const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, float tilingFactor = 1.0f);
+		static void DrawQuad(const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr, const glm::vec2& tilingFactor = glm::vec2(1.0f));
 	private:
 		static void Reset();
 

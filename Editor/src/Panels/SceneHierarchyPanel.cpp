@@ -4,6 +4,8 @@
 #include "GBC/Scene/Components/CameraComponent.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
+#include "GBC/Scene/Components/Physics/BoxCollider2DComponent.h"
+#include "GBC/Scene/Components/Physics/Rigidbody2DComponent.h"
 
 namespace gbc
 {
@@ -20,7 +22,7 @@ namespace gbc
 			Update();
 
 			// TODO: entt iterates over its entities in a reverse order, so unreverse it.
-			context->registry.each([&](entt::entity handle)
+			context->registry->each([&](entt::entity handle)
 			{
 				Entity entity(handle, context.get());
 				DrawEntityNode(entity);
@@ -34,16 +36,43 @@ namespace gbc
 				if (ImGui::BeginMenu("Create"))
 				{
 					if (ImGui::MenuItem("Empty Entity"))
-						context->CreateEntity("Empty Entity");
+						selectedEntity = context->CreateEntity("Empty Entity");
 					if (ImGui::MenuItem("Camera"))
 					{
-						Entity entity = context->CreateEntity("Camera");
-						entity.AddComponent<CameraComponent>();
+						selectedEntity = context->CreateEntity("Camera");
+						selectedEntity.AddComponent<CameraComponent>();
 					}
 					if (ImGui::MenuItem("Quad"))
-				{
-						Entity entity = context->CreateEntity("Quad");
-						entity.AddComponent<SpriteRendererComponent>();
+					{
+						selectedEntity = context->CreateEntity("Quad");
+						selectedEntity.AddComponent<SpriteRendererComponent>();
+					}
+					if (ImGui::BeginMenu("Physics"))
+					{
+						if (ImGui::MenuItem("Static"))
+						{
+							selectedEntity = context->CreateEntity("Static Physics Entity");
+							selectedEntity.AddComponent<SpriteRendererComponent>();
+							selectedEntity.AddComponent<BoxCollider2DComponent>();
+							Rigidbody2DComponent& rigidbody = selectedEntity.AddComponent<Rigidbody2DComponent>();
+							rigidbody.type = Rigidbody2DComponent::BodyType::Static;
+						}
+						if (ImGui::MenuItem("Dynamic"))
+						{
+							selectedEntity = context->CreateEntity("Dynamic Physics Entity");
+							selectedEntity.AddComponent<SpriteRendererComponent>();
+							selectedEntity.AddComponent<BoxCollider2DComponent>();
+							selectedEntity.AddComponent<Rigidbody2DComponent>();
+						}
+						if (ImGui::MenuItem("Kinematic"))
+						{
+							selectedEntity = context->CreateEntity("Kinematic Physics Entity");
+							selectedEntity.AddComponent<SpriteRendererComponent>();
+							selectedEntity.AddComponent<BoxCollider2DComponent>();
+							Rigidbody2DComponent& rigidbody = selectedEntity.AddComponent<Rigidbody2DComponent>();
+							rigidbody.type = Rigidbody2DComponent::BodyType::Kinematic;
+						}
+						ImGui::EndMenu();
 					}
 
 					ImGui::EndMenu();

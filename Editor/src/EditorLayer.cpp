@@ -82,10 +82,10 @@ namespace gbc
 		{
 			case SceneState::Edit:
 				editorCamera.OnUpdate(viewportHovered ? timestep : Timestep());
-				scene->OnUpdateEditor(timestep);
+				scene->OnEditorUpdate(timestep);
 				break;
 			case SceneState::Play:
-				scene->OnUpdateRuntime(timestep);
+				scene->OnRuntimeUpdate(timestep);
 				break;
 		}
 	}
@@ -106,10 +106,10 @@ namespace gbc
 		switch (sceneState)
 		{
 			case SceneState::Edit:
-				scene->OnRenderEditor(editorCamera);
+				scene->OnEditorRender(editorCamera);
 				break;
 			case SceneState::Play:
-				scene->OnRenderRuntime();
+				scene->OnRuntimeRender();
 				break;
 		}
 
@@ -364,7 +364,7 @@ namespace gbc
 		sceneState = SceneState::Play;
 		canRenderGizmos = false;
 		ImGuiHelper::SetScenePlayColors();
-		scene->OnPlay();
+		scene->OnRuntimePlay();
 	}
 
 	void EditorLayer::OnSceneStop()
@@ -372,7 +372,7 @@ namespace gbc
 		sceneState = SceneState::Edit;
 		canRenderGizmos = true;
 		ImGuiHelper::SetSceneEditColors();
-		scene->OnStop();
+		scene->OnRuntimeStop();
 	}
 
 	void EditorLayer::ClearScene()

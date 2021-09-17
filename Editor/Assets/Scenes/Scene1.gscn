@@ -9,13 +9,14 @@ Entities:
       Scale: [4, 4, 1]
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
-      Texture: Assets\Textures\dirt.png
-      TilingFactor: 4
-      Specification:
-        MinFilter: 0
-        MagFilter: 1
-        WrapS: 1
-        WrapT: 1
+      TilingFactor: [4, 4]
+      Texture:
+        Filepath: Assets\Textures\dirt.png
+        Specification:
+          MinFilter: Linear
+          MagFilter: Nearest
+          WrapS: Repeat
+          WrapT: Repeat
   - Entity: 0
     TagComponent:
       Tag: Quad2
@@ -25,13 +26,14 @@ Entities:
       Scale: [1, 1, 1]
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
-      Texture: Assets\Textures\grass_side.png
-      TilingFactor: 1
-      Specification:
-        MinFilter: 0
-        MagFilter: 1
-        WrapS: 0
-        WrapT: 0
+      TilingFactor: [1, 1]
+      Texture:
+        Filepath: Assets\Textures\grass_side.png
+        Specification:
+          MinFilter: Linear
+          MagFilter: Nearest
+          WrapS: ClampToEdge
+          WrapT: ClampToEdge
   - Entity: 0
     TagComponent:
       Tag: Camera
@@ -41,7 +43,7 @@ Entities:
       Scale: [1, 1, 1]
     CameraComponent:
       Camera:
-        ProjectionType: 1
+        ProjectionType: Orthographic
         PerspectiveFOV: 1.57079637
         PerspectiveNear: 0.00100000005
         PerspectiveFar: 1000

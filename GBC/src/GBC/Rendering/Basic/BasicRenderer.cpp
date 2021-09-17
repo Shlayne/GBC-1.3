@@ -12,7 +12,7 @@ namespace gbc
 		glm::vec4 tintColor;
 		glm::vec2 texCoord;
 		uint32_t texIndex;
-		float tilingFactor;
+		glm::vec2 tilingFactor;
 	};
 
 	struct BasicRendererData
@@ -81,7 +81,7 @@ namespace gbc
 			{ VertexBufferElementType::Float4, "tintColor" },
 			{ VertexBufferElementType::Float2, "texCoord" },
 			{ VertexBufferElementType::UInt,   "texIndex" },
-			{ VertexBufferElementType::Float,  "tilingFactor" }
+			{ VertexBufferElementType::Float2, "tilingFactor" }
 		});
 
 		data.vertexArray = VertexArray::Create();
@@ -173,27 +173,27 @@ namespace gbc
 		data.textureCount = 1;
 	}
 
-	void BasicRenderer::DrawQuad(const glm::vec3& translation, const glm::vec4& color, const Ref<Texture2D>& texture, float tilingFactor)
+	void BasicRenderer::DrawQuad(const glm::vec3& translation, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
 	{
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation);
 		DrawQuad(transform, color, texture, tilingFactor);
 	}
 
-	void BasicRenderer::DrawQuad(const glm::vec3& translation, float rotation, const glm::vec4& color, const Ref<Texture2D>& texture, float tilingFactor)
+	void BasicRenderer::DrawQuad(const glm::vec3& translation, float rotation, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
 	{
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
 							* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f));
 		DrawQuad(transform, color, texture, tilingFactor);
 	}
 
-	void BasicRenderer::DrawQuad(const glm::vec3& translation, const glm::vec2& scale, const glm::vec4& color, const Ref<Texture2D>& texture, float tilingFactor)
+	void BasicRenderer::DrawQuad(const glm::vec3& translation, const glm::vec2& scale, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
 	{
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
 							* glm::scale(glm::mat4(1.0f), glm::vec3(scale, 1.0f));
 		DrawQuad(transform, color, texture, tilingFactor);
 	}
 
-	void BasicRenderer::DrawQuad(const glm::vec3& translation, float rotation, const glm::vec2& scale, const glm::vec4& color, const Ref<Texture2D>& texture, float tilingFactor)
+	void BasicRenderer::DrawQuad(const glm::vec3& translation, float rotation, const glm::vec2& scale, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
 	{
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
 							* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
@@ -220,7 +220,7 @@ namespace gbc
 			EndScene();
 	}
 
-	void BasicRenderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color, const Ref<Texture2D>& texture, float tilingFactor)
+	void BasicRenderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
 	{
 		// Handle texture
 		uint32_t texIndex = GetTexIndex(texture);

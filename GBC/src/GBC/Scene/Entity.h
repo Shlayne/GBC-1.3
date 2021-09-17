@@ -18,7 +18,7 @@ namespace gbc
 		T& AddComponent(Args&&... args)
 		{
 			GBC_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
-			T& component = context->registry.emplace<T>(handle, std::forward<Args>(args)...);
+			T& component = context->registry->emplace<T>(handle, std::forward<Args>(args)...);
 			context->OnComponentAdded(*this, component);
 			return component;
 		}
@@ -27,20 +27,21 @@ namespace gbc
 		void RemoveComponent()
 		{
 			GBC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component to remove!");
-			context->registry.remove<T>(handle);
+			context->OnComponentRemoved(*this, context->registry->get<T>(handle));
+			context->registry->remove<T>(handle);
 		}
 
 		template<typename T>
 		T& GetComponent()
 		{
 			GBC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component to get!");
-			return context->registry.get<T>(handle);
+			return context->registry->get<T>(handle);
 		}
 
 		template<typename T>
 		bool HasComponent()
 		{
-			return context->registry.has<T>(handle);
+			return context->registry->has<T>(handle);
 		}
 
 		inline operator bool() const noexcept { return handle != entt::null; }

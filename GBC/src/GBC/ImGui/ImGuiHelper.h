@@ -14,7 +14,6 @@ namespace gbc
 		static void Init();
 		friend class ImGuiWrapper;
 
-		static constexpr float defaultResetValue = 0.0f;
 		static constexpr float defaultSpeed = 0.1f;
 	public:
 		static void SetScenePlayColors();
@@ -44,9 +43,12 @@ namespace gbc
 		inline static bool InputText(char(&buffer)[Size], ImGuiInputTextFlags flags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue)
 		{ return InputText(buffer, Size, flags); }
 
-		static bool FloatEdit3(float* values, float resetValue = defaultResetValue, float speed = defaultSpeed);
-		static bool FloatEdit3(const char* label, float* values, float resetValue = defaultResetValue, float speed = defaultSpeed);
-		
+		static bool FloatEdit3(float* values, float speed = defaultSpeed);
+		static bool FloatEdit3(const char* label, float* values, float speed = defaultSpeed);
+
+		static bool FloatEdit2(float* values, float speed = defaultSpeed);
+		static bool FloatEdit2(const char* label, float* values, float speed = defaultSpeed);
+
 		static bool FloatEdit(float* value, float speed = defaultSpeed);
 		static bool FloatEdit(const char* label, float* value, float speed = defaultSpeed);
 

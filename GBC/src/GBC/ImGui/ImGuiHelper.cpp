@@ -132,7 +132,7 @@ namespace gbc
 		return ImGui::InputText("", buffer, size, flags) || (!ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left));
 	}
 
-	bool ImGuiHelper::FloatEdit3(float* values, float resetValue, float speed)
+	bool ImGuiHelper::FloatEdit3(float* values, float speed)
 	{
 		bool changed = false;
 		ImGui::PushItemWidth(-FLT_MIN);
@@ -143,13 +143,39 @@ namespace gbc
 		return changed;
 	}
 
-	bool ImGuiHelper::FloatEdit3(const char* label, float* values, float resetValue, float speed)
+	bool ImGuiHelper::FloatEdit3(const char* label, float* values, float speed)
 	{
 		bool changed = false;
 		ImGui::PushID(label);
 
 		NextTableColumn();
-		changed |= FloatEdit3(values, resetValue, speed);
+		changed |= FloatEdit3(values, speed);
+		PrevTableColumn();
+		Text(label);
+		NextTableColumn();
+
+		ImGui::PopID();
+		return changed;
+	}
+
+	bool ImGuiHelper::FloatEdit2(float* values, float speed)
+	{
+		bool changed = false;
+		ImGui::PushItemWidth(-FLT_MIN);
+
+		changed |= ImGui::DragFloat2("", values, speed);
+
+		ImGui::PopItemWidth();
+		return changed;
+	}
+
+	bool ImGuiHelper::FloatEdit2(const char* label, float* values, float speed)
+	{
+		bool changed = false;
+		ImGui::PushID(label);
+
+		NextTableColumn();
+		changed |= FloatEdit2(values, speed);
 		PrevTableColumn();
 		Text(label);
 		NextTableColumn();

@@ -7,10 +7,36 @@
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
+#include "GBC/Scene/Components/Physics/BoxCollider2DComponent.h"
+#include "GBC/Scene/Components/Physics/Rigidbody2DComponent.h"
 
 // Deserialization stuff
 namespace YAML
 {
+	template<>
+	struct convert<glm::vec2>
+	{
+		static Node encode(const glm::vec2& v)
+		{
+			Node node;
+			node.push_back(v.x);
+			node.push_back(v.y);
+			node.SetStyle(YAML::EmitterStyle::Flow);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::vec2& v)
+		{
+			if (node.IsSequence() && node.size() == 2)
+			{
+				v.x = node[0].as<float>();
+				v.y = node[1].as<float>();
+				return true;
+			}
+			return false;
+		}
+	};
+
 	template<>
 	struct convert<glm::vec3>
 	{
@@ -68,8 +94,91 @@ namespace YAML
 
 namespace gbc
 {
-	static YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec1& value)
-	{ return out << YAML::Flow << YAML::BeginSeq << value.x << YAML::EndSeq; }
+	static std::string SceneCameraProjectionTypeToString(SceneCamera::ProjectionType projectionType)
+	{
+		switch (projectionType)
+		{
+			case SceneCamera::ProjectionType::Perspective:  return "Perspective";
+			case SceneCamera::ProjectionType::Orthographic: return "Orthographic";
+		}
+
+		GBC_CORE_ASSERT("Unknown Scene Camera Projection Type!");
+		return std::string();
+	}
+
+	static SceneCamera::ProjectionType SceneCameraProjectionTypeFromString(std::string_view string)
+	{
+		if (string == "Perspective")       return SceneCamera::ProjectionType::Perspective;
+		else if (string == "Orthographic") return SceneCamera::ProjectionType::Orthographic;
+
+		GBC_CORE_ASSERT("Unknown Scene Camera Projection Type!");
+		return static_cast<SceneCamera::ProjectionType>(0);
+	}
+
+	static std::string TextureFilterModeToString(TextureFilterMode textureFilterMode)
+	{
+		switch (textureFilterMode)
+		{
+			case TextureFilterMode::Linear:  return "Linear";
+			case TextureFilterMode::Nearest: return "Nearest";
+		}
+
+		GBC_CORE_ASSERT("Unknown Texture Filter Mode!");
+		return std::string();
+	}
+
+	static TextureFilterMode TextureFilterModeFromString(std::string_view string)
+	{
+		if (string == "Linear")       return TextureFilterMode::Linear;
+		else if (string == "Nearest") return TextureFilterMode::Nearest;
+
+		GBC_CORE_ASSERT("Unknown Texture Filter Mode!");
+		return static_cast<TextureFilterMode>(0);
+	}
+
+	static std::string TextureWrapModeToString(TextureWrapMode textureFilterMode)
+	{
+		switch (textureFilterMode)
+		{
+			case TextureWrapMode::ClampToEdge: return "ClampToEdge";
+			case TextureWrapMode::Repeat:      return "Repeat";
+		}
+
+		GBC_CORE_ASSERT("Unknown Texture Wrap Mode!");
+		return std::string();
+	}
+
+	static TextureWrapMode TextureWrapModeFromString(std::string_view string)
+	{
+		if (string == "ClampToEdge") return TextureWrapMode::ClampToEdge;
+		else if (string == "Repeat") return TextureWrapMode::Repeat;
+
+		GBC_CORE_ASSERT("Unknown Texture Wrap Mode!");
+		return static_cast<TextureWrapMode>(0);
+	}
+
+	static std::string Rigidbody2DComponentBodyTypeToString(Rigidbody2DComponent::BodyType rigidbody2DComponentType)
+	{
+		switch (rigidbody2DComponentType)
+		{
+			case Rigidbody2DComponent::BodyType::Static:    return "Static";
+			case Rigidbody2DComponent::BodyType::Dynamic:   return "Dynamic";
+			case Rigidbody2DComponent::BodyType::Kinematic: return "Kinematic";
+		}
+
+		GBC_CORE_ASSERT("Unknown Rigidbody 2D Component Body Type!");
+		return std::string();
+	}
+
+	static Rigidbody2DComponent::BodyType Rigidbody2DComponentBodyTypeFromString(std::string_view string)
+	{
+		if (string == "Static")         return Rigidbody2DComponent::BodyType::Static;
+		else if (string == "Dynamic")   return Rigidbody2DComponent::BodyType::Dynamic;
+		else if (string == "Kinematic") return Rigidbody2DComponent::BodyType::Kinematic;
+
+		GBC_CORE_ASSERT("Unknown Rigidbody 2D Component Body Type!");
+		return static_cast<Rigidbody2DComponent::BodyType>(0);
+	}
 
 	static YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& value)
 	{ return out << YAML::Flow << YAML::BeginSeq << value.x << value.y << YAML::EndSeq; }
@@ -112,7 +221,7 @@ namespace gbc
 		{
 			auto& camera = component.camera;
 			out << YAML::Key << "Camera" << YAML::Value << YAML::BeginMap
-				<< YAML::Key << "ProjectionType" << YAML::Value << static_cast<int32_t>(camera.GetProjectionType())
+				<< YAML::Key << "ProjectionType" << YAML::Value << SceneCameraProjectionTypeToString(camera.GetProjectionType())
 				<< YAML::Key << "PerspectiveFOV" << YAML::Value << camera.GetPerspectiveFOV()
 				<< YAML::Key << "PerspectiveNear" << YAML::Value << camera.GetPerspectiveNearClip()
 				<< YAML::Key << "PerspectiveFar" << YAML::Value << camera.GetPerspectiveFarClip()
@@ -126,21 +235,41 @@ namespace gbc
 		//SerializeComponent<NativeScriptComponent>(out, entity, "NativeScriptComponent", [&out](NativeScriptComponent& component) {});
 		SerializeComponent<SpriteRendererComponent>(out, entity, "SpriteRendererComponent", [&out](SpriteRendererComponent& component)
 		{
-			// TODO: reference texture by UUID
-			std::string filepath;
-			if (component.texture && component.texture->GetTexture())
-				filepath = component.texture->GetTexture()->GetFilepath();
-			const auto& specs = component.texture->GetSpecification();
-
 			out << YAML::Key << "TintColor" << YAML::Value << component.color
-				<< YAML::Key << "Texture" << YAML::Value << filepath
-				<< YAML::Key << "TilingFactor" << YAML::Value << component.tilingFactor
-				<< YAML::Key << "Specification" << YAML::BeginMap
-				<< YAML::Key << "MinFilter" << YAML::Value << static_cast<int32_t>(specs.minFilter)
-				<< YAML::Key << "MagFilter" << YAML::Value << static_cast<int32_t>(specs.magFilter)
-				<< YAML::Key << "WrapS" << YAML::Value << static_cast<int32_t>(specs.wrapS)
-				<< YAML::Key << "WrapT" << YAML::Value << static_cast<int32_t>(specs.wrapT)
-				<< YAML::EndMap;
+				<< YAML::Key << "TilingFactor" << YAML::Value << component.tilingFactor;
+
+			// TODO: reference texture by UUID
+			if (component.texture && component.texture->GetTexture())
+			{
+				std::string filepath = component.texture->GetTexture()->GetFilepath();
+				const auto& specs = component.texture->GetSpecification();
+
+				out << YAML::Key << "Texture" << YAML::BeginMap
+						<< YAML::Key << "Filepath" << YAML::Value << filepath
+						<< YAML::Key << "Specification" << YAML::BeginMap
+							<< YAML::Key << "MinFilter" << YAML::Value << TextureFilterModeToString(specs.minFilter)
+							<< YAML::Key << "MagFilter" << YAML::Value << TextureFilterModeToString(specs.magFilter)
+							<< YAML::Key << "WrapS" << YAML::Value << TextureWrapModeToString(specs.wrapS)
+							<< YAML::Key << "WrapT" << YAML::Value << TextureWrapModeToString(specs.wrapT)
+						<< YAML::EndMap
+					<< YAML::EndMap;
+			}
+		});
+
+		SerializeComponent<BoxCollider2DComponent>(out, entity, "BoxCollider2DComponent", [&out](BoxCollider2DComponent& component)
+		{
+			out << YAML::Key << "Size" << YAML::Value << component.size
+				<< YAML::Key << "Offset" << YAML::Value << component.offset
+				<< YAML::Key << "Density" << YAML::Value << component.density
+				<< YAML::Key << "Friction" << YAML::Value << component.friction
+				<< YAML::Key << "Restitution" << YAML::Value << component.restitution
+				<< YAML::Key << "RestitutionThreshold" << YAML::Value << component.restitutionThreshold;
+		});
+
+		SerializeComponent<Rigidbody2DComponent>(out, entity, "Rigidbody2DComponent", [&out](Rigidbody2DComponent& component)
+		{
+			out << YAML::Key << "Type" << YAML::Value << Rigidbody2DComponentBodyTypeToString(component.type)
+				<< YAML::Key << "FixedRotation" << YAML::Value << component.fixedRotation;
 		});
 
 		out << YAML::EndMap;
@@ -154,7 +283,7 @@ namespace gbc
 			<< YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
 		// entt::registry::each iterates backwards, this doesn't
-		auto view = scene->registry.view<TagComponent>();
+		auto view = scene->registry->view<TagComponent>();
 		for (auto it = view.rbegin(); it != view.rend(); ++it)
 		{
 			Entity entity(*it, scene.get());
@@ -203,23 +332,22 @@ namespace gbc
 
 					Entity entity = scene->CreateEntity(name);
 
-					auto transformComponentNode = entityNode["TransformComponent"];
-					if (transformComponentNode)
+					// Entities always have transform components
 					{
+						auto transformComponentNode = entityNode["TransformComponent"];
 						auto& transformComponent = entity.GetComponent<TransformComponent>();
 						transformComponent.translation = transformComponentNode["Translation"].as<glm::vec3>();
 						transformComponent.rotation = transformComponentNode["Rotation"].as<glm::vec3>();
 						transformComponent.scale = transformComponentNode["Scale"].as<glm::vec3>();
 					}
 
-					auto cameraComponentNode = entityNode["CameraComponent"];
-					if (cameraComponentNode)
+					if (auto cameraComponentNode = entityNode["CameraComponent"]; cameraComponentNode)
 					{
 						auto& cameraComponent = entity.AddComponent<CameraComponent>();
 
 						auto cameraNode = cameraComponentNode["Camera"];
 						auto& camera = cameraComponent.camera;
-						camera.SetProjectionType(static_cast<SceneCamera::ProjectionType>(cameraNode["ProjectionType"].as<int32_t>()));
+						camera.SetProjectionType(SceneCameraProjectionTypeFromString(cameraNode["ProjectionType"].as<std::string>()));
 						camera.SetPerspectiveFOV(cameraNode["PerspectiveFOV"].as<float>());
 						camera.SetPerspectiveNearClip(cameraNode["PerspectiveNear"].as<float>());
 						camera.SetPerspectiveFarClip(cameraNode["PerspectiveFar"].as<float>());
@@ -230,8 +358,7 @@ namespace gbc
 						cameraComponent.primary = cameraComponentNode["Primary"].as<bool>();
 					}
 
-					auto spriteRendererComponentNode = entityNode["SpriteRendererComponent"];
-					if (spriteRendererComponentNode)
+					if (auto spriteRendererComponentNode = entityNode["SpriteRendererComponent"]; spriteRendererComponentNode)
 					{
 						auto& spriteRendererComponent = entity.AddComponent<SpriteRendererComponent>();
 
@@ -246,16 +373,37 @@ namespace gbc
 						// and that would use the asset manager to get the correct Ref<Texture2D>
 
 						spriteRendererComponent.color = spriteRendererComponentNode["TintColor"].as<glm::vec4>();
-						spriteRendererComponent.tilingFactor = spriteRendererComponentNode["TilingFactor"].as<float>();
+						spriteRendererComponent.tilingFactor = spriteRendererComponentNode["TilingFactor"].as<glm::vec2>();
 
-						auto specsNode = spriteRendererComponentNode["Specification"];
-						TextureSpecification specs;
-						specs.texture = LocalTexture2D::Create(spriteRendererComponentNode["Texture"].as<std::string>(), 4);
-						specs.minFilter = static_cast<TextureFilterMode>(specsNode["MinFilter"].as<int32_t>());
-						specs.magFilter = static_cast<TextureFilterMode>(specsNode["MagFilter"].as<int32_t>());
-						specs.wrapS = static_cast<TextureWrapMode>(specsNode["WrapS"].as<int32_t>());
-						specs.wrapT = static_cast<TextureWrapMode>(specsNode["WrapT"].as<int32_t>());
-						spriteRendererComponent.texture = Texture2D::Create(specs);
+						if (auto textureNode = spriteRendererComponentNode["Texture"]; textureNode)
+						{
+							auto specsNode = textureNode["Specification"];
+							TextureSpecification specs;
+							specs.texture = LocalTexture2D::Create(textureNode["Filepath"].as<std::string>(), 4);
+							specs.minFilter = TextureFilterModeFromString(specsNode["MinFilter"].as<std::string>());
+							specs.magFilter = TextureFilterModeFromString(specsNode["MagFilter"].as<std::string>());
+							specs.wrapS = TextureWrapModeFromString(specsNode["WrapS"].as<std::string>());
+							specs.wrapT = TextureWrapModeFromString(specsNode["WrapT"].as<std::string>());
+							spriteRendererComponent.texture = Texture2D::Create(specs);
+						}
+					}
+
+					if (auto boxCollider2DComponentNode = entityNode["BoxCollider2DComponent"]; boxCollider2DComponentNode)
+					{
+						auto& boxCollider2DComponent = entity.AddComponent<BoxCollider2DComponent>();
+						boxCollider2DComponent.size = boxCollider2DComponentNode["Size"].as<glm::vec2>();
+						boxCollider2DComponent.offset = boxCollider2DComponentNode["Offset"].as<glm::vec2>();
+						boxCollider2DComponent.density = boxCollider2DComponentNode["Density"].as<float>();
+						boxCollider2DComponent.friction = boxCollider2DComponentNode["Friction"].as<float>();
+						boxCollider2DComponent.restitution = boxCollider2DComponentNode["Restitution"].as<float>();
+						boxCollider2DComponent.restitutionThreshold = boxCollider2DComponentNode["RestitutionThreshold"].as<float>();
+					}
+
+					if (auto rigidbody2DComponentNode = entityNode["Rigidbody2DComponent"]; rigidbody2DComponentNode)
+					{
+						auto& rigidbody2DComponent = entity.AddComponent<Rigidbody2DComponent>();
+						rigidbody2DComponent.type = Rigidbody2DComponentBodyTypeFromString(rigidbody2DComponentNode["Type"].as<std::string>());
+						rigidbody2DComponent.fixedRotation = rigidbody2DComponentNode["FixedRotation"].as<bool>();
 					}
 				}
 			}
@@ -267,8 +415,6 @@ namespace gbc
 		return false;
 	}
 
-	static std::ostream& operator<<(std::ostream& out, const glm::vec1& value) { return out << value.x; }
-	static std::istream& operator>>(std::istream& in,        glm::vec1& value) { return in  >> value.x; }
 	static std::ostream& operator<<(std::ostream& out, const glm::vec2& value) { return out << value.x << value.y; }
 	static std::istream& operator>>(std::istream& in,        glm::vec2& value) { return in  >> value.x >> value.y; }
 	static std::ostream& operator<<(std::ostream& out, const glm::vec3& value) { return out << value.x << value.y << value.z; }
@@ -334,10 +480,10 @@ namespace gbc
 		{
 			static constexpr char sceneName[] = "Untitled";
 			static constexpr size_t sceneNameLength = sizeof(sceneName) / sizeof(*sceneName);
-			size_t entityCount = scene->registry.size();
+			size_t entityCount = scene->registry->size();
 			file << sceneNameLength << sceneName << entityCount;
 
-			auto view = scene->registry.view<TagComponent>();
+			auto view = scene->registry->view<TagComponent>();
 			for (auto it = view.rbegin(); it != view.rend(); ++it)
 			{
 				Entity entity(*it, scene.get());

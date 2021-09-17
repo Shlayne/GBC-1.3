@@ -6,6 +6,8 @@
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
+#include "GBC/Scene/Components/Physics/BoxCollider2DComponent.h"
+#include "GBC/Scene/Components/Physics/Rigidbody2DComponent.h"
 
 namespace gbc
 {
@@ -106,10 +108,10 @@ namespace gbc
 					ImGuiHelper::FloatEdit3("Translation", &component.translation.x);
 					ImGuiHelper::NextTableColumn();
 					glm::vec3 rotation = glm::degrees(component.rotation);
-					if (ImGuiHelper::FloatEdit3("Rotation", &rotation.x, 0.0f, 1.0f))
+					if (ImGuiHelper::FloatEdit3("Rotation", &rotation.x))
 						component.rotation = glm::radians(rotation);
 					ImGuiHelper::NextTableColumn();
-					ImGuiHelper::FloatEdit3("Scale", &component.scale.x, 1.0f);
+					ImGuiHelper::FloatEdit3("Scale", &component.scale.x);
 				});
 
 				DrawComponent<CameraComponent>("Camera", 2, selectedEntity, true, [](CameraComponent& component)
@@ -182,17 +184,20 @@ namespace gbc
 					ImGuiHelper::ButtonDragDropTarget("Texture", buttonText, "CONTENT_BROWSER_ITEM", [&component](const ImGuiPayload* payload)
 					{
 						std::string filepath = (const char*)(payload->Data);
-						auto localTexture = CreateRef<LocalTexture2D>(filepath);
-						if (localTexture)
+						if (filepath.ends_with(".png")) // TODO: support other file types
 						{
-							TextureSpecification specs = component.texture ? component.texture->GetSpecification() : TextureSpecification{};
-							specs.texture = localTexture;
-							component.texture = Texture2D::Create(specs);
+							auto localTexture = CreateRef<LocalTexture2D>(filepath);
+							if (localTexture)
+							{
+								TextureSpecification specs = component.texture ? component.texture->GetSpecification() : TextureSpecification{};
+								specs.texture = localTexture;
+								component.texture = Texture2D::Create(specs);
+							}
 						}
 					});
 					ImGuiHelper::NextTableColumn();
 
-					ImGuiHelper::FloatEdit("Tiling Factor", &component.tilingFactor);
+					ImGuiHelper::FloatEdit2("Tiling Factor", &component.tilingFactor.x);
 					ImGuiHelper::NextTableColumn();
 
 					// TODO: all of what's in this if statement should be moved to another panel similar to unity
@@ -232,11 +237,37 @@ namespace gbc
 							specs.wrapT = static_cast<TextureWrapMode>(selectedItem);
 							changed = true;
 						}
-						ImGuiHelper::NextTableColumn();
 
 						if (changed)
 							component.texture = Texture2D::Create(specs);
 					}
+				});
+
+				DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", 2, selectedEntity, true, [](Rigidbody2DComponent& component)
+				{
+					static constexpr const char* names[]{ "Static", "Dynamic", "Kinematic" };
+
+					int selectedItem = static_cast<int>(component.type);
+					if (ImGuiHelper::Combo("Body Type", &selectedItem, names, sizeof(names) / sizeof(*names)))
+						component.type = static_cast<Rigidbody2DComponent::BodyType>(selectedItem);
+					ImGuiHelper::NextTableColumn();
+
+					ImGuiHelper::Checkbox("Fixed Rotation", &component.fixedRotation);
+				});
+
+				DrawComponent<BoxCollider2DComponent>("Box Collider", 2, selectedEntity, true, [](BoxCollider2DComponent& component)
+				{
+					ImGuiHelper::FloatEdit2("Size", &component.size.x);
+					ImGuiHelper::NextTableColumn();
+					ImGuiHelper::FloatEdit2("Offset", &component.offset.x);
+					ImGuiHelper::NextTableColumn();
+					ImGuiHelper::FloatEdit("Friction", &component.friction);
+					ImGuiHelper::NextTableColumn();
+					ImGuiHelper::FloatEdit("Density", &component.density);
+					ImGuiHelper::NextTableColumn();
+					ImGuiHelper::FloatEdit("Restitution", &component.restitution);
+					ImGuiHelper::NextTableColumn();
+					ImGuiHelper::FloatEdit("Restitution Threshold", &component.restitutionThreshold);
 				});
 
 				ImGui::Separator();
@@ -256,6 +287,9 @@ namespace gbc
 					allComponentsAdded &= DrawAddComponent<CameraComponent>("Camera", selectedEntity);
 					allComponentsAdded &= DrawAddComponent<SpriteRendererComponent>("Sprite Renderer", selectedEntity);
 					allComponentsAdded &= DrawAddComponent<TransformComponent>("Transform", selectedEntity);
+					ImGui::Separator(); // New section: physics
+					allComponentsAdded &= DrawAddComponent<BoxCollider2DComponent>("Box Collider", selectedEntity);
+					allComponentsAdded &= DrawAddComponent<Rigidbody2DComponent>("Rigidbody 2D", selectedEntity);
 					if (allComponentsAdded)
 						ImGui::CloseCurrentPopup();
 					ImGui::EndPopup();

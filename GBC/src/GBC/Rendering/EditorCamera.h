@@ -62,7 +62,7 @@ namespace gbc
 		glm::vec2 mousePosition{ 0.0f };
 		float mouseScrollOffset = 0.0f;
 
-		Keycode activatorKey = Keycode::LeftShift;
+		Keycode activatorKey = Keycode::LeftAlt;
 		bool activatorKeyPressed = false;
 		MouseButton panButton = MouseButton::ButtonMiddle;
 		bool panButtonPressed = false;
