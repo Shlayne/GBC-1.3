@@ -47,7 +47,7 @@ namespace gbc
 				ImGuizmo::SetDrawlist();
 
 				// Get window info
-				ImGuizmo::SetRect(position.x, position.y, static_cast<float>(size.x), static_cast<float>(size.y));
+				ImGuizmo::SetRect(static_cast<float>(position.x), static_cast<float>(position.y), static_cast<float>(size.x), static_cast<float>(size.y));
 
 				// Get editor camera info
 				glm::mat4 view = editorCamera.GetView();

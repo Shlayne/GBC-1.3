@@ -23,7 +23,7 @@ namespace gbc
 
 		inline bool HasSizeChanged() const noexcept { return sizeChanged && size.x > 0 && size.y > 0; }
 		inline const glm::ivec2& GetSize() const noexcept { return size; }
-		inline const glm::vec2& GetPosition() const noexcept { return position; }
+		inline const glm::ivec2& GetPosition() const noexcept { return position; }
 	protected:
 		void Update();
 
@@ -33,6 +33,6 @@ namespace gbc
 		bool hovered = false;
 		bool sizeChanged = false;
 		glm::ivec2 size{ 1 };
-		glm::vec2 position{ 0.0f };
+		glm::ivec2 position{ 0 };
 	};
 }

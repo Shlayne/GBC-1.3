@@ -24,9 +24,6 @@ namespace gbc
 
 		Window& window = Application::Get().GetWindow();
 
-		editorCamera = EditorCamera(90.0f, 0.001f, 1000.0f);
-		editorCamera.OnViewportResize(window.GetWidth(), window.GetHeight());
-
 		FramebufferSpecification framebufferSpecification;
 		framebufferSpecification.width = window.GetWidth();
 		framebufferSpecification.height = window.GetHeight();
@@ -68,6 +65,9 @@ namespace gbc
 
 		editorCamera.SetBlocked(ImGuizmo::IsUsing());
 		Application::Get().GetImGuiWrapper().SetBlockEvents(!viewportFocused && !viewportHovered);
+
+		glm::ivec2 viewportPosition = sceneViewportPanel->GetPosition();
+		editorCamera.OnViewportMove(viewportPosition.x, viewportPosition.y);
 
 		if (sceneViewportPanel->HasSizeChanged())
 		{
