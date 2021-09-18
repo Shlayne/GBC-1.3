@@ -2,6 +2,7 @@
 
 #include <gbc.h>
 #include <map>
+#include <filesystem>
 #include "GBC/Rendering/EditorCamera.h"
 #include "Panels/SceneViewportPanel.h"
 #include "Panels/SceneHierarchyPanel.h"
@@ -32,11 +33,11 @@ namespace gbc
 
 		void NewScene();
 		void OpenScene();
-		void OpenSceneFile(const std::string& filepath);
+		void OpenSceneFile(const std::filesystem::path& filepath);
 		void SaveScene();
 		void SaveAsScene();
 
-		std::string currentFilepath;
+		std::filesystem::path currentFilepath;
 		bool hasUnsavedChanges = false;
 
 		enum class SceneState : uint8_t

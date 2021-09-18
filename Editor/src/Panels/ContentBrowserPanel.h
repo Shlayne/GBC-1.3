@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Panel.h"
-#include <vector>
-#include <list>
 #include <filesystem>
+#include <list>
+#include <vector>
+#include "GBC/IO/DirectoryChange.h"
 #include "GBC/Rendering/Texture.h"
 
 namespace gbc
@@ -36,7 +37,12 @@ namespace gbc
 		void PushDirectory(const std::filesystem::path& path);
 		void RefreshDirectory(bool refreshAssetDirectory = false);
 		void RefreshDirectory(Directory& subdirectory);
+		void UpdateCurrentCachedDirectoryText();
 	private:
+		DirectoryChangeNotifier directoryChangeNotifier;
+		bool OnDirectoryNotification(bool error);
+		bool refreshDirectories = false;
+
 		Directory assetDirectory;
 
 		std::list<std::filesystem::path> cachedDirectories;

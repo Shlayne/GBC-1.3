@@ -1,10 +1,12 @@
 #include "ContentBrowserPanel.h"
 #include <imgui/imgui.h>
 #include <regex>
+#include <atomic>
 #include "GBC/Core/Input.h"
 #include "GBC/Events/MouseEvents.h"
 #include "GBC/ImGui/ImGuiHelper.h"
 #include "GBC/IO/FileDialog.h"
+#include "GBC/IO/DirectoryChange.h"
 
 namespace gbc
 {
@@ -17,14 +19,22 @@ namespace gbc
 		currentCachedDirectory = cachedDirectories.begin();
 		RefreshDirectory(true);
 
-		directoryTexture = Texture2D::Create(CreateRef<LocalTexture2D>("Resources/Icons/ContentBrowserPanel/DirectoryIcon.png", 4));
-		fileTexture = Texture2D::Create(CreateRef<LocalTexture2D>("Resources/Icons/ContentBrowserPanel/FileIcon.png", 4));
+		directoryTexture = Texture2D::Create(LocalTexture2D::Create("Resources/Icons/ContentBrowserPanel/DirectoryIcon.png", 4));
+		fileTexture = Texture2D::Create(LocalTexture2D::Create("Resources/Icons/ContentBrowserPanel/FileIcon.png", 4));
+
+		directoryChangeNotifier = DirectoryChange::CreateNotifier(GBC_BIND_FUNC(OnDirectoryNotification), assetDirectory.path, NotificationType_FileNameChanged | NotificationType_DirectoryNameChanged, true);
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
 	{
 		if (enabled)
 		{
+			if (refreshDirectories)
+			{
+				refreshDirectories = false;
+				RefreshDirectory(true);
+			}
+
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 4.0f, 2.0f });
 			ImGui::Begin(name.c_str(), &enabled, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 			ImGui::PopStyleVar();
@@ -112,7 +122,7 @@ namespace gbc
 
 		ImGui::SameLine();
 		if (ImGui::Button("Refresh"))
-			RefreshDirectory(true);
+			refreshDirectories = true;
 
 		ImGui::SameLine();
 		ImGui::PushItemWidth(200.0f);
@@ -138,9 +148,6 @@ namespace gbc
 		{
 			ImGui::TableNextColumn();
 
-			bool deferredChange = false;
-			bool directoriesAltered = false;
-
 			if (creatingDirectory)
 			{
 				ImGui::PushID(-1);
@@ -159,8 +166,6 @@ namespace gbc
 					try
 					{
 						std::filesystem::create_directory(*currentCachedDirectory / fileNameBuffer);
-						deferredChange = true;
-						directoriesAltered = true;
 					}
 #if GBC_ENABLE_LOGGING
 					catch (std::filesystem::filesystem_error& error)
@@ -213,9 +218,21 @@ namespace gbc
 
 					if (ImGui::BeginDragDropSource())
 					{
-						auto relativePathString = (projectAssetDirectory / relativePath).string();
-						ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", relativePathString.c_str(), relativePathString.size() + 1, ImGuiCond_Once);
+						auto relativePathString = projectAssetDirectory / relativePath;
+						size_t bufferSize = (relativePathString.native().size() + 1) * sizeof(wchar_t);
+						ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", relativePathString.c_str(), bufferSize, ImGuiCond_Once);
 						ImGui::EndDragDropSource();
+					}
+
+					if (file.directory && ImGui::BeginDragDropTarget())
+					{
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+						{
+							std::filesystem::path oldPath = static_cast<const wchar_t*>(payload->Data);
+							std::filesystem::path newPath = file.path / oldPath.filename();
+							std::filesystem::rename(oldPath, newPath);
+						}
+						ImGui::EndDragDropTarget();
 					}
 
 					if (ImGui::IsItemHovered())
@@ -268,8 +285,6 @@ namespace gbc
 							try
 							{
 								std::filesystem::rename(file.path, *currentCachedDirectory / fileNameBuffer);
-								deferredChange = true;
-								directoriesAltered = file.directory;
 							}
 	#if GBC_ENABLE_LOGGING
 							catch (std::filesystem::filesystem_error& error)
@@ -304,8 +319,6 @@ namespace gbc
 							try
 							{
 								std::filesystem::remove(file.path);
-								deferredChange = true;
-								directoriesAltered = file.directory;
 							}
 #if GBC_ENABLE_LOGGING
 							catch (std::filesystem::filesystem_error& error)
@@ -350,9 +363,6 @@ namespace gbc
 			}
 
 			ImGui::EndTable();
-
-			if (deferredChange)
-				RefreshDirectory(directoriesAltered);
 		}
 
 		ImGui::PopStyleColor();
@@ -414,19 +424,17 @@ namespace gbc
 
 	void ContentBrowserPanel::RefreshDirectory(bool refreshAssetDirectory)
 	{
-		// Whenever currentCachedDirectory is updated, update currentCachedDirectoryText
+		while (!std::filesystem::exists(*currentCachedDirectory))
 		{
-			currentCachedDirectoryText.clear();
-			auto& directoryString = currentCachedDirectory->native();
-			for (auto wc : directoryString)
+			if (*--currentCachedDirectory == projectAssetDirectory)
 			{
-				char c = static_cast<char>(wc);
-				if (c == '\\' || c == '/')
-					currentCachedDirectoryText += "  /  ";
-				else
-					currentCachedDirectoryText += c;
+				// User used filesystem or other means to delete the asset directory
+				std::filesystem::create_directory(projectAssetDirectory);
+				break;
 			}
 		}
+
+		UpdateCurrentCachedDirectoryText();
 
 		if (refreshAssetDirectory)
 		{
@@ -458,5 +466,32 @@ namespace gbc
 		for (const auto& entry : std::filesystem::directory_iterator(subdirectory.path))
 			if (entry.is_directory())
 				RefreshDirectory(subdirectory.subdirectories.emplace_back(entry.path()));
+	}
+
+	void ContentBrowserPanel::UpdateCurrentCachedDirectoryText()
+	{
+		currentCachedDirectoryText.clear();
+		auto& directoryString = currentCachedDirectory->native();
+		for (auto wc : directoryString)
+		{
+			if (wc == L'\\' || wc == L'/')
+				currentCachedDirectoryText += "  /  ";
+			else
+				currentCachedDirectoryText += static_cast<char>(wc);
+		}
+	}
+
+	bool ContentBrowserPanel::OnDirectoryNotification(bool error)
+	{
+		GBC_CORE_ERROR("ContentBrowserPanel::OnDirectoryNotification(error={0})", error);
+
+		if (error)
+		{
+			GBC_CORE_ERROR("Content Browser directory notification failed! Save and restart recommended.");
+			return false; // return value here does not matter as it is not used
+		}
+
+		refreshDirectories = true;
+		return true;
 	}
 }

@@ -5,15 +5,14 @@
 #include "GBC/Debug/Profiler.h"
 
 #if GBC_PLATFORM_WINDOWS
-
-extern gbc::Application* gbc::CreateApplication();
+extern gbc::Application* gbc::CreateApplication(CommandLineArgs args);
 
 int main(int argc, char** argv)
 {
 	gbc::Logger::Init();
 
 	GBC_PROFILE_BEGIN("Init", "GBCProfileInit.json");
-	auto application = gbc::CreateApplication();
+	auto application = gbc::CreateApplication({ argc, argv });
 	GBC_PROFILE_END();
 
 	GBC_PROFILE_BEGIN("Run", "GBCProfileRun.json");

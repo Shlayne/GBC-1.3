@@ -16,9 +16,8 @@ namespace gbc
 		GBC_CORE_ASSERT(instance == nullptr, "Application already exists!");
 		instance = this;
 
-		window = Window::Create(windowSpecs);
-
 		auto eventCallback = GBC_BIND_FUNC(OnEvent);
+		window = Window::Create(windowSpecs);
 		window->SetEventCallback(eventCallback);
 		Input::SetEventCallback(eventCallback);
 

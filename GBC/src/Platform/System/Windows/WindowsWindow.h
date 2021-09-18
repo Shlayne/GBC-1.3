@@ -9,7 +9,7 @@ namespace gbc
 	class WindowsWindow : public Window
 	{
 	public:
-		WindowsWindow(const WindowSpecifications& specs);
+		WindowsWindow(const WindowSpecifications& specification);
 		virtual ~WindowsWindow();
 
 		virtual void PollEvents() override;
@@ -79,7 +79,6 @@ namespace gbc
 
 			EventCallbackFunc eventCallback;
 		} state;
-		friend class Window;
 
 		// Callbacks
 		static void SetCallbacks(GLFWwindow* window);

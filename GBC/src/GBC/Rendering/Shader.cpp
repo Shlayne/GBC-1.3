@@ -5,7 +5,7 @@
 
 namespace gbc
 {
-	Ref<Shader> Shader::Create(const std::string& filepath)
+	Ref<Shader> Shader::Create(const std::filesystem::path& filepath)
 	{
 		switch (RendererAPI::GetAPI())
 		{

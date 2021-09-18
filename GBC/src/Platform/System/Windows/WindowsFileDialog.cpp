@@ -10,81 +10,63 @@
 
 namespace gbc
 {
-	std::optional<std::string> FileDialog::OpenFile(const char* filter, const std::string& initialDirectory)
+	std::filesystem::path FileDialog::OpenFile(const wchar_t* filter, const std::filesystem::path& initialDirectoryPath)
 	{
-		OPENFILENAMEA ofn;
-		CHAR szFile[260]{ '\0' };
-		ZeroMemory(&ofn, sizeof(OPENFILENAMEA));
-		ofn.lStructSize = sizeof(OPENFILENAMEA);
+		OPENFILENAMEW ofn;
+		WCHAR szFile[__std_fs_max_path]{ L'\0' };
+		ZeroMemory(&ofn, sizeof(OPENFILENAMEW));
+		ofn.lStructSize = sizeof(OPENFILENAMEW);
 		ofn.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()));
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 		ofn.lpstrFilter = filter;
 		ofn.nFilterIndex = 1;
-		ofn.lpstrInitialDir = initialDirectory.c_str();
+		ofn.lpstrInitialDir = initialDirectoryPath.c_str();
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
-		if (GetOpenFileNameA(&ofn) == TRUE)
+		if (GetOpenFileNameW(&ofn) == TRUE)
 			return ofn.lpstrFile;
-		return std::nullopt;
+		return {};
 	}
 
-	std::optional<std::string> FileDialog::OpenFile(const char* filter, const std::filesystem::path& initialDirectoryPath)
+	std::filesystem::path FileDialog::OpenFile(const wchar_t* filter)
 	{
-		std::string initialDirectory = initialDirectoryPath.string();
-		return OpenFile(filter, initialDirectory);
-	}
-
-	std::optional<std::string> FileDialog::OpenFile(const char* filter)
-	{
-		static constexpr size_t initialDirectoryMaxSize = 256;
-		std::string initialDirectory(initialDirectoryMaxSize, '\0');
+		static constexpr size_t initialDirectoryMaxSize = __std_fs_max_path;
+		std::string initialDirectory(initialDirectoryMaxSize, L'\0');
 		GetCurrentDirectoryA(initialDirectoryMaxSize, initialDirectory.data());
 		return OpenFile(filter, initialDirectory);
 	}
 
-	std::optional<std::string> FileDialog::SaveFile(const char* filter, const std::string& initialDirectory)
+	std::filesystem::path FileDialog::SaveFile(const wchar_t* filter, const std::filesystem::path& initialDirectoryPath)
 	{
-		OPENFILENAMEA ofn;
-		CHAR szFile[260]{ 0 };
-		ZeroMemory(&ofn, sizeof(OPENFILENAMEA));
-		ofn.lStructSize = sizeof(OPENFILENAMEA);
+		OPENFILENAMEW ofn;
+		WCHAR szFile[__std_fs_max_path]{ L'\0' };
+		ZeroMemory(&ofn, sizeof(OPENFILENAMEW));
+		ofn.lStructSize = sizeof(OPENFILENAMEW);
 		ofn.hwndOwner = glfwGetWin32Window(static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow()));
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
 		ofn.lpstrFilter = filter;
 		ofn.nFilterIndex = 1;
-		ofn.lpstrInitialDir = initialDirectory.c_str();
+		ofn.lpstrInitialDir = initialDirectoryPath.c_str();
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-		ofn.lpstrDefExt = strchr(filter, '\0') + 1;
+		ofn.lpstrDefExt = wcschr(filter, L'\0') + 1;
 
-		if (GetSaveFileNameA(&ofn) == TRUE)
+		if (GetSaveFileNameW(&ofn) == TRUE)
 			return ofn.lpstrFile;
-		return std::nullopt;
+		return {};
 	}
 
-	std::optional<std::string> FileDialog::SaveFile(const char* filter, const std::filesystem::path& initialDirectoryPath)
+	std::filesystem::path FileDialog::SaveFile(const wchar_t* filter)
 	{
-		std::string initialDirectory = initialDirectoryPath.string();
+		static constexpr size_t initialDirectoryMaxSize = __std_fs_max_path;
+		std::wstring initialDirectory(initialDirectoryMaxSize, L'\0');
+		GetCurrentDirectoryW(initialDirectoryMaxSize, initialDirectory.data());
 		return SaveFile(filter, initialDirectory);
-	}
-
-	std::optional<std::string> FileDialog::SaveFile(const char* filter)
-	{
-		static constexpr size_t initialDirectoryMaxSize = 256;
-		std::string initialDirectory(initialDirectoryMaxSize, '\0');
-		GetCurrentDirectoryA(initialDirectoryMaxSize, initialDirectory.data());
-		return SaveFile(filter, initialDirectory);
-	}
-
-	void FileDialog::OpenFolder(const std::string& directory)
-	{
-		ShellExecuteA(nullptr, nullptr, directory.c_str(), nullptr, nullptr, SW_SHOWDEFAULT);
 	}
 
 	void FileDialog::OpenFolder(const std::filesystem::path& directoryPath)
 	{
-		std::string directory = directoryPath.string();
-		return OpenFolder(directory);
+		ShellExecuteW(nullptr, nullptr, directoryPath.c_str(), nullptr, nullptr, SW_SHOWDEFAULT);
 	}
 }

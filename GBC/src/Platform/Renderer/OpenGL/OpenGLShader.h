@@ -7,7 +7,7 @@ namespace gbc
 	class OpenGLShader : public Shader
 	{
 	public:
-		OpenGLShader(const std::string& filepath);
+		OpenGLShader(const std::filesystem::path& filepath);
 		virtual ~OpenGLShader();
 
 		virtual void Bind() const override;
@@ -50,7 +50,7 @@ namespace gbc
 		int32_t GetUniformLocation(const std::string& name);
 	private:
 		RendererID rendererID = 0;
-		std::string filepath;
+		std::filesystem::path filepath;
 
 		std::unordered_map<uint32_t, std::vector<uint32_t>> vulkanSPIRV;
 		std::unordered_map<uint32_t, std::vector<uint32_t>> openglSPIRV;

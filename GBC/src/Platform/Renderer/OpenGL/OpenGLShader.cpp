@@ -90,19 +90,18 @@ namespace gbc
 		return nullptr;
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& filepath)
+	OpenGLShader::OpenGLShader(const std::filesystem::path& filepath)
 		: filepath(filepath)
 	{
 		GBC_PROFILE_FUNCTION();
 
 		CreateCacheDirectoryIfNeeded();
 
-		auto file = FileIO::ReadFile(filepath);
-		if (file)
+		if (auto file = FileIO::ReadFile(filepath); !file.empty())
 		{
 			Timer timer;
 
-			auto shaderSources = PreProcess(*file);
+			auto shaderSources = PreProcess(file);
 			CompileOrGetVulkanBinaries(shaderSources);
 
 			// Get shader information
@@ -115,7 +114,7 @@ namespace gbc
 			GBC_CORE_WARN("Shader creation took {0}ms.", timer.GetElapsedTime().Millis());
 		}
 		else
-			GBC_CORE_ERROR("Shader file does not exist!");
+			GBC_CORE_ERROR("Shader file does not exist or is empty!");
 	}
 
 	OpenGLShader::~OpenGLShader()
@@ -191,7 +190,8 @@ namespace gbc
 			}
 			else
 			{
-				shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, GLShaderStageToShaderC(stage), filepath.c_str(), options);
+				auto filepathString = filepath.string();
+				shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, GLShaderStageToShaderC(stage), filepathString.c_str(), options);
 #if GBC_ENABLE_ASSERTS
 				if (module.GetCompilationStatus() != shaderc_compilation_status_success)
 					GBC_CORE_ASSERT(false, module.GetErrorMessage());
@@ -245,7 +245,8 @@ namespace gbc
 				openglSourceCode[stage] = glslCompiler.compile();
 				auto& source = openglSourceCode[stage];
 
-				shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, GLShaderStageToShaderC(stage), filepath.c_str(), options);
+				auto filepathString = filepath.string();
+				shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, GLShaderStageToShaderC(stage), filepathString.c_str(), options);
 #if GBC_ENABLE_ASSERTS
 				if (module.GetCompilationStatus() != shaderc_compilation_status_success)
 					GBC_CORE_ASSERT(false, module.GetErrorMessage());
@@ -270,7 +271,8 @@ namespace gbc
 		spirv_cross::Compiler compiler(data);
 		spirv_cross::ShaderResources resources = compiler.get_shader_resources();
 
-		GBC_CORE_TRACE("Shader Compilation Info for {0} shader in \"{1}\".", GLShaderStageToString(stage), filepath);
+		auto filepathString = filepath.string();
+		GBC_CORE_TRACE("Shader Compilation Info for {0} shader in \"{1}\".", GLShaderStageToString(stage), filepathString);
 
 		GBC_CORE_TRACE("  {0} uniform buffer{1}", resources.uniform_buffers.size(), resources.uniform_buffers.size() != 1 ? "s" : "");
 		for (const auto& resource : resources.uniform_buffers)

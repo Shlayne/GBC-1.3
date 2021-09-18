@@ -13,11 +13,14 @@ namespace gbc
 		int32_t width = 1600;
 		int32_t height = 900;
 		const char* title = "GBC v1.3";
+
 		bool vsync = true;
 		bool resizable = true;
 		bool fullscreen = false;
 		bool captureMouse = false;
+
 		bool focusOnShow = true;
+		bool maximizeOnShow = false;
 	};
 
 	class Window
@@ -62,6 +65,6 @@ namespace gbc
 
 		virtual void SetEventCallback(const EventCallbackFunc& callback) = 0;
 
-		static Scope<Window> Create(const WindowSpecifications& specs);
+		static Scope<Window> Create(const WindowSpecifications& specification);
 	};
 }

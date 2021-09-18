@@ -9,7 +9,7 @@
 
 namespace gbc
 {
-	using OpenSceneFunc = std::function<void(const std::string&)>;
+	using OpenSceneFunc = std::function<void(const std::filesystem::path&)>;
 
 	class SceneViewportPanel : public Panel
 	{

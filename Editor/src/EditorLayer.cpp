@@ -413,13 +413,13 @@ namespace gbc
 		if (allowedDiscard)
 		{
 			// TODO: open from assets directory
-			auto filepath = FileDialog::OpenFile("GBC Scene (*.gscn)\0*.gscn\0");
-			if (filepath)
-				OpenSceneFile(*filepath);
+			auto filepath = FileDialog::OpenFile(L"GBC Scene (*.gscn)\0*.gscn\0");
+			if (!filepath.empty())
+				OpenSceneFile(filepath);
 		}
 	}
 
-	void EditorLayer::OpenSceneFile(const std::string& filepath)
+	void EditorLayer::OpenSceneFile(const std::filesystem::path& filepath)
 	{
 		currentFilepath = filepath;
 		ClearScene();
@@ -442,14 +442,14 @@ namespace gbc
 
 	void EditorLayer::SaveAsScene()
 	{
-		auto filepath = FileDialog::SaveFile("GBC Scene (*.gscn)\0*.gscn\0");
-		if (filepath)
+		auto filepath = FileDialog::SaveFile(L"GBC Scene (*.gscn)\0*.gscn\0");
+		if (!filepath.empty())
 		{
 			// Add extension to extensionless path
-			if (!filepath->ends_with(".gscn"))
-				*filepath += ".gscn";
+			if (!filepath.native().ends_with(L".gscn"))
+				filepath += L".gscn";
 
-			currentFilepath = *filepath;
+			currentFilepath = filepath;
 			SaveScene();
 		}
 	}

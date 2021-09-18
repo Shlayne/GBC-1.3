@@ -3,8 +3,9 @@
 
 namespace gbc
 {
-	static std::optional<std::string> ReadFile(std::ifstream& file)
+	std::string FileIO::ReadFile(const std::filesystem::path& filepath)
 	{
+		std::ifstream file(filepath);
 		if (file.is_open())
 		{
 			std::stringstream contents;
@@ -12,23 +13,12 @@ namespace gbc
 			file.close();
 			return contents.str();
 		}
-		return std::nullopt;
+		return {};
 	}
 
-	std::optional<std::string> FileIO::ReadFile(const std::string& filepath)
+	std::vector<uint8_t> FileIO::ReadBinaryFile(const std::filesystem::path& filepath)
 	{
-		std::ifstream file(filepath);
-		return gbc::ReadFile(file);
-	}
-
-	std::optional<std::string> FileIO::ReadFile(const std::filesystem::path& filepath)
-	{
-		std::ifstream file(filepath);
-		return gbc::ReadFile(file);
-	}
-
-	static std::optional<std::vector<uint8_t>> ReadBinaryFile(std::ifstream& file)
-	{
+		std::ifstream file(filepath, std::ios::binary);
 		if (file.is_open())
 		{
 			file.seekg(0, std::ios::end);
@@ -40,23 +30,12 @@ namespace gbc
 			file.close();
 			return contents;
 		}
-		return std::nullopt;
+		return {};
 	}
 
-	std::optional<std::vector<uint8_t>> FileIO::ReadBinaryFile(const std::string& filepath)
+	bool FileIO::WriteFile(const std::filesystem::path& filepath, std::string_view contents)
 	{
-		std::ifstream file(filepath, std::ios::binary);
-		return gbc::ReadBinaryFile(file);
-	}
-
-	std::optional<std::vector<uint8_t>> FileIO::ReadBinaryFile(const std::filesystem::path& filepath)
-	{
-		std::ifstream file(filepath, std::ios::binary);
-		return gbc::ReadBinaryFile(file);
-	}
-
-	static bool WriteFile(std::ofstream& file, std::string_view contents)
-	{
+		std::ofstream file(filepath);
 		if (file.is_open())
 		{
 			file << contents;
@@ -66,20 +45,9 @@ namespace gbc
 		return false;
 	}
 
-	bool FileIO::WriteFile(const std::string& filepath, std::string_view contents)
+	bool FileIO::WriteBinaryFile(const std::filesystem::path& filepath, const std::vector<uint8_t>& contents)
 	{
-		std::ofstream file(filepath);
-		return gbc::WriteFile(file, contents);
-	}
-
-	bool FileIO::WriteFile(const std::filesystem::path& filepath, std::string_view contents)
-	{
-		std::ofstream file(filepath);
-		return gbc::WriteFile(file, contents);
-	}
-
-	static bool WriteBinaryFile(std::ofstream& file, const std::vector<uint8_t>& contents)
-	{
+		std::ofstream file(filepath, std::ios::binary);
 		if (file.is_open())
 		{
 			file.write((const char*)contents.data(), contents.size());
@@ -87,17 +55,5 @@ namespace gbc
 			return file.good();
 		}
 		return false;
-	}
-
-	bool FileIO::WriteBinaryFile(const std::string& filepath, const std::vector<uint8_t>& contents)
-	{
-		std::ofstream file(filepath, std::ios::binary);
-		return gbc::WriteBinaryFile(file, contents);
-	}
-
-	bool FileIO::WriteBinaryFile(const std::filesystem::path& filepath, const std::vector<uint8_t>& contents)
-	{
-		std::ofstream file(filepath, std::ios::binary);
-		return gbc::WriteBinaryFile(file, contents);
 	}
 }

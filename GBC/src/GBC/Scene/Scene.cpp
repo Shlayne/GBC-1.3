@@ -22,9 +22,9 @@ namespace gbc
 	{
 		switch (type)
 		{
-			case gbc::Rigidbody2DComponent::BodyType::Static:    return b2BodyType::b2_staticBody;
-			case gbc::Rigidbody2DComponent::BodyType::Dynamic:   return b2BodyType::b2_dynamicBody;
-			case gbc::Rigidbody2DComponent::BodyType::Kinematic: return b2BodyType::b2_kinematicBody;
+			case Rigidbody2DComponent::BodyType::Static:    return b2BodyType::b2_staticBody;
+			case Rigidbody2DComponent::BodyType::Dynamic:   return b2BodyType::b2_dynamicBody;
+			case Rigidbody2DComponent::BodyType::Kinematic: return b2BodyType::b2_kinematicBody;
 		}
 
 		GBC_CORE_ASSERT(false, "Unknown Rigidbody 2D Component Type!");
@@ -66,6 +66,9 @@ namespace gbc
 	void Scene::DestroyEntity(Entity entity)
 	{
 		GBC_PROFILE_FUNCTION();
+
+		if (physicsWorld && entity.HasComponent<Rigidbody2DComponent>())
+			DestroyPhysicsEntityRigidbody2D(entity);
 
 		registry->destroy(entity);
 	}
@@ -113,23 +116,14 @@ namespace gbc
 
 		// Update physics
 		{
+			// TODO: Add these two to project physics settings
 			int32_t velocityIterations = 6;
 			int32_t positionIterations = 2;
 			physicsWorld->Step(timestep, velocityIterations, positionIterations);
 
 			auto view = registry->view<Rigidbody2DComponent>();
 			for (auto handle : view)
-			{
-				Entity entity = { handle, this };
-				TransformComponent& transform = entity.GetComponent<TransformComponent>();
-				Rigidbody2DComponent& rigidbody = entity.GetComponent<Rigidbody2DComponent>();
-
-				b2Body* body = static_cast<b2Body*>(rigidbody.runtimeBody);
-				const auto& position = body->GetPosition();
-				transform.translation.x = position.x;
-				transform.translation.y = position.y;
-				transform.rotation.z = body->GetAngle();
-			}
+				UpdatePhysicsEntity({ handle, this });
 		}
 	}
 
@@ -220,13 +214,25 @@ namespace gbc
 		return {};
 	}
 
+	void Scene::UpdatePhysicsEntity(Entity entity)
+	{
+		auto& transform = entity.GetComponent<TransformComponent>();
+		auto& rigidbody = entity.GetComponent<Rigidbody2DComponent>();
+
+		b2Body* body = static_cast<b2Body*>(rigidbody.runtimeBody);
+		const auto& position = body->GetPosition();
+		transform.translation.x = position.x;
+		transform.translation.y = position.y;
+		transform.rotation.z = body->GetAngle();
+	}
+
 	void Scene::InitializePhysicsEntityRigidbody2D(Entity entity)
 	{
-		TransformComponent& transform = entity.GetComponent<TransformComponent>();
-		Rigidbody2DComponent& rigidbody = entity.GetComponent<Rigidbody2DComponent>();
+		auto& transform = entity.GetComponent<TransformComponent>();
+		auto& rigidbody = entity.GetComponent<Rigidbody2DComponent>();
 
 		b2BodyDef bodyDef;
-		bodyDef.type = Rigidbody2DTypeToB2BodyType(rigidbody.type);
+		bodyDef.type = Rigidbody2DTypeToB2BodyType(rigidbody.bodyType);
 		bodyDef.position.Set(transform.translation.x, transform.translation.y);
 		bodyDef.angle = transform.rotation.z;
 
@@ -240,7 +246,7 @@ namespace gbc
 
 	void Scene::InitializePhysicsEntityBoxCollider2D(Entity entity, TransformComponent& transform, Rigidbody2DComponent& rigidbody)
 	{
-		BoxCollider2DComponent& collider = entity.GetComponent<BoxCollider2DComponent>();
+		auto& collider = entity.GetComponent<BoxCollider2DComponent>();
 		if (collider.runtimeFixture == nullptr)
 		{
 			b2PolygonShape shape;
@@ -257,6 +263,23 @@ namespace gbc
 			fixtureDef.restitutionThreshold = collider.restitutionThreshold;
 			static_cast<b2Body*>(rigidbody.runtimeBody)->CreateFixture(&fixtureDef);
 		}
+	}
+
+	void Scene::DestroyPhysicsEntityRigidbody2D(Entity entity)
+	{
+		auto& rigidbody = entity.GetComponent<Rigidbody2DComponent>();
+
+		physicsWorld->DestroyBody(static_cast<b2Body*>(rigidbody.runtimeBody));
+
+		if (entity.HasComponent<BoxCollider2DComponent>())
+			DestroyPhysicsEntityBoxCollider2D(entity, rigidbody);
+	}
+
+	void Scene::DestroyPhysicsEntityBoxCollider2D(Entity entity, Rigidbody2DComponent& rigidbody)
+	{
+		auto body = static_cast<b2Body*>(rigidbody.runtimeBody);
+		auto fixture = static_cast<b2Fixture*>(entity.GetComponent<BoxCollider2DComponent>().runtimeFixture);
+		body->DestroyFixture(fixture);
 	}
 
 	// OnComponentAdded
@@ -277,8 +300,8 @@ namespace gbc
 	{
 		if (physicsWorld && entity.HasComponent<Rigidbody2DComponent>())
 		{
-			TransformComponent& transform = entity.GetComponent<TransformComponent>();
-			Rigidbody2DComponent& rigidbody = entity.GetComponent<Rigidbody2DComponent>();
+			auto& transform = entity.GetComponent<TransformComponent>();
+			auto& rigidbody = entity.GetComponent<Rigidbody2DComponent>();
 			InitializePhysicsEntityBoxCollider2D(entity, transform, rigidbody);
 		}
 	}
@@ -301,10 +324,12 @@ namespace gbc
 	// OnComponentAdded::Physics
 	template<> void Scene::OnComponentRemoved<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
 	{
-		
+		if (physicsWorld && entity.HasComponent<Rigidbody2DComponent>())
+			DestroyPhysicsEntityBoxCollider2D(entity, entity.GetComponent<Rigidbody2DComponent>());
 	}
 	template<> void Scene::OnComponentRemoved<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
 	{
-		
+		if (physicsWorld)
+			DestroyPhysicsEntityRigidbody2D(entity);
 	}
 }

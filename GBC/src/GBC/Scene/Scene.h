@@ -56,8 +56,11 @@ namespace gbc
 		entt::registry* registry;
 		glm::ivec2 viewportSize;
 	private:
+		void UpdatePhysicsEntity(Entity entity);
 		void InitializePhysicsEntityRigidbody2D(Entity entity);
 		void InitializePhysicsEntityBoxCollider2D(Entity entity, TransformComponent& transform, Rigidbody2DComponent& rigidbody);
+		void DestroyPhysicsEntityRigidbody2D(Entity entity);
+		void DestroyPhysicsEntityBoxCollider2D(Entity entity, Rigidbody2DComponent& rigidbody);
 
 		b2World* physicsWorld = nullptr;
 	private:

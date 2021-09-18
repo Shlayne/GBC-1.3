@@ -177,16 +177,16 @@ namespace gbc
 					ImGuiHelper::ColorEdit4("Tint Color", &component.color.x);
 					ImGuiHelper::NextTableColumn();
 
-					const char* buttonText = "Null";
+					std::string buttonText = "Null";
 					if (component.texture && component.texture->GetTexture())
-						buttonText = component.texture->GetTexture()->GetFilepath().c_str();
+						buttonText = component.texture->GetTexture()->GetFilepath().string();
 
-					ImGuiHelper::ButtonDragDropTarget("Texture", buttonText, "CONTENT_BROWSER_ITEM", [&component](const ImGuiPayload* payload)
+					ImGuiHelper::ButtonDragDropTarget("Texture", buttonText.c_str(), "CONTENT_BROWSER_ITEM", [&component](const ImGuiPayload* payload)
 					{
-						std::string filepath = (const char*)(payload->Data);
-						if (filepath.ends_with(".png")) // TODO: support other file types
+						std::filesystem::path filepath = (const wchar_t*)(payload->Data);
+						if (filepath.native().ends_with(L".png")) // TODO: support other file types
 						{
-							auto localTexture = CreateRef<LocalTexture2D>(filepath);
+							auto localTexture = LocalTexture2D::Create(filepath);
 							if (localTexture)
 							{
 								TextureSpecification specs = component.texture ? component.texture->GetSpecification() : TextureSpecification{};
@@ -247,9 +247,9 @@ namespace gbc
 				{
 					static constexpr const char* names[]{ "Static", "Dynamic", "Kinematic" };
 
-					int selectedItem = static_cast<int>(component.type);
+					int selectedItem = static_cast<int>(component.bodyType);
 					if (ImGuiHelper::Combo("Body Type", &selectedItem, names, sizeof(names) / sizeof(*names)))
-						component.type = static_cast<Rigidbody2DComponent::BodyType>(selectedItem);
+						component.bodyType = static_cast<Rigidbody2DComponent::BodyType>(selectedItem);
 					ImGuiHelper::NextTableColumn();
 
 					ImGuiHelper::Checkbox("Fixed Rotation", &component.fixedRotation);
@@ -257,17 +257,17 @@ namespace gbc
 
 				DrawComponent<BoxCollider2DComponent>("Box Collider", 2, selectedEntity, true, [](BoxCollider2DComponent& component)
 				{
-					ImGuiHelper::FloatEdit2("Size", &component.size.x);
+					ImGuiHelper::FloatEdit2("Size", &component.size.x, 0.1f, 0.0f, FLT_MAX);
 					ImGuiHelper::NextTableColumn();
 					ImGuiHelper::FloatEdit2("Offset", &component.offset.x);
 					ImGuiHelper::NextTableColumn();
-					ImGuiHelper::FloatEdit("Friction", &component.friction);
+					ImGuiHelper::FloatEdit("Friction", &component.friction, 0.1f, 0.0f, FLT_MAX);
 					ImGuiHelper::NextTableColumn();
-					ImGuiHelper::FloatEdit("Density", &component.density);
+					ImGuiHelper::FloatEdit("Density", &component.density, 0.1f, 0.0f, FLT_MAX);
 					ImGuiHelper::NextTableColumn();
-					ImGuiHelper::FloatEdit("Restitution", &component.restitution);
+					ImGuiHelper::FloatEdit("Restitution", &component.restitution, 0.1f, 0.0f, FLT_MAX);
 					ImGuiHelper::NextTableColumn();
-					ImGuiHelper::FloatEdit("Restitution Threshold", &component.restitutionThreshold);
+					ImGuiHelper::FloatEdit("Restitution Threshold", &component.restitutionThreshold, 0.1f, 0.0f, FLT_MAX);
 				});
 
 				ImGui::Separator();

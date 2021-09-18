@@ -1,6 +1,5 @@
 #pragma once
 
-#include <optional>
 #include <string>
 #include <filesystem>
 
@@ -8,15 +7,17 @@ namespace gbc
 {
 	class FileIO
 	{
+	private:
+		FileIO() = delete;
+		FileIO(const FileIO&) = delete;
+		FileIO(FileIO&&) = delete;
+		FileIO& operator=(const FileIO&) = delete;
+		FileIO& operator=(FileIO&&) = delete;
+		~FileIO() = delete;
 	public:
-		static std::optional<std::string> ReadFile(const std::string& filepath);
-		static std::optional<std::string> ReadFile(const std::filesystem::path& filepath);
-		static std::optional<std::vector<uint8_t>> ReadBinaryFile(const std::string& filepath);
-		static std::optional<std::vector<uint8_t>> ReadBinaryFile(const std::filesystem::path& filepath);
-
-		static bool WriteFile(const std::string& filepath, std::string_view contents);
+		static std::string ReadFile(const std::filesystem::path& filepath);
+		static std::vector<uint8_t> ReadBinaryFile(const std::filesystem::path& filepath);
 		static bool WriteFile(const std::filesystem::path& filepath, std::string_view contents);
-		static bool WriteBinaryFile(const std::string& filepath, const std::vector<uint8_t>& contents);
 		static bool WriteBinaryFile(const std::filesystem::path& filepath, const std::vector<uint8_t>& contents);
 	};
 }

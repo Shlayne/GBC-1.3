@@ -1,6 +1,8 @@
 #pragma once
 
-#include <string>
+#if GBC_ENABLE_LOGGING
+	#include <string>
+#endif
 #include <functional>
 #include "GBC/Core/Core.h"
 

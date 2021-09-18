@@ -19,12 +19,12 @@ namespace gbc
 		GBC_CORE_ERROR("GLFW Error (id={0}): {1}", error, description);
 	}
 
-	Scope<Window> Window::Create(const WindowSpecifications& specs)
+	Scope<Window> Window::Create(const WindowSpecifications& specification)
 	{
-		return CreateScope<WindowsWindow>(specs);
+		return CreateScope<WindowsWindow>(specification);
 	}
 
-	WindowsWindow::WindowsWindow(const WindowSpecifications& specs)
+	WindowsWindow::WindowsWindow(const WindowSpecifications& specification)
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -43,11 +43,11 @@ namespace gbc
 			Input::Init();
 		}
 
-		state.current.size = { specs.width, specs.height };
-		state.title = specs.title;
-		state.resizable = specs.resizable;
-		state.fullscreen = specs.fullscreen;
-		state.focused = specs.focusOnShow;
+		state.current.size = { specification.width, specification.height };
+		state.title = specification.title;
+		state.resizable = specification.resizable;
+		state.fullscreen = specification.fullscreen;
+		state.focused = specification.focusOnShow;
 
 		glfwWindowHint(GLFW_RESIZABLE, state.resizable);
 		glfwWindowHint(GLFW_FOCUS_ON_SHOW, state.focused);
@@ -91,10 +91,13 @@ namespace gbc
 		glfwSetWindowUserPointer(window, &state);
 
 		context = Context::Create(window);
-		SetVSync(specs.vsync);
-		SetCaptureMouse(specs.captureMouse);
-		SetCallbacks(window);
+		SetVSync(specification.vsync);
+		SetCaptureMouse(specification.captureMouse);
 
+		if (specification.maximizeOnShow)
+			glfwMaximizeWindow(window);
+
+		SetCallbacks(window);
 		glfwShowWindow(window);
 	}
 

@@ -54,8 +54,7 @@ namespace gbc
 							selectedEntity = context->CreateEntity("Static Physics Entity");
 							selectedEntity.AddComponent<SpriteRendererComponent>();
 							selectedEntity.AddComponent<BoxCollider2DComponent>();
-							Rigidbody2DComponent& rigidbody = selectedEntity.AddComponent<Rigidbody2DComponent>();
-							rigidbody.type = Rigidbody2DComponent::BodyType::Static;
+							selectedEntity.AddComponent<Rigidbody2DComponent>(Rigidbody2DComponent::BodyType::Static);
 						}
 						if (ImGui::MenuItem("Dynamic"))
 						{
@@ -69,8 +68,7 @@ namespace gbc
 							selectedEntity = context->CreateEntity("Kinematic Physics Entity");
 							selectedEntity.AddComponent<SpriteRendererComponent>();
 							selectedEntity.AddComponent<BoxCollider2DComponent>();
-							Rigidbody2DComponent& rigidbody = selectedEntity.AddComponent<Rigidbody2DComponent>();
-							rigidbody.type = Rigidbody2DComponent::BodyType::Kinematic;
+							selectedEntity.AddComponent<Rigidbody2DComponent>(Rigidbody2DComponent::BodyType::Kinematic);
 						}
 						ImGui::EndMenu();
 					}

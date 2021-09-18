@@ -27,6 +27,7 @@
 #include "GBC/ImGui/ImGuiHelper.h"
 #include "GBC/ImGui/ImGuiWrapper.h"
 
+#include "GBC/IO/DirectoryChange.h"
 #include "GBC/IO/FileDialog.h"
 #include "GBC/IO/FileIO.h"
 
@@ -51,6 +52,8 @@
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
+#include "GBC/Scene/Components/Physics/BoxCollider2DComponent.h"
+#include "GBC/Scene/Components/Physics/Rigidbody2DComponent.h"
 #include "GBC/Scene/Entity.h"
 #include "GBC/Scene/Scene.h"
 #include "GBC/Scene/SceneCamera.h"

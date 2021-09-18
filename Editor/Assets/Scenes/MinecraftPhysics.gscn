@@ -6,10 +6,10 @@ Entities:
     TransformComponent:
       Translation: [0, -3.5, 0]
       Rotation: [0, 0, 0]
-      Scale: [24, 1, 1]
+      Scale: [15, 1, 1]
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
-      TilingFactor: [24, 1]
+      TilingFactor: [15, 1]
       Texture:
         Filepath: Assets\Textures\grass_side.png
         Specification:
@@ -31,8 +31,8 @@ Entities:
     TagComponent:
       Tag: Grass Block
     TransformComponent:
-      Translation: [-0.200000003, 1.79999995, 0]
-      Rotation: [0, 0, 0.410152376]
+      Translation: [-0.629999995, 1.82000005, 0]
+      Rotation: [0, 0, 0.559953988]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
@@ -73,10 +73,10 @@ Entities:
       Primary: true
   - Entity: 0
     TagComponent:
-      Tag: Dirt Block
+      Tag: Dirt Block Chunk
     TransformComponent:
-      Translation: [0.5, 0, 0]
-      Rotation: [0, 0, -0.511381447]
+      Translation: [0.428000003, -0.0829999968, 0]
+      Rotation: [0, 0, -0.417412937]
       Scale: [1, 3, 1]
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
@@ -104,10 +104,10 @@ Entities:
     TransformComponent:
       Translation: [0, -4.5, 0]
       Rotation: [0, 0, 0]
-      Scale: [24, 1, 1]
+      Scale: [17, 1, 1]
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
-      TilingFactor: [24, 1]
+      TilingFactor: [17, 1]
       Texture:
         Filepath: Assets\Textures\dirt.png
         Specification:
@@ -119,8 +119,8 @@ Entities:
     TagComponent:
       Tag: Grass Block 2
     TransformComponent:
-      Translation: [0.300000012, 3.20000005, 0]
-      Rotation: [0, 0, -0.251327395]
+      Translation: [0.128000006, 3.31699991, 0]
+      Rotation: [0, 0, -0.364721447]
       Scale: [1, 1, 1]
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
@@ -142,3 +142,111 @@ Entities:
     Rigidbody2DComponent:
       Type: Dynamic
       FixedRotation: false
+  - Entity: 0
+    TagComponent:
+      Tag: Right Wall
+    TransformComponent:
+      Translation: [8, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 8, 1]
+    SpriteRendererComponent:
+      TintColor: [1, 1, 1, 1]
+      TilingFactor: [1, 8]
+      Texture:
+        Filepath: Assets\Textures\dirt.png
+        Specification:
+          MinFilter: Linear
+          MagFilter: Nearest
+          WrapS: ClampToEdge
+          WrapT: Repeat
+    BoxCollider2DComponent:
+      Size: [0.5, 0.5]
+      Offset: [0, 0]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+    Rigidbody2DComponent:
+      Type: Static
+      FixedRotation: true
+  - Entity: 0
+    TagComponent:
+      Tag: Left Wall
+    TransformComponent:
+      Translation: [-8, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 8, 1]
+    SpriteRendererComponent:
+      TintColor: [1, 1, 1, 1]
+      TilingFactor: [1, 8]
+      Texture:
+        Filepath: Assets\Textures\dirt.png
+        Specification:
+          MinFilter: Linear
+          MagFilter: Nearest
+          WrapS: ClampToEdge
+          WrapT: Repeat
+    BoxCollider2DComponent:
+      Size: [0.5, 0.5]
+      Offset: [0, 0]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+    Rigidbody2DComponent:
+      Type: Static
+      FixedRotation: true
+  - Entity: 0
+    TagComponent:
+      Tag: Left Wall Top
+    TransformComponent:
+      Translation: [-8, 4.5, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      TintColor: [1, 1, 1, 1]
+      TilingFactor: [1, 1]
+      Texture:
+        Filepath: Assets\Textures\grass_side.png
+        Specification:
+          MinFilter: Linear
+          MagFilter: Nearest
+          WrapS: ClampToEdge
+          WrapT: ClampToEdge
+    BoxCollider2DComponent:
+      Size: [0.5, 0.5]
+      Offset: [0, 0]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+    Rigidbody2DComponent:
+      Type: Static
+      FixedRotation: true
+  - Entity: 0
+    TagComponent:
+      Tag: Right Wall Top
+    TransformComponent:
+      Translation: [8, 4.5, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteRendererComponent:
+      TintColor: [1, 1, 1, 1]
+      TilingFactor: [1, 1]
+      Texture:
+        Filepath: Assets\Textures\grass_side.png
+        Specification:
+          MinFilter: Linear
+          MagFilter: Nearest
+          WrapS: ClampToEdge
+          WrapT: ClampToEdge
+    BoxCollider2DComponent:
+      Size: [0.5, 0.5]
+      Offset: [0, 0]
+      Density: 1
+      Friction: 0.5
+      Restitution: 0
+      RestitutionThreshold: 0.5
+    Rigidbody2DComponent:
+      Type: Static
+      FixedRotation: true

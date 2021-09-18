@@ -2,6 +2,7 @@
 
 #include <string>
 #include <cstdint>
+#include <filesystem>
 #include <glm/glm.hpp>
 #include "GBC/Core/Core.h"
 
@@ -43,6 +44,6 @@ namespace gbc
 		virtual void SetInts   (const std::string& name, const int32_t*     values, int32_t count) = 0;
 		virtual void SetUInts  (const std::string& name, const uint32_t*    values, int32_t count) = 0;
 
-		static Ref<Shader> Create(const std::string& filepath);
+		static Ref<Shader> Create(const std::filesystem::path& filepath);
 	};
 }

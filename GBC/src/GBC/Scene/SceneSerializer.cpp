@@ -241,11 +241,11 @@ namespace gbc
 			// TODO: reference texture by UUID
 			if (component.texture && component.texture->GetTexture())
 			{
-				std::string filepath = component.texture->GetTexture()->GetFilepath();
+				std::string filepath = component.texture->GetTexture()->GetFilepath().string();
 				const auto& specs = component.texture->GetSpecification();
 
 				out << YAML::Key << "Texture" << YAML::BeginMap
-						<< YAML::Key << "Filepath" << YAML::Value << filepath
+						<< YAML::Key << "Filepath" << YAML::Value << filepath.c_str()
 						<< YAML::Key << "Specification" << YAML::BeginMap
 							<< YAML::Key << "MinFilter" << YAML::Value << TextureFilterModeToString(specs.minFilter)
 							<< YAML::Key << "MagFilter" << YAML::Value << TextureFilterModeToString(specs.magFilter)
@@ -268,14 +268,14 @@ namespace gbc
 
 		SerializeComponent<Rigidbody2DComponent>(out, entity, "Rigidbody2DComponent", [&out](Rigidbody2DComponent& component)
 		{
-			out << YAML::Key << "Type" << YAML::Value << Rigidbody2DComponentBodyTypeToString(component.type)
+			out << YAML::Key << "Type" << YAML::Value << Rigidbody2DComponentBodyTypeToString(component.bodyType)
 				<< YAML::Key << "FixedRotation" << YAML::Value << component.fixedRotation;
 		});
 
 		out << YAML::EndMap;
 	}
 
-	bool SceneSerializer::Serialize(const std::string& filepath)
+	bool SceneSerializer::Serialize(const std::filesystem::path& filepath)
 	{
 		YAML::Emitter out;
 		out << YAML::BeginMap
@@ -304,7 +304,7 @@ namespace gbc
 		return false;
 	}
 
-	bool SceneSerializer::Deserialize(const std::string& filepath)
+	bool SceneSerializer::Deserialize(const std::filesystem::path& filepath)
 	{
 		std::ifstream file(filepath);
 
@@ -402,7 +402,7 @@ namespace gbc
 					if (auto rigidbody2DComponentNode = entityNode["Rigidbody2DComponent"]; rigidbody2DComponentNode)
 					{
 						auto& rigidbody2DComponent = entity.AddComponent<Rigidbody2DComponent>();
-						rigidbody2DComponent.type = Rigidbody2DComponentBodyTypeFromString(rigidbody2DComponentNode["Type"].as<std::string>());
+						rigidbody2DComponent.bodyType = Rigidbody2DComponentBodyTypeFromString(rigidbody2DComponentNode["Type"].as<std::string>());
 						rigidbody2DComponent.fixedRotation = rigidbody2DComponentNode["FixedRotation"].as<bool>();
 					}
 				}
@@ -415,90 +415,13 @@ namespace gbc
 		return false;
 	}
 
-	static std::ostream& operator<<(std::ostream& out, const glm::vec2& value) { return out << value.x << value.y; }
-	static std::istream& operator>>(std::istream& in,        glm::vec2& value) { return in  >> value.x >> value.y; }
-	static std::ostream& operator<<(std::ostream& out, const glm::vec3& value) { return out << value.x << value.y << value.z; }
-	static std::istream& operator>>(std::istream& in,        glm::vec3& value) { return in  >> value.x >> value.y >> value.z; }
-	static std::ostream& operator<<(std::ostream& out, const glm::vec4& value) { return out << value.x << value.y << value.z << value.w; }
-	static std::istream& operator>>(std::istream& in,        glm::vec4& value) { return in  >> value.x >> value.y >> value.z >> value.w; }
-
-	template<typename T, typename Func>
-	static void SerializeComponent(std::ofstream& out, Entity entity, Func func)
+	bool SceneSerializer::SerializeRuntime(const std::filesystem::path& filepath)
 	{
-		if (entity.HasComponent<T>())
-		{
-			// TODO: Figure out if this component ID system is ok or not.
-			out << typeid(T).hash_code();
-			func(entity.GetComponent<T>());
-		}
-	}
-
-	static void SerializeEntity(std::ofstream& out, Entity entity)
-	{
-		// TODO: entity ID goes here
-		uint64_t uuid = 0;
-		out << uuid;
-		
-		// An entity always has these two components
-		TagComponent tagComponent = entity.GetComponent<TagComponent>();
-		out << tagComponent.tag.size() << tagComponent.tag;
-		TransformComponent transformComponent = entity.GetComponent<TransformComponent>();
-		out << transformComponent.translation << transformComponent.rotation << transformComponent.scale;
-
-		SerializeComponent<CameraComponent>(out, entity, [&out](CameraComponent& component)
-		{
-			auto& camera = component.camera;
-			out << static_cast<int32_t>(camera.GetProjectionType()) << camera.GetPerspectiveFOV()
-				<< camera.GetPerspectiveNearClip() << camera.GetPerspectiveFarClip()
-				<< camera.GetOrthographicSize() << camera.GetOrthographicNearClip()
-				<< camera.GetOrthographicFarClip() << component.primary;
-		});
-		// TODO: how do this ???
-		//SerializeComponent<NativeScriptComponent>(out, entity, [&out](NativeScriptComponent& component) {});
-		SerializeComponent<SpriteRendererComponent>(out, entity, [&out](SpriteRendererComponent& component)
-		{
-			// TODO: reference texture by UUID
-			std::string filepath;
-			if (component.texture && component.texture->GetTexture())
-				filepath = component.texture->GetTexture()->GetFilepath();
-			const auto& specs = component.texture->GetSpecification();
-
-			out << component.color << filepath.size() << filepath << component.tilingFactor
-				<< static_cast<int32_t>(specs.minFilter) << static_cast<int32_t>(specs.magFilter)
-				<< static_cast<int32_t>(specs.wrapS) << static_cast<int32_t>(specs.wrapT);
-		});
-
-		uint64_t endOfEntity = 0;
-		out << endOfEntity;
-	}
-
-	bool SceneSerializer::SerializeRuntime(const std::string& filepath)
-	{
-		std::ofstream file = std::ofstream(filepath, std::ios::out | std::ios::binary);
-
-		if (file.is_open())
-		{
-			static constexpr char sceneName[] = "Untitled";
-			static constexpr size_t sceneNameLength = sizeof(sceneName) / sizeof(*sceneName);
-			size_t entityCount = scene->registry->size();
-			file << sceneNameLength << sceneName << entityCount;
-
-			auto view = scene->registry->view<TagComponent>();
-			for (auto it = view.rbegin(); it != view.rend(); ++it)
-			{
-				Entity entity(*it, scene.get());
-				if (entity)
-					SerializeEntity(file, entity);
-			}
-
-			file.close();
-			return true;
-		}
-
+		// TODO: implement
 		return false;
 	}
 
-	bool SceneSerializer::DeserializeRuntime(const std::string& filepath)
+	bool SceneSerializer::DeserializeRuntime(const std::filesystem::path& filepath)
 	{
 		// TODO: implement
 		return false;

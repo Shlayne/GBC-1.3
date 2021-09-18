@@ -10,6 +10,18 @@ int main(int argc, char** argv);
 
 namespace gbc
 {
+	struct CommandLineArgs
+	{
+		int count = 0;
+		char** args = nullptr;
+
+		constexpr const char* operator[](int index) const
+		{
+			GBC_CORE_ASSERT(index < count, "Command Line Args index out of bounds!");
+			return args[index];
+		}
+	};
+
 	class Application
 	{
 	public:
@@ -53,5 +65,5 @@ namespace gbc
 		void Run();
 	};
 
-	Application* CreateApplication();
+	Application* CreateApplication(CommandLineArgs args);
 }

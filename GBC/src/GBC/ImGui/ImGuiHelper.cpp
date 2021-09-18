@@ -132,24 +132,24 @@ namespace gbc
 		return ImGui::InputText("", buffer, size, flags) || (!ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left));
 	}
 
-	bool ImGuiHelper::FloatEdit3(float* values, float speed)
+	bool ImGuiHelper::FloatEdit3(float* values, float speed, float minValue, float maxValue)
 	{
 		bool changed = false;
 		ImGui::PushItemWidth(-FLT_MIN);
 
-		changed |= ImGui::DragFloat3("", values, speed);
+		changed |= ImGui::DragFloat3("", values, speed, minValue, maxValue);
 
 		ImGui::PopItemWidth();
 		return changed;
 	}
 
-	bool ImGuiHelper::FloatEdit3(const char* label, float* values, float speed)
+	bool ImGuiHelper::FloatEdit3(const char* label, float* values, float speed, float minValue, float maxValue)
 	{
 		bool changed = false;
 		ImGui::PushID(label);
 
 		NextTableColumn();
-		changed |= FloatEdit3(values, speed);
+		changed |= FloatEdit3(values, speed, minValue, maxValue);
 		PrevTableColumn();
 		Text(label);
 		NextTableColumn();
@@ -158,24 +158,24 @@ namespace gbc
 		return changed;
 	}
 
-	bool ImGuiHelper::FloatEdit2(float* values, float speed)
+	bool ImGuiHelper::FloatEdit2(float* values, float speed, float minValue, float maxValue)
 	{
 		bool changed = false;
 		ImGui::PushItemWidth(-FLT_MIN);
 
-		changed |= ImGui::DragFloat2("", values, speed);
+		changed |= ImGui::DragFloat2("", values, speed, minValue, maxValue);
 
 		ImGui::PopItemWidth();
 		return changed;
 	}
 
-	bool ImGuiHelper::FloatEdit2(const char* label, float* values, float speed)
+	bool ImGuiHelper::FloatEdit2(const char* label, float* values, float speed, float minValue, float maxValue)
 	{
 		bool changed = false;
 		ImGui::PushID(label);
 
 		NextTableColumn();
-		changed |= FloatEdit2(values, speed);
+		changed |= FloatEdit2(values, speed, minValue, maxValue);
 		PrevTableColumn();
 		Text(label);
 		NextTableColumn();
@@ -184,24 +184,24 @@ namespace gbc
 		return changed;
 	}
 
-	bool ImGuiHelper::FloatEdit(float* value, float speed)
+	bool ImGuiHelper::FloatEdit(float* value, float speed, float minValue, float maxValue)
 	{
 		bool changed = false;
 		ImGui::PushItemWidth(-FLT_MIN);
 
-		changed |= ImGui::DragFloat("", value, speed);
+		changed |= ImGui::DragFloat("", value, speed, minValue, maxValue);
 
 		ImGui::PopItemWidth();
 		return changed;
 	}
 
-	bool ImGuiHelper::FloatEdit(const char* label, float* value, float speed)
+	bool ImGuiHelper::FloatEdit(const char* label, float* value, float speed, float minValue, float maxValue)
 	{
 		bool changed = false;
 		ImGui::PushID(label);
 
 		NextTableColumn();
-		changed |= FloatEdit(value, speed);
+		changed |= FloatEdit(value, speed, minValue, maxValue);
 		PrevTableColumn();
 		Text(label);
 		NextTableColumn();
