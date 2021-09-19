@@ -6,7 +6,7 @@
 #include <thread>
 #include <functional>
 
-namespace gbc
+namespace gbc::DirectoryChange
 {
 	using NotificationType = uint8_t;
 	enum NotificationType_
@@ -18,40 +18,28 @@ namespace gbc
 		NotificationType_LastWriteChanged     = 1 << 4, // Writing to a file or directory
 		NotificationType_SecurityChanged      = 1 << 5, // Changing the security of a file or directory.
 
+		NotificationType_NameChanged = NotificationType_FileNameChanged | NotificationType_DirectoryNameChanged,
 		NotificationType_Any = NotificationType_FileNameChanged | NotificationType_DirectoryNameChanged
-							 | NotificationType_AttributesChanged | NotificationType_SizeChanged
-							 | NotificationType_LastWriteChanged | NotificationType_SecurityChanged
+								| NotificationType_AttributesChanged | NotificationType_SizeChanged
+								| NotificationType_LastWriteChanged | NotificationType_SecurityChanged
 	};
 
 	// Parameter: if everything went smoothly and a notification was received
 	// Return value: if you want to continue waiting for notifications
-	using DirectoryChangeNotificationFunc = std::function<bool(bool)>;
+	using NotificationFunc = std::function<bool(bool)>;
 
-	struct DirectoryChangeNotifier
+	struct Notifier
 	{
-		DirectoryChangeNotifier() noexcept = default;
-		DirectoryChangeNotifier(DirectoryChangeNotifier&& notification) noexcept;
-		DirectoryChangeNotifier& operator=(DirectoryChangeNotifier&& notification) noexcept;
-		~DirectoryChangeNotifier();
+		Notifier(const NotificationFunc& notificationFunc, const std::filesystem::path& directoryPath, NotificationType notificationType, bool checkSubdirectories);
+		Notifier() noexcept = default;
+		Notifier(Notifier&& notification) noexcept;
+		Notifier& operator=(Notifier&& notification) noexcept;
+		~Notifier();
 
 		void Remove();
 	private:
-		friend class DirectoryChange;
-		DirectoryChangeNotifier(std::thread&& thread);
+		Notifier(std::thread&& thread);
 		std::thread thread;
 		void* closeHandle = nullptr;
-	};
-
-	class DirectoryChange
-	{
-	private:
-		DirectoryChange() = delete;
-		DirectoryChange(const DirectoryChange&) = delete;
-		DirectoryChange(DirectoryChange&&) = delete;
-		DirectoryChange& operator=(const DirectoryChange&) = delete;
-		DirectoryChange& operator=(DirectoryChange&&) = delete;
-		~DirectoryChange() = delete;
-	public:
-		static DirectoryChangeNotifier CreateNotifier(const DirectoryChangeNotificationFunc& notificationFunc, const std::filesystem::path& directoryPath, NotificationType notificationType, bool checkSubdirectories = false);
 	};
 }

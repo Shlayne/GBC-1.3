@@ -70,8 +70,9 @@ namespace gbc
 		static bool TextEdit(std::string* value);
 		static bool TextEdit(const char* label, std::string* value);
 
-		static bool ButtonDragDropTarget(const char* buttonText, const char* dragDropType, const std::function<void(const ImGuiPayload*)>& dragDropFunc);
-		static bool ButtonDragDropTarget(const char* label, const char* buttonText, const char* dragDropType, const std::function<void(const ImGuiPayload*)>& dragDropFunc);
+		static const ImGuiPayload* AcceptDragDropPayloadIf(const char* dragDropType, const std::function<bool(void*)>& acceptFunc, ImGuiDragDropFlags flags = ImGuiDragDropFlags_None);
+		static const ImGuiPayload* ButtonDragDropTarget(const char* buttonText, const char* dragDropType, const std::function<bool(void*)>& acceptFunc, ImGuiDragDropFlags flags = ImGuiDragDropFlags_None);
+		static const ImGuiPayload* ButtonDragDropTarget(const char* label, const char* buttonText, const char* dragDropType, const std::function<bool(void*)>& acceptFunc, ImGuiDragDropFlags flags = ImGuiDragDropFlags_None);
 
 		template<typename... Args>
 		static bool ConfirmAction(const char* name, bool* action, const char* messageFormat, Args&&... args)

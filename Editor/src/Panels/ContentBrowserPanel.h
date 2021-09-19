@@ -19,7 +19,7 @@ namespace gbc
 		struct File
 		{
 			std::filesystem::path path;
-			bool directory = false;
+			bool isDirectory = false;
 		};
 
 		struct Directory
@@ -28,44 +28,62 @@ namespace gbc
 			std::vector<Directory> subdirectories;
 		};
 	private:
-		void DrawHierarchy(const Directory& directory);
+		void DrawHierarchy(const Directory& isDirectory);
 		void DrawSearchBar();
 		void DrawExplorer();
 
 		void ForwardDirectory();
 		void BackwardDirectory();
 		void PushDirectory(const std::filesystem::path& path);
-		void RefreshDirectory(bool refreshAssetDirectory = false);
+		void RefreshDirectories();
 		void RefreshDirectory(Directory& subdirectory);
-		void UpdateCurrentCachedDirectoryText();
 	private:
-		DirectoryChangeNotifier directoryChangeNotifier;
-		bool OnDirectoryNotification(bool error);
-		bool refreshDirectories = false;
-
+		void ShowDeleteConfirmationMessage();
+		void MakeCurrentItemDragDropSource(const std::filesystem::path& sourcePath);
+		void MakeCurrentItemDragDropTarget(const std::filesystem::path& targetPath);
+	private:
 		Directory assetDirectory;
 
-		std::list<std::filesystem::path> cachedDirectories;
-		static constexpr size_t maxCachedDirectories = 16;
-		std::list<std::filesystem::path>::iterator currentCachedDirectory;
-		std::string currentCachedDirectoryText;
+		// Directory change notifications
+		DirectoryChange::Notifier notifier;
+		bool OnDirectoryNotification(bool error);
 
-		std::vector<File> files;
-		size_t directoryInsert = 0;
-		size_t clickedFileIndex = 0;
-		bool deletingFile = false;
+		// Update flags
+		bool forwardDirectory = false;
+		bool backwardDirectory = false;
+		bool pushDirectory = false;
+		bool refreshDirectories = true;
 
 		bool creatingDirectory = false;
 		bool renamingFile = false;
+		bool deletingFile = false;
+		bool hierarchyOptionsOpen = false;
+		bool showDeleteOption = true;
+
+		// Temp data
+		File tempFile;
+
+		// Cached directories
+		static constexpr size_t maxCachedDirectories = 16;
+		std::list<std::filesystem::path> cachedDirectories;
+		std::list<std::filesystem::path>::iterator currentCachedDirectory;
+		std::string currentCachedDirectoryText;
+
+		// File explorer
+		std::vector<File> files;
+		size_t clickedFileIndex = 0;
+
+		// Renaming
 		static constexpr char defaultFolderName[] = "New Folder";
 		static constexpr size_t defaultFolderNameSize = sizeof(defaultFolderName) / sizeof(*defaultFolderName);
 
 		size_t fileNameSize = 0;
-		static constexpr size_t fileNameBufferSize = 256;
+		static constexpr size_t fileNameBufferSize = __std_fs_max_path;
 		char fileNameBuffer[fileNameBufferSize];
 
+		// Searching
 		size_t searchSize = 0;
-		static constexpr size_t searchBufferSize = fileNameBufferSize;
+		static constexpr size_t searchBufferSize = __std_fs_max_path;
 		char searchBuffer[searchBufferSize]{ '\0' };
 
 		// Resources

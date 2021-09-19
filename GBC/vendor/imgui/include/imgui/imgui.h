@@ -1603,6 +1603,8 @@ enum ImGuiMouseButton_
     ImGuiMouseButton_Left = 0,
     ImGuiMouseButton_Right = 1,
     ImGuiMouseButton_Middle = 2,
+	ImGuiMouseButton_Back = 3,
+	ImGuiMouseButton_Front = 4,
     ImGuiMouseButton_COUNT = 5
 };
 

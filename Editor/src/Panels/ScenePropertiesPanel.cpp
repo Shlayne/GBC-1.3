@@ -181,20 +181,17 @@ namespace gbc
 					if (component.texture && component.texture->GetTexture())
 						buttonText = component.texture->GetTexture()->GetFilepath().string();
 
-					ImGuiHelper::ButtonDragDropTarget("Texture", buttonText.c_str(), "CONTENT_BROWSER_ITEM", [&component](const ImGuiPayload* payload)
+					if (const ImGuiPayload* payload = ImGuiHelper::ButtonDragDropTarget("Texture", buttonText.c_str(), "CONTENT_BROWSER_ITEM",
+						[](void* payloadData) { return std::wstring_view(static_cast<const wchar_t*>(payloadData)).ends_with(L".png"); }))
 					{
-						std::filesystem::path filepath = (const wchar_t*)(payload->Data);
-						if (filepath.native().ends_with(L".png")) // TODO: support other file types
+						auto localTexture = LocalTexture2D::Create(static_cast<const wchar_t*>(payload->Data));
+						if (localTexture)
 						{
-							auto localTexture = LocalTexture2D::Create(filepath);
-							if (localTexture)
-							{
-								TextureSpecification specs = component.texture ? component.texture->GetSpecification() : TextureSpecification{};
-								specs.texture = localTexture;
-								component.texture = Texture2D::Create(specs);
-							}
+							TextureSpecification specs = component.texture ? component.texture->GetSpecification() : TextureSpecification{};
+							specs.texture = localTexture;
+							component.texture = Texture2D::Create(specs);
 						}
-					});
+					};
 					ImGuiHelper::NextTableColumn();
 
 					ImGuiHelper::FloatEdit2("Tiling Factor", &component.tilingFactor.x);

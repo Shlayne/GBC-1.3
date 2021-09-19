@@ -389,36 +389,48 @@ namespace gbc
 		return changed;
 	}
 
-	bool ImGuiHelper::ButtonDragDropTarget(const char* buttonText, const char* dragDropType, const std::function<void(const ImGuiPayload*)>& dragDropFunc)
+	const ImGuiPayload* ImGuiHelper::AcceptDragDropPayloadIf(const char* dragDropType, const std::function<bool(void*)>& acceptFunc, ImGuiDragDropFlags flags)
 	{
-		bool changed = false;
+		if (acceptFunc == nullptr)
+			return ImGui::AcceptDragDropPayload(dragDropType, flags);
 
-		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, { 0.0f, 0.5f });
-		changed |= ImGui::Button(buttonText, { ImGui::GetContentRegionAvail().x, 0.0f });
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(dragDropType))
-				dragDropFunc(payload);
-			ImGui::EndDragDropTarget();
-		}
-		ImGui::PopStyleVar();
+		ImGuiPayload& payload = ImGui::GetCurrentContext()->DragDropPayload;
+		if (payload.IsDataType(dragDropType) && acceptFunc(payload.Data))
+			return ImGui::AcceptDragDropPayload(dragDropType, flags);
 
-		return changed;
+		return nullptr;
 	}
 
-	bool ImGuiHelper::ButtonDragDropTarget(const char* label, const char* buttonText, const char* dragDropType, const std::function<void(const ImGuiPayload*)>& dragDropFunc)
+	const ImGuiPayload* ImGuiHelper::ButtonDragDropTarget(const char* buttonText, const char* dragDropType, const std::function<bool(void*)>& acceptFunc, ImGuiDragDropFlags flags)
 	{
-		bool changed = false;
+		const ImGuiPayload* payload = nullptr;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, { 0.0f, 0.5f });
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetStyle().Colors[ImGuiCol_Button]);
+		ImGui::Button(buttonText, { ImGui::GetContentRegionAvail().x, 0.0f });
+		if (ImGui::BeginDragDropTarget())
+		{
+			payload = AcceptDragDropPayloadIf(dragDropType, acceptFunc, flags);
+			ImGui::EndDragDropTarget();
+		}
+		ImGui::PopStyleColor();
+		ImGui::PopStyleVar();
+
+		return payload;
+	}
+
+	const ImGuiPayload* ImGuiHelper::ButtonDragDropTarget(const char* label, const char* buttonText, const char* dragDropType, const std::function<bool(void*)>& acceptFunc, ImGuiDragDropFlags flags)
+	{
 		ImGui::PushID(label);
 
 		NextTableColumn();
-		changed |= ButtonDragDropTarget(buttonText, dragDropType, dragDropFunc);
+		auto payload = ButtonDragDropTarget(buttonText, dragDropType, acceptFunc, flags);
 		PrevTableColumn();
 		Text(label);
 		NextTableColumn();
 
 		ImGui::PopID();
-		return changed;
+		return payload;
 	}
 }
 #endif

@@ -1,7 +1,7 @@
 #include "gbcpch.h"
 #include "GBC/IO/DirectoryChange.h"
 
-namespace gbc
+namespace gbc::DirectoryChange
 {
 	static DWORD GetWindowsNotificationType(NotificationType notificationType)
 	{
@@ -17,20 +17,20 @@ namespace gbc
 		if (notificationType & NotificationType_LastWriteChanged)     type |= FILE_NOTIFY_CHANGE_LAST_WRITE;
 		if (notificationType & NotificationType_SecurityChanged)      type |= FILE_NOTIFY_CHANGE_SECURITY;
 
-		GBC_CORE_ASSERT((type & allTypes) != 0, "Unknown Directory Change DirectoryChangeNotifier Type!");
+		GBC_CORE_ASSERT((type & allTypes) != 0, "Unknown Directory Change Notification Type!");
 		return type;
 	}
 
-	DirectoryChangeNotifier::DirectoryChangeNotifier(std::thread&& thread)
+	Notifier::Notifier(std::thread&& thread)
 		: thread(std::move(thread)) {}
 
-	DirectoryChangeNotifier::DirectoryChangeNotifier(DirectoryChangeNotifier&& notification) noexcept
+	Notifier::Notifier(Notifier&& notification) noexcept
 		: thread(std::move(notification.thread)), closeHandle(notification.closeHandle)
 	{
 		notification.closeHandle = nullptr;
 	}
 
-	DirectoryChangeNotifier& DirectoryChangeNotifier::operator=(DirectoryChangeNotifier&& notification) noexcept
+	Notifier& Notifier::operator=(Notifier&& notification) noexcept
 	{
 		if (this != &notification)
 		{
@@ -41,23 +41,22 @@ namespace gbc
 		return *this;
 	}
 
-	DirectoryChangeNotifier::~DirectoryChangeNotifier()
+	Notifier::~Notifier()
 	{
-		if (closeHandle)
-			Remove();
+		Remove();
 	}
 
-	void DirectoryChangeNotifier::Remove()
+	void Notifier::Remove()
 	{
 		if (closeHandle)
 		{
-			if (SetEvent(closeHandle))
-				thread.join();
+			SetEvent(closeHandle);
+			thread.join();
 			closeHandle = nullptr;
 		}
 	}
 
-	DirectoryChangeNotifier DirectoryChange::CreateNotifier(const DirectoryChangeNotificationFunc& notificationFunc, const std::filesystem::path& directoryPath, NotificationType notificationType, bool checkSubdirectories)
+	Notifier::Notifier(const NotificationFunc& notificationFunc, const std::filesystem::path& directoryPath, NotificationType notificationType, bool checkSubdirectories)
 	{
 		// Notes:
 		//	length of "GBCDirectoryChange" is 18
@@ -70,7 +69,7 @@ namespace gbc
 		bool closeHandleSet = false;
 		bool waiting = true;
 
-		DirectoryChangeNotifier notification = std::thread([&](const DirectoryChangeNotificationFunc& notificationFunc)
+		std::thread thread = std::thread([&](const NotificationFunc& notificationFunc)
 		{
 			HANDLE handles[2];
 
@@ -95,7 +94,7 @@ namespace gbc
 				return;
 			}
 
-			notification.closeHandle = handles[0];
+			closeHandle = handles[0];
 			closeHandleSet = true;
 			waiting = false;
 
@@ -129,9 +128,12 @@ namespace gbc
 			FindCloseChangeNotification(handles[0]);
 		}, notificationFunc);
 
-		// Wait for the notification's closeHandle to be set or for an error to occur
+		// Wait for this notification's closeHandle to be set or for an error to occur
 		while (waiting);
 
-		return notification;
+		if (closeHandleSet)
+			this->thread = std::move(thread);
+		else
+			thread.join();
 	}
 }

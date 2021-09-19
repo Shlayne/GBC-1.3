@@ -4,6 +4,7 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include "GBC/Core/Application.h"
 #include "GBC/Core/Input.h"
+#include "GBC/ImGui/ImGuiHelper.h"
 #include "GBC/Math/Math.h"
 #include "GBC/Scene/Components/CameraComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
@@ -29,12 +30,11 @@ namespace gbc
 
 			if (ImGui::BeginDragDropTarget())
 			{
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+				if (const ImGuiPayload* payload = ImGuiHelper::AcceptDragDropPayloadIf("CONTENT_BROWSER_ITEM",
+					[](void* payloadData) { return std::wstring_view(static_cast<const wchar_t*>(payloadData)).ends_with(L".gscn"); }))
 				{
 					// TODO: calling this openScene method can caused unsaved work to be lost!
-					std::filesystem::path filepath = static_cast<const wchar_t*>(payload->Data);
-					if (filepath.native().ends_with(L".gscn"))
-						openScene(filepath);
+					openScene(static_cast<const wchar_t*>(payload->Data));
 				}
 				ImGui::EndDragDropTarget();
 			}
