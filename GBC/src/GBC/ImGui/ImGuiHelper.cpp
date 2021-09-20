@@ -25,6 +25,7 @@ namespace gbc
 		style.WindowRounding = 0.0f;
 		style.FramePadding = { 4.0f, 4.0f };
 		style.WindowPadding = { 4.0f, 4.0f };
+		style.WindowMenuButtonPosition = ImGuiDir_None;
 
 		SetSceneEditColors();
 	}
@@ -88,7 +89,7 @@ namespace gbc
 	bool ImGuiHelper::BeginTable(const char* id, int32_t columnCount, ImGuiTableFlags tableFlags)
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(style.ItemSpacing.x / 2.0f, style.ItemSpacing.y));
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { style.ItemSpacing.x / 2.0f, style.ItemSpacing.y });
 
 		ImGui::PushID(id);
 		if (!ImGui::BeginTable(id, columnCount, tableFlags))
@@ -202,32 +203,6 @@ namespace gbc
 
 		NextTableColumn();
 		changed |= FloatEdit(value, speed, minValue, maxValue);
-		PrevTableColumn();
-		Text(label);
-		NextTableColumn();
-
-		ImGui::PopID();
-		return changed;
-	}
-
-	bool ImGuiHelper::SliderFloat(float* value, float minValue, float maxValue)
-	{
-		bool changed = false;
-		ImGui::PushItemWidth(-FLT_MIN);
-
-		changed |= ImGui::SliderFloat("", value, minValue, maxValue);
-
-		ImGui::PopItemWidth();
-		return changed;
-	}
-
-	bool ImGuiHelper::SliderFloat(const char* label, float* value, float minValue, float maxValue)
-	{
-		bool changed = false;
-		ImGui::PushID(label);
-
-		NextTableColumn();
-		changed |= SliderFloat(value, minValue, maxValue);
 		PrevTableColumn();
 		Text(label);
 		NextTableColumn();

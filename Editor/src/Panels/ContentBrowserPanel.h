@@ -74,12 +74,12 @@ namespace gbc
 		size_t clickedFileIndex = 0;
 
 		// Renaming
-		static constexpr char defaultFolderName[] = "New Folder";
-		static constexpr size_t defaultFolderNameSize = sizeof(defaultFolderName) / sizeof(*defaultFolderName);
+		const char* GetNewFolderName(size_t& outSize) const;
+		void CalculateFileNameBufferSize(bool isDirectory);
 
 		size_t fileNameSize = 0;
-		static constexpr size_t fileNameBufferSize = __std_fs_max_path;
-		char fileNameBuffer[fileNameBufferSize];
+		char fileNameBuffer[__std_fs_max_path];
+		size_t fileNameBufferSize = 0;
 
 		// Searching
 		size_t searchSize = 0;

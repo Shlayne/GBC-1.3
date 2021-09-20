@@ -16,8 +16,8 @@ namespace gbc
 	{
 		if (entity.HasComponent<T>())
 		{
-			ImGui::PushID(label.c_str());
 			ImGui::PushID(static_cast<uint32_t>(entity));
+			ImGui::PushID(label.c_str());
 
 			ImFont* font = ImGui::GetFont();
 			ImGuiStyle& style = ImGui::GetStyle();
@@ -37,9 +37,9 @@ namespace gbc
 				ImGui::OpenPopup("ComponentSettings");
 
 			bool removeComponent = false;
-			if (removable && ImGui::BeginPopup("ComponentSettings"))
+			if (ImGui::BeginPopup("ComponentSettings"))
 			{
-				if (ImGui::MenuItem("Remove Component"))
+				if (removable && ImGui::MenuItem("Remove Component"))
 					removeComponent = true;
 				ImGui::EndPopup();
 			}
@@ -47,9 +47,12 @@ namespace gbc
 			if (open)
 			{
 				ImGui::Unindent();
-				ImGuiHelper::BeginTable(label.c_str(), columnCount);
-				func(entity.GetComponent<T>());
-				ImGuiHelper::EndTable();
+				ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
+				if (ImGuiHelper::BeginTable(label.c_str(), columnCount))
+				{
+					func(entity.GetComponent<T>());
+					ImGuiHelper::EndTable();
+				}
 				ImGui::Indent();
 				ImGui::TreePop();
 			}
@@ -63,19 +66,13 @@ namespace gbc
 	}
 
 	template<typename T>
-	static bool DrawAddComponent(const std::string& label, Entity entity)
+	static void DrawAddComponent(const std::string& label, Entity entity)
 	{
-		if (!entity.HasComponent<T>())
+		if (!entity.HasComponent<T>() && ImGui::MenuItem(label.c_str()))
 		{
-			if (ImGui::MenuItem(label.c_str()))
-			{
-				entity.AddComponent<T>();
-				ImGui::CloseCurrentPopup();
-			}
-			else
-				return false;
+			entity.AddComponent<T>();
+			ImGui::CloseCurrentPopup();
 		}
-		return true;
 	}
 
 	ScenePropertiesPanel::ScenePropertiesPanel(const std::string& name, Entity& selectedEntity)
@@ -91,8 +88,6 @@ namespace gbc
 			if (selectedEntity)
 			{
 				// TODO: ImGui::PushID((void*)selectedEntity.GetUUID());
-
-				// This doesn't work and I have no idea why!??!?!???
 				ImGui::PushID((void*)static_cast<uint64_t>(static_cast<uint32_t>(selectedEntity)));
 
 				{
@@ -195,12 +190,13 @@ namespace gbc
 					ImGuiHelper::NextTableColumn();
 
 					ImGuiHelper::FloatEdit2("Tiling Factor", &component.tilingFactor.x);
-					ImGuiHelper::NextTableColumn();
 
 					// TODO: all of what's in this if statement should be moved to another panel similar to unity
 					// because there are going to be way more than just these things in a texture
 					if (component.texture)
 					{
+						ImGuiHelper::NextTableColumn();
+
 						TextureSpecification specs = component.texture->GetSpecification();
 						bool changed = false;
 
@@ -280,15 +276,11 @@ namespace gbc
 					ImGui::OpenPopup("AddComponent");
 				if (ImGui::BeginPopup("AddComponent"))
 				{
-					bool allComponentsAdded = true;
-					allComponentsAdded &= DrawAddComponent<CameraComponent>("Camera", selectedEntity);
-					allComponentsAdded &= DrawAddComponent<SpriteRendererComponent>("Sprite Renderer", selectedEntity);
-					allComponentsAdded &= DrawAddComponent<TransformComponent>("Transform", selectedEntity);
-					ImGui::Separator(); // New section: physics
-					allComponentsAdded &= DrawAddComponent<BoxCollider2DComponent>("Box Collider", selectedEntity);
-					allComponentsAdded &= DrawAddComponent<Rigidbody2DComponent>("Rigidbody 2D", selectedEntity);
-					if (allComponentsAdded)
-						ImGui::CloseCurrentPopup();
+					DrawAddComponent<CameraComponent>("Camera", selectedEntity);
+					DrawAddComponent<SpriteRendererComponent>("Sprite Renderer", selectedEntity);
+					DrawAddComponent<TransformComponent>("Transform", selectedEntity);
+					DrawAddComponent<BoxCollider2DComponent>("Box Collider", selectedEntity);
+					DrawAddComponent<Rigidbody2DComponent>("Rigidbody 2D", selectedEntity);
 					ImGui::EndPopup();
 				}
 

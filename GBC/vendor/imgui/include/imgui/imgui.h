@@ -973,6 +973,7 @@ enum ImGuiInputTextFlags_
     ImGuiInputTextFlags_CharsScientific     = 1 << 17,  // Allow 0123456789.+-*/eE (Scientific notation input)
     ImGuiInputTextFlags_CallbackResize      = 1 << 18,  // Callback on buffer capacity changes request (beyond 'buf_size' parameter value), allowing the string to grow. Notify when the string wants to be resized (for string types which hold a cache of their Size). You will be provided a new BufSize in the callback and NEED to honor it. (see misc/cpp/imgui_stdlib.h for an example of using this)
     ImGuiInputTextFlags_CallbackEdit        = 1 << 19,  // Callback on any edit (note that InputText() already returns true on edit, the callback is useful mainly to manipulate the underlying buffer while focus is active)
+    ImGuiInputTextFlags_ForceScrollLeft     = 1 << 22,  // Forces the scroll of the text input to the left
     // [Internal]
     ImGuiInputTextFlags_Multiline           = 1 << 20,  // For internal use by InputTextMultiline()
     ImGuiInputTextFlags_NoMarkEdited        = 1 << 21   // For internal use by functions using InputText() before reformatting data
@@ -1603,8 +1604,8 @@ enum ImGuiMouseButton_
     ImGuiMouseButton_Left = 0,
     ImGuiMouseButton_Right = 1,
     ImGuiMouseButton_Middle = 2,
-	ImGuiMouseButton_Back = 3,
-	ImGuiMouseButton_Front = 4,
+    ImGuiMouseButton_Back = 3,
+    ImGuiMouseButton_Front = 4,
     ImGuiMouseButton_COUNT = 5
 };
 

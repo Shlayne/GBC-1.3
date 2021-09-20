@@ -104,10 +104,10 @@ Entities:
     TransformComponent:
       Translation: [0, -4.5, 0]
       Rotation: [0, 0, 0]
-      Scale: [17, 1, 1]
+      Scale: [19, 1, 1]
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
-      TilingFactor: [17, 1]
+      TilingFactor: [19, 1]
       Texture:
         Filepath: Assets\Textures\dirt.png
         Specification:
@@ -146,18 +146,18 @@ Entities:
     TagComponent:
       Tag: Right Wall
     TransformComponent:
-      Translation: [8, 0, 0]
+      Translation: [8.5, 0, 0]
       Rotation: [0, 0, 0]
-      Scale: [1, 8, 1]
+      Scale: [2, 8, 1]
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
-      TilingFactor: [1, 8]
+      TilingFactor: [2, 8]
       Texture:
         Filepath: Assets\Textures\dirt.png
         Specification:
           MinFilter: Linear
           MagFilter: Nearest
-          WrapS: ClampToEdge
+          WrapS: Repeat
           WrapT: Repeat
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
@@ -173,18 +173,18 @@ Entities:
     TagComponent:
       Tag: Left Wall
     TransformComponent:
-      Translation: [-8, 0, 0]
+      Translation: [-8.5, 0, 0]
       Rotation: [0, 0, 0]
-      Scale: [1, 8, 1]
+      Scale: [2, 8, 1]
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
-      TilingFactor: [1, 8]
+      TilingFactor: [2, 8]
       Texture:
         Filepath: Assets\Textures\dirt.png
         Specification:
           MinFilter: Linear
           MagFilter: Nearest
-          WrapS: ClampToEdge
+          WrapS: Repeat
           WrapT: Repeat
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
@@ -200,18 +200,18 @@ Entities:
     TagComponent:
       Tag: Left Wall Top
     TransformComponent:
-      Translation: [-8, 4.5, 0]
+      Translation: [-8.5, 4.5, 0]
       Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
+      Scale: [2, 1, 1]
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
-      TilingFactor: [1, 1]
+      TilingFactor: [2, 1]
       Texture:
         Filepath: Assets\Textures\grass_side.png
         Specification:
           MinFilter: Linear
           MagFilter: Nearest
-          WrapS: ClampToEdge
+          WrapS: Repeat
           WrapT: ClampToEdge
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
@@ -227,18 +227,18 @@ Entities:
     TagComponent:
       Tag: Right Wall Top
     TransformComponent:
-      Translation: [8, 4.5, 0]
+      Translation: [8.5, 4.5, 0]
       Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
+      Scale: [2, 1, 1]
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
-      TilingFactor: [1, 1]
+      TilingFactor: [2, 1]
       Texture:
         Filepath: Assets\Textures\grass_side.png
         Specification:
           MinFilter: Linear
           MagFilter: Nearest
-          WrapS: ClampToEdge
+          WrapS: Repeat
           WrapT: ClampToEdge
     BoxCollider2DComponent:
       Size: [0.5, 0.5]

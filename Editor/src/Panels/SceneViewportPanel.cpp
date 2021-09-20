@@ -1,7 +1,6 @@
 #include "SceneViewportPanel.h"
 #include <imgui/imgui.h>
 #include <imguizmo/ImGuizmo.h>
-#include <glm/gtx/matrix_decompose.hpp>
 #include "GBC/Core/Application.h"
 #include "GBC/Core/Input.h"
 #include "GBC/ImGui/ImGuiHelper.h"
@@ -11,7 +10,7 @@
 
 namespace gbc
 {
-	SceneViewportPanel::SceneViewportPanel(const std::string& name, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, int& gizmoType, bool& canUseGizmos, bool& canRenderGizmos, EditorCamera& editorCamera, const OpenSceneFunc& openScene)
+	SceneViewportPanel::SceneViewportPanel(const std::string& name, Ref<Framebuffer>& framebuffer, Ref<Scene>& context, Entity& selectedEntity, ImGuizmo::OPERATION& gizmoType, bool& canUseGizmos, bool& canRenderGizmos, EditorCamera& editorCamera, const OpenSceneFunc& openScene)
 		: Panel(name), framebuffer(framebuffer), context(context), selectedEntity(selectedEntity), gizmoType(gizmoType), canUseGizmos(canUseGizmos), canRenderGizmos(canRenderGizmos), editorCamera(editorCamera), openScene(openScene) {}
 
 	void SceneViewportPanel::OnImGuiRender()
@@ -40,10 +39,9 @@ namespace gbc
 			}
 
 			// Gizmos
-			if (selectedEntity && gizmoType != -1 && canRenderGizmos)
+			if (selectedEntity && gizmoType != ImGuizmo::OPERATION::NONE && canRenderGizmos)
 			{
-				// TODO: orthographic projections
-				ImGuizmo::SetOrthographic(false);
+				ImGuizmo::SetOrthographic(true);
 				ImGuizmo::SetDrawlist();
 
 				// Get window info

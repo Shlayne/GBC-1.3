@@ -16,9 +16,10 @@ namespace gbc
 	{
 		if (enabled)
 		{
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, ImGui::GetStyle().WindowPadding.y));
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, ImGui::GetStyle().WindowPadding.y });
+			ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
 			ImGui::Begin(name.c_str(), &enabled);
-			ImGui::PopStyleVar();
+			ImGui::PopStyleVar(2);
 			Update();
 
 			// TODO: entt iterates over its entities in a reverse order, so unreverse it.

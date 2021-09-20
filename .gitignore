@@ -1,7 +1,6 @@
 # GBC
 Editor/ProfileSessions/**
-Editor/GBC.log
-**/imgui.ini
+Editor/imgui.ini
 **/Cache/**
 
 # Visual Studio

@@ -19,7 +19,7 @@ namespace gbc
 		static void SetScenePlayColors();
 		static void SetSceneEditColors();
 
-		static bool BeginTable(const char* id, int32_t columnCount, ImGuiTableFlags tableFlags = ImGuiTableFlags_BordersInnerV);
+		static bool BeginTable(const char* id, int32_t columnCount = 2, ImGuiTableFlags tableFlags = ImGuiTableFlags_BordersInnerV);
 		static void NextTableColumn();
 		static void PrevTableColumn();
 		static void EndTable();
@@ -52,9 +52,6 @@ namespace gbc
 		static bool FloatEdit(float* value, float speed = defaultSpeed, float minValue = 0.0f, float maxValue = 0.0f);
 		static bool FloatEdit(const char* label, float* value, float speed = defaultSpeed, float minValue = 0.0f, float maxValue = 0.0f);
 
-		static bool SliderFloat(float* value, float minValue = 0.0f, float maxValue = 1.0f);
-		static bool SliderFloat(const char* label, float* value, float minValue = 0.0f, float maxValue = 1.0f);
-		
 		static bool Combo(int32_t* selectedItem, const char* const* names, int32_t count);
 		static bool Combo(const char* label, int32_t* selectedItem, const char* const* names, int32_t count);
 		

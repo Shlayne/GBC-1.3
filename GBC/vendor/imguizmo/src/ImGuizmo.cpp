@@ -849,7 +849,7 @@ namespace ImGuizmo
    void SetDrawlist(ImDrawList* drawlist)
    {
       gContext.mDrawList = drawlist ? drawlist : ImGui::GetWindowDrawList();
-}
+   }
 
    void BeginFrame()
    {
@@ -883,16 +883,16 @@ namespace ImGuizmo
 
    bool IsOver()
    {
-      return (gContext.mOperation == TRANSLATE && GetMoveType(NULL) != NONE) ||
-         (gContext.mOperation == ROTATE && GetRotateType() != NONE) ||
-         (gContext.mOperation == SCALE && GetScaleType() != NONE) || IsUsing();
+      return (gContext.mOperation == OPERATION::TRANSLATE && GetMoveType(NULL) != NONE) ||
+         (gContext.mOperation == OPERATION::ROTATE && GetRotateType() != NONE) ||
+         (gContext.mOperation == OPERATION::SCALE && GetScaleType() != NONE) || IsUsing();
    }
 
    bool IsOver(OPERATION op) {
       switch (op) {
-      case SCALE:       return GetScaleType()      != NONE || IsUsing();
-      case ROTATE:      return GetRotateType()     != NONE || IsUsing();
-      case TRANSLATE:   return GetMoveType(NULL)   != NONE || IsUsing();
+      case OPERATION::SCALE:       return GetScaleType()      != NONE || IsUsing();
+      case OPERATION::ROTATE:      return GetRotateType()     != NONE || IsUsing();
+      case OPERATION::TRANSLATE:   return GetMoveType(NULL)   != NONE || IsUsing();
       }
       return false;
    }
@@ -920,7 +920,7 @@ namespace ImGuizmo
       gContext.mViewMat = *(matrix_t*)view;
       gContext.mProjectionMat = *(matrix_t*)projection;
 
-      if (mode == LOCAL)
+      if (mode == MODE::LOCAL)
       {
          gContext.mModel = *(matrix_t*)matrix;
          gContext.mModel.OrthoNormalize();
@@ -968,7 +968,7 @@ namespace ImGuizmo
       {
          switch (operation)
          {
-         case TRANSLATE:
+         case OPERATION::TRANSLATE:
             colors[0] = (type == MOVE_SCREEN) ? selectionColor : 0xFFFFFFFF;
             for (int i = 0; i < 3; i++)
             {
@@ -977,21 +977,19 @@ namespace ImGuizmo
                colors[i + 4] = (type == MOVE_SCREEN) ? selectionColor : colors[i + 4];
             }
             break;
-         case ROTATE:
+         case OPERATION::ROTATE:
             colors[0] = (type == ROTATE_SCREEN) ? selectionColor : 0xFFFFFFFF;
             for (int i = 0; i < 3; i++)
             {
                colors[i + 1] = (type == (int)(ROTATE_X + i)) ? selectionColor : directionColor[i];
             }
             break;
-         case SCALE:
+         case OPERATION::SCALE:
             colors[0] = (type == SCALE_XYZ) ? selectionColor : 0xFFFFFFFF;
             for (int i = 0; i < 3; i++)
             {
                colors[i + 1] = (type == (int)(SCALE_X + i)) ? selectionColor : directionColor[i];
             }
-            break;
-         case BOUNDS:
             break;
          }
       }
@@ -1101,7 +1099,7 @@ namespace ImGuizmo
 
       // colors
       ImU32 colors[7];
-      ComputeColors(colors, type, ROTATE);
+      ComputeColors(colors, type, OPERATION::ROTATE);
 
       vec_t cameraToModelNormalized;
       if (gContext.mIsOrthographic)
@@ -1187,7 +1185,7 @@ namespace ImGuizmo
 
       // colors
       ImU32 colors[7];
-      ComputeColors(colors, type, SCALE);
+      ComputeColors(colors, type, OPERATION::SCALE);
 
       // draw
       vec_t scaleDisplay = { 1.f, 1.f, 1.f, 1.f };
@@ -1260,7 +1258,7 @@ namespace ImGuizmo
 
       // colors
       ImU32 colors[7];
-      ComputeColors(colors, type, TRANSLATE);
+      ComputeColors(colors, type, OPERATION::TRANSLATE);
 
       const ImVec2 origin = worldToPos(gContext.mModel.v.position, gContext.mViewProjection);
 
@@ -1464,10 +1462,9 @@ namespace ImGuizmo
 
             switch (operation)
             {
-               case TRANSLATE: type = GetMoveType(&gizmoHitProportion); break;
-               case ROTATE: type = GetRotateType(); break;
-               case SCALE: type = GetScaleType(); break;
-               case BOUNDS: break;
+               case OPERATION::TRANSLATE: type = GetMoveType(&gizmoHitProportion); break;
+               case OPERATION::ROTATE: type = GetRotateType(); break;
+               case OPERATION::SCALE: type = GetScaleType(); break;
             }
             if (type != NONE)
             {
@@ -1736,7 +1733,7 @@ namespace ImGuizmo
    static bool HandleTranslation(float* matrix, float* deltaMatrix, int& type, float* snap)
    {
       ImGuiIO& io = ImGui::GetIO();
-      bool applyRotationLocaly = gContext.mMode == LOCAL || type == MOVE_SCREEN;
+      bool applyRotationLocaly = gContext.mMode == MODE::LOCAL || type == MOVE_SCREEN;
       bool modified = false;
 
       // move
@@ -1942,7 +1939,7 @@ namespace ImGuizmo
    static bool HandleRotation(float* matrix, float* deltaMatrix, int& type, float* snap)
    {
       ImGuiIO& io = ImGui::GetIO();
-      bool applyRotationLocaly = gContext.mMode == LOCAL;
+      bool applyRotationLocaly = gContext.mMode == MODE::LOCAL;
       bool modified = false;
 
       if (!gContext.mbUsing)
@@ -2117,16 +2114,14 @@ namespace ImGuizmo
          {
             switch (operation)
             {
-            case ROTATE:
+            case OPERATION::ROTATE:
                manipulated = HandleRotation(matrix, deltaMatrix, type, snap);
                break;
-            case TRANSLATE:
+            case OPERATION::TRANSLATE:
                manipulated = HandleTranslation(matrix, deltaMatrix, type, snap);
                break;
-            case SCALE:
+            case OPERATION::SCALE:
                manipulated = HandleScale(matrix, deltaMatrix, type, snap);
-               break;
-            case BOUNDS:
                break;
             }
          }
@@ -2142,16 +2137,14 @@ namespace ImGuizmo
       {
          switch (operation)
          {
-         case ROTATE:
+         case OPERATION::ROTATE:
             DrawRotationGizmo(type);
             break;
-         case TRANSLATE:
+         case OPERATION::TRANSLATE:
             DrawTranslationGizmo(type);
             break;
-         case SCALE:
+         case OPERATION::SCALE:
             DrawScaleGizmo(type);
-            break;
-         case BOUNDS:
             break;
          }
       }

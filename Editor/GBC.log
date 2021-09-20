@@ -1,0 +1,15 @@
+[20:08:36] [info] GBC: OpenGL Info:
+[20:08:36] [info] GBC:   Vendor:   NVIDIA Corporation
+[20:08:36] [info] GBC:   Renderer: NVIDIA GeForce GTX 1650/PCIe/SSE2
+[20:08:36] [info] GBC:   Version:  4.6.0 NVIDIA 471.68
+[20:08:36] [trace] GBC: Shader Compilation Info for vertex shader in "Resources/Shaders/BasicShader.glsl".
+[20:08:36] [trace] GBC:   1 uniform buffer
+[20:08:36] [trace] GBC:     _40_42
+[20:08:36] [trace] GBC:       Size = 64
+[20:08:36] [trace] GBC:       Binding = 0
+[20:08:36] [trace] GBC:       Members = 1
+[20:08:36] [trace] GBC:   0 resources
+[20:08:36] [trace] GBC: Shader Compilation Info for fragment shader in "Resources/Shaders/BasicShader.glsl".
+[20:08:36] [trace] GBC:   0 uniform buffers
+[20:08:36] [trace] GBC:   1 resource
+[20:08:36] [warning] GBC: Shader creation took 10.4301ms.

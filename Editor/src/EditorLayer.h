@@ -3,6 +3,7 @@
 #include <gbc.h>
 #include <map>
 #include <filesystem>
+#include <imguizmo/ImGuizmo.h>
 #include "GBC/Rendering/EditorCamera.h"
 #include "Panels/SceneViewportPanel.h"
 #include "Panels/SceneHierarchyPanel.h"
@@ -51,7 +52,7 @@ namespace gbc
 		Ref<Framebuffer> framebuffer;
 
 		Entity selectedEntity;
-		int gizmoType = -1;
+		ImGuizmo::OPERATION gizmoType = ImGuizmo::OPERATION::NONE;
 		bool canUseGizmos = true;
 		bool canRenderGizmos = true;
 

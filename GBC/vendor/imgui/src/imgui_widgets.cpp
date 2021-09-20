@@ -3920,6 +3920,8 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
             // Recycle existing cursor/selection/undo stack but clamp position
             // Note a single mouse click will override the cursor/position immediately by calling stb_textedit_click handler.
             state->CursorClamp();
+            if (flags & ImGuiInputTextFlags_ForceScrollLeft)
+                state->ScrollX = 0.0f;
         }
         else
         {

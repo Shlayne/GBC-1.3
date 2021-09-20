@@ -1,6 +1,5 @@
 #include "EditorLayer.h"
 #include <imgui/imgui.h>
-#include <imguizmo/ImGuizmo.h>
 #include "GBC/Scene/SceneSerializer.h"
 #include "Panels/ContentBrowserPanel.h"
 #if GBC_ENABLE_STATS
@@ -294,7 +293,7 @@ namespace gbc
 			case Keycode::Q:
 				if (sceneViewportPanel->IsFocused())
 				{
-					gizmoType = -1;
+					gizmoType = ImGuizmo::OPERATION::NONE;
 					return true;
 				}
 				break;

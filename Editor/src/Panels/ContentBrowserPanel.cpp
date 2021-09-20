@@ -9,6 +9,7 @@
 
 namespace gbc
 {
+	static constexpr ImGuiInputTextFlags inputTextFlags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_ForceScrollLeft;
 
 	const std::filesystem::path projectAssetDirectory = "Assets";
 
@@ -92,12 +93,11 @@ namespace gbc
 					DrawSearchBar();
 					ImGui::Separator();
 					ImGui::TableNextColumn();
-					if (ImGui::BeginChild("ContentBrowserExplorer"))
-					{
-						ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
-						DrawExplorer();
-						ImGui::EndChild();
-					}
+
+					ImGui::BeginChild("ContentBrowserExplorer");
+					DrawExplorer();
+					ImGui::EndChild();
+
 					ImGui::EndTable();
 				}
 				ImGui::EndChild();
@@ -158,7 +158,6 @@ namespace gbc
 	void ContentBrowserPanel::DrawSearchBar()
 	{
 		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
-
 		auto itemSpacing = ImGui::GetStyle().ItemSpacing;
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { itemSpacing.x * 0.5f, itemSpacing.y });
 
@@ -184,6 +183,7 @@ namespace gbc
 
 	void ContentBrowserPanel::DrawExplorer()
 	{
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 2.0f, 2.0f });
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
 
@@ -191,7 +191,7 @@ namespace gbc
 		float thumbnailSize = 96.0f;
 		int32_t columnCount = std::max(1, static_cast<int32_t>((ImGui::GetContentRegionAvail().x - padding) / (thumbnailSize + 2.0f * padding)));
 
-		if (ImGui::BeginTable("ContentBrowserExplorer", columnCount, ImGuiTableFlags_SameWidths))
+		if (ImGui::BeginTable("ContentBrowserExplorerFiles", columnCount, ImGuiTableFlags_SameWidths))
 		{
 			ImGui::TableNextColumn();
 
@@ -202,12 +202,15 @@ namespace gbc
 				auto textureID = (void*)static_cast<size_t>(directoryTexture->GetRendererID());
 				ImGui::ImageButton(textureID, { thumbnailSize, thumbnailSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f });
 
-				if (ImGuiHelper::InputText(fileNameBuffer))
+				if (ImGuiHelper::InputText(fileNameBuffer, fileNameBufferSize, inputTextFlags))
 				{
 					if (fileNameBuffer[0] == '\0')
 					{
-						memcpy_s(fileNameBuffer, fileNameBufferSize, defaultFolderName, defaultFolderNameSize);
-						fileNameSize = defaultFolderNameSize;
+						size_t folderNameSize;
+						const char* folderName = GetNewFolderName(folderNameSize);
+						CalculateFileNameBufferSize(true);
+						memcpy_s(fileNameBuffer, fileNameBufferSize, folderName, folderNameSize);
+						fileNameSize = folderNameSize;
 					}
 
 					try
@@ -295,24 +298,19 @@ namespace gbc
 						{
 							ImGui::CloseCurrentPopup();
 
+							CalculateFileNameBufferSize(file.isDirectory);
 							memcpy_s(fileNameBuffer, fileNameBufferSize, filenameString.c_str(), filenameString.size() + 1);
 							renamingFile = true;
 						}
 
-						if (file.isDirectory)
-						{
-							if (ImGui::MenuItem("Open In Explorer"))
-							{
-								std::string directoryPath = (*currentCachedDirectory / filename).string();
-								FileDialog::OpenFolder(directoryPath);
-							}
-						}
+						if (file.isDirectory && ImGui::MenuItem("Open In Explorer"))
+							FileDialog::OpenFolder(*currentCachedDirectory / filename);
 						ImGui::EndPopup();
 					}
 
 					if (clickedFileIndex == i && renamingFile)
 					{
-						if (ImGuiHelper::InputText(fileNameBuffer))
+						if (ImGuiHelper::InputText(fileNameBuffer, fileNameBufferSize, inputTextFlags))
 						{
 							try
 							{
@@ -354,10 +352,13 @@ namespace gbc
 				{
 					if (ImGui::MenuItem("Folder"))
 					{
-						memcpy_s(fileNameBuffer, fileNameBufferSize, defaultFolderName, defaultFolderNameSize);
-						if (fileNameSize > defaultFolderNameSize)
-							memset(fileNameBuffer + defaultFolderNameSize, 0, fileNameSize - defaultFolderNameSize);
-						fileNameSize = 0;
+						size_t folderNameSize;
+						const char* folderName = GetNewFolderName(folderNameSize);
+						CalculateFileNameBufferSize(true);
+						memcpy_s(fileNameBuffer, fileNameBufferSize, folderName, folderNameSize);
+						if (fileNameSize > folderNameSize)
+							memset(fileNameBuffer + folderNameSize, 0, fileNameSize - folderNameSize);
+						fileNameSize = folderNameSize;
 						creatingDirectory = true;
 					}
 
@@ -365,10 +366,7 @@ namespace gbc
 				}
 
 				if (ImGui::MenuItem("Open In Explorer"))
-				{
-					std::string directoryPath = currentCachedDirectory->string();
-					FileDialog::OpenFolder(directoryPath);
-				}
+					FileDialog::OpenFolder(*currentCachedDirectory);
 
 				ImGui::EndPopup();
 			}
@@ -446,7 +444,7 @@ namespace gbc
 			{
 				// User used filesystem or other means to delete the asset directory
 				std::error_code error;
-				if (!std::filesystem::create_directories(projectAssetDirectory, error))
+				if (!std::filesystem::create_directories(projectAssetDirectory, error) && error)
 				{
 					GBC_CORE_FATAL("Unable to recreate Assets directory after user deleted it on using their OS's file system.");
 					GBC_CORE_FATAL(error.message());
@@ -474,7 +472,8 @@ namespace gbc
 		files.clear();
 		size_t directoryInsert = 0;
 
-		for (const auto& entry : std::filesystem::directory_iterator(*currentCachedDirectory))
+		std::error_code error;
+		for (const auto& entry : std::filesystem::directory_iterator(*currentCachedDirectory, error))
 		{
 			bool isDirectory = entry.is_directory();
 
@@ -487,14 +486,21 @@ namespace gbc
 				files.emplace_back(entry.path(), isDirectory);
 		}
 
+		if (error)
+			GBC_CORE_ERROR(error.message());
+
 		clickedFileIndex = files.size();
 	}
 
 	void ContentBrowserPanel::RefreshDirectory(Directory& subdirectory)
 	{
-		for (const auto& entry : std::filesystem::directory_iterator(subdirectory.path))
+		std::error_code error;
+		for (const auto& entry : std::filesystem::directory_iterator(subdirectory.path, error))
 			if (entry.is_directory())
 				RefreshDirectory(subdirectory.subdirectories.emplace_back(entry.path()));
+
+		if (error)
+			GBC_CORE_ERROR("{0} \"{1}\"", error.message(), subdirectory.path.string());
 	}
 
 	void ContentBrowserPanel::ShowDeleteConfirmationMessage()
@@ -555,7 +561,12 @@ namespace gbc
 		{
 			if (const ImGuiPayload* payload = ImGuiHelper::AcceptDragDropPayloadIf("CONTENT_BROWSER_ITEM",
 				// Don't move a folder into itself nor its subdirectories
-				[&targetPath](void* sourceData) { return !targetPath.native().starts_with(static_cast<const wchar_t*>(sourceData)); }))
+				[&targetPath](void* sourceData)
+				{
+					std::wstring_view sourceView = static_cast<const wchar_t*>(sourceData);
+					std::wstring_view targetView = targetPath.native();
+					return !targetView.starts_with(sourceView) || (targetView.size() > sourceView.size() && targetView[sourceView.size()] != L'\\');
+				}))
 			{
 				std::filesystem::path oldPath = static_cast<const wchar_t*>(payload->Data);
 				std::filesystem::path newPath = targetPath / oldPath.filename();
@@ -581,5 +592,47 @@ namespace gbc
 
 		refreshDirectories = true;
 		return true;
+	}
+
+	const char* ContentBrowserPanel::GetNewFolderName(size_t& outSize) const
+	{
+		static char folderNameBufferBackup[] = "New Folder\0(1)\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+		static char folderNameBuffer[sizeof(folderNameBufferBackup)];
+		memcpy_s(folderNameBuffer, sizeof(folderNameBuffer), folderNameBufferBackup, sizeof(folderNameBufferBackup));
+
+		size_t folderNameSize = 10;
+
+		std::error_code error;
+		if (std::filesystem::exists(*currentCachedDirectory / folderNameBuffer, error))
+		{
+			folderNameBuffer[folderNameSize] = ' ';
+			folderNameSize = 14;
+
+			char* folderNumberStart = folderNameBuffer + folderNameSize - 2;
+			size_t folderNumber = 1;
+
+			while (std::filesystem::exists(*currentCachedDirectory / folderNameBuffer, error))
+			{
+				_ui64toa_s(++folderNumber, folderNumberStart, 21, 10);
+
+				char* folderNumberEnd = folderNumberStart + 1;
+				while (*folderNumberEnd != '\0')
+					folderNumberEnd++;
+				*folderNumberEnd = ')';
+				*++folderNumberEnd = '\0';
+			}
+		}
+
+		outSize = folderNameSize + 1;
+		return folderNameBuffer;
+	}
+
+	void ContentBrowserPanel::CalculateFileNameBufferSize(bool isDirectory)
+	{
+		// https://social.technet.microsoft.com/Forums/windows/en-US/43945b2c-f123-46d7-9ba9-dd6abc967dd4/maximum-path-length-limitation-on-windows-is-255-or-247?forum=w7itprogeneral
+		size_t maxLength = isDirectory ? __std_fs_max_path - 12 - 1 : __std_fs_max_path;
+
+		auto currentPathAbsolute = std::filesystem::absolute(*currentCachedDirectory);
+		fileNameBufferSize = maxLength - std::min(maxLength, currentPathAbsolute.native().size());
 	}
 }
