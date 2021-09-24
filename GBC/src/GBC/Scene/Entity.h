@@ -3,6 +3,7 @@
 #include <entt/entt.hpp>
 #include "GBC/Core/Core.h"
 #include "GBC/Scene/Scene.h"
+#include "GBC/Scene/Components/IDComponent.h"
 
 namespace gbc
 {
@@ -39,10 +40,12 @@ namespace gbc
 		}
 
 		template<typename T>
-		bool HasComponent()
+		bool HasComponent() const
 		{
 			return context->registry->has<T>(handle);
 		}
+
+		UUID GetUUID() { return GetComponent<IDComponent>().id; }
 
 		inline operator bool() const noexcept { return handle != entt::null; }
 		inline operator uint32_t() const noexcept { return static_cast<uint32_t>(handle); }

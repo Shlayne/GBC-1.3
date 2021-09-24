@@ -1,9 +1,9 @@
 #pragma once
 
-#include "GBC/Scene/ScriptableEntity.h"
-
 namespace gbc
 {
+	class ScriptableEntity;
+
 	struct NativeScriptComponent
 	{
 		ScriptableEntity* instance = nullptr;

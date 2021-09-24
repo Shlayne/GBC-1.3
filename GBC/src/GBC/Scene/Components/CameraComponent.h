@@ -7,6 +7,7 @@ namespace gbc
 	struct CameraComponent
 	{
 		CameraComponent() noexcept = default;
+		CameraComponent(const CameraComponent&) = default;
 		CameraComponent(const SceneCamera& camera);
 		CameraComponent& operator=(const SceneCamera& camera);
 

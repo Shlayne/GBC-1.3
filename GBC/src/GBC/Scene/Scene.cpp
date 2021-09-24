@@ -8,7 +8,9 @@
 #include "GBC/Core/Application.h"
 #include "GBC/Rendering/Renderer.h"
 #include "GBC/Rendering/Basic/BasicRenderer.h"
+#include "GBC/Scene/ScriptableEntity.h"
 #include "GBC/Scene/Components/CameraComponent.h"
+#include "GBC/Scene/Components/IDComponent.h"
 #include "GBC/Scene/Components/NativeScriptComponent.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
@@ -53,14 +55,20 @@ namespace gbc
 		delete registry;
 	}
 
-	Entity Scene::CreateEntity(const std::string& tag)
+	Entity Scene::CreateEntity(UUID uuid, const std::string& tag)
 	{
 		GBC_PROFILE_FUNCTION();
 
 		Entity entity(registry->create(), this);
-		entity.AddComponent<TransformComponent>();
+		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<TagComponent>(tag.empty() ? "Unknown Entity" : tag);
+		entity.AddComponent<TransformComponent>();
 		return entity;
+	}
+
+	Entity Scene::CreateEntity(const std::string& tag)
+	{
+		return CreateEntity(UUID(), tag);
 	}
 
 	void Scene::DestroyEntity(Entity entity)
@@ -289,7 +297,7 @@ namespace gbc
 	{
 		component.camera.OnViewportResize(viewportSize.x, viewportSize.y);
 	}
-
+	template<> void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component) {}
 	template<> void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent & component) {}
 	template<> void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent & component) {}
 	template<> void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent & component) {}
@@ -315,6 +323,7 @@ namespace gbc
 	// OnComponentRemoved
 	template<typename T> void Scene::OnComponentRemoved(Entity entity, T& component) { static_assert(false); }
 
+	template<> void Scene::OnComponentRemoved<IDComponent>(Entity entity, IDComponent& component) { GBC_CORE_ASSERT(false); }
 	template<> void Scene::OnComponentRemoved<CameraComponent>(Entity entity, CameraComponent& component) {}
 	template<> void Scene::OnComponentRemoved<TagComponent>(Entity entity, TagComponent& component) { GBC_CORE_ASSERT(false); }
 	template<> void Scene::OnComponentRemoved<TransformComponent>(Entity entity, TransformComponent& component) { GBC_CORE_ASSERT(false); }

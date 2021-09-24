@@ -29,7 +29,7 @@ namespace gbc
 		}
 
 		template<typename T>
-		bool HasComponent()
+		bool HasComponent() const
 		{
 			return entity.HasComponent<T>();
 		}

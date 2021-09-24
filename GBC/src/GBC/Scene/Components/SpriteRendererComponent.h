@@ -8,7 +8,7 @@ namespace gbc
 	struct SpriteRendererComponent
 	{
 		SpriteRendererComponent() = default;
-		SpriteRendererComponent(const SpriteRendererComponent& component);
+		SpriteRendererComponent(const SpriteRendererComponent&) = default;
 
 		glm::vec4 color{ 1.0f };
 		Ref<Texture2D> texture;

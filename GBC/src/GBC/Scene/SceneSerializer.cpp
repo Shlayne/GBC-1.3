@@ -10,7 +10,7 @@
 #include "GBC/Scene/Components/Physics/BoxCollider2DComponent.h"
 #include "GBC/Scene/Components/Physics/Rigidbody2DComponent.h"
 
-// Deserialization stuff
+#pragma region yaml_deserialization_stuff
 namespace YAML
 {
 	template<>
@@ -91,9 +91,11 @@ namespace YAML
 		}
 	};
 }
+#pragma endregion
 
 namespace gbc
 {
+#pragma region enum_converters
 	static std::string SceneCameraProjectionTypeToString(SceneCamera::ProjectionType projectionType)
 	{
 		switch (projectionType)
@@ -179,7 +181,9 @@ namespace gbc
 		GBC_CORE_ASSERT("Unknown Rigidbody 2D Component Body Type!");
 		return static_cast<Rigidbody2DComponent::BodyType>(0);
 	}
+#pragma endregion
 
+#pragma region serialization
 	static YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& value)
 	{ return out << YAML::Flow << YAML::BeginSeq << value.x << value.y << YAML::EndSeq; }
 
@@ -195,7 +199,7 @@ namespace gbc
 		if (entity.HasComponent<T>())
 		{
 			out << YAML::Key << name << YAML::Value << YAML::BeginMap;
-			func(entity.GetComponent<T>());
+			func(out, entity.GetComponent<T>());
 			out << YAML::EndMap;
 		}
 	}
@@ -203,21 +207,21 @@ namespace gbc
 	static void SerializeEntity(YAML::Emitter& out, Entity entity)
 	{
 		out << YAML::BeginMap
-			<< YAML::Key << "Entity" << YAML::Value << "0"; // TODO: entity ID goes here
+			<< YAML::Key << "Entity" << YAML::Value << entity.GetUUID();
 
-		// An entity always has these two components
-		SerializeComponent<TagComponent>(out, entity, "TagComponent", [&out](TagComponent& component)
+		// An entity always has these two components in addition to a UUID
+		SerializeComponent<TagComponent>(out, entity, "TagComponent", [](YAML::Emitter& out, TagComponent& component)
 		{
 			out << YAML::Key << "Tag" << YAML::Value << component.tag;
 		});
-		SerializeComponent<TransformComponent>(out, entity, "TransformComponent", [&out](TransformComponent& component)
+		SerializeComponent<TransformComponent>(out, entity, "TransformComponent", [](YAML::Emitter& out, TransformComponent& component)
 		{
 			out << YAML::Key << "Translation" << YAML::Value << component.translation
 				<< YAML::Key << "Rotation" << YAML::Value << component.rotation
 				<< YAML::Key << "Scale" << YAML::Value << component.scale;
 		});
 
-		SerializeComponent<CameraComponent>(out, entity, "CameraComponent", [&out](CameraComponent& component)
+		SerializeComponent<CameraComponent>(out, entity, "CameraComponent", [](YAML::Emitter& out, CameraComponent& component)
 		{
 			auto& camera = component.camera;
 			out << YAML::Key << "Camera" << YAML::Value << YAML::BeginMap
@@ -232,13 +236,13 @@ namespace gbc
 				<< YAML::Key << "Primary" << YAML::Value << component.primary;
 		});
 		// TODO: how do this ???
-		//SerializeComponent<NativeScriptComponent>(out, entity, "NativeScriptComponent", [&out](NativeScriptComponent& component) {});
-		SerializeComponent<SpriteRendererComponent>(out, entity, "SpriteRendererComponent", [&out](SpriteRendererComponent& component)
+		//SerializeComponent<NativeScriptComponent>(out, entity, "NativeScriptComponent", [](YAML::Emitter& out, NativeScriptComponent& component) {});
+		SerializeComponent<SpriteRendererComponent>(out, entity, "SpriteRendererComponent", [](YAML::Emitter& out, SpriteRendererComponent& component)
 		{
 			out << YAML::Key << "TintColor" << YAML::Value << component.color
 				<< YAML::Key << "TilingFactor" << YAML::Value << component.tilingFactor;
 
-			// TODO: reference texture by UUID
+			// TODO: reference texture by UUID once an asset system is in place
 			if (component.texture && component.texture->GetTexture())
 			{
 				std::string filepath = component.texture->GetTexture()->GetFilepath().string();
@@ -256,7 +260,7 @@ namespace gbc
 			}
 		});
 
-		SerializeComponent<BoxCollider2DComponent>(out, entity, "BoxCollider2DComponent", [&out](BoxCollider2DComponent& component)
+		SerializeComponent<BoxCollider2DComponent>(out, entity, "BoxCollider2DComponent", [](YAML::Emitter& out, BoxCollider2DComponent& component)
 		{
 			out << YAML::Key << "Size" << YAML::Value << component.size
 				<< YAML::Key << "Offset" << YAML::Value << component.offset
@@ -266,7 +270,7 @@ namespace gbc
 				<< YAML::Key << "RestitutionThreshold" << YAML::Value << component.restitutionThreshold;
 		});
 
-		SerializeComponent<Rigidbody2DComponent>(out, entity, "Rigidbody2DComponent", [&out](Rigidbody2DComponent& component)
+		SerializeComponent<Rigidbody2DComponent>(out, entity, "Rigidbody2DComponent", [](YAML::Emitter& out, Rigidbody2DComponent& component)
 		{
 			out << YAML::Key << "Type" << YAML::Value << Rigidbody2DComponentBodyTypeToString(component.bodyType)
 				<< YAML::Key << "FixedRotation" << YAML::Value << component.fixedRotation;
@@ -304,6 +308,14 @@ namespace gbc
 		return false;
 	}
 
+	bool SceneSerializer::SerializeRuntime(const std::filesystem::path& filepath)
+	{
+		// TODO: implement
+		return false;
+	}
+#pragma endregion
+
+#pragma region deserialization
 	bool SceneSerializer::Deserialize(const std::filesystem::path& filepath)
 	{
 		std::ifstream file(filepath);
@@ -323,14 +335,14 @@ namespace gbc
 			{
 				for (auto entityNode : entities)
 				{
-					uint64_t uuid = entityNode["Entity"].as<uint64_t>(); // TODO
+					uint64_t uuid = entityNode["Entity"].as<uint64_t>();
 
 					std::string name;
 					auto tagComponent = entityNode["TagComponent"];
 					if (tagComponent)
 						name = tagComponent["Tag"].as<std::string>();
 
-					Entity entity = scene->CreateEntity(name);
+					Entity entity = scene->CreateEntity(uuid, name);
 
 					// Entities always have transform components
 					{
@@ -415,15 +427,10 @@ namespace gbc
 		return false;
 	}
 
-	bool SceneSerializer::SerializeRuntime(const std::filesystem::path& filepath)
-	{
-		// TODO: implement
-		return false;
-	}
-
 	bool SceneSerializer::DeserializeRuntime(const std::filesystem::path& filepath)
 	{
 		// TODO: implement
 		return false;
 	}
+#pragma endregion
 }

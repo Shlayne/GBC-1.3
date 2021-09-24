@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <string>
 #include "GBC/Core/Timestep.h"
+#include "GBC/Core/UUID.h"
 #include "GBC/Events/Event.h"
 #include "GBC/Events/WindowEvents.h"
 #include "GBC/Rendering/EditorCamera.h"
@@ -33,6 +34,7 @@ namespace gbc
 		Scene();
 		~Scene();
 
+		Entity CreateEntity(UUID uuid, const std::string& tag = {});
 		Entity CreateEntity(const std::string& tag = {});
 		void DestroyEntity(Entity entity);
 
