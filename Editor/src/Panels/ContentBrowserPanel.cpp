@@ -549,6 +549,9 @@ namespace gbc
 	{
 		if (ImGui::BeginDragDropSource())
 		{
+			std::string sourceFilenameString = sourcePath.filename().string();
+			ImGui::Text(sourceFilenameString.c_str());
+
 			size_t bufferSize = (sourcePath.native().size() + 1) * sizeof(wchar_t);
 			ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", sourcePath.c_str(), bufferSize, ImGuiCond_Once);
 			ImGui::EndDragDropSource();
@@ -559,7 +562,7 @@ namespace gbc
 	{
 		if (ImGui::BeginDragDropTarget())
 		{
-			if (const ImGuiPayload* payload = ImGuiHelper::AcceptDragDropPayloadIf("CONTENT_BROWSER_ITEM",
+			if (const ImGuiPayload* payload = ImGuiHelper::AcceptDragDropPayload("CONTENT_BROWSER_ITEM",
 				// Don't move a folder into itself nor its subdirectories
 				[&targetPath](void* sourceData)
 				{

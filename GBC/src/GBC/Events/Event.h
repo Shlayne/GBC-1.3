@@ -41,8 +41,7 @@ namespace gbc
 
 		virtual EventType GetType() const = 0;
 		virtual EventCategoryFlags GetCategoryFlags() const = 0;
-		inline bool IsInCategory(EventCategoryFlags category) const noexcept
-		{ return GetCategoryFlags() & category; }
+		inline bool IsInCategory(EventCategoryFlags category) const noexcept;
 
 #if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const = 0;
@@ -54,32 +53,15 @@ namespace gbc
 	class EventDispatcher
 	{
 	public:
-		EventDispatcher(Event& event) : event(event) {}
-
-		template<typename C, typename E>
-		bool Dispatch(C* object, bool(C::*func)(E&))
-		{
-			if (event.GetType() == E::GetStaticType())
-			{
-				event.handled |= (object->*func)(static_cast<E&>(event));
-				return true;
-			}
-			return false;
-		}
-
-		template<typename E>
-		bool Dispatch(bool(*func)(E&))
-		{
-			if (event.GetType() == E::GetStaticType())
-			{
-				event.handled |= func(static_cast<E&>(event));
-				return true;
-			}
-			return false;
-		}
+		EventDispatcher(Event& event);
+	public:
+		template<typename C, typename E> bool Dispatch(C* object, bool(C::* func)(E&));
+		template<typename E> bool Dispatch(bool(*func)(E&));
 	private:
 		Event& event;
 	};
 
 	using EventCallbackFunc = std::function<void(Event&)>;
 }
+
+#include "Event.inl"

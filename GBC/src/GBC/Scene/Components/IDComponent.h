@@ -10,6 +10,8 @@ namespace gbc
 		IDComponent(const IDComponent&) = default;
 		IDComponent(UUID id) : id(id) {}
 
+		inline operator UUID() const noexcept { return id; }
+
 		UUID id;
 	};
 }

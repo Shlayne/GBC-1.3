@@ -84,22 +84,25 @@ namespace gbc
 		colors[ImGuiCol_TabActive]          = { 0.280f, 0.285f, 0.290f, 1.000f };
 		colors[ImGuiCol_TabUnfocused]       = { 0.150f, 0.155f, 0.160f, 1.000f };
 		colors[ImGuiCol_TabUnfocusedActive] = { 0.200f, 0.205f, 0.210f, 1.000f };
+
+		// Drag/Drop
+		colors[ImGuiCol_DragDropTarget]     = { 0.102f, 0.337f, 0.608f, 1.000f };
 	}
 
-	bool ImGuiHelper::BeginTable(const char* id, int32_t columnCount, ImGuiTableFlags tableFlags)
+	bool ImGuiHelper::BeginTable(const char* id, int32_t columnCount, ImGuiTableFlags flags)
 	{
 		ImGuiStyle& style = ImGui::GetStyle();
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { style.ItemSpacing.x / 2.0f, style.ItemSpacing.y });
 
 		ImGui::PushID(id);
-		if (!ImGui::BeginTable(id, columnCount, tableFlags))
+		if (!ImGui::BeginTable(id, columnCount, flags))
 		{
 			ImGui::PopID();
 			ImGui::PopStyleVar();
 			return false;
 		}
 
-		ImGuiTableColumnFlags columnFlags = ImGuiTableColumnFlags_WidthAuto;
+		constexpr ImGuiTableColumnFlags columnFlags = ImGuiTableColumnFlags_WidthAuto;
 		ImGui::TableSetupColumn(nullptr, columnFlags);
 		ImGui::TableSetupColumn(nullptr, ImGuiTableColumnFlags_None);
 		for (int32_t i = 2; i < columnCount; i++)
@@ -364,7 +367,7 @@ namespace gbc
 		return changed;
 	}
 
-	const ImGuiPayload* ImGuiHelper::AcceptDragDropPayloadIf(const char* dragDropType, const std::function<bool(void*)>& acceptFunc, ImGuiDragDropFlags flags)
+	const ImGuiPayload* ImGuiHelper::AcceptDragDropPayload(const char* dragDropType, const std::function<bool(void*)>& acceptFunc, ImGuiDragDropFlags flags)
 	{
 		if (acceptFunc == nullptr)
 			return ImGui::AcceptDragDropPayload(dragDropType, flags);
@@ -385,7 +388,7 @@ namespace gbc
 		ImGui::Button(buttonText, { ImGui::GetContentRegionAvail().x, 0.0f });
 		if (ImGui::BeginDragDropTarget())
 		{
-			payload = AcceptDragDropPayloadIf(dragDropType, acceptFunc, flags);
+			payload = AcceptDragDropPayload(dragDropType, acceptFunc, flags);
 			ImGui::EndDragDropTarget();
 		}
 		ImGui::PopStyleColor();

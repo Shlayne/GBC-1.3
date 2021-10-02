@@ -4,6 +4,9 @@
 #include "GBC/Core/Core.h"
 #include "GBC/Scene/Scene.h"
 #include "GBC/Scene/Components/IDComponent.h"
+#include "GBC/Scene/Components/RelationshipComponent.h"
+#include "GBC/Scene/Components/TagComponent.h"
+#include "GBC/Scene/Components/TransformComponent.h"
 
 namespace gbc
 {
@@ -12,49 +15,48 @@ namespace gbc
 	public:
 		Entity() = default;
 		Entity(const Entity&) = default;
-		Entity(entt::entity handle, Scene* context) noexcept
-			: handle(handle), context(context) {}
-
-		template<typename T, typename... Args>
-		T& AddComponent(Args&&... args)
-		{
-			GBC_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
-			T& component = context->registry->emplace<T>(handle, std::forward<Args>(args)...);
-			context->OnComponentAdded(*this, component);
-			return component;
-		}
-
-		template<typename T>
-		void RemoveComponent()
-		{
-			GBC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component to remove!");
-			context->OnComponentRemoved(*this, context->registry->get<T>(handle));
-			context->registry->remove<T>(handle);
-		}
-
-		template<typename T>
-		T& GetComponent()
-		{
-			GBC_CORE_ASSERT(HasComponent<T>(), "Entity does not have component to get!");
-			return context->registry->get<T>(handle);
-		}
-
-		template<typename T>
-		bool HasComponent() const
-		{
-			return context->registry->has<T>(handle);
-		}
-
-		UUID GetUUID() { return GetComponent<IDComponent>().id; }
-
-		inline operator bool() const noexcept { return handle != entt::null; }
-		inline operator uint32_t() const noexcept { return static_cast<uint32_t>(handle); }
-		inline operator entt::entity() const noexcept { return handle; }
-
-		inline bool operator==(const Entity& entity) const noexcept { return handle == entity.handle && context == entity.context; }
-		inline bool operator!=(const Entity& entity) const noexcept { return !(*this == entity); }
+		Entity(entt::entity handle, Scene* context) noexcept;
+	public:
+		template<typename Component, typename... Args> Component& Add(Args&&... args);
+		template<typename Component, typename... Args> Component& AddOrReplace(Args&&... args);
+		template<typename Component> Component& AddOrGet();
+		template<typename Component> void Remove();
+		template<typename Component> Component& Get();
+		template<typename Component> const Component& Get() const;
+		template<typename Component> bool Has() const;
+	public:
+		inline UUID GetUUID() const;
+		inline std::string& GetName();
+		inline const std::string& GetName() const;
+		inline TransformComponent& GetTransform();
+		inline const TransformComponent& GetTransform() const;
+		glm::mat4 GetAbsoluteTransform() const;
+	public:
+		bool HasParent() const;
+		Entity GetParent() const;
+		void SetParent(Entity newParent);
+		void RemoveParent();
+		bool HasRelationship() const;
+		bool HasChildren() const;
+		Entity GetFirstChild() const;
+		Entity GetNextSibling() const;
+		Entity GetPreviousSibling() const;
+		bool IsChildOf(Entity entity) const;
+		bool IsSubChildOf(Entity entity) const;
+	public:
+		inline operator bool() const noexcept;
+		inline operator uint32_t() const noexcept;
+		inline operator entt::entity() const noexcept;
+	public:
+		inline bool operator==(const Entity& entity) const noexcept;
+		inline bool operator!=(const Entity& entity) const noexcept;
+	private:
+		void GetAbsoluteTransformInternal(glm::mat4& transform) const;
+		void RemoveParentInternal(Entity currentParent, RelationshipComponent& currentParentRelationship, RelationshipComponent& childRelationship);
 	private:
 		entt::entity handle = entt::null;
 		Scene* context = nullptr;
 	};
 }
+
+#include "Entity.inl"

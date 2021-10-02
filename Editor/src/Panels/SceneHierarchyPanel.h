@@ -15,8 +15,12 @@ namespace gbc
 		virtual void OnImGuiRender() override;
 	private:
 		void DrawEntityNode(Entity entity);
+		void MakeCurrentItemDragDropSource(Entity source);
+		void MakeCurrentItemDragDropTarget(Entity target);
 
 		Ref<Scene>& context;
 		Entity& selectedEntity;
+
+		Entity entityToDelete;
 	};
 }

@@ -4,8 +4,8 @@
 
 namespace gbc
 {
-	EditorApplication::EditorApplication(const WindowSpecifications& specs)
-		: Application(specs)
+	EditorApplication::EditorApplication(CommandLineArgs args, const WindowSpecifications& specs)
+		: Application(args, specs)
 	{
 		PushLayer(new EditorLayer());
 	}
@@ -14,7 +14,8 @@ namespace gbc
 	{
 		WindowSpecifications specs;
 		specs.maximizeOnShow = true;
+		specs.title = "GBC v1.3 | Editor";
 
-		return new EditorApplication(specs);
+		return new EditorApplication(args, specs);
 	}
 }

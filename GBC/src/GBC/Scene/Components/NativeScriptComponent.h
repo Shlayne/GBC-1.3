@@ -11,11 +11,8 @@ namespace gbc
 		ScriptableEntity*(*createFunc)();
 		void(*destroyFunc)(NativeScriptComponent*);
 
-		template<typename T>
-		void Bind()
-		{
-			createFunc = []() { return static_cast<ScriptableEntity*>(new T()); };
-			destroyFunc = [](NativeScriptComponent* nsc) { delete nsc->instance; nsc->instance = nullptr; };
-		}
+		template<typename T> void Bind();
 	};
 }
+
+#include "NativeScriptComponent.inl"

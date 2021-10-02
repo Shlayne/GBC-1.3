@@ -9,7 +9,7 @@ namespace gbc
 {
 	Application* Application::instance = nullptr;
 
-	Application::Application(const WindowSpecifications& windowSpecs)
+	Application::Application(CommandLineArgs args, const WindowSpecifications& windowSpecs)
 	{
 		GBC_PROFILE_FUNCTION();
 
@@ -178,11 +178,11 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		windowZeroSize = event.GetWidth() == 0 || event.GetHeight() == 0;
+		windowZeroSize = event.GetWidth() <= 0 || event.GetHeight() <= 0;
 		if (windowZeroSize)
 		{
 			rendering = false;
-			// Don't resize anything with zero size.
+			// Don't dispatch the event to resize with zero size
 			return true;
 		}
 		else

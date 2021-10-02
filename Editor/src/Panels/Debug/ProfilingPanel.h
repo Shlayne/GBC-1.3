@@ -14,7 +14,7 @@ namespace gbc
 		virtual void OnImGuiRender() override;
 	private:
 		bool profiling = false;
-		unsigned int profileCount = 0;
+		uint32_t profileCount = 0;
 	};
 }
 #endif

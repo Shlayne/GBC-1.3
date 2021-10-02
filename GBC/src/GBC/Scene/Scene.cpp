@@ -8,10 +8,12 @@
 #include "GBC/Core/Application.h"
 #include "GBC/Rendering/Renderer.h"
 #include "GBC/Rendering/Basic/BasicRenderer.h"
+#include "GBC/Scene/Entity.h"
 #include "GBC/Scene/ScriptableEntity.h"
 #include "GBC/Scene/Components/CameraComponent.h"
 #include "GBC/Scene/Components/IDComponent.h"
 #include "GBC/Scene/Components/NativeScriptComponent.h"
+#include "GBC/Scene/Components/RelationshipComponent.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
@@ -55,14 +57,88 @@ namespace gbc
 		delete registry;
 	}
 
+	template<typename Component>
+	static void CopyComponent(entt::registry* destination, entt::registry* source, Scene* scene, const std::unordered_map<UUID, entt::entity>& entities)
+	{
+		auto view = source->view<Component>();
+		for (auto handle : view)
+		{
+			UUID uuid = source->get<IDComponent>(handle);
+			GBC_CORE_ASSERT(entities.find(uuid) != entities.cend(), "Entity UUID not found when copying scene!");
+			auto destinationHandle = entities.at(uuid);
+			auto& component = view.get<Component>(handle);
+			destination->emplace_or_replace<Component>(destinationHandle, component);
+		}
+	}
+
+	template<typename Component>
+	static void CopyComponentIfExists(Entity destination, Entity source)
+	{
+		if (source.Has<Component>())
+			destination.AddOrReplace<Component>(source.Get<Component>());
+	}
+
+	Ref<Scene> Scene::Copy(const Ref<Scene>& scene)
+	{
+		GBC_PROFILE_FUNCTION();
+
+		Ref<Scene> newScene = CreateRef<Scene>();
+		newScene->viewportSize = scene->viewportSize;
+
+		Scene* sourceScene = scene.get();
+		entt::registry* destination = newScene->registry;
+		entt::registry* source = scene->registry;
+		std::unordered_map<UUID, entt::entity> entities;
+
+		// Create new entities
+		for (auto handle : scene->entities)
+			CopyEntity(handle, source, sourceScene, newScene, entities, false);
+
+		// Copy all components except for IDComponent, TagComponent, and RelationshipComponent
+		CopyComponent<CameraComponent>(destination, source, sourceScene, entities);
+		CopyComponent<NativeScriptComponent>(destination, source, sourceScene, entities);
+		CopyComponent<SpriteRendererComponent>(destination, source, sourceScene, entities);
+		CopyComponent<TransformComponent>(destination, source, sourceScene, entities);
+
+		CopyComponent<BoxCollider2DComponent>(destination, source, sourceScene, entities);
+		CopyComponent<Rigidbody2DComponent>(destination, source, sourceScene, entities);
+
+		return newScene;
+	}
+
+	Entity Scene::CopyEntity(entt::entity handle, entt::registry* source, Scene* sourceScene, Ref<Scene>& newScene, std::unordered_map<UUID, entt::entity>& entities, bool hasParent)
+	{
+		UUID uuid = source->get<IDComponent>(handle);
+		const auto& name = source->get<TagComponent>(handle).tag;
+		Entity newEntity = newScene->CreateEntity(uuid, name);
+		entities[uuid] = newEntity;
+		// TODO: find a better way to not add children to the entities list
+		if (hasParent)
+			newScene->entities.pop_back();
+
+		Entity entity{ handle, sourceScene };
+
+		// Copy child entities
+		for (Entity child = entity.GetFirstChild(); child; child = child.GetNextSibling())
+		{
+			Entity newChild = CopyEntity(child, source, sourceScene, newScene, entities, true);
+			newChild.SetParent(newEntity);
+		}
+
+		return newEntity;
+	}
+
 	Entity Scene::CreateEntity(UUID uuid, const std::string& tag)
 	{
 		GBC_PROFILE_FUNCTION();
 
-		Entity entity(registry->create(), this);
-		entity.AddComponent<IDComponent>(uuid);
-		entity.AddComponent<TagComponent>(tag.empty() ? "Unknown Entity" : tag);
-		entity.AddComponent<TransformComponent>();
+		Entity entity{ registry->create(), this };
+		entity.Add<IDComponent>(uuid);
+		entity.Add<RelationshipComponent>();
+		entity.Add<TagComponent>(tag.empty() ? "Unknown Entity" : tag);
+		entity.Add<TransformComponent>();
+
+		entities.push_back(entity);
 		return entity;
 	}
 
@@ -71,14 +147,69 @@ namespace gbc
 		return CreateEntity(UUID(), tag);
 	}
 
+	Entity Scene::DuplicateEntity(Entity entity)
+	{
+		auto name = entity.GetName();
+		Entity newEntity = CreateEntity(name);
+
+		// Copy RelationshipComponent
+		newEntity.SetParent(entity.GetParent());
+		for (Entity child = entity.GetFirstChild(); child; child = child.GetNextSibling())
+		{
+			Entity newChild = DuplicateEntity(child);
+			newChild.SetParent(newEntity);
+		}
+
+		// Copy all components except for IDComponent, TagComponent, and RelationshipComponent
+		CopyComponentIfExists<CameraComponent>(newEntity, entity);
+		CopyComponentIfExists<NativeScriptComponent>(newEntity, entity);
+		CopyComponentIfExists<SpriteRendererComponent>(newEntity, entity);
+		CopyComponentIfExists<TransformComponent>(newEntity, entity);
+
+		CopyComponentIfExists<BoxCollider2DComponent>(newEntity, entity);
+		CopyComponentIfExists<Rigidbody2DComponent>(newEntity, entity);
+
+		return newEntity;
+	}
+
+	Entity Scene::GetExistingEntity(UUID uuid)
+	{
+		auto view = registry->view<IDComponent>();
+		for (auto handle : view)
+			if (uuid == registry->get<IDComponent>(handle).id)
+				return { handle, this };
+		return {};
+	}
+
 	void Scene::DestroyEntity(Entity entity)
 	{
 		GBC_PROFILE_FUNCTION();
 
-		if (physicsWorld && entity.HasComponent<Rigidbody2DComponent>())
+		if (physicsWorld && entity.Has<Rigidbody2DComponent>())
 			DestroyPhysicsEntityRigidbody2D(entity);
 
+		for (Entity child = entity.GetFirstChild(), nextSibling; child; child = nextSibling)
+		{
+			nextSibling = child.GetNextSibling();
+			DestroyEntity(child);
+		}
+		if (entity.HasParent())
+			entity.RemoveParent();
+
+		RemoveEntity(entity.GetUUID());
 		registry->destroy(entity);
+	}
+
+	void Scene::RemoveEntity(UUID uuid)
+	{
+		for (auto it = entities.begin(); it != entities.end(); ++it)
+		{
+			if (uuid == registry->get<IDComponent>(*it).id)
+			{
+				entities.erase(it);
+				break;
+			}
+		}
 	}
 
 	void Scene::OnRuntimePlay()
@@ -139,42 +270,22 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		// Get camera
-		glm::mat4 primaryCameraTransform;
-		Camera* primaryCamera = nullptr;
+		if (Entity primaryCamera = GetPrimaryCameraEntity())
 		{
-			auto group = registry->group(entt::get<TransformComponent, CameraComponent>);
-			for (auto entity : group)
+			BasicRenderer::BeginScene(primaryCamera.Get<CameraComponent>(), glm::inverse(primaryCamera.GetAbsoluteTransform()));
+
+			auto view = registry->view<SpriteRendererComponent>();
+			for (auto handle : view)
 			{
-				auto [transform, camera] = group.get<TransformComponent, CameraComponent>(entity);
+				Entity entity{ handle, this };
+				glm::mat4 transform = entity.GetAbsoluteTransform();
 
-				if (camera.primary)
-				{
-					primaryCameraTransform = transform;
-					primaryCamera = &camera.camera;
-					break;
-				}
-			}
-		}
-
-		if (primaryCamera != nullptr)
-		{
-			BasicRenderer::BeginScene(*primaryCamera, glm::inverse(primaryCameraTransform));
-
-			auto group = registry->group(entt::get<TransformComponent, SpriteRendererComponent>);
-			for (auto entity : group)
-			{
-				auto [transform, renderable] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+				auto renderable = view.get<SpriteRendererComponent>(handle);
 				BasicRenderer::DrawQuad(transform, renderable);
 			}
 
 			BasicRenderer::EndScene();
 		}
-	}
-
-	void Scene::OnEditorUpdate(Timestep timestep)
-	{
-		GBC_PROFILE_FUNCTION();
 	}
 
 	void Scene::OnEditorRender(const EditorCamera& camera)
@@ -183,10 +294,13 @@ namespace gbc
 
 		BasicRenderer::BeginScene(camera);
 
-		auto group = registry->group(entt::get<TransformComponent, SpriteRendererComponent>);
-		for (auto entity : group)
+		auto view = registry->view<SpriteRendererComponent>();
+		for (auto handle : view)
 		{
-			auto [transform, renderable] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+			Entity entity{ handle, this };
+			glm::mat4 transform = entity.GetAbsoluteTransform();
+
+			auto renderable = view.get<SpriteRendererComponent>(handle);
 			BasicRenderer::DrawQuad(transform, renderable);
 		}
 
@@ -197,18 +311,15 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		if (width > 0 && height > 0)
-		{
-			viewportSize.x = width;
-			viewportSize.y = height;
+		viewportSize.x = width;
+		viewportSize.y = height;
 
-			auto view = registry->view<CameraComponent>();
-			for (auto entity : view)
-			{
-				auto& camera = view.get<CameraComponent>(entity);
-				if (!camera.fixedAspectRatio)
-					camera.camera.OnViewportResize(viewportSize.x, viewportSize.y);
-			}
+		auto view = registry->view<CameraComponent>();
+		for (auto handle : view)
+		{
+			auto& cameraComponent = view.get<CameraComponent>(handle);
+			if (!cameraComponent.fixedAspectRatio)
+				cameraComponent.camera.OnViewportResize(viewportSize.x, viewportSize.y);
 		}
 	}
 
@@ -224,8 +335,8 @@ namespace gbc
 
 	void Scene::UpdatePhysicsEntity(Entity entity)
 	{
-		auto& transform = entity.GetComponent<TransformComponent>();
-		auto& rigidbody = entity.GetComponent<Rigidbody2DComponent>();
+		auto& transform = entity.Get<TransformComponent>();
+		auto& rigidbody = entity.Get<Rigidbody2DComponent>();
 
 		b2Body* body = static_cast<b2Body*>(rigidbody.runtimeBody);
 		const auto& position = body->GetPosition();
@@ -236,8 +347,8 @@ namespace gbc
 
 	void Scene::InitializePhysicsEntityRigidbody2D(Entity entity)
 	{
-		auto& transform = entity.GetComponent<TransformComponent>();
-		auto& rigidbody = entity.GetComponent<Rigidbody2DComponent>();
+		auto& transform = entity.Get<TransformComponent>();
+		auto& rigidbody = entity.Get<Rigidbody2DComponent>();
 
 		b2BodyDef bodyDef;
 		bodyDef.type = Rigidbody2DTypeToB2BodyType(rigidbody.bodyType);
@@ -248,13 +359,13 @@ namespace gbc
 		body->SetFixedRotation(rigidbody.fixedRotation);
 		rigidbody.runtimeBody = body;
 
-		if (entity.HasComponent<BoxCollider2DComponent>())
+		if (entity.Has<BoxCollider2DComponent>())
 			InitializePhysicsEntityBoxCollider2D(entity, transform, rigidbody);
 	}
 
 	void Scene::InitializePhysicsEntityBoxCollider2D(Entity entity, TransformComponent& transform, Rigidbody2DComponent& rigidbody)
 	{
-		auto& collider = entity.GetComponent<BoxCollider2DComponent>();
+		auto& collider = entity.Get<BoxCollider2DComponent>();
 		if (collider.runtimeFixture == nullptr)
 		{
 			b2PolygonShape shape;
@@ -275,18 +386,18 @@ namespace gbc
 
 	void Scene::DestroyPhysicsEntityRigidbody2D(Entity entity)
 	{
-		auto& rigidbody = entity.GetComponent<Rigidbody2DComponent>();
+		auto& rigidbody = entity.Get<Rigidbody2DComponent>();
 
 		physicsWorld->DestroyBody(static_cast<b2Body*>(rigidbody.runtimeBody));
 
-		if (entity.HasComponent<BoxCollider2DComponent>())
+		if (entity.Has<BoxCollider2DComponent>())
 			DestroyPhysicsEntityBoxCollider2D(entity, rigidbody);
 	}
 
 	void Scene::DestroyPhysicsEntityBoxCollider2D(Entity entity, Rigidbody2DComponent& rigidbody)
 	{
 		auto body = static_cast<b2Body*>(rigidbody.runtimeBody);
-		auto fixture = static_cast<b2Fixture*>(entity.GetComponent<BoxCollider2DComponent>().runtimeFixture);
+		auto fixture = static_cast<b2Fixture*>(entity.Get<BoxCollider2DComponent>().runtimeFixture);
 		body->DestroyFixture(fixture);
 	}
 
@@ -298,6 +409,7 @@ namespace gbc
 		component.camera.OnViewportResize(viewportSize.x, viewportSize.y);
 	}
 	template<> void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component) {}
+	template<> void Scene::OnComponentAdded<RelationshipComponent>(Entity entity, RelationshipComponent& component) {}
 	template<> void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent & component) {}
 	template<> void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent & component) {}
 	template<> void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent & component) {}
@@ -306,14 +418,13 @@ namespace gbc
 	// OnComponentAdded::Physics
 	template<> void Scene::OnComponentAdded<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
 	{
-		if (physicsWorld && entity.HasComponent<Rigidbody2DComponent>())
+		if (physicsWorld && entity.Has<Rigidbody2DComponent>())
 		{
-			auto& transform = entity.GetComponent<TransformComponent>();
-			auto& rigidbody = entity.GetComponent<Rigidbody2DComponent>();
+			auto& transform = entity.Get<TransformComponent>();
+			auto& rigidbody = entity.Get<Rigidbody2DComponent>();
 			InitializePhysicsEntityBoxCollider2D(entity, transform, rigidbody);
 		}
 	}
-
 	template<> void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
 	{
 		if (physicsWorld)
@@ -323,22 +434,41 @@ namespace gbc
 	// OnComponentRemoved
 	template<typename T> void Scene::OnComponentRemoved(Entity entity, T& component) { static_assert(false); }
 
-	template<> void Scene::OnComponentRemoved<IDComponent>(Entity entity, IDComponent& component) { GBC_CORE_ASSERT(false); }
 	template<> void Scene::OnComponentRemoved<CameraComponent>(Entity entity, CameraComponent& component) {}
-	template<> void Scene::OnComponentRemoved<TagComponent>(Entity entity, TagComponent& component) { GBC_CORE_ASSERT(false); }
-	template<> void Scene::OnComponentRemoved<TransformComponent>(Entity entity, TransformComponent& component) { GBC_CORE_ASSERT(false); }
-	template<> void Scene::OnComponentRemoved<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component) {}
+	template<> void Scene::OnComponentRemoved<IDComponent>(Entity entity, IDComponent& component) {}
 	template<> void Scene::OnComponentRemoved<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
+	template<> void Scene::OnComponentRemoved<RelationshipComponent>(Entity entity, RelationshipComponent& component) {}
+	template<> void Scene::OnComponentRemoved<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component) {}
+	template<> void Scene::OnComponentRemoved<TagComponent>(Entity entity, TagComponent& component) {}
+	template<> void Scene::OnComponentRemoved<TransformComponent>(Entity entity, TransformComponent& component) {}
 
-	// OnComponentAdded::Physics
+	// OnComponentRemoved::Physics
 	template<> void Scene::OnComponentRemoved<BoxCollider2DComponent>(Entity entity, BoxCollider2DComponent& component)
 	{
-		if (physicsWorld && entity.HasComponent<Rigidbody2DComponent>())
-			DestroyPhysicsEntityBoxCollider2D(entity, entity.GetComponent<Rigidbody2DComponent>());
+		if (physicsWorld && entity.Has<Rigidbody2DComponent>())
+			DestroyPhysicsEntityBoxCollider2D(entity, entity.Get<Rigidbody2DComponent>());
 	}
 	template<> void Scene::OnComponentRemoved<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)
 	{
 		if (physicsWorld)
 			DestroyPhysicsEntityRigidbody2D(entity);
+	}
+
+	// child is always valid
+	// if either oldParent or newParent are invalid, the other is valid
+	void Scene::OnParentChanged(Entity child, Entity oldParent, Entity newParent)
+	{
+		if (!oldParent)
+		{
+			RemoveEntity(child.GetUUID());
+		}
+		else if (!newParent)
+		{
+			entities.push_back(child);
+		}
+		else
+		{
+			// for now do nothing
+		}
 	}
 }

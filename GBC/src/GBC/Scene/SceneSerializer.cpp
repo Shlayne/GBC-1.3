@@ -196,10 +196,10 @@ namespace gbc
 	template<typename T, typename Func>
 	static void SerializeComponent(YAML::Emitter& out, Entity entity, const char* name, Func func)
 	{
-		if (entity.HasComponent<T>())
+		if (entity.Has<T>())
 		{
 			out << YAML::Key << name << YAML::Value << YAML::BeginMap;
-			func(out, entity.GetComponent<T>());
+			func(out, entity.Get<T>());
 			out << YAML::EndMap;
 		}
 	}
@@ -221,6 +221,7 @@ namespace gbc
 				<< YAML::Key << "Scale" << YAML::Value << component.scale;
 		});
 
+		// Optional components
 		SerializeComponent<CameraComponent>(out, entity, "CameraComponent", [](YAML::Emitter& out, CameraComponent& component)
 		{
 			auto& camera = component.camera;
@@ -237,6 +238,21 @@ namespace gbc
 		});
 		// TODO: how do this ???
 		//SerializeComponent<NativeScriptComponent>(out, entity, "NativeScriptComponent", [](YAML::Emitter& out, NativeScriptComponent& component) {});
+		if (entity.HasRelationship())
+		{
+			SerializeComponent<RelationshipComponent>(out, entity, "RelationshipComponent", [entity](YAML::Emitter& out, RelationshipComponent& component)
+			{
+				if (entity.HasParent())
+					out << YAML::Key << "Parent" << YAML::Value << entity.GetParent().GetUUID();
+				if (entity.HasChildren())
+				{
+					out << YAML::Key << "Children" << YAML::BeginSeq;
+					for (Entity child = entity.GetFirstChild(); child; child = child.GetNextSibling())
+						out << YAML::Value << child.GetUUID();
+					out << YAML::EndSeq;
+				}
+			});
+		}
 		SerializeComponent<SpriteRendererComponent>(out, entity, "SpriteRendererComponent", [](YAML::Emitter& out, SpriteRendererComponent& component)
 		{
 			out << YAML::Key << "TintColor" << YAML::Value << component.color
@@ -269,7 +285,6 @@ namespace gbc
 				<< YAML::Key << "Restitution" << YAML::Value << component.restitution
 				<< YAML::Key << "RestitutionThreshold" << YAML::Value << component.restitutionThreshold;
 		});
-
 		SerializeComponent<Rigidbody2DComponent>(out, entity, "Rigidbody2DComponent", [](YAML::Emitter& out, Rigidbody2DComponent& component)
 		{
 			out << YAML::Key << "Type" << YAML::Value << Rigidbody2DComponentBodyTypeToString(component.bodyType)
@@ -277,20 +292,22 @@ namespace gbc
 		});
 
 		out << YAML::EndMap;
+
+		// Serialize all child entities and their children
+		for (Entity child = entity.GetFirstChild(); child; child = child.GetNextSibling())
+			SerializeEntity(out, child);
 	}
 
 	bool SceneSerializer::Serialize(const std::filesystem::path& filepath)
 	{
 		YAML::Emitter out;
 		out << YAML::BeginMap
-			<< YAML::Key << "Scene" << YAML::Value << "Untitled"
+			<< YAML::Key << "Scene" << YAML::Value << "Untitled" // TODO: scene names, projects, etc.
 			<< YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
-		// entt::registry::each iterates backwards, this doesn't
-		auto view = scene->registry->view<TagComponent>();
-		for (auto it = view.rbegin(); it != view.rend(); ++it)
+		for (auto handle : scene->entities)
 		{
-			Entity entity(*it, scene.get());
+			Entity entity{ handle, scene.get() };
 			if (entity)
 				SerializeEntity(out, entity);
 		}
@@ -326,36 +343,45 @@ namespace gbc
 
 			YAML::Node sceneNode = data["Scene"];
 			if (!sceneNode)
-				return false;
-
-			std::string sceneName = sceneNode.as<std::string>();
-
-			auto entities = data["Entities"];
-			if (entities)
 			{
+				file.close();
+				return false;
+			}
+
+			//std::string sceneName = sceneNode.as<std::string>(); // TODO: use this when projects are implemented
+
+			std::unordered_map<UUID, entt::entity> entityIDMappings;
+
+			if (auto entities = data["Entities"])
+			{
+				// Create all entities and setup mappings for RelationshipComponent
 				for (auto entityNode : entities)
 				{
 					uint64_t uuid = entityNode["Entity"].as<uint64_t>();
 
 					std::string name;
-					auto tagComponent = entityNode["TagComponent"];
-					if (tagComponent)
+					if (auto tagComponent = entityNode["TagComponent"])
 						name = tagComponent["Tag"].as<std::string>();
 
-					Entity entity = scene->CreateEntity(uuid, name);
+					entityIDMappings[uuid] = scene->CreateEntity(uuid, name);
+				}
+
+				for (auto entityNode : entities)
+				{
+					Entity entity{ entityIDMappings[entityNode["Entity"].as<uint64_t>()], scene.get() };
 
 					// Entities always have transform components
 					{
 						auto transformComponentNode = entityNode["TransformComponent"];
-						auto& transformComponent = entity.GetComponent<TransformComponent>();
+						auto& transformComponent = entity.Get<TransformComponent>();
 						transformComponent.translation = transformComponentNode["Translation"].as<glm::vec3>();
 						transformComponent.rotation = transformComponentNode["Rotation"].as<glm::vec3>();
 						transformComponent.scale = transformComponentNode["Scale"].as<glm::vec3>();
 					}
 
-					if (auto cameraComponentNode = entityNode["CameraComponent"]; cameraComponentNode)
+					if (auto cameraComponentNode = entityNode["CameraComponent"])
 					{
-						auto& cameraComponent = entity.AddComponent<CameraComponent>();
+						auto& cameraComponent = entity.Add<CameraComponent>();
 
 						auto cameraNode = cameraComponentNode["Camera"];
 						auto& camera = cameraComponent.camera;
@@ -369,10 +395,23 @@ namespace gbc
 
 						cameraComponent.primary = cameraComponentNode["Primary"].as<bool>();
 					}
-
-					if (auto spriteRendererComponentNode = entityNode["SpriteRendererComponent"]; spriteRendererComponentNode)
+					if (auto relationshipComponentNode = entityNode["RelationshipComponent"])
 					{
-						auto& spriteRendererComponent = entity.AddComponent<SpriteRendererComponent>();
+						auto& relationshipComponent = entity.Get<RelationshipComponent>();
+						if (auto parentNode = relationshipComponentNode["Parent"])
+							relationshipComponent.parent = entityIDMappings[parentNode.as<uint64_t>()];
+						if (auto childrenNode = relationshipComponentNode["Children"])
+						{
+							for (auto childNode : childrenNode)
+							{
+								Entity child{ entityIDMappings[childNode.as<uint64_t>()], scene.get() };
+								child.SetParent(entity);
+							}
+						}
+					}
+					if (auto spriteRendererComponentNode = entityNode["SpriteRendererComponent"])
+					{
+						auto& spriteRendererComponent = entity.Add<SpriteRendererComponent>();
 
 						// TODO: this is not at all what should happen; I'm just doing this right now so
 						// I can save and load a scene and have it keep the texture.
@@ -400,9 +439,9 @@ namespace gbc
 						}
 					}
 
-					if (auto boxCollider2DComponentNode = entityNode["BoxCollider2DComponent"]; boxCollider2DComponentNode)
+					if (auto boxCollider2DComponentNode = entityNode["BoxCollider2DComponent"])
 					{
-						auto& boxCollider2DComponent = entity.AddComponent<BoxCollider2DComponent>();
+						auto& boxCollider2DComponent = entity.Add<BoxCollider2DComponent>();
 						boxCollider2DComponent.size = boxCollider2DComponentNode["Size"].as<glm::vec2>();
 						boxCollider2DComponent.offset = boxCollider2DComponentNode["Offset"].as<glm::vec2>();
 						boxCollider2DComponent.density = boxCollider2DComponentNode["Density"].as<float>();
@@ -410,10 +449,9 @@ namespace gbc
 						boxCollider2DComponent.restitution = boxCollider2DComponentNode["Restitution"].as<float>();
 						boxCollider2DComponent.restitutionThreshold = boxCollider2DComponentNode["RestitutionThreshold"].as<float>();
 					}
-
-					if (auto rigidbody2DComponentNode = entityNode["Rigidbody2DComponent"]; rigidbody2DComponentNode)
+					if (auto rigidbody2DComponentNode = entityNode["Rigidbody2DComponent"])
 					{
-						auto& rigidbody2DComponent = entity.AddComponent<Rigidbody2DComponent>();
+						auto& rigidbody2DComponent = entity.Add<Rigidbody2DComponent>();
 						rigidbody2DComponent.bodyType = Rigidbody2DComponentBodyTypeFromString(rigidbody2DComponentNode["Type"].as<std::string>());
 						rigidbody2DComponent.fixedRotation = rigidbody2DComponentNode["FixedRotation"].as<bool>();
 					}

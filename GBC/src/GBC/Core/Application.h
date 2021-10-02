@@ -25,7 +25,7 @@ namespace gbc
 	class Application
 	{
 	public:
-		Application(const WindowSpecifications& windowSpecs = {});
+		Application(CommandLineArgs args, const WindowSpecifications& windowSpecs = {});
 		virtual ~Application();
 
 		inline static Application& Get() { return *instance; }

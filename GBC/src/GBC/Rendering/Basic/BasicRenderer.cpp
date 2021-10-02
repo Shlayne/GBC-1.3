@@ -216,7 +216,7 @@ namespace gbc
 
 	void BasicRenderer::EnsureBatch(uint32_t texIndex)
 	{
-		if (data.quadCount + 1 > data.maxQuads && texIndex >= data.maxTextures)
+		if (data.quadCount >= data.maxQuads || texIndex >= data.maxTextures)
 			EndScene();
 	}
 

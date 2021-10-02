@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <string>
+#include <unordered_map>
 #include "GBC/Core/Timestep.h"
 #include "GBC/Core/UUID.h"
 #include "GBC/Events/Event.h"
@@ -34,17 +35,25 @@ namespace gbc
 		Scene();
 		~Scene();
 
+		static Ref<Scene> Copy(const Ref<Scene>& scene);
+	private:
+		static Entity CopyEntity(entt::entity handle, entt::registry* source, Scene* sourceScene, Ref<Scene>& newScene, std::unordered_map<UUID, entt::entity>& entities, bool hasParent);
+	public:
 		Entity CreateEntity(UUID uuid, const std::string& tag = {});
 		Entity CreateEntity(const std::string& tag = {});
+		Entity DuplicateEntity(Entity entity);
+		Entity GetExistingEntity(UUID uuid);
 		void DestroyEntity(Entity entity);
-
+	private:
+		void RemoveEntity(UUID uuid);
+	public:
 		void OnRuntimePlay();
 		void OnRuntimeStop();
 		void OnRuntimeUpdate(Timestep timestep);
+		// TODO: move these to SceneRenderer
 		void OnRuntimeRender();
-		void OnEditorUpdate(Timestep timestep);
 		void OnEditorRender(const EditorCamera& camera);
-
+	public:
 		void OnViewportResize(int32_t width, int32_t height);
 		inline const glm::ivec2& GetViewportSize() const noexcept { return viewportSize; }
 
@@ -55,8 +64,11 @@ namespace gbc
 		template<typename T>
 		void OnComponentRemoved(Entity entity, T& component);
 
+		void OnParentChanged(Entity child, Entity oldParent, Entity newParent);
+
 		entt::registry* registry;
 		glm::ivec2 viewportSize;
+		std::vector<entt::entity> entities;
 	private:
 		void UpdatePhysicsEntity(Entity entity);
 		void InitializePhysicsEntityRigidbody2D(Entity entity);

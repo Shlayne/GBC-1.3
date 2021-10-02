@@ -18,6 +18,7 @@ project "GBC"
 
 	files {
 		"src/**.h",
+		"src/**.inl",
 		"src/**.cpp"
 	}
 

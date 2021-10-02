@@ -29,7 +29,7 @@ namespace gbc
 
 			if (ImGui::BeginDragDropTarget())
 			{
-				if (const ImGuiPayload* payload = ImGuiHelper::AcceptDragDropPayloadIf("CONTENT_BROWSER_ITEM",
+				if (const ImGuiPayload* payload = ImGuiHelper::AcceptDragDropPayload("CONTENT_BROWSER_ITEM",
 					[](void* payloadData) { return std::wstring_view(static_cast<const wchar_t*>(payloadData)).ends_with(L".gscn"); }))
 				{
 					// TODO: calling this openScene method can caused unsaved work to be lost!
@@ -52,7 +52,7 @@ namespace gbc
 				glm::mat4 projection = editorCamera.GetProjection();
 				
 				// Get entity info
-				TransformComponent& transformComponent = selectedEntity.GetComponent<TransformComponent>();
+				auto& transformComponent = selectedEntity.Get<TransformComponent>();
 				glm::mat4 transform = transformComponent;
 
 				// Get snapping info

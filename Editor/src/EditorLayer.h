@@ -28,17 +28,16 @@ namespace gbc
 		bool OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& event);
 
 		// Scene
-		void OnScenePlay();
-		void OnSceneStop();
-		void ClearScene();
-
 		void NewScene();
 		void OpenScene();
 		void OpenSceneFile(const std::filesystem::path& filepath);
 		void SaveScene();
-		void SaveAsScene();
+		void SaveSceneAs();
 
-		std::filesystem::path currentFilepath;
+		void OnScenePlay();
+		void OnSceneStop();
+
+		std::filesystem::path sceneFilepath;
 		bool hasUnsavedChanges = false;
 
 		enum class SceneState : uint8_t
@@ -48,10 +47,12 @@ namespace gbc
 		SceneState sceneState = SceneState::Edit;
 		
 		EditorCamera editorCamera;
-		Ref<Scene> scene;
+		Ref<Scene> activeScene;
+		Ref<Scene> editorScene;
 		Ref<Framebuffer> framebuffer;
 
 		Entity selectedEntity;
+		Entity selectedEditorEntity;
 		ImGuizmo::OPERATION gizmoType = ImGuizmo::OPERATION::NONE;
 		bool canUseGizmos = true;
 		bool canRenderGizmos = true;
@@ -62,12 +63,7 @@ namespace gbc
 		void UI_ToolBar();
 
 		template<typename T, typename... Args>
-		T* AddPanel(const std::string& name, Args&&... args)
-		{
-			T* panel = new T(name, std::forward<Args>(args)...);
-			panels[name] = panel;
-			return panel;
-		}
+		T* AddPanel(const std::string& name, Args&&... args);
 
 		std::map<std::string, Panel*> panels;
 		SceneViewportPanel* sceneViewportPanel = nullptr;
@@ -80,3 +76,5 @@ namespace gbc
 		Ref<Texture2D> stopButtonTexture;
 	};
 }
+
+#include "EditorLayer.inl"

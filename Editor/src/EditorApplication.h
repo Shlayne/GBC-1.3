@@ -7,6 +7,6 @@ namespace gbc
 	class EditorApplication : public Application
 	{
 	public:
-		EditorApplication(const WindowSpecifications& specs);
+		EditorApplication(CommandLineArgs args, const WindowSpecifications& specs);
 	};
 }

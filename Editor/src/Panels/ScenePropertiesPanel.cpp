@@ -14,7 +14,7 @@ namespace gbc
 	template<typename T, typename Func>
 	static void DrawComponent(const std::string& label, int columnCount, Entity entity, bool removable, Func func)
 	{
-		if (entity.HasComponent<T>())
+		if (entity.Has<T>())
 		{
 			ImGui::PushID(static_cast<uint32_t>(entity));
 			ImGui::PushID(label.c_str());
@@ -50,7 +50,7 @@ namespace gbc
 				ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
 				if (ImGuiHelper::BeginTable(label.c_str(), columnCount))
 				{
-					func(entity.GetComponent<T>());
+					func(entity.Get<T>());
 					ImGuiHelper::EndTable();
 				}
 				ImGui::Indent();
@@ -58,7 +58,7 @@ namespace gbc
 			}
 
 			if (removeComponent)
-				entity.RemoveComponent<T>();
+				entity.Remove<T>();
 
 			ImGui::PopID();
 			ImGui::PopID();
@@ -68,9 +68,9 @@ namespace gbc
 	template<typename T>
 	static void DrawAddComponent(const std::string& label, Entity entity)
 	{
-		if (!entity.HasComponent<T>() && ImGui::MenuItem(label.c_str()))
+		if (!entity.Has<T>() && ImGui::MenuItem(label.c_str()))
 		{
-			entity.AddComponent<T>();
+			entity.Add<T>();
 			ImGui::CloseCurrentPopup();
 		}
 	}
@@ -92,7 +92,7 @@ namespace gbc
 
 				{
 					ImGui::PushID("TagComponent");
-					ImGuiHelper::TextEdit(&selectedEntity.GetComponent<TagComponent>().tag);
+					ImGuiHelper::TextEdit(&selectedEntity.Get<TagComponent>().tag);
 					ImGui::PopID();
 				}
 

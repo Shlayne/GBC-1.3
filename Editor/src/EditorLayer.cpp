@@ -29,11 +29,12 @@ namespace gbc
 		framebufferSpecification.attachments = { { FramebufferTextureFormat::RGBA8 }, { FramebufferTextureFormat::Depth24Stencil8 } };
 		framebuffer = Framebuffer::Create(framebufferSpecification);
 
-		scene = CreateRef<Scene>();
+		editorScene = CreateRef<Scene>();
+		activeScene = editorScene;
 
 		// TODO: Figure out a different way to have Panels change values in EditorLayer
-		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer, scene, selectedEntity, gizmoType, canUseGizmos, canRenderGizmos, editorCamera, GBC_BIND_FUNC(OpenSceneFile));
-		sceneHierarchyPanel = AddPanel<SceneHierarchyPanel>("Scene Hierarchy", scene, selectedEntity);
+		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer, activeScene, selectedEntity, gizmoType, canUseGizmos, canRenderGizmos, editorCamera, GBC_BIND_FUNC(OpenSceneFile));
+		sceneHierarchyPanel = AddPanel<SceneHierarchyPanel>("Scene Hierarchy", activeScene, selectedEntity);
 		scenePropertiesPanel = AddPanel<ScenePropertiesPanel>("Scene Properties", selectedEntity);
 		contentBrowserPanel = AddPanel<ContentBrowserPanel>("Content Browser");
 #if GBC_ENABLE_STATS
@@ -74,17 +75,16 @@ namespace gbc
 
 			editorCamera.OnViewportResize(viewportSize.x, viewportSize.y);
 			framebuffer->OnViewportResize(viewportSize.x, viewportSize.y);
-			scene->OnViewportResize(viewportSize.x, viewportSize.y);
+			activeScene->OnViewportResize(viewportSize.x, viewportSize.y);
 		}
 
 		switch (sceneState)
 		{
 			case SceneState::Edit:
 				editorCamera.OnUpdate(viewportHovered ? timestep : Timestep());
-				scene->OnEditorUpdate(timestep);
 				break;
 			case SceneState::Play:
-				scene->OnRuntimeUpdate(timestep);
+				activeScene->OnRuntimeUpdate(timestep);
 				break;
 		}
 	}
@@ -105,10 +105,10 @@ namespace gbc
 		switch (sceneState)
 		{
 			case SceneState::Edit:
-				scene->OnEditorRender(editorCamera);
+				activeScene->OnEditorRender(editorCamera);
 				break;
 			case SceneState::Play:
-				scene->OnRuntimeRender();
+				activeScene->OnRuntimeRender();
 				break;
 		}
 
@@ -161,7 +161,7 @@ namespace gbc
 				if (ImGui::MenuItem("Save...", "Ctrl+S"))
 					SaveScene();
 				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
-					SaveAsScene();
+					SaveSceneAs();
 
 				ImGui::Separator();
 
@@ -249,10 +249,12 @@ namespace gbc
 
 	bool EditorLayer::OnKeyPressEvent(KeyPressEvent& event)
 	{
-		bool controlPressed = Input::IsKeyPressed(Keycode::LeftControl) || Input::IsKeyPressed(Keycode::RightControl);
-		bool shiftPressed = Input::IsKeyPressed(Keycode::LeftShift) || Input::IsKeyPressed(Keycode::RightShift);
-		bool altPressed = Input::IsKeyPressed(Keycode::LeftAlt) || Input::IsKeyPressed(Keycode::RightAlt);
+		// TODO: assignable keybindings
+		bool controlPressed  = Input::IsKeyPressed(Keycode::LeftControl) || Input::IsKeyPressed(Keycode::RightControl);
+		bool shiftPressed    = Input::IsKeyPressed(Keycode::LeftShift)   || Input::IsKeyPressed(Keycode::RightShift);
+		bool altPressed      = Input::IsKeyPressed(Keycode::LeftAlt)     || Input::IsKeyPressed(Keycode::RightAlt);
 
+		bool none            = !controlPressed && !shiftPressed && !altPressed;
 		bool control         =  controlPressed && !shiftPressed && !altPressed;
 		bool shift           = !controlPressed &&  shiftPressed && !altPressed;
 		bool controlShift    =  controlPressed &&  shiftPressed && !altPressed;
@@ -282,37 +284,50 @@ namespace gbc
 				if (control || controlShift)
 				{
 					if (shiftPressed)
-						SaveAsScene();
+						SaveSceneAs();
 					else
 						SaveScene();
 					return true;
 				}
 				break;
 
+			// Scene
+			case Keycode::Delete:
+				if (none && selectedEntity)
+				{
+					activeScene->DestroyEntity(selectedEntity);
+					selectedEntity = {};
+				}
+				break;
+			case Keycode::D:
+				if (control && selectedEntity)
+					activeScene->DuplicateEntity(selectedEntity);
+				break;
+
 			// Gizmos
 			case Keycode::Q:
-				if (sceneViewportPanel->IsFocused())
+				if (none && sceneViewportPanel->IsFocused())
 				{
 					gizmoType = ImGuizmo::OPERATION::NONE;
 					return true;
 				}
 				break;
 			case Keycode::W:
-				if (sceneViewportPanel->IsFocused())
+				if (none && sceneViewportPanel->IsFocused())
 				{
 					gizmoType = ImGuizmo::OPERATION::TRANSLATE;
 					return true;
 				}
 				break;
 			case Keycode::E:
-				if (sceneViewportPanel->IsFocused())
+				if (none && sceneViewportPanel->IsFocused())
 				{
 					gizmoType = ImGuizmo::OPERATION::ROTATE;
 					return true;
 				}
 				break;
 			case Keycode::R:
-				if (sceneViewportPanel->IsFocused())
+				if (none && sceneViewportPanel->IsFocused())
 				{
 					gizmoType = ImGuizmo::OPERATION::SCALE;
 					return true;
@@ -358,30 +373,6 @@ namespace gbc
 		return false;
 	}
 
-	void EditorLayer::OnScenePlay()
-	{
-		sceneState = SceneState::Play;
-		canRenderGizmos = false;
-		ImGuiHelper::SetScenePlayColors();
-		scene->OnRuntimePlay();
-	}
-
-	void EditorLayer::OnSceneStop()
-	{
-		sceneState = SceneState::Edit;
-		canRenderGizmos = true;
-		ImGuiHelper::SetSceneEditColors();
-		scene->OnRuntimeStop();
-	}
-
-	void EditorLayer::ClearScene()
-	{
-		glm::ivec2 viewportSize = scene->GetViewportSize();
-		scene = CreateRef<Scene>();
-		scene->OnViewportResize(viewportSize.x, viewportSize.y);
-		selectedEntity = {};
-	}
-
 	void EditorLayer::NewScene()
 	{
 		bool allowedDiscard = true;
@@ -395,8 +386,16 @@ namespace gbc
 
 		if (allowedDiscard)
 		{
-			currentFilepath.clear();
-			ClearScene();
+			if (sceneState != SceneState::Edit)
+				OnSceneStop();
+
+			sceneFilepath.clear();
+
+			editorScene = CreateRef<Scene>();
+			glm::ivec2 viewportSize = activeScene->GetViewportSize();
+			editorScene->OnViewportResize(viewportSize.x, viewportSize.y);
+			selectedEntity = {};
+			activeScene = editorScene;
 		}
 	}
 
@@ -412,7 +411,7 @@ namespace gbc
 		if (allowedDiscard)
 		{
 			// TODO: open from assets directory
-			auto filepath = FileDialog::OpenFile(L"GBC Scene (*.gscn)\0*.gscn\0");
+			auto filepath = FileDialog::OpenFile(L"GBC Scene (*.gscn)\0*.gscn\0", std::filesystem::current_path() /= "Assets");
 			if (!filepath.empty())
 				OpenSceneFile(filepath);
 		}
@@ -420,36 +419,71 @@ namespace gbc
 
 	void EditorLayer::OpenSceneFile(const std::filesystem::path& filepath)
 	{
-		currentFilepath = filepath;
-		ClearScene();
-		SceneSerializer serializer(scene);
-		serializer.Deserialize(currentFilepath);
+		if (sceneState != SceneState::Edit)
+			OnSceneStop();
+
+		sceneFilepath = filepath;
+
+		Ref<Scene> newScene = CreateRef<Scene>();
+		SceneSerializer serializer(newScene);
+		if (serializer.Deserialize(sceneFilepath))
+		{
+			editorScene = newScene;
+			glm::ivec2 viewportSize = activeScene->GetViewportSize();
+			editorScene->OnViewportResize(viewportSize.x, viewportSize.y);
+			selectedEntity = {};
+			activeScene = editorScene;
+		}
 	}
 
 	void EditorLayer::SaveScene()
 	{
-		if (!currentFilepath.empty())
+		if (!sceneFilepath.empty())
 		{
 			hasUnsavedChanges = false;
 
-			SceneSerializer serializer(scene);
-			serializer.Serialize(currentFilepath);
+			SceneSerializer serializer(activeScene);
+			serializer.Serialize(sceneFilepath);
 		}
 		else
-			SaveAsScene();
+			SaveSceneAs();
 	}
 
-	void EditorLayer::SaveAsScene()
+	void EditorLayer::SaveSceneAs()
 	{
-		auto filepath = FileDialog::SaveFile(L"GBC Scene (*.gscn)\0*.gscn\0");
+		auto filepath = FileDialog::SaveFile(L"GBC Scene (*.gscn)\0*.gscn\0", std::filesystem::current_path() /= "Assets");
 		if (!filepath.empty())
 		{
 			// Add extension to extensionless path
 			if (!filepath.native().ends_with(L".gscn"))
 				filepath += L".gscn";
 
-			currentFilepath = filepath;
+			sceneFilepath = filepath;
 			SaveScene();
 		}
+	}
+
+	void EditorLayer::OnScenePlay()
+	{
+		sceneState = SceneState::Play;
+		canRenderGizmos = false;
+		ImGuiHelper::SetScenePlayColors();
+
+		activeScene = Scene::Copy(editorScene);
+		activeScene->OnRuntimePlay();
+
+		selectedEditorEntity = selectedEntity;
+		selectedEntity = selectedEntity ? activeScene->GetExistingEntity(selectedEntity.GetUUID()) : Entity{};
+	}
+
+	void EditorLayer::OnSceneStop()
+	{
+		sceneState = SceneState::Edit;
+		canRenderGizmos = true;
+		ImGuiHelper::SetSceneEditColors();
+		activeScene->OnRuntimeStop();
+		activeScene = editorScene;
+
+		selectedEntity = selectedEditorEntity;
 	}
 }

@@ -2,7 +2,7 @@
 
 namespace gbc
 {
-	class Timestep
+	struct Timestep
 	{
 	public:
 		constexpr Timestep() noexcept = default;

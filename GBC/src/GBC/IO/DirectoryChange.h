@@ -1,10 +1,9 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 #include <filesystem>
-#include <thread>
 #include <functional>
+#include <thread>
 
 namespace gbc::DirectoryChange
 {

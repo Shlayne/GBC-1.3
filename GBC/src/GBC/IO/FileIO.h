@@ -1,7 +1,9 @@
 #pragma once
 
-#include <string>
+#include <cstdint>
 #include <filesystem>
+#include <string>
+#include <vector>
 
 namespace gbc
 {

@@ -1,6 +1,7 @@
 #include "SceneHierarchyPanel.h"
 #include <imgui/imgui.h>
 #include "GBC/Core/Input.h"
+#include "GBC/ImGui/ImGuiHelper.h"
 #include "GBC/Scene/Components/CameraComponent.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
@@ -16,18 +17,23 @@ namespace gbc
 	{
 		if (enabled)
 		{
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, ImGui::GetStyle().WindowPadding.y });
-			ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
 			ImGui::Begin(name.c_str(), &enabled);
-			ImGui::PopStyleVar(2);
+			// Fake child for drag/drop
+			// TODO: add reordering of elements
+			//	add a single blue line at the index to move the entity to
+			//		with the proper length depending on child status
+			ImGui::BeginChild("SceneHierarchyPanelChild");
 			Update();
 
-			// TODO: entt iterates over its entities in a reverse order, so unreverse it.
-			context->registry->each([&](entt::entity handle)
+			for (auto entity : context->entities)
+				DrawEntityNode({ entity, context.get() });
+			if (entityToDelete)
 			{
-				Entity entity(handle, context.get());
-				DrawEntityNode(entity);
-			});
+				if (selectedEntity && (selectedEntity == entityToDelete || selectedEntity.IsSubChildOf(entityToDelete)))
+					selectedEntity = {};
+				context->DestroyEntity(entityToDelete);
+				entityToDelete = {};
+			}
 
 			if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered())
 				selectedEntity = {};
@@ -41,35 +47,35 @@ namespace gbc
 					if (ImGui::MenuItem("Camera"))
 					{
 						selectedEntity = context->CreateEntity("Camera");
-						selectedEntity.AddComponent<CameraComponent>();
+						selectedEntity.Add<CameraComponent>();
 					}
 					if (ImGui::MenuItem("Quad"))
 					{
 						selectedEntity = context->CreateEntity("Quad");
-						selectedEntity.AddComponent<SpriteRendererComponent>();
+						selectedEntity.Add<SpriteRendererComponent>();
 					}
 					if (ImGui::BeginMenu("Physics"))
 					{
 						if (ImGui::MenuItem("Static"))
 						{
 							selectedEntity = context->CreateEntity("Static Physics Entity");
-							selectedEntity.AddComponent<SpriteRendererComponent>();
-							selectedEntity.AddComponent<BoxCollider2DComponent>();
-							selectedEntity.AddComponent<Rigidbody2DComponent>(Rigidbody2DComponent::BodyType::Static);
+							selectedEntity.Add<SpriteRendererComponent>();
+							selectedEntity.Add<BoxCollider2DComponent>();
+							selectedEntity.Add<Rigidbody2DComponent>(Rigidbody2DComponent::BodyType::Static);
 						}
 						if (ImGui::MenuItem("Dynamic"))
 						{
 							selectedEntity = context->CreateEntity("Dynamic Physics Entity");
-							selectedEntity.AddComponent<SpriteRendererComponent>();
-							selectedEntity.AddComponent<BoxCollider2DComponent>();
-							selectedEntity.AddComponent<Rigidbody2DComponent>();
+							selectedEntity.Add<SpriteRendererComponent>();
+							selectedEntity.Add<BoxCollider2DComponent>();
+							selectedEntity.Add<Rigidbody2DComponent>();
 						}
 						if (ImGui::MenuItem("Kinematic"))
 						{
 							selectedEntity = context->CreateEntity("Kinematic Physics Entity");
-							selectedEntity.AddComponent<SpriteRendererComponent>();
-							selectedEntity.AddComponent<BoxCollider2DComponent>();
-							selectedEntity.AddComponent<Rigidbody2DComponent>(Rigidbody2DComponent::BodyType::Kinematic);
+							selectedEntity.Add<SpriteRendererComponent>();
+							selectedEntity.Add<BoxCollider2DComponent>();
+							selectedEntity.Add<Rigidbody2DComponent>(Rigidbody2DComponent::BodyType::Kinematic);
 						}
 						ImGui::EndMenu();
 					}
@@ -79,37 +85,75 @@ namespace gbc
 				ImGui::EndPopup();
 			}
 
+			ImGui::EndChild();
+			MakeCurrentItemDragDropTarget({});
 			ImGui::End();
 		}
 	}
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 	{
-		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 		if (selectedEntity == entity)
 			flags |= ImGuiTreeNodeFlags_Selected;
+		if (!entity.HasChildren())
+			flags |= ImGuiTreeNodeFlags_Leaf;
 		auto id = (void*)static_cast<size_t>(static_cast<uint32_t>(entity));
-		bool opened = ImGui::TreeNodeEx(id, flags, "%s", entity.GetComponent<TagComponent>().tag.c_str());
+		bool opened = ImGui::TreeNodeEx(id, flags, "%s", entity.Get<TagComponent>().tag.c_str());
 
-		bool removeEntity = false;
 		if (ImGui::BeginPopupContextItem(nullptr, ImGuiMouseButton_Right))
 		{
 			if (ImGui::MenuItem("Delete Entity"))
-				removeEntity = true;
+				entityToDelete = entity;
+			// TODO: should I set selectedEntity to the duplicated entity?
+			if (ImGui::MenuItem("Duplicate Entity"))
+				context->DuplicateEntity(entity);
 			ImGui::EndPopup();
 		}
 
 		if (ImGui::IsItemClicked())
 			selectedEntity = entity;
 
-		if (opened)
-			ImGui::TreePop();
+		MakeCurrentItemDragDropSource(entity);
+		MakeCurrentItemDragDropTarget(entity);
 
-		if (removeEntity || (focused && selectedEntity && Input::IsKeyPressed(Keycode::Delete)))
+		if (opened)
 		{
-			if (selectedEntity == entity)
-				selectedEntity = {};
-			context->DestroyEntity(entity);
+			for (Entity child = entity.GetFirstChild(); child; child = child.GetNextSibling())
+				DrawEntityNode(child);
+			ImGui::TreePop();
+		}
+	}
+
+	void SceneHierarchyPanel::MakeCurrentItemDragDropSource(Entity source)
+	{
+		if (ImGui::BeginDragDropSource())
+		{
+			ImGui::Text(source.GetName().c_str());
+
+			ImGui::SetDragDropPayload("SCENE_HIERARCHY_ITEM", &source, sizeof(source), ImGuiCond_Once);
+			ImGui::EndDragDropSource();
+		}
+	}
+
+	void SceneHierarchyPanel::MakeCurrentItemDragDropTarget(Entity target)
+	{
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGuiHelper::AcceptDragDropPayload("SCENE_HIERARCHY_ITEM",
+				[target](void* payloadData)
+				{
+					if (!target)
+						return true;
+					Entity source = *static_cast<Entity*>(payloadData);
+					return !target.IsSubChildOf(source);
+				}))
+			{
+				Entity child = *static_cast<Entity*>(payload->Data);
+				child.SetParent(target);
+			}
+
+			ImGui::EndDragDropTarget();
 		}
 	}
 }
