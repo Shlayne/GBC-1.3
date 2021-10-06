@@ -1,8 +1,8 @@
 #include "gbcpch.h"
 #include "GBC/Core/Input.h"
+#include "GBC/Core/Application.h"
 #include <glfw/glfw3.h>
 #include <array>
-#include "GBC/Core/Application.h"
 
 namespace gbc
 {

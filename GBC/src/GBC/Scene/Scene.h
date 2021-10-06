@@ -1,13 +1,13 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <string>
-#include <unordered_map>
 #include "GBC/Core/Timestep.h"
 #include "GBC/Core/UUID.h"
 #include "GBC/Events/Event.h"
 #include "GBC/Events/WindowEvents.h"
 #include "GBC/Rendering/EditorCamera.h"
+#include <glm/glm.hpp>
+#include <string>
+#include <unordered_map>
 
 // Forward declare entt stuff so we don't have to unclude the entire header file
 namespace entt

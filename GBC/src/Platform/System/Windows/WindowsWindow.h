@@ -17,6 +17,8 @@ namespace gbc
 
 		virtual int32_t GetWidth() const override { return state.current.size.x; }
 		virtual int32_t GetHeight() const override { return state.current.size.y; }
+		virtual int32_t GetX() const override { return state.current.position.x; }
+		virtual int32_t GetY() const override { return state.current.position.y; }
 
 		virtual bool IsFocused() const override { return state.focused; };
 		virtual bool ContainsMouse() const override { return state.containsMouse; }

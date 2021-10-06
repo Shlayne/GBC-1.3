@@ -8,8 +8,12 @@ namespace gbc
 	{
 	public:
 		OpenGLTexture(const TextureSpecification& specification);
+		OpenGLTexture(const TextureSpecification& specification, UUID uuid);
 		OpenGLTexture(const Ref<Framebuffer>& framebuffer, int32_t attachmentIndex);
 		virtual ~OpenGLTexture();
+
+		// TODO: Change this???
+		virtual void ChangeSampling(const TextureSpecification& specification) override;
 
 		virtual void Bind(uint32_t slot = 0) const override;
 		virtual void Unbind(uint32_t slot = 0) const override;
@@ -17,11 +21,15 @@ namespace gbc
 		virtual RendererID GetRendererID() const override { return rendererID; }
 		virtual const Ref<LocalTexture2D>& GetTexture() const override { return specification.texture; }
 		virtual const TextureSpecification& GetSpecification() const override { return specification; }
+		virtual UUID GetUUID() const override { return uuid; }
 
 		virtual void Update() override;
 		virtual bool IsFramebufferTexture() const override { return !ownsRendererID; }
 	private:
+		void Init();
+	private:
 		TextureSpecification specification;
+		UUID uuid;
 		bool ownsRendererID = true;
 
 		RendererID rendererID = 0;

@@ -1,17 +1,14 @@
 #include "gbcpch.h"
 #include "Scene.h"
-#include <entt/entt.hpp>
-#include <box2d/b2_world.h>
-#include <box2d/b2_body.h>
-#include <box2d/b2_fixture.h>
-#include <box2d/b2_polygon_shape.h>
 #include "GBC/Core/Application.h"
 #include "GBC/Rendering/Renderer.h"
-#include "GBC/Rendering/Basic/BasicRenderer.h"
+#include "GBC/Rendering/Renderers/Renderer2D.h"
+#include "GBC/Rendering/Renderers/Renderer3D.h"
 #include "GBC/Scene/Entity.h"
 #include "GBC/Scene/ScriptableEntity.h"
 #include "GBC/Scene/Components/CameraComponent.h"
 #include "GBC/Scene/Components/IDComponent.h"
+#include "GBC/Scene/Components/Mesh3DComponent.h"
 #include "GBC/Scene/Components/NativeScriptComponent.h"
 #include "GBC/Scene/Components/RelationshipComponent.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
@@ -19,6 +16,11 @@
 #include "GBC/Scene/Components/TransformComponent.h"
 #include "GBC/Scene/Components/Physics/BoxCollider2DComponent.h"
 #include "GBC/Scene/Components/Physics/Rigidbody2DComponent.h"
+#include <box2d/b2_body.h>
+#include <box2d/b2_fixture.h>
+#include <box2d/b2_polygon_shape.h>
+#include <box2d/b2_world.h>
+#include <entt/entt.hpp>
 
 namespace gbc
 {
@@ -96,6 +98,7 @@ namespace gbc
 
 		// Copy all components except for IDComponent, TagComponent, and RelationshipComponent
 		CopyComponent<CameraComponent>(destination, source, sourceScene, entities);
+		CopyComponent<Mesh3DComponent>(destination, source, sourceScene, entities);
 		CopyComponent<NativeScriptComponent>(destination, source, sourceScene, entities);
 		CopyComponent<SpriteRendererComponent>(destination, source, sourceScene, entities);
 		CopyComponent<TransformComponent>(destination, source, sourceScene, entities);
@@ -162,6 +165,7 @@ namespace gbc
 
 		// Copy all components except for IDComponent, TagComponent, and RelationshipComponent
 		CopyComponentIfExists<CameraComponent>(newEntity, entity);
+		CopyComponentIfExists<Mesh3DComponent>(newEntity, entity);
 		CopyComponentIfExists<NativeScriptComponent>(newEntity, entity);
 		CopyComponentIfExists<SpriteRendererComponent>(newEntity, entity);
 		CopyComponentIfExists<TransformComponent>(newEntity, entity);
@@ -272,19 +276,41 @@ namespace gbc
 
 		if (Entity primaryCamera = GetPrimaryCameraEntity())
 		{
-			BasicRenderer::BeginScene(primaryCamera.Get<CameraComponent>(), glm::inverse(primaryCamera.GetAbsoluteTransform()));
+			const auto& camera = primaryCamera.Get<CameraComponent>();
+			glm::mat4 cameraView = glm::inverse(primaryCamera.GetAbsoluteTransform());
 
-			auto view = registry->view<SpriteRendererComponent>();
-			for (auto handle : view)
+			if (auto view = registry->view<SpriteRendererComponent>(); !view.empty())
 			{
-				Entity entity{ handle, this };
-				glm::mat4 transform = entity.GetAbsoluteTransform();
+				Renderer2D::BeginScene(camera, cameraView);
 
-				auto renderable = view.get<SpriteRendererComponent>(handle);
-				BasicRenderer::DrawQuad(transform, renderable);
+				for (auto handle : view)
+				{
+					Entity entity{ handle, this };
+					glm::mat4 transform = entity.GetAbsoluteTransform();
+
+					auto& spriteRendererComponent = view.get<SpriteRendererComponent>(handle);
+					Renderer2D::DrawQuad(transform, spriteRendererComponent);
+				}
+
+				Renderer2D::EndScene();
 			}
 
-			BasicRenderer::EndScene();
+			if (auto view = registry->view<Mesh3DComponent>(); !view.empty())
+			{
+				Renderer3D::BeginScene(camera, cameraView);
+
+				for (auto handle : view)
+				{
+					Entity entity{ handle, this };
+					glm::mat4 transform = entity.GetAbsoluteTransform();
+
+					auto& meshComponent = view.get<Mesh3DComponent>(handle);
+					if (meshComponent.mesh)
+						Renderer3D::Submit(meshComponent.mesh, transform, meshComponent.tintColor, meshComponent.texture);
+				}
+
+				Renderer3D::EndScene();
+			}
 		}
 	}
 
@@ -292,19 +318,38 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		BasicRenderer::BeginScene(camera);
-
-		auto view = registry->view<SpriteRendererComponent>();
-		for (auto handle : view)
+		if (auto view = registry->view<SpriteRendererComponent>(); !view.empty())
 		{
-			Entity entity{ handle, this };
-			glm::mat4 transform = entity.GetAbsoluteTransform();
+			Renderer2D::BeginScene(camera);
 
-			auto renderable = view.get<SpriteRendererComponent>(handle);
-			BasicRenderer::DrawQuad(transform, renderable);
+			for (auto handle : view)
+			{
+				Entity entity{ handle, this };
+				glm::mat4 transform = entity.GetAbsoluteTransform();
+
+				auto& spriteRendererComponent = view.get<SpriteRendererComponent>(handle);
+				Renderer2D::DrawQuad(transform, spriteRendererComponent);
+			}
+
+			Renderer2D::EndScene();
 		}
 
-		BasicRenderer::EndScene();
+		if (auto view = registry->view<Mesh3DComponent>(); !view.empty())
+		{
+			Renderer3D::BeginScene(camera);
+
+			for (auto handle : view)
+			{
+				Entity entity{ handle, this };
+				glm::mat4 transform = entity.GetAbsoluteTransform();
+
+				auto& meshComponent = view.get<Mesh3DComponent>(handle);
+				if (meshComponent.mesh)
+					Renderer3D::Submit(meshComponent.mesh, transform, meshComponent.tintColor, meshComponent.texture);
+			}
+
+			Renderer3D::EndScene();
+		}
 	}
 
 	void Scene::OnViewportResize(int32_t width, int32_t height)
@@ -411,6 +456,7 @@ namespace gbc
 	template<> void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component) {}
 	template<> void Scene::OnComponentAdded<RelationshipComponent>(Entity entity, RelationshipComponent& component) {}
 	template<> void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent & component) {}
+	template<> void Scene::OnComponentAdded<Mesh3DComponent>(Entity entity, Mesh3DComponent& component) {}
 	template<> void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent & component) {}
 	template<> void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent & component) {}
 	template<> void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent & component) {}
@@ -436,6 +482,7 @@ namespace gbc
 
 	template<> void Scene::OnComponentRemoved<CameraComponent>(Entity entity, CameraComponent& component) {}
 	template<> void Scene::OnComponentRemoved<IDComponent>(Entity entity, IDComponent& component) {}
+	template<> void Scene::OnComponentRemoved<Mesh3DComponent>(Entity entity, Mesh3DComponent& component) {}
 	template<> void Scene::OnComponentRemoved<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
 	template<> void Scene::OnComponentRemoved<RelationshipComponent>(Entity entity, RelationshipComponent& component) {}
 	template<> void Scene::OnComponentRemoved<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component) {}

@@ -62,7 +62,7 @@ namespace gbc
 		colors[ImGuiCol_TitleBgCollapsed]   = { 0.150f, 0.155f, 0.160f, 1.000f };
 		
 		// Checkbox
-		colors[ImGuiCol_CheckMark]          = { 0.400f, 0.405f, 0.410f, 1.000f };
+		colors[ImGuiCol_CheckMark]          = { 0.260f, 0.590f, 0.980f, 1.000f };
 
 		// Slider
 		colors[ImGuiCol_SliderGrab]         = { 0.338f, 0.338f, 0.338f, 1.000f };

@@ -30,6 +30,18 @@ namespace gbc
 		return nullptr;
 	}
 
+	Ref<Texture2D> Texture2D::Create(const TextureSpecification& specification, UUID uuid)
+	{
+		switch (RendererAPI::GetAPI())
+		{
+			case RendererAPI::API::Headless: return nullptr;
+			case RendererAPI::API::OpenGL: return CreateRef<OpenGLTexture>(specification, uuid);
+		}
+
+		GBC_CORE_ASSERT(false, "Unknown Renderer API!");
+		return nullptr;
+	}
+
 	Ref<Texture2D> Texture2D::Create(const Ref<Framebuffer>& framebuffer, int32_t attachmentIndex)
 	{
 		switch (RendererAPI::GetAPI())

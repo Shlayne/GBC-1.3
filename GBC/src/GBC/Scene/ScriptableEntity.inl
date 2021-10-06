@@ -1,4 +1,3 @@
-#include "ScriptableEntity.h"
 namespace gbc
 {
 	template<typename Component, typename... Args>

@@ -1,13 +1,13 @@
 #include "ProfilingPanel.h"
 #if GBC_ENABLE_PROFILE_RUNTIME
-#include <imgui/imgui.h>
 #include "GBC/Debug/Profiler.h"
 #include "GBC/ImGui/ImGuiHelper.h"
+#include <imgui/imgui.h>
 
 namespace gbc
 {
-	ProfilingPanel::ProfilingPanel(const std::string& name)
-		: Panel(name) {}
+	ProfilingPanel::ProfilingPanel(const std::string& name, EditorLayer* editorLayer)
+		: Panel(name, editorLayer) {}
 
 	void ProfilingPanel::OnImGuiRender()
 	{

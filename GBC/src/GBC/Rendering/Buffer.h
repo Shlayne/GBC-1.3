@@ -1,9 +1,9 @@
 #pragma once
 
+#include "GBC/Core/Core.h"
 #include <cstdint>
 #include <string>
 #include <vector>
-#include "GBC/Core/Core.h"
 
 namespace gbc
 {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GBC/Core/UUID.h"
 #include "GBC/Rendering/Framebuffer.h"
 #include "GBC/Rendering/LocalTexture2D.h"
 
@@ -50,12 +51,15 @@ namespace gbc
 	public:
 		virtual ~Texture() = default;
 
+		virtual void ChangeSampling(const TextureSpecification& specification) = 0;
+
 		virtual void Bind(uint32_t slot = 0) const = 0;
 		virtual void Unbind(uint32_t slot = 0) const = 0;
 
 		virtual RendererID GetRendererID() const = 0;
 		virtual const Ref<LocalTexture2D>& GetTexture() const = 0;
 		virtual const TextureSpecification& GetSpecification() const = 0;
+		virtual UUID GetUUID() const = 0;
 
 		// Call this when you want to update the internal
 		// texture after the the local texture has updated.
@@ -70,6 +74,7 @@ namespace gbc
 	{
 	public:
 		static Ref<Texture2D> Create(const TextureSpecification& specification);
+		static Ref<Texture2D> Create(const TextureSpecification& specification, UUID uuid);
 		static Ref<Texture2D> Create(const Ref<Framebuffer>& framebuffer, int32_t attachmentIndex);
 	};
 }

@@ -1,10 +1,10 @@
 #pragma once
 
+#include "GBC/Core/Core.h"
+#include <functional>
 #if GBC_ENABLE_LOGGING
 	#include <string>
 #endif
-#include <functional>
-#include "GBC/Core/Core.h"
 
 namespace gbc
 {
@@ -53,7 +53,7 @@ namespace gbc
 	class EventDispatcher
 	{
 	public:
-		EventDispatcher(Event& event);
+		EventDispatcher(Event& event) : event(event) {}
 	public:
 		template<typename C, typename E> bool Dispatch(C* object, bool(C::* func)(E&));
 		template<typename E> bool Dispatch(bool(*func)(E&));

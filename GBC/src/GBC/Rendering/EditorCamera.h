@@ -11,62 +11,75 @@ namespace gbc
 	{
 	public:
 		EditorCamera();
-		EditorCamera(float size, float nearClip, float farClip);
+		EditorCamera(float fov, float nearClip, float farClip);
 
 		void OnUpdate(Timestep timestep);
-		void OnEvent(Event& event);
+		void OnEvent(Event & event);
 
-		void OnViewportMove(int32_t x, int32_t y);
+		inline float GetDistance() const noexcept { return distance; }
+		inline void SetDistance(float distance) noexcept { this->distance = distance; }
+
 		virtual void OnViewportResize(int32_t width, int32_t height) override;
 
 		inline const glm::mat4& GetView() const noexcept { return view; }
 		inline glm::mat4 GetViewProjection() const noexcept { return projection * view; }
 
-		inline const glm::vec2& GetPosition() const noexcept { return position; }
+		glm::vec3 GetRightDirection() const;
+		glm::vec3 GetUpDirection() const;
+		glm::vec3 GetForwardDirection() const;
+		inline const glm::vec3& GetPosition() const noexcept { return position; }
+		glm::quat GetOrientation() const;
+
+		inline float GetPitch() const noexcept { return pitch; }
+		inline float GetYaw() const noexcept { return yaw; }
 
 		bool IsUsing() const;
 		inline void SetBlocked(bool blocked) noexcept { this->blocked = blocked; }
 	private:
 		void RecalculateProjection();
 		void RecalculateView();
-		bool recalculateProjection = false;
-		bool recalculateView = false;
 
-		bool OnKeyPressEvent(KeyPressEvent& event);
-		bool OnKeyReleaseEvent(KeyReleaseEvent& event);
-		bool OnMouseButtonPressEvent(MouseButtonPressEvent& event);
-		bool OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& event);
-		bool OnMouseMoveEvent(MouseMoveEvent& event);
-		bool OnMouseScrollEvent(MouseScrollEvent& event);
+		void OnKeyEvent(Keycode keycode, bool pressed);
+		void OnMouseButtonEvent(MouseButton button, bool pressed);
 
-		void MousePan();
-		void MouseZoom();
+		bool OnKeyPressEvent(KeyPressEvent & event);
+		bool OnKeyReleaseEvent(KeyReleaseEvent & event);
+		bool OnMouseButtonPressEvent(MouseButtonPressEvent & event);
+		bool OnMouseButtonReleaseEvent(MouseButtonReleaseEvent & event);
+		bool OnMouseMoveEvent(MouseMoveEvent & event);
+		bool OnMouseScrollEvent(MouseScrollEvent & event);
 
-		glm::vec2 PixelSpaceToWorldSpace(const glm::vec2& pixelSpace) const;
+		void MousePan(const glm::vec2 & delta);
+		void MouseRotate(const glm::vec2 & delta);
+		void MouseZoom(float delta);
 
-		float zoomSpeed = 10.0f;
-		glm::vec2 startPanMousePosition{ 0.0f };
-		glm::vec2 startPanPosition{ 0.0f };
+		//glm::vec2 GetPanSpeed() const;
+		float GetRotationSpeed() const;
+		float GetZoomSpeed() const;
 
-		float size = 10.0f;
-		float nearClip = -1.0f;
-		float farClip = 1.0f;
-
+		float fov = 90.0f;
 		float aspectRatio = 1.0f;
-		glm::vec2 viewportSize{ 1.0f };
-		glm::vec2 viewportPosition{ 0.0f };
+		float nearClip = 0.001f;
+		float farClip = 1000.0f;
 
 		glm::mat4 view{ 1.0f };
-		glm::vec2 position{ 0.0f };
-		
-		glm::vec2 mousePosition{ 0.0f };
-		float mouseScrollOffset = 0.0f;
+		glm::vec3 position{ 0.0f };
+		glm::vec3 focalPoint{ 0.0f };
 
-		Keycode activatorKey = Keycode::LeftAlt;
-		bool activatorKeyPressed = false;
-		MouseButton panButton = MouseButton::ButtonMiddle;
-		bool panButtonPressed = false;
+		glm::vec2 mousePosition{ 0.0f };
+		glm::vec2 prevMousePosition{ 0.0f };
+		glm::vec2 viewportSize{ 1.0f };
+
+		float distance = 5.0f;
+		float pitch = 0.0f;
+		float yaw = 0.0f;
 
 		bool blocked = false;
+		bool activatorKeyPressed = false;
+		bool middleMouseButtonPressed = false;
+		bool leftMouseButtonPressed = false;
+		bool rightMouseButtonPressed = false;
+
+		Keycode activatorKey = Keycode::LeftAlt;
 	};
 }

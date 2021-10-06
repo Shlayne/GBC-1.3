@@ -1,11 +1,11 @@
 #include "gbcpch.h"
 #include "OpenGLShader.h"
+#include "GBC/IO/FileIO.h"
+#include "GBC/Util/Timer.h"
 #include <glad/glad.h>
 #include <shaderc/shaderc.hpp>
 #include <spirv_cross/spirv_cross.hpp>
 #include <spirv_cross/spirv_glsl.hpp>
-#include "GBC/IO/FileIO.h"
-#include "GBC/Util/Timer.h"
 
 namespace gbc
 {

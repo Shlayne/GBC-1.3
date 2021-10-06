@@ -1,12 +1,12 @@
 #pragma once
 
-#include <entt/entt.hpp>
 #include "GBC/Core/Core.h"
 #include "GBC/Scene/Scene.h"
 #include "GBC/Scene/Components/IDComponent.h"
 #include "GBC/Scene/Components/RelationshipComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
+#include <entt/entt.hpp>
 
 namespace gbc
 {

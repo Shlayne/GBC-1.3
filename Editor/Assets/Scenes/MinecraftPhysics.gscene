@@ -51,13 +51,7 @@ Entities:
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
       TilingFactor: [15, 1]
-      Texture:
-        Filepath: Assets\Textures\grass_side.png
-        Specification:
-          MinFilter: Linear
-          MagFilter: Nearest
-          WrapS: Repeat
-          WrapT: ClampToEdge
+      Texture: Assets\Textures\grass_side.png
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
       Offset: [0, 0]
@@ -80,13 +74,7 @@ Entities:
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
       TilingFactor: [19, 1]
-      Texture:
-        Filepath: Assets\Textures\dirt.png
-        Specification:
-          MinFilter: Linear
-          MagFilter: Nearest
-          WrapS: Repeat
-          WrapT: Repeat
+      Texture: Assets\Textures\dirt.png
   - Entity: 8849280984760648787
     TagComponent:
       Tag: Left Wall
@@ -99,13 +87,7 @@ Entities:
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
       TilingFactor: [2, 8]
-      Texture:
-        Filepath: Assets\Textures\dirt.png
-        Specification:
-          MinFilter: Linear
-          MagFilter: Nearest
-          WrapS: Repeat
-          WrapT: Repeat
+      Texture: Assets\Textures\dirt.png
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
       Offset: [0, 0]
@@ -128,13 +110,7 @@ Entities:
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
       TilingFactor: [2, 1]
-      Texture:
-        Filepath: Assets\Textures\grass_side.png
-        Specification:
-          MinFilter: Linear
-          MagFilter: Nearest
-          WrapS: Repeat
-          WrapT: ClampToEdge
+      Texture: Assets\Textures\grass_side.png
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
       Offset: [0, 0]
@@ -157,13 +133,7 @@ Entities:
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
       TilingFactor: [2, 8]
-      Texture:
-        Filepath: Assets\Textures\dirt.png
-        Specification:
-          MinFilter: Linear
-          MagFilter: Nearest
-          WrapS: Repeat
-          WrapT: Repeat
+      Texture: Assets\Textures\dirt.png
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
       Offset: [0, 0]
@@ -186,13 +156,7 @@ Entities:
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
       TilingFactor: [2, 1]
-      Texture:
-        Filepath: Assets\Textures\grass_side.png
-        Specification:
-          MinFilter: Linear
-          MagFilter: Nearest
-          WrapS: Repeat
-          WrapT: ClampToEdge
+      Texture: Assets\Textures\grass_side.png
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
       Offset: [0, 0]
@@ -228,13 +192,7 @@ Entities:
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
       TilingFactor: [1, 1]
-      Texture:
-        Filepath: Assets\Textures\grass_side.png
-        Specification:
-          MinFilter: Linear
-          MagFilter: Nearest
-          WrapS: ClampToEdge
-          WrapT: ClampToEdge
+      Texture: Assets\Textures\grass_side.png
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
       Offset: [0, 0]
@@ -257,13 +215,7 @@ Entities:
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
       TilingFactor: [1, 1]
-      Texture:
-        Filepath: Assets\Textures\grass_side.png
-        Specification:
-          MinFilter: Linear
-          MagFilter: Nearest
-          WrapS: ClampToEdge
-          WrapT: ClampToEdge
+      Texture: Assets\Textures\grass_side.png
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
       Offset: [0, 0]
@@ -286,13 +238,7 @@ Entities:
     SpriteRendererComponent:
       TintColor: [1, 1, 1, 1]
       TilingFactor: [1, 3]
-      Texture:
-        Filepath: Assets\Textures\dirt.png
-        Specification:
-          MinFilter: Linear
-          MagFilter: Nearest
-          WrapS: ClampToEdge
-          WrapT: Repeat
+      Texture: Assets\Textures\dirt.png
     BoxCollider2DComponent:
       Size: [0.5, 0.5]
       Offset: [0, 0]
@@ -307,12 +253,12 @@ Entities:
     TagComponent:
       Tag: Camera
     TransformComponent:
-      Translation: [0, 0, 0]
+      Translation: [0, 0, 5]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     CameraComponent:
       Camera:
-        ProjectionType: Orthographic
+        ProjectionType: Perspective
         PerspectiveFOV: 1.57079637
         PerspectiveNear: 0.00100000005
         PerspectiveFar: 1000

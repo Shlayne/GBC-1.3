@@ -67,23 +67,25 @@ namespace gbc
 				if (layer->IsEnabled())
 					layer->OnUpdate(timestep);
 
-			if (rendering)
+#if GBC_ENABLE_IMGUI
+			if (imguiWrapper->ImGuiHasWindows() || rendering)
+			{
 				for (Layer* layer : layerStack)
 					if (layer->IsEnabled())
 						layer->OnRender();
 
-#if GBC_ENABLE_IMGUI
-			for (Layer* layer : layerStack)
-				if (layer->IsEnabled())
-					layer->OnRender();
+				imguiWrapper->Begin();
+				for (Layer* layer : layerStack)
+					if (layer->IsEnabled())
+						layer->OnImGuiRender();
+				imguiWrapper->End();
 
-			imguiWrapper->Begin();
-			for (Layer* layer : layerStack)
-				if (layer->IsEnabled())
-					layer->OnImGuiRender();
-			imguiWrapper->End();
+				for (Layer* layer : layerStack)
+					if (layer->IsEnabled())
+						layer->OnPostImGuiRender();
 
-			window->SwapBuffers();
+				window->SwapBuffers();
+			}
 #else
 			if (rendering)
 			{

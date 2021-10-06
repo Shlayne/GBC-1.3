@@ -1,6 +1,8 @@
 #pragma once
 
 #include "GBC/Rendering/Shader.h"
+#include <unordered_map>
+#include <vector>
 
 namespace gbc
 {

@@ -1,6 +1,5 @@
 #include "gbcpch.h"
 #include "WindowsWindow.h"
-#include <glfw/glfw3.h>
 #include "GBC/Core/Application.h"
 #include "GBC/Core/Input.h"
 #include "GBC/Events/DeviceEvents.h"
@@ -10,6 +9,7 @@
 #if GBC_CONFIG_DEBUG
 	#include "GBC/Rendering/RendererAPI.h"
 #endif
+#include <glfw/glfw3.h>
 
 namespace gbc
 {
@@ -95,7 +95,12 @@ namespace gbc
 		SetCaptureMouse(specification.captureMouse);
 
 		if (specification.maximizeOnShow)
+		{
 			glfwMaximizeWindow(window);
+			glfwGetWindowSize(window, &state.current.size.x, &state.current.size.y);
+			glfwGetWindowPos(window, &state.current.position.x, &state.current.position.y);
+			state.maximized = true;
+		}
 
 		SetCallbacks(window);
 		glfwShowWindow(window);

@@ -9,7 +9,7 @@ namespace gbc
 	class ProfilingPanel : public Panel
 	{
 	public:
-		ProfilingPanel(const std::string& name);
+		ProfilingPanel(const std::string& name, EditorLayer* editorLayer);
 
 		virtual void OnImGuiRender() override;
 	private:

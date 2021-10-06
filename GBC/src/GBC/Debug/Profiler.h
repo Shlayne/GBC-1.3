@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GBC/Core/Core.h"
 #if GBC_ENABLE_PROFILE_RUNTIME || GBC_ENABLE_PROFILE
 #include <algorithm>
 #include <chrono>

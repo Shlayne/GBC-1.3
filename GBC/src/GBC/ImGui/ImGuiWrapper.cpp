@@ -1,13 +1,14 @@
 #include "gbcpch.h"
 #if GBC_ENABLE_IMGUI
 #include "ImGuiWrapper.h"
+#include "GBC/Core/Application.h"
+#include "GBC/ImGui/ImGuiHelper.h"
 #include <glfw/glfw3.h>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
+#include <imgui/imgui_internal.h>
 #include <imguizmo/ImGuizmo.h>
-#include "GBC/Core/Application.h"
-#include "GBC/ImGui/ImGuiHelper.h"
 
 namespace gbc
 {
@@ -21,7 +22,7 @@ namespace gbc
 
 		Window& window = Application::Get().GetWindow();
 		ImGui_ImplGlfw_InitForOpenGL(static_cast<GLFWwindow*>(window.GetNativeWindow()), true);
-		ImGui_ImplOpenGL3_Init(window.GetContext().GetVersion());
+		ImGui_ImplOpenGL3_Init(window.GetContext().GetVersionForImGui());
 	}
 
 	ImGuiWrapper::~ImGuiWrapper()
@@ -68,6 +69,11 @@ namespace gbc
 			event.handled |= event.IsInCategory(EventCategory_Keyboard) && io.WantCaptureKeyboard ||
 							 event.IsInCategory(EventCategory_Mouse) && io.WantCaptureMouse;
 		}
+	}
+
+	bool ImGuiWrapper::ImGuiHasWindows() const
+	{
+		return ImGui::GetCurrentContext()->Viewports.size() > 1;
 	}
 }
 #endif

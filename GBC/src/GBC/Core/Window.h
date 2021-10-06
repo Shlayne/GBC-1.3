@@ -1,10 +1,10 @@
 #pragma once
 
-#include <functional>
 #include "GBC/Core/Core.h"
 #include "GBC/Events/Event.h"
 #include "GBC/Rendering/Context.h"
 #include "GBC/Rendering/LocalTexture2D.h"
+#include <functional>
 
 namespace gbc
 {
@@ -33,6 +33,8 @@ namespace gbc
 
 		virtual int32_t GetWidth() const = 0;
 		virtual int32_t GetHeight() const = 0;
+		virtual int32_t GetX() const = 0;
+		virtual int32_t GetY() const = 0;
 
 		virtual bool IsFocused() const = 0;
 		virtual bool ContainsMouse() const = 0;

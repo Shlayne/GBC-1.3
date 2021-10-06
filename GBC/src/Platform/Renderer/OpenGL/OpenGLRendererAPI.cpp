@@ -119,6 +119,11 @@ namespace gbc
 		glClear(clearBits);
 	}
 
+	void OpenGLRendererAPI::ClearDepthOnly()
+	{
+		glClear(GL_DEPTH_BUFFER_BIT);
+	}
+
 	void OpenGLRendererAPI::SetClearColor(float red, float green, float blue, float alpha)
 	{
 		glClearColor(red, green, blue, alpha);

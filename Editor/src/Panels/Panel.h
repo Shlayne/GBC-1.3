@@ -5,14 +5,18 @@
 
 namespace gbc
 {
+	class EditorLayer;
+
 	class Panel
 	{
 	public:
 		Panel() = default;
-		Panel(const std::string& name);
+		Panel(const std::string& name, EditorLayer* editorLayer);
 		virtual ~Panel() = default;
 
-		virtual void OnImGuiRender() = 0;
+		virtual void OnImGuiRender() {}
+
+		inline const std::string& GetName() const noexcept { return name; }
 
 		inline bool IsEnabled() const noexcept { return enabled; }
 		inline void SetEnabled(bool enabled) noexcept { this->enabled = enabled; }
@@ -28,6 +32,8 @@ namespace gbc
 		void Update();
 
 		std::string name;
+		EditorLayer* editorLayer = nullptr;
+
 		bool enabled = true;
 		bool focused = false;
 		bool hovered = false;

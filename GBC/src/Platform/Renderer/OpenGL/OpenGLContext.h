@@ -10,10 +10,16 @@ namespace gbc
 	{
 	public:
 		OpenGLContext(void* nativeWindow);
+	public:
 		virtual void SwapBuffers() override;
 		virtual Timestep GetElapsedTime() const override;
-#if GBC_ENABLE_IMGUI
+	public:
+		virtual const char* GetVendor() const override;
+		virtual const char* GetRenderer() const override;
 		virtual const char* GetVersion() const override;
+	public:
+#if GBC_ENABLE_IMGUI
+		virtual const char* GetVersionForImGui() const override;
 #endif
 	private:
 		GLFWwindow* window = nullptr;

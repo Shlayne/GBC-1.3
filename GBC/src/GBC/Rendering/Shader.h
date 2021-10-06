@@ -1,10 +1,10 @@
 #pragma once
 
-#include <string>
+#include "GBC/Core/Core.h"
+#include <glm/glm.hpp>
 #include <cstdint>
 #include <filesystem>
-#include <glm/glm.hpp>
-#include "GBC/Core/Core.h"
+#include <string>
 
 namespace gbc
 {

@@ -1,26 +1,39 @@
 #include "gbcpch.h"
 #include "Renderer.h"
-#include "GBC/Rendering/Basic/BasicRenderer.h"
+#include "GBC/Rendering/Renderers/Renderer2D.h"
+#include "GBC/Rendering/Renderers/Renderer3D.h"
 
 namespace gbc
 {
+	struct RendererData
+	{
+		Ref<UniformBuffer> cameraUniformBuffer;
+	};
+	static RendererData data;
+
 	Scope<RendererAPI> Renderer::api = nullptr;
 
 	void Renderer::Init()
 	{
 		GBC_PROFILE_FUNCTION();
 
+		data.cameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer::CameraBuffer), 0, nullptr, BufferUsage::DynamicDraw);
+
 		api = RendererAPI::Create();
 		api->Init();
-		BasicRenderer::Init();
+		Renderer2D::Init();
+		Renderer3D::Init();
 	}
 
 	void Renderer::Shutdown()
 	{
 		GBC_PROFILE_FUNCTION();
 
-		BasicRenderer::Shutdown();
+		Renderer3D::Shutdown();
+		Renderer2D::Shutdown();
 		api->Shutdown();
+
+		data.cameraUniformBuffer.reset();
 	}
 
 	void Renderer::EnableDepthTest()
@@ -49,6 +62,9 @@ namespace gbc
 	void Renderer::Clear()
 	{ api->Clear(); }
 
+	void Renderer::ClearDepthOnly()
+	{ api->ClearDepthOnly(); }
+
 	void Renderer::SetClearColor(const glm::vec4& color)
 	{ api->SetClearColor(color.r, color.g, color.b, color.a); }
 	void Renderer::SetClearColor(float red, float green, float blue, float alpha)
@@ -56,4 +72,9 @@ namespace gbc
 
 	void Renderer::DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, uint32_t offset, uint32_t count, RendererPrimitive primitive)
 	{ api->DrawIndexed(vertexArray, indexBuffer, offset, count, primitive); }
+
+	void Renderer::UploadCameraBuffer(const CameraBuffer& cameraBuffer)
+	{
+		data.cameraUniformBuffer->SetData(&cameraBuffer, sizeof(Renderer::CameraBuffer));
+	}
 }

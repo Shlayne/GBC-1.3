@@ -1,13 +1,13 @@
 #pragma once
 
-#include "GBC/Rendering/Texture.h"
 #include "GBC/Rendering/Camera.h"
 #include "GBC/Rendering/EditorCamera.h"
+#include "GBC/Rendering/Texture.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 
 namespace gbc
 {
-	class BasicRenderer
+	class Renderer2D
 	{
 	public:
 		static void BeginScene(const Camera& camera, const glm::mat4& view);
@@ -56,7 +56,7 @@ namespace gbc
 			inline uint32_t GetVertexCount() const noexcept { return quadCount * 4; }
 			inline uint32_t GetIndexCount() const noexcept { return quadCount * 6; }
 		private:
-			friend class BasicRenderer;
+			friend class Renderer2D;
 			uint32_t drawCallCount = 0;
 			uint32_t quadCount = 0;
 			uint32_t textureCount = 0;

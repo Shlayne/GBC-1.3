@@ -3,15 +3,22 @@ namespace gbc
 	template<typename... Args>
 	static void ImGuiHelper::Text(const char* format, Args&&... args)
 	{
+		ImGui::PushItemWidth(-FLT_MIN);
 		ImGui::Text(format, std::forward<Args>(args)...);
 	}
 
 	template<typename... Args>
 	static void ImGuiHelper::Text(const char* label, const char* format, Args&&... args)
 	{
-		Text(label);
+		ImGui::PushID(label);
+
 		NextTableColumn();
 		ImGui::Text(format, std::forward<Args>(args)...);
+		PrevTableColumn();
+		Text(label);
+		NextTableColumn();
+
+		ImGui::PopID();
 	}
 
 	template<size_t Size>
@@ -29,7 +36,8 @@ namespace gbc
 		ImGui::OpenPopup(name);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, { 0.5f, 0.5f });
-		if (ImGui::BeginPopupModal(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 4.0f, 4.0f });
+		if (ImGui::BeginPopupModal(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings))
 		{
 			ImGui::Text(messageFormat, std::forward<Args>(args)...);
 
@@ -58,7 +66,7 @@ namespace gbc
 
 			ImGui::EndPopup();
 		}
-		ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2);
 
 		return closed;
 	}
@@ -71,7 +79,7 @@ namespace gbc
 		ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, { 0.5f, 0.5f });
 		ImGui::OpenPopup(name);
 
-		if (ImGui::BeginPopupModal(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
+		if (ImGui::BeginPopupModal(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings))
 		{
 			ImGui::Text(messageFormat, std::forward<Args>(args)...);
 

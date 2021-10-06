@@ -1,9 +1,16 @@
 #include "EditorLayer.h"
-#include <imgui/imgui.h>
+#include "GBC/Core/FileTypes.h"
 #include "GBC/Scene/SceneSerializer.h"
-#include "Panels/ContentBrowserPanel.h"
+#include <imgui/imgui.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include "Panels/Dist/ContentBrowserPanel.h"
+#include "Panels/Dist/SceneHierarchyPanel.h"
+#include "Panels/Dist/ScenePropertiesPanel.h"
+#include "Panels/Dist/SceneViewportPanel.h"
+#include "Panels/Dist/TexturePropertiesPanel.h"
 #if GBC_ENABLE_STATS
-	#include "Panels/StasticsPanel.h"
+	#include "Panels/Release/RendererInfoPanel.h"
+	#include "Panels/Release/StasticsPanel.h"
 #endif
 #if GBC_ENABLE_PROFILE_RUNTIME
 	#include "Panels/Debug/ProfilingPanel.h"
@@ -18,10 +25,12 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		playButtonTexture = Texture2D::Create(CreateRef<LocalTexture2D>("Resources/Icons/PlayButton.png"));
-		stopButtonTexture = Texture2D::Create(CreateRef<LocalTexture2D>("Resources/Icons/StopButton.png"));
+		auto& application = Application::Get();
+		auto& window = application.GetWindow();
+		auto& assetManager = application.GetAssetManager();
 
-		Window& window = Application::Get().GetWindow();
+		playButtonTexture = assetManager.GetOrLoadTexture(L"Resources/Icons/PlayButton.png");
+		stopButtonTexture = assetManager.GetOrLoadTexture(L"Resources/Icons/StopButton.png");
 
 		FramebufferSpecification framebufferSpecification;
 		framebufferSpecification.width = window.GetWidth();
@@ -32,27 +41,30 @@ namespace gbc
 		editorScene = CreateRef<Scene>();
 		activeScene = editorScene;
 
-		// TODO: Figure out a different way to have Panels change values in EditorLayer
-		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport", framebuffer, activeScene, selectedEntity, gizmoType, canUseGizmos, canRenderGizmos, editorCamera, GBC_BIND_FUNC(OpenSceneFile));
-		sceneHierarchyPanel = AddPanel<SceneHierarchyPanel>("Scene Hierarchy", activeScene, selectedEntity);
-		scenePropertiesPanel = AddPanel<ScenePropertiesPanel>("Scene Properties", selectedEntity);
-		contentBrowserPanel = AddPanel<ContentBrowserPanel>("Content Browser");
-#if GBC_ENABLE_STATS
-		AddPanel<StatisticsPanel>("Statistics", BasicRenderer::GetStatistics());
+		// The panels are weirdly ordered because ImGui has a bug that orders them incorrectly and has for over 2 years now, sooo.......
+#if GBC_CONFIG_DEBUG
+		AddPanel<DemoPanel>("Demo");
 #endif
 #if GBC_ENABLE_PROFILE_RUNTIME
 		AddPanel<ProfilingPanel>("Profiling");
 #endif
-#if GBC_CONFIG_DEBUG
-		AddPanel<DemoPanel>("Demo");
+#if GBC_ENABLE_STATS
+		AddPanel<RendererInfoPanel>("Renderer Info");
+		AddPanel<StatisticsPanel>("Statistics");
 #endif
+		contentBrowserPanel = AddPanel<ContentBrowserPanel>("Content Browser");
+		sceneHierarchyPanel = AddPanel<SceneHierarchyPanel>("Scene Hierarchy");
+		texturePropertiesPanel = AddPanel<TexturePropertiesPanel>("Texture Properties");
+		scenePropertiesPanel = AddPanel<ScenePropertiesPanel>("Scene Properties");
+
+		sceneViewportPanel = AddPanel<SceneViewportPanel>("Scene Viewport");
 	}
 
 	void EditorLayer::OnDetach()
 	{
 		GBC_PROFILE_FUNCTION();
 
-		for (auto& [name, panel] : panels)
+		for (auto panel : panels)
 			delete panel;
 	}
 
@@ -65,9 +77,6 @@ namespace gbc
 
 		editorCamera.SetBlocked(ImGuizmo::IsUsing());
 		Application::Get().GetImGuiWrapper().SetBlockEvents(!viewportFocused && !viewportHovered);
-
-		glm::ivec2 viewportPosition = sceneViewportPanel->GetPosition();
-		editorCamera.OnViewportMove(viewportPosition.x, viewportPosition.y);
 
 		if (sceneViewportPanel->HasSizeChanged())
 		{
@@ -93,9 +102,10 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-	#if GBC_ENABLE_STATS
-		BasicRenderer::ResetStatistics();
-	#endif
+#if GBC_ENABLE_STATS
+		Renderer2D::ResetStatistics();
+		Renderer3D::ResetStatistics();
+#endif
 
 		framebuffer->Bind();
 
@@ -121,8 +131,37 @@ namespace gbc
 
 		UI_Dockspace();
 
-		for (auto& [name, panel] : panels)
+		for (auto panel : panels)
 			panel->OnImGuiRender();
+	}
+
+	void EditorLayer::OnPostImGuiRender()
+	{
+		if (contentBrowserPanel->IsDragSelectActive())
+		{
+			Window& window = Application::Get().GetWindow();
+
+			Renderer::ClearDepthOnly();
+			Renderer::SetViewport(0, 0, window.GetWidth(), window.GetHeight());
+			float windowWidth = static_cast<float>(window.GetWidth());
+			float windowHeight = static_cast<float>(window.GetHeight());
+
+			float aspect = windowWidth / windowHeight;
+			Renderer2D::BeginScene(glm::ortho(-aspect * 0.5f, aspect * 0.5f, -0.5f, 0.5f), glm::mat4(1.0f));
+
+			glm::ivec2 topLeft, bottomRight;
+			contentBrowserPanel->GetDragSelectBounds(topLeft, bottomRight);
+
+			glm::vec2 size = glm::vec2(bottomRight - topLeft - 1) / windowHeight;
+			glm::vec2 outlineSize = glm::vec2(bottomRight - topLeft + 1) / windowHeight;
+			glm::vec2 center = (glm::vec2(topLeft + bottomRight + 1) / windowHeight - glm::vec2(aspect, 1.0f)) * glm::vec2(0.5f, -0.5f);
+			glm::vec2 outlineCenter = (glm::vec2(topLeft + bottomRight + 1) / windowHeight - glm::vec2(aspect, 1.0f)) * glm::vec2(0.5f, -0.5f);
+
+			Renderer2D::DrawQuad(center, size, { 0.102f, 0.337f, 0.608f, 0.400f });
+			Renderer2D::DrawQuad(outlineCenter, outlineSize, { 0.260f, 0.590f, 0.980f, 1.000f }); // TODO: drawing lines
+
+			Renderer2D::EndScene();
+		}
 	}
 
 	void EditorLayer::UI_Dockspace()
@@ -175,10 +214,10 @@ namespace gbc
 			{
 				if (ImGui::BeginMenu("Panels"))
 				{
-					for (auto& [name, panel] : panels)
+					for (auto panel : panels)
 					{
 						bool enabled = panel->IsEnabled();
-						if (ImGui::MenuItem(name.c_str(), nullptr, &enabled))
+						if (ImGui::MenuItem(panel->GetName().c_str(), nullptr, &enabled))
 							panel->ToggleEnabled();
 					}
 					ImGui::EndMenu();
@@ -279,7 +318,7 @@ namespace gbc
 					OpenScene();
 					return true;
 				}
-				return true;
+				break;
 			case Keycode::S:
 				if (control || controlShift)
 				{
@@ -290,18 +329,20 @@ namespace gbc
 					return true;
 				}
 				break;
-
-			// Scene
 			case Keycode::Delete:
 				if (none && selectedEntity)
 				{
 					activeScene->DestroyEntity(selectedEntity);
 					selectedEntity = {};
+					return true;
 				}
 				break;
 			case Keycode::D:
 				if (control && selectedEntity)
-					activeScene->DuplicateEntity(selectedEntity);
+				{
+					selectedEntity = activeScene->DuplicateEntity(selectedEntity);
+					return true;
+				}
 				break;
 
 			// Gizmos
@@ -340,8 +381,8 @@ namespace gbc
 
 	bool EditorLayer::OnMouseButtonPressEvent(MouseButtonPressEvent& event)
 	{
-		// TODO: Bring back mouse picking when calculating mesh intersections
-		// rather than reading back from a framebuffer attachment
+		// TODO: Bring back mouse picking when calculating mesh intersections is
+		// implemented rather than reading back from a framebuffer attachment.
 
 		//if (sceneViewportPanel->IsHovered() && sceneViewportPanel->IsFocused() && event.GetButton() == MouseButton::ButtonLeft && !editorCamera.IsUsing() && !ImGuizmo::IsOver())
 		//{
@@ -410,8 +451,8 @@ namespace gbc
 
 		if (allowedDiscard)
 		{
-			// TODO: open from assets directory
-			auto filepath = FileDialog::OpenFile(L"GBC Scene (*.gscn)\0*.gscn\0", std::filesystem::current_path() /= "Assets");
+			// TODO: open from project's assets directory
+			auto filepath = FileDialog::OpenFile(GetFilter(FileType::scene), std::filesystem::current_path() /= L"Assets");
 			if (!filepath.empty())
 				OpenSceneFile(filepath);
 		}
@@ -451,12 +492,12 @@ namespace gbc
 
 	void EditorLayer::SaveSceneAs()
 	{
-		auto filepath = FileDialog::SaveFile(L"GBC Scene (*.gscn)\0*.gscn\0", std::filesystem::current_path() /= "Assets");
+		auto filepath = FileDialog::SaveFile(GetFilter(FileType::scene), std::filesystem::current_path() /= "Assets");
 		if (!filepath.empty())
 		{
 			// Add extension to extensionless path
-			if (!filepath.native().ends_with(L".gscn"))
-				filepath += L".gscn";
+			if (!IsSceneFilepath(filepath))
+				AppendSceneTypeTo(filepath);
 
 			sceneFilepath = filepath;
 			SaveScene();

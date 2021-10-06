@@ -1,29 +1,36 @@
 #include "SceneHierarchyPanel.h"
-#include <imgui/imgui.h>
 #include "GBC/Core/Input.h"
 #include "GBC/ImGui/ImGuiHelper.h"
+#include "GBC/Model/MeshFactory3D.h"
 #include "GBC/Scene/Components/CameraComponent.h"
+#include "GBC/Scene/Components/Mesh3DComponent.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 #include "GBC/Scene/Components/Physics/BoxCollider2DComponent.h"
 #include "GBC/Scene/Components/Physics/Rigidbody2DComponent.h"
+#include <imgui/imgui.h>
+#include "Layers/EditorLayer.h"
 
 namespace gbc
 {
-	SceneHierarchyPanel::SceneHierarchyPanel(const std::string& name, Ref<Scene>& context, Entity& selectedEntity)
-		: Panel(name), context(context), selectedEntity(selectedEntity) {}
+	SceneHierarchyPanel::SceneHierarchyPanel(const std::string& name, EditorLayer* editorLayer)
+		: Panel(name, editorLayer) {}
 
 	void SceneHierarchyPanel::OnImGuiRender()
 	{
 		if (enabled)
 		{
 			ImGui::Begin(name.c_str(), &enabled);
+			Update();
+
+			auto& context = editorLayer->activeScene;
+			auto& selectedEntity = editorLayer->selectedEntity;
+
 			// Fake child for drag/drop
 			// TODO: add reordering of elements
 			//	add a single blue line at the index to move the entity to
 			//		with the proper length depending on child status
-			ImGui::BeginChild("SceneHierarchyPanelChild");
-			Update();
+			ImGui::BeginChild("SceneHierarchyPanelChild", { 0.0f, 0.0f }, false, ImGuiWindowFlags_HorizontalScrollbar);
 
 			for (auto entity : context->entities)
 				DrawEntityNode({ entity, context.get() });
@@ -54,7 +61,31 @@ namespace gbc
 						selectedEntity = context->CreateEntity("Quad");
 						selectedEntity.Add<SpriteRendererComponent>();
 					}
-					if (ImGui::BeginMenu("Physics"))
+					if (ImGui::BeginMenu("3D Mesh"))
+					{
+						if (ImGui::MenuItem("Empty"))
+						{
+							selectedEntity = context->CreateEntity("Empty 3D Mesh");
+							selectedEntity.Add<Mesh3DComponent>();
+						}
+						if (ImGui::MenuItem("Cube"))
+						{
+							selectedEntity = context->CreateEntity("Cube");
+							selectedEntity.Add<Mesh3DComponent>().mesh = MeshFactory3D::CreateCuboid();
+						}
+						if (ImGui::MenuItem("Sphere"))
+						{
+							selectedEntity = context->CreateEntity("Sphere");
+							selectedEntity.Add<Mesh3DComponent>().mesh = MeshFactory3D::CreateEllipsoid();
+						}
+						if (ImGui::MenuItem("Plane"))
+						{
+							selectedEntity = context->CreateEntity("Plane");
+							selectedEntity.Add<Mesh3DComponent>().mesh = MeshFactory3D::CreatePlane();
+						}
+						ImGui::EndMenu();
+					}
+					if (ImGui::BeginMenu("2D Physics"))
 					{
 						if (ImGui::MenuItem("Static"))
 						{
@@ -93,6 +124,9 @@ namespace gbc
 
 	void SceneHierarchyPanel::DrawEntityNode(Entity entity)
 	{
+		auto& context = editorLayer->activeScene;
+		auto& selectedEntity = editorLayer->selectedEntity;
+
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 		if (selectedEntity == entity)
 			flags |= ImGuiTreeNodeFlags_Selected;
@@ -105,9 +139,8 @@ namespace gbc
 		{
 			if (ImGui::MenuItem("Delete Entity"))
 				entityToDelete = entity;
-			// TODO: should I set selectedEntity to the duplicated entity?
 			if (ImGui::MenuItem("Duplicate Entity"))
-				context->DuplicateEntity(entity);
+				selectedEntity = context->DuplicateEntity(entity);
 			ImGui::EndPopup();
 		}
 

@@ -1,5 +1,5 @@
 #include "EditorApplication.h"
-#include "EditorLayer.h"
+#include "Layers/EditorLayer.h"
 #include "GBC/Core/EntryPoint.h"
 
 namespace gbc

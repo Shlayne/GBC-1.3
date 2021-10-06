@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include "GBC/Rendering/LocalTexture2D.h"
+#include <glm/glm.hpp>
 
 namespace gbc
 {

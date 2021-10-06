@@ -20,6 +20,7 @@ namespace gbc
 		virtual void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height) override;
 
 		virtual void Clear() override;
+		virtual void ClearDepthOnly() override;
 		virtual void SetClearColor(float red, float green, float blue, float alpha) override;
 
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, uint32_t offset, uint32_t count, RendererPrimitive primitive) override;

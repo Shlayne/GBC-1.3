@@ -10,8 +10,8 @@ namespace gbc
 		RecalculateView();
 	}
 
-	EditorCamera::EditorCamera(float size, float nearClip, float farClip)
-		: size(size), nearClip(nearClip), farClip(farClip)
+	EditorCamera::EditorCamera(float fov, float nearClip, float farClip)
+		: fov(fov), nearClip(nearClip), farClip(farClip)
 	{
 		RecalculateView();
 	}
@@ -23,20 +23,21 @@ namespace gbc
 
 	void EditorCamera::OnUpdate(Timestep timestep)
 	{
+		// Always update mouse position regardless if the camera is in use
+		glm::vec2 delta = (mousePosition - prevMousePosition) * 0.003f;
+		prevMousePosition = mousePosition;
+
 		if (timestep && IsUsing())
 		{
-			if (Input::IsMouseButtonPressed(panButton))
-				MousePan();
-			if (mouseScrollOffset != 0.0f)
-				MouseZoom();
+			if (middleMouseButtonPressed)
+				MousePan(delta);
+			else if (leftMouseButtonPressed)
+				MouseRotate(delta);
+			else if (rightMouseButtonPressed)
+				MouseZoom(delta.y);
 
-			if (recalculateView)
-				RecalculateView();
-			if (recalculateProjection)
-				RecalculateProjection();
+			RecalculateView();
 		}
-
-		mouseScrollOffset = 0.0f;
 	}
 
 	void EditorCamera::OnEvent(Event& event)
@@ -50,106 +51,140 @@ namespace gbc
 		dispatcher.Dispatch(this, &EditorCamera::OnMouseScrollEvent);
 	}
 
+	void EditorCamera::OnKeyEvent(Keycode keycode, bool pressed)
+	{
+		if (keycode == activatorKey)
+			activatorKeyPressed = pressed;
+	}
+
+	void EditorCamera::OnMouseButtonEvent(MouseButton button, bool pressed)
+	{
+		switch (button)
+		{
+			case MouseButton::ButtonMiddle: middleMouseButtonPressed = pressed; break;
+			case MouseButton::ButtonLeft:   leftMouseButtonPressed = pressed;   break;
+			case MouseButton::ButtonRight:  rightMouseButtonPressed = pressed;  break;
+		}
+	}
+
 	bool EditorCamera::OnKeyPressEvent(KeyPressEvent& event)
 	{
-		if (!blocked && event.GetKeycode() == activatorKey)
-		{
-			activatorKeyPressed = true;
-			if (panButtonPressed)
-			{
-				startPanMousePosition = Input::GetAbsoluteMousePosition() - viewportPosition - viewportSize / 2.0f;
-				startPanPosition = position;
-			}
-		}
+		OnKeyEvent(event.GetKeycode(), true);
 		return false;
 	}
 
 	bool EditorCamera::OnKeyReleaseEvent(KeyReleaseEvent& event)
 	{
-		if (!blocked && event.GetKeycode() == activatorKey)
-			activatorKeyPressed = false;
+		OnKeyEvent(event.GetKeycode(), false);
 		return false;
 	}
 
 	bool EditorCamera::OnMouseButtonPressEvent(MouseButtonPressEvent& event)
 	{
-		if (!blocked && event.GetButton() == panButton)
-		{
-			panButtonPressed = true;
-			if (activatorKeyPressed)
-			{
-				startPanMousePosition = Input::GetAbsoluteMousePosition() - viewportPosition - viewportSize / 2.0f;
-				startPanPosition = position;
-			}
-		}
+		OnMouseButtonEvent(event.GetButton(), true);
 		return false;
 	}
 
 	bool EditorCamera::OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& event)
 	{
-		if (!blocked && event.GetButton() == panButton)
-			panButtonPressed = false;
+		OnMouseButtonEvent(event.GetButton(), false);
 		return false;
 	}
 
 	bool EditorCamera::OnMouseMoveEvent(MouseMoveEvent& event)
 	{
-		mousePosition = Input::GetAbsoluteMousePosition() - viewportPosition - viewportSize / 2.0f;
+		mousePosition.x = event.GetX();
+		mousePosition.y = event.GetY();
 		return false;
 	}
 
 	bool EditorCamera::OnMouseScrollEvent(MouseScrollEvent& event)
 	{
-		mouseScrollOffset = event.GetOffsetY();
+		MouseZoom(event.GetOffsetY() * 0.1f);
+		RecalculateView();
 		return false;
-	}
-
-	void EditorCamera::OnViewportMove(int32_t x, int32_t y)
-	{
-		viewportPosition = { static_cast<float>(x), static_cast<float>(y) };
 	}
 
 	void EditorCamera::OnViewportResize(int32_t width, int32_t height)
 	{
-		viewportSize = { static_cast<float>(width), static_cast<float>(height) };
-		aspectRatio = viewportSize.x / viewportSize.y;
+		viewportSize.x = static_cast<float>(width);
+		viewportSize.y = static_cast<float>(height);
 		RecalculateProjection();
 	}
 
 	void EditorCamera::RecalculateProjection()
 	{
-		float orthoTop = size * 0.5f;
-		float orthoRight = orthoTop * aspectRatio;
-		projection = glm::ortho(-orthoRight, orthoRight, -orthoTop, orthoTop, nearClip, farClip);
-		recalculateProjection = false;
+		aspectRatio = viewportSize.x / viewportSize.y;
+		projection = glm::perspective(fov, aspectRatio, nearClip, farClip);
 	}
 
 	void EditorCamera::RecalculateView()
 	{
-		view = glm::inverse(glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f)));
-		recalculateView = false;
+		position = focalPoint - GetForwardDirection() * distance;
+		view = glm::inverse(glm::translate(glm::mat4(1.0f), position) * glm::toMat4(GetOrientation()));
 	}
 
-	void EditorCamera::MousePan()
+	void EditorCamera::MousePan(const glm::vec2& delta)
 	{
-		position = startPanPosition - PixelSpaceToWorldSpace(mousePosition - startPanMousePosition);
-		recalculateView = true;
+		focalPoint += (GetUpDirection() * delta.y - GetRightDirection() * delta.x) * distance;
 	}
 
-	void EditorCamera::MouseZoom()
+	void EditorCamera::MouseRotate(const glm::vec2& delta)
 	{
-		glm::vec2 preZoomMousePositionWorldSpace = PixelSpaceToWorldSpace(mousePosition);
-		size *= std::pow(1.2f, -mouseScrollOffset);
-		position += preZoomMousePositionWorldSpace - PixelSpaceToWorldSpace(mousePosition);
-
-		recalculateProjection = true;
-		recalculateView = true;
+		float yawSign = GetUpDirection().y < 0.0f ? -1.0f : 1.0f;
+		yaw += yawSign * delta.x * GetRotationSpeed();
+		pitch += delta.y * GetRotationSpeed();
 	}
 
-	// Input  Range: -viewportSize * 0.5f -> viewportSize * 0.5f
-	// Output Range: x = -aspectRatio * size -> aspectRatio * size, y = -size -> size
-	glm::vec2 EditorCamera::PixelSpaceToWorldSpace(const glm::vec2& pixelSpace) const
+	void EditorCamera::MouseZoom(float delta)
 	{
-		return pixelSpace / viewportSize * glm::vec2(aspectRatio, -1.0f) * size;
+		distance -= delta * GetZoomSpeed();
+		if (distance < 1.0f)
+		{
+			distance = 1.0f;
+			focalPoint += GetForwardDirection();
+		}
+	}
+
+	//glm::vec2 EditorCamera::GetPanSpeed() const
+	//{
+	//	float x = std::min(viewportSize.x / 1000.0f, 2.4f);
+	//	float xFactor = 0.0366f * x * x - 0.1778f * x + 0.3021f;
+
+	//	float y = std::min(viewportSize.x / 1000.0f, 2.4f);
+	//	float yFactor = 0.0366f * y * y - 0.1778f * y + 0.3021f;
+
+	//	return {xFactor, yFactor};
+	//}
+
+	float EditorCamera::GetRotationSpeed() const
+	{
+		return 0.8f;
+	}
+
+	float EditorCamera::GetZoomSpeed() const
+	{
+		float dist = std::max(distance * 0.4f, 0.0f);
+		return std::min(dist * dist, 100.0f);
+	}
+
+	glm::vec3 EditorCamera::GetRightDirection() const
+	{
+		return glm::rotate(GetOrientation(), glm::vec3(1.0f, 0.0f, 0.0f));
+	}
+
+	glm::vec3 EditorCamera::GetUpDirection() const
+	{
+		return glm::rotate(GetOrientation(), glm::vec3(0.0f, 1.0f, 0.0f));
+	}
+
+	glm::vec3 EditorCamera::GetForwardDirection() const
+	{
+		return glm::rotate(GetOrientation(), glm::vec3(0.0f, 0.0f, -1.0f));
+	}
+
+	glm::quat EditorCamera::GetOrientation() const
+	{
+		return glm::quat(glm::vec3(-pitch, -yaw, 0.0f));
 	}
 }

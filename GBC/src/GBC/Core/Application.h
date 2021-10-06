@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GBC/Core/AssetManager.h"
 #include "GBC/Core/LayerStack.h"
 #include "GBC/Core/Window.h"
 #include "GBC/Events/DeviceEvents.h"
@@ -29,6 +30,7 @@ namespace gbc
 		virtual ~Application();
 
 		inline static Application& Get() { return *instance; }
+		inline AssetManager& GetAssetManager() { return assetManager; }
 		inline Window& GetWindow() { return *window; }
 		inline void* GetFocusedNativeWindow() { return focusedNativeWindow; }
 #if GBC_ENABLE_IMGUI
@@ -49,6 +51,7 @@ namespace gbc
 		bool OnWindowMinimizeEvent(WindowMinimizeEvent& event);
 
 		static Application* instance;
+		AssetManager assetManager;
 
 		bool running = true;
 		bool rendering = true;

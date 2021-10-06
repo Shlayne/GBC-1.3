@@ -17,6 +17,7 @@ namespace gbc
 		virtual void OnRender() {}
 #if GBC_ENABLE_IMGUI
 		virtual void OnImGuiRender() {}
+		virtual void OnPostImGuiRender() {}
 #endif
 		virtual void OnEvent(Event& event) {}
 	public:

@@ -1,15 +1,6 @@
 #pragma once
 
-// NOTE: Include this AFTER you have included entt.hpp
-
-// This is here as a last resort fallback option
-//#include <cstdint>
-//namespace entt
-//{
-//	using id_type = std::uint32_t;
-//	enum class entity : id_type;
-//	static constexpr entity gbc_null = static_cast<entt::entity>(0xFFFFF); // entt::null
-//}
+#include <entt/entt.hpp>
 
 namespace gbc
 {

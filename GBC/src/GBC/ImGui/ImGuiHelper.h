@@ -13,7 +13,7 @@ namespace gbc
 	private:
 		static void Init();
 		friend class ImGuiWrapper;
-
+	public:
 		static constexpr float defaultSpeed = 0.1f;
 		static constexpr ImGuiTableFlags defaultTableFlags = ImGuiTableFlags_BordersInnerV;
 		static constexpr ImGuiInputTextFlags defaultTextFlags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue;

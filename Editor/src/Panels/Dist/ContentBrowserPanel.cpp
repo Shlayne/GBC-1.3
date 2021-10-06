@@ -1,27 +1,32 @@
 #include "ContentBrowserPanel.h"
-#include <regex>
-#include <imgui/imgui.h>
+#include "GBC/Core/Application.h"
+#include "GBC/Core/FileTypes.h"
 #include "GBC/Core/Input.h"
 #include "GBC/Events/MouseEvents.h"
 #include "GBC/ImGui/ImGuiHelper.h"
 #include "GBC/IO/DirectoryChange.h"
 #include "GBC/IO/FileDialog.h"
+#include "GBC/Rendering/Renderers/Renderer2D.h"
+#include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
+#include <regex>
 
 namespace gbc
 {
 	static constexpr ImGuiInputTextFlags inputTextFlags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_ForceScrollLeft;
 
-	const std::filesystem::path projectAssetDirectory = "Assets";
+	const std::filesystem::path projectAssetDirectory = L"Assets";
 
-	ContentBrowserPanel::ContentBrowserPanel(const std::string& name)
-		: Panel(name), assetDirectory{ projectAssetDirectory },
+	ContentBrowserPanel::ContentBrowserPanel(const std::string& name, EditorLayer* editorLayer)
+		: Panel(name, editorLayer), assetDirectory{ projectAssetDirectory },
 		notifier{ GBC_BIND_FUNC(OnDirectoryNotification), assetDirectory.path, DirectoryChange::NotificationType_NameChanged, true }
 	{
 		cachedDirectories.push_back(projectAssetDirectory);
 		currentCachedDirectory = cachedDirectories.begin();
 
-		directoryTexture = Texture2D::Create(LocalTexture2D::Create("Resources/Icons/ContentBrowserPanel/DirectoryIcon.png", 4));
-		fileTexture = Texture2D::Create(LocalTexture2D::Create("Resources/Icons/ContentBrowserPanel/FileIcon.png", 4));
+		auto& assetManager = Application::Get().GetAssetManager();
+		directoryTexture = assetManager.GetOrLoadTexture(L"Resources/Icons/ContentBrowserPanel/DirectoryIcon.png");
+		fileTexture = assetManager.GetOrLoadTexture(L"Resources/Icons/ContentBrowserPanel/FileIcon.png");
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -183,14 +188,32 @@ namespace gbc
 
 	void ContentBrowserPanel::DrawExplorer()
 	{
+		// Basically does Update() but for the explorer child window instead
+		{
+			ImVec2 imguiSize = ImGui::GetContentRegionAvail();
+			explorerSizeChanged = imguiSize.x != size.x || imguiSize.y != size.y;
+			if (explorerSizeChanged)
+				explorerSize = { imguiSize.x, imguiSize.y };
+
+			ImVec2 windowPos = ImGui::GetWindowPos();
+			ImVec2 viewportOffset = ImGui::GetCursorPos();
+			ImVec2 viewportPos = ImGui::GetMainViewport()->Pos;
+			explorerPosition = { windowPos.x + viewportOffset.x - viewportPos.x, windowPos.y + viewportOffset.y - viewportPos.y };
+		}
+
 		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 2.0f, 2.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 2.0f, 0.0f });
 		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
 
 		float padding = ImGui::GetStyle().CellPadding.x;
 		float thumbnailSize = 96.0f;
-		int32_t columnCount = std::max(1, static_cast<int32_t>((ImGui::GetContentRegionAvail().x - padding) / (thumbnailSize + 2.0f * padding)));
+		int32_t columnCount = std::max(1, static_cast<int32_t>((ImGui::GetContentRegionAvail().x - padding) / (thumbnailSize + padding)));
 
+		std::vector<FileButton> fileButtons;
+
+		bool endDragSelect = dragSelectActive && ImGui::IsMouseReleased(ImGuiMouseButton_Left);
+		bool mouseOverFiles = false;
 		if (ImGui::BeginTable("ContentBrowserExplorerFiles", columnCount, ImGuiTableFlags_SameWidths))
 		{
 			ImGui::TableNextColumn();
@@ -263,6 +286,9 @@ namespace gbc
 
 				if (passedSearch)
 				{
+					if (endDragSelect)
+						fileButtons.emplace_back(file.path, glm::ivec2(explorerPosition.x + ImGui::GetCursorPosX(), explorerPosition.y + ImGui::GetCursorPosY()));
+
 					void* textureID = (void*)static_cast<size_t>((file.isDirectory ? directoryTexture : fileTexture)->GetRendererID());
 					ImGui::ImageButton(textureID, { thumbnailSize, thumbnailSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f });
 
@@ -272,6 +298,8 @@ namespace gbc
 
 					if (ImGui::IsItemHovered())
 					{
+						mouseOverFiles = true;
+
 						if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 						{
 							if (file.isDirectory)
@@ -374,8 +402,21 @@ namespace gbc
 			ImGui::EndTable();
 		}
 
+		if (!dragSelectActive)
+		{
+			if (ImGui::IsWindowHovered() && !mouseOverFiles && ImGui::IsMouseDown(ImGuiMouseButton_Left) && !ImGui::GetCurrentContext()->DragDropActive)
+			{
+				BeginDragSelect();
+				UpdateDragSelect();
+			}
+		}
+		else if (endDragSelect)
+			EndDragSelect(fileButtons, glm::ivec2(thumbnailSize, thumbnailSize));
+		else
+			UpdateDragSelect();
+
 		ImGui::PopStyleColor();
-		ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2);
 	}
 
 	void ContentBrowserPanel::ForwardDirectory()
@@ -475,6 +516,10 @@ namespace gbc
 		std::error_code error;
 		for (const auto& entry : std::filesystem::directory_iterator(*currentCachedDirectory, error))
 		{
+			// Hide the metadata
+			if (entry.path().native().ends_with(L".gmeta"))
+				continue;
+
 			bool isDirectory = entry.is_directory();
 
 			if (isDirectory)
@@ -524,6 +569,10 @@ namespace gbc
 						std::filesystem::remove_all(tempFile.path);
 					else
 						std::filesystem::remove(tempFile.path);
+
+					std::filesystem::path metaFilepath = AppendMetadataType(tempFile.path);
+					if (std::filesystem::exists(metaFilepath))
+						std::filesystem::remove(metaFilepath);
 				}
 #if GBC_ENABLE_LOGGING
 				catch (std::filesystem::filesystem_error& error)
@@ -583,6 +632,47 @@ namespace gbc
 			
 			ImGui::EndDragDropTarget();
 		}
+	}
+
+	void ContentBrowserPanel::BeginDragSelect()
+	{
+		dragSelectActive = true;
+		dragSelectStart = Input::GetRelativeMousePosition(Application::Get().GetWindow().GetNativeWindow());
+	}
+
+	void ContentBrowserPanel::UpdateDragSelect()
+	{
+		dragSelectCurrent = Input::GetRelativeMousePosition(Application::Get().GetWindow().GetNativeWindow());
+	}
+
+	void ContentBrowserPanel::EndDragSelect(const std::vector<FileButton>& fileButtons, const glm::ivec2& buttonSize)
+	{
+		dragSelectActive = false;
+
+		auto Overlap = [](const glm::ivec2& position1, const glm::ivec2& size1, const glm::ivec2& position2, const glm::ivec2& size2)
+		{
+			return position1.x + size1.x >= position2.x && position1.x < position2.x + size2.x &&
+				   position1.y + size1.y >= position2.y && position1.y < position2.y + size2.y;
+		};
+
+		glm::ivec2 topLeft, bottomRight;
+		GetDragSelectBounds(topLeft, bottomRight);
+		glm::ivec2 dragSelectSize = bottomRight - topLeft;
+		selectedFiles.clear();
+
+		for (const auto& button : fileButtons)
+		{
+			if (Overlap(topLeft, dragSelectSize, button.position, buttonSize))
+			{
+				selectedFiles.push_back(button.filepath);
+			}
+		}
+	}
+
+	void ContentBrowserPanel::GetDragSelectBounds(glm::ivec2& topLeft, glm::ivec2& bottomRight) const
+	{
+		topLeft = glm::max(glm::min(dragSelectCurrent, dragSelectStart), explorerPosition);
+		bottomRight = glm::min(glm::max(dragSelectCurrent, dragSelectStart), explorerPosition + explorerSize - 1);
 	}
 
 	bool ContentBrowserPanel::OnDirectoryNotification(bool error)

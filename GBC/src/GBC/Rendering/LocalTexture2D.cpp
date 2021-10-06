@@ -1,8 +1,8 @@
 #include "gbcpch.h"
 #include "LocalTexture2D.h"
+#include "GBC/Rendering/RendererAPI.h"
 #include <stb/stb_image.h>
 #include <stb/stb_image_write.h>
-#include "GBC/Rendering/RendererAPI.h"
 
 namespace gbc
 {

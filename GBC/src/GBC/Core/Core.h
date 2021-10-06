@@ -53,5 +53,5 @@ namespace gbc
 	using RendererID = uint32_t;
 }
 
-#include "GBC/Core/Logger.h"
 #include "GBC/Core/Assert.h"
+#include "GBC/Core/Logger.h"

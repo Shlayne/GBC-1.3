@@ -1,20 +1,24 @@
 #include "ScenePropertiesPanel.h"
-#include <imgui/imgui.h>
+#include "GBC/Core/Application.h"
+#include "GBC/Core/FileTypes.h"
 #include "GBC/ImGui/ImGuiHelper.h"
 #include "GBC/IO/FileDialog.h"
 #include "GBC/Scene/Components/CameraComponent.h"
+#include "GBC/Scene/Components/Mesh3DComponent.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
 #include "GBC/Scene/Components/Physics/BoxCollider2DComponent.h"
 #include "GBC/Scene/Components/Physics/Rigidbody2DComponent.h"
+#include <imgui/imgui.h>
+#include "Layers/EditorLayer.h"
 
 namespace gbc
 {
-	template<typename T, typename Func>
-	static void DrawComponent(const std::string& label, int columnCount, Entity entity, bool removable, Func func)
+	template<typename Component, typename Func>
+	static void DrawComponent(const std::string& label, Entity entity, bool removable, Func func)
 	{
-		if (entity.Has<T>())
+		if (entity.Has<Component>())
 		{
 			ImGui::PushID(static_cast<uint32_t>(entity));
 			ImGui::PushID(label.c_str());
@@ -28,7 +32,7 @@ namespace gbc
 			float lineHeight = ImGui::GetFrameHeight();
 			ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
 
-			void* id = (void*)(((size_t)(void*)label.c_str()) ^ typeid(T).hash_code());
+			void* id = (void*)(((size_t)(void*)label.c_str()) ^ typeid(Component).hash_code());
 			bool open = ImGui::TreeNodeEx(id, flags, label.c_str());
 
 			// TODO: This will eventually have more than just remove component, i.e. other settings.
@@ -48,9 +52,9 @@ namespace gbc
 			{
 				ImGui::Unindent();
 				ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
-				if (ImGuiHelper::BeginTable(label.c_str(), columnCount))
+				if (ImGuiHelper::BeginTable(label.c_str(), 2))
 				{
-					func(entity.Get<T>());
+					func(entity.Get<Component>());
 					ImGuiHelper::EndTable();
 				}
 				ImGui::Indent();
@@ -58,25 +62,39 @@ namespace gbc
 			}
 
 			if (removeComponent)
-				entity.Remove<T>();
+				entity.Remove<Component>();
 
 			ImGui::PopID();
 			ImGui::PopID();
 		}
 	}
 
-	template<typename T>
-	static void DrawAddComponent(const std::string& label, Entity entity)
+	template<typename Component>
+	static void DrawAdd(const std::string& label, Entity entity)
 	{
-		if (!entity.Has<T>() && ImGui::MenuItem(label.c_str()))
+		if (!entity.Has<Component>() && ImGui::MenuItem(label.c_str()))
 		{
-			entity.Add<T>();
+			entity.Add<Component>();
 			ImGui::CloseCurrentPopup();
 		}
 	}
 
-	ScenePropertiesPanel::ScenePropertiesPanel(const std::string& name, Entity& selectedEntity)
-		: Panel(name), selectedEntity(selectedEntity) {}
+	static void TextureButton(Ref<Texture2D>& texture)
+	{
+		std::string buttonText = "Null";
+		if (texture && texture->GetTexture())
+			buttonText = texture->GetTexture()->GetFilepath().string();
+
+		if (const ImGuiPayload* payload = ImGuiHelper::ButtonDragDropTarget("Texture", buttonText.c_str(), "CONTENT_BROWSER_ITEM",
+			[](void* payloadData) { return IsTextureFile(static_cast<const wchar_t*>(payloadData)); }))
+		{
+			std::filesystem::path filepath = static_cast<const wchar_t*>(payload->Data);
+			texture = Application::Get().GetAssetManager().GetOrLoadTexture(filepath);
+		}
+	}
+
+	ScenePropertiesPanel::ScenePropertiesPanel(const std::string& name, EditorLayer* editorLayer)
+		: Panel(name, editorLayer) {}
 
 	void ScenePropertiesPanel::OnImGuiRender()
 	{
@@ -85,20 +103,37 @@ namespace gbc
 			ImGui::Begin(name.c_str(), &enabled);
 			Update();
 
+			auto& selectedEntity = editorLayer->selectedEntity;
+
 			if (selectedEntity)
 			{
-				// TODO: ImGui::PushID((void*)selectedEntity.GetUUID());
-				ImGui::PushID((void*)static_cast<uint64_t>(static_cast<uint32_t>(selectedEntity)));
+				ImGui::PushID((void*)(uint64_t)selectedEntity.GetUUID());
 
 				{
-					ImGui::PushID("TagComponent");
-					ImGuiHelper::TextEdit(&selectedEntity.Get<TagComponent>().tag);
-					ImGui::PopID();
+					ImGuiStyle& style = ImGui::GetStyle();
+					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { style.ItemSpacing.x * 0.5f, style.ItemSpacing.y * 0.5f });
+
+					if (ImGui::BeginTable("TagComponent", 2, ImGuiHelper::defaultTableFlags))
+					{
+						ImGui::TableSetupColumn(nullptr, ImGuiTableColumnFlags_None);
+						ImGui::TableSetupColumn(nullptr, ImGuiTableColumnFlags_WidthAuto);
+						ImGui::TableNextColumn();
+
+						auto& tag = selectedEntity.Get<TagComponent>().tag;
+						ImGuiHelper::TextEdit(&tag);
+						ImGui::TableNextColumn();
+
+						std::string uuidString = std::to_string(selectedEntity.GetUUID());
+						ImGui::Text(uuidString.c_str());
+						ImGui::EndTable();
+					}
+
+					ImGui::PopStyleVar();
 				}
 
 				ImGui::Separator();
 
-				DrawComponent<TransformComponent>("Transform", 2, selectedEntity, false, [](TransformComponent& component)
+				DrawComponent<TransformComponent>("Transform", selectedEntity, false, [](TransformComponent& component)
 				{
 					ImGuiHelper::FloatEdit3("Translation", &component.translation.x);
 					ImGuiHelper::NextTableColumn();
@@ -109,7 +144,7 @@ namespace gbc
 					ImGuiHelper::FloatEdit3("Scale", &component.scale.x);
 				});
 
-				DrawComponent<CameraComponent>("Camera", 2, selectedEntity, true, [](CameraComponent& component)
+				DrawComponent<CameraComponent>("Camera", selectedEntity, true, [](CameraComponent& component)
 				{
 					SceneCamera& camera = component.camera;
 
@@ -167,76 +202,37 @@ namespace gbc
 					}
 				});
 
-				DrawComponent<SpriteRendererComponent>("Sprite Renderer", 2, selectedEntity, true, [](SpriteRendererComponent& component)
+				DrawComponent<Mesh3DComponent>("3D Mesh", selectedEntity, true, [](Mesh3DComponent& component)
+				{
+					std::string buttonText = "Null";
+					if (component.mesh)
+						buttonText = component.mesh->filepath.string();
+
+					if (const ImGuiPayload* payload = ImGuiHelper::ButtonDragDropTarget("Mesh", buttonText.c_str(), "CONTENT_BROWSER_ITEM",
+						[](void* payloadData) { return Is3DObjectFile(static_cast<const wchar_t*>(payloadData)); }))
+					{
+						// TODO: load obj into mesh
+					}
+					ImGuiHelper::NextTableColumn();
+
+					ImGuiHelper::ColorEdit4("Tint Color", &component.tintColor.x);
+					ImGuiHelper::NextTableColumn();
+
+					TextureButton(component.texture);
+				});
+
+				DrawComponent<SpriteRendererComponent>("Sprite Renderer", selectedEntity, true, [](SpriteRendererComponent& component)
 				{
 					ImGuiHelper::ColorEdit4("Tint Color", &component.color.x);
 					ImGuiHelper::NextTableColumn();
 
-					std::string buttonText = "Null";
-					if (component.texture && component.texture->GetTexture())
-						buttonText = component.texture->GetTexture()->GetFilepath().string();
-
-					if (const ImGuiPayload* payload = ImGuiHelper::ButtonDragDropTarget("Texture", buttonText.c_str(), "CONTENT_BROWSER_ITEM",
-						[](void* payloadData) { return std::wstring_view(static_cast<const wchar_t*>(payloadData)).ends_with(L".png"); }))
-					{
-						auto localTexture = LocalTexture2D::Create(static_cast<const wchar_t*>(payload->Data));
-						if (localTexture)
-						{
-							TextureSpecification specs = component.texture ? component.texture->GetSpecification() : TextureSpecification{};
-							specs.texture = localTexture;
-							component.texture = Texture2D::Create(specs);
-						}
-					};
+					ImGuiHelper::FloatEdit2("Tiling Factor", &component.tilingFactor.x);
 					ImGuiHelper::NextTableColumn();
 
-					ImGuiHelper::FloatEdit2("Tiling Factor", &component.tilingFactor.x);
-
-					// TODO: all of what's in this if statement should be moved to another panel similar to unity
-					// because there are going to be way more than just these things in a texture
-					if (component.texture)
-					{
-						ImGuiHelper::NextTableColumn();
-
-						TextureSpecification specs = component.texture->GetSpecification();
-						bool changed = false;
-
-						static constexpr const char* names1[]{ "Linear", "Nearest" };
-						static constexpr const char* names2[]{ "ClampToEdge", "Repeat" };
-
-						int selectedItem = static_cast<int>(specs.minFilter);
-						if (changed = ImGuiHelper::Combo("Min Filter", &selectedItem, names1, sizeof(names1) / sizeof(*names1)))
-						{
-							specs.minFilter = static_cast<TextureFilterMode>(selectedItem);
-							changed = true;
-						}
-						ImGuiHelper::NextTableColumn();
-						selectedItem = static_cast<int>(specs.magFilter);
-						if (ImGuiHelper::Combo("Mag Filter", &selectedItem, names1, sizeof(names1) / sizeof(*names1)) && !changed)
-						{
-							specs.magFilter = static_cast<TextureFilterMode>(selectedItem);
-							changed = true;
-						}
-						ImGuiHelper::NextTableColumn();
-						selectedItem = static_cast<int>(specs.wrapS);
-						if (ImGuiHelper::Combo("Wrap S", &selectedItem, names2, sizeof(names2) / sizeof(*names2)) && !changed)
-						{
-							specs.wrapS = static_cast<TextureWrapMode>(selectedItem);
-							changed = true;
-						}
-						ImGuiHelper::NextTableColumn();
-						selectedItem = static_cast<int>(specs.wrapT);
-						if (ImGuiHelper::Combo("Wrap T", &selectedItem, names2, sizeof(names2) / sizeof(*names2)) && !changed)
-						{
-							specs.wrapT = static_cast<TextureWrapMode>(selectedItem);
-							changed = true;
-						}
-
-						if (changed)
-							component.texture = Texture2D::Create(specs);
-					}
+					TextureButton(component.texture);
 				});
 
-				DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", 2, selectedEntity, true, [](Rigidbody2DComponent& component)
+				DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", selectedEntity, true, [](Rigidbody2DComponent& component)
 				{
 					static constexpr const char* names[]{ "Static", "Dynamic", "Kinematic" };
 
@@ -248,7 +244,7 @@ namespace gbc
 					ImGuiHelper::Checkbox("Fixed Rotation", &component.fixedRotation);
 				});
 
-				DrawComponent<BoxCollider2DComponent>("Box Collider", 2, selectedEntity, true, [](BoxCollider2DComponent& component)
+				DrawComponent<BoxCollider2DComponent>("Box Collider", selectedEntity, true, [](BoxCollider2DComponent& component)
 				{
 					ImGuiHelper::FloatEdit2("Size", &component.size.x, 0.1f, 0.0f, FLT_MAX);
 					ImGuiHelper::NextTableColumn();
@@ -276,11 +272,11 @@ namespace gbc
 					ImGui::OpenPopup("AddComponent");
 				if (ImGui::BeginPopup("AddComponent"))
 				{
-					DrawAddComponent<CameraComponent>("Camera", selectedEntity);
-					DrawAddComponent<SpriteRendererComponent>("Sprite Renderer", selectedEntity);
-					DrawAddComponent<TransformComponent>("Transform", selectedEntity);
-					DrawAddComponent<BoxCollider2DComponent>("Box Collider", selectedEntity);
-					DrawAddComponent<Rigidbody2DComponent>("Rigidbody 2D", selectedEntity);
+					DrawAdd<CameraComponent>("Camera", selectedEntity);
+					DrawAdd<Mesh3DComponent>("Mesh 3D", selectedEntity);
+					DrawAdd<SpriteRendererComponent>("Sprite Renderer", selectedEntity);
+					DrawAdd<BoxCollider2DComponent>("Box Collider", selectedEntity);
+					DrawAdd<Rigidbody2DComponent>("Rigidbody 2D", selectedEntity);
 					ImGui::EndPopup();
 				}
 

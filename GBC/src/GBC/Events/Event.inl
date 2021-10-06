@@ -2,8 +2,6 @@ namespace gbc
 {
 	inline bool Event::IsInCategory(EventCategoryFlags category) const noexcept { return GetCategoryFlags() & category; }
 
-	EventDispatcher::EventDispatcher(Event& event) : event(event) {}
-
 	template<typename C, typename E>
 	bool EventDispatcher::Dispatch(C* object, bool(C::* func)(E&))
 	{

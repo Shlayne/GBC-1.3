@@ -1,17 +1,19 @@
 #pragma once
 
 #include <gbc.h>
-#include <map>
-#include <filesystem>
-#include <imguizmo/ImGuizmo.h>
 #include "GBC/Rendering/EditorCamera.h"
-#include "Panels/SceneViewportPanel.h"
-#include "Panels/SceneHierarchyPanel.h"
-#include "Panels/ScenePropertiesPanel.h"
-#include "Panels/ContentBrowserPanel.h"
+#include <imguizmo/ImGuizmo.h>
+#include <filesystem>
 
 namespace gbc
 {
+	class Panel;
+	class ContentBrowserPanel;
+	class SceneHierarchyPanel;
+	class ScenePropertiesPanel;
+	class SceneViewportPanel;
+	class TexturePropertiesPanel;
+
 	class EditorLayer : public Layer
 	{
 	public:
@@ -20,6 +22,7 @@ namespace gbc
 		virtual void OnUpdate(Timestep timestep) override;
 		virtual void OnRender() override;
 		virtual void OnImGuiRender() override;
+		virtual void OnPostImGuiRender() override;
 		virtual void OnEvent(Event& event) override;
 	private:
 		bool OnWindowCloseEvent(WindowCloseEvent& event);
@@ -62,14 +65,21 @@ namespace gbc
 		void UI_MenuBar();
 		void UI_ToolBar();
 
-		template<typename T, typename... Args>
-		T* AddPanel(const std::string& name, Args&&... args);
+		template<typename T> T* AddPanel(const std::string& name);
 
-		std::map<std::string, Panel*> panels;
-		SceneViewportPanel* sceneViewportPanel = nullptr;
+		std::vector<Panel*> panels;
+
+		friend class ContentBrowserPanel;
+		friend class SceneHierarchyPanel;
+		friend class ScenePropertiesPanel;
+		friend class SceneViewportPanel;
+		friend class TexturePropertiesPanel;
+
+		ContentBrowserPanel* contentBrowserPanel = nullptr;
 		SceneHierarchyPanel* sceneHierarchyPanel = nullptr;
 		ScenePropertiesPanel* scenePropertiesPanel = nullptr;
-		ContentBrowserPanel* contentBrowserPanel = nullptr;
+		SceneViewportPanel* sceneViewportPanel = nullptr;
+		TexturePropertiesPanel* texturePropertiesPanel = nullptr;
 
 		// Resources
 		Ref<Texture2D> playButtonTexture;

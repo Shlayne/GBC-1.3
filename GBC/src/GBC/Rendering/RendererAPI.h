@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include "GBC/Rendering/VertexArray.h"
+#include <glm/glm.hpp>
 
 namespace gbc
 {
@@ -40,8 +40,9 @@ namespace gbc
 
 		virtual void SetViewport(int32_t x, int32_t y, int32_t width, int32_t height) = 0;
 
-		virtual void SetClearColor(float red, float green, float blue, float alpha) = 0;
 		virtual void Clear() = 0;
+		virtual void ClearDepthOnly() = 0;
+		virtual void SetClearColor(float red, float green, float blue, float alpha) = 0;
 
 		virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, const Ref<IndexBuffer>& indexBuffer, uint32_t offset, uint32_t count, RendererPrimitive primitive) = 0;
 

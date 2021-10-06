@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include "GBC/Core/Core.h"
+#include <vector>
 
 namespace gbc
 {

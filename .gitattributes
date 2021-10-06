@@ -13,3 +13,11 @@
 
 *.exe binary
 *.png binary
+*.jpg binary
+*.jpeg binary
+*.jpe binary
+*.jfif binary
+
+*.gmeta text
+*.gscene text
+*.gobj4 text

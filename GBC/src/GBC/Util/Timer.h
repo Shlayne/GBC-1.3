@@ -1,7 +1,7 @@
 #pragma once
 
-#include <chrono>
 #include "GBC/Core/Timestep.h"
+#include <chrono>
 
 namespace gbc
 {

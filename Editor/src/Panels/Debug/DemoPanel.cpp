@@ -4,8 +4,8 @@
 
 namespace gbc
 {
-	DemoPanel::DemoPanel(const std::string& name)
-		: Panel(name)
+	DemoPanel::DemoPanel(const std::string& name, EditorLayer* editorLayer)
+		: Panel(name, editorLayer)
 	{
 		enabled = false;
 	}

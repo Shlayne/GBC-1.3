@@ -3,8 +3,8 @@
 
 namespace gbc
 {
-	Panel::Panel(const std::string& name)
-		: name(name) {}
+	Panel::Panel(const std::string& name, EditorLayer* editorLayer)
+		: name(name), editorLayer(editorLayer) {}
 
 	void Panel::Update()
 	{

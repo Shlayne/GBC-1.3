@@ -1,12 +1,12 @@
 #include "gbcpch.h"
+#include "GBC/Core/Application.h"
 #include "GBC/IO/FileDialog.h"
+#include <filesystem>
 #include <commdlg.h>
 #include <shellapi.h>
-#include <filesystem>
 #include <glfw/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <glfw/glfw3native.h>
-#include "GBC/Core/Application.h"
 
 namespace gbc
 {

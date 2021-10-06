@@ -3,18 +3,15 @@
 #include "GBC/Core/Core.h"
 #if GBC_ENABLE_STATS
 #include "Panels/Panel.h"
-#include "GBC/Rendering/Basic/BasicRenderer.h"
 
 namespace gbc
 {
 	class StatisticsPanel : public Panel
 	{
 	public:
-		StatisticsPanel(const std::string& name, const BasicRenderer::Statistics& statistics);
+		StatisticsPanel(const std::string& name, EditorLayer* editorLayer);
 
 		virtual void OnImGuiRender() override;
-	private:
-		const BasicRenderer::Statistics& statistics;
 	};
 }
 #endif

@@ -1,7 +1,7 @@
 #include "gbcpch.h"
 #include "OpenGLFramebuffer.h"
-#include <glad/glad.h>
 #include "GBC/Rendering/RendererCapabilities.h"
+#include <glad/glad.h>
 
 namespace gbc
 {

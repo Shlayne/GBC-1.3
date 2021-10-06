@@ -1,5 +1,5 @@
 #include "gbcpch.h"
-#include "BasicRenderer.h"
+#include "Renderer2D.h"
 #include "GBC/Rendering/Renderer.h"
 #include "GBC/Rendering/RendererCapabilities.h"
 #include "GBC/Rendering/Shader.h"
@@ -15,7 +15,7 @@ namespace gbc
 		glm::vec2 tilingFactor;
 	};
 
-	struct BasicRendererData
+	struct Renderer2DData
 	{
 		Ref<Shader> shader;
 		Ref<VertexArray> vertexArray;
@@ -49,20 +49,13 @@ namespace gbc
 			{ 0.0f, 1.0f }
 		};
 
-		struct CameraBuffer
-		{
-			glm::mat4 viewProjection{ 1.0f };
-		};
-		CameraBuffer cameraBuffer;
-		Ref<UniformBuffer> cameraUniformBuffer;
-
 #if GBC_ENABLE_STATS
-		BasicRenderer::Statistics statistics;
+		Renderer2D::Statistics statistics;
 #endif
 	};
-	static BasicRendererData data;
+	static Renderer2DData data;
 
-	void BasicRenderer::Init()
+	void Renderer2D::Init()
 	{
 		Renderer::DisableDepthTest();
 		Renderer::EnableCullFace();
@@ -77,10 +70,10 @@ namespace gbc
 		data.localVertexBufferCurrent = data.localVertexBufferStart;
 		data.vertexBuffer = VertexBuffer::Create(data.maxVertices * sizeof(Vertex), nullptr, BufferUsage::DynamicDraw);
 		data.vertexBuffer->SetLayout({
-			{ VertexBufferElementType::Float3, "position" },
-			{ VertexBufferElementType::Float4, "tintColor" },
-			{ VertexBufferElementType::Float2, "texCoord" },
-			{ VertexBufferElementType::UInt,   "texIndex" },
+			{ VertexBufferElementType::Float3, "position"     },
+			{ VertexBufferElementType::Float4, "tintColor"    },
+			{ VertexBufferElementType::Float2, "texCoord"     },
+			{ VertexBufferElementType::UInt,   "texIndex"     },
 			{ VertexBufferElementType::Float2, "tilingFactor" }
 		});
 
@@ -101,9 +94,7 @@ namespace gbc
 		data.indexBuffer = IndexBuffer::Create(data.maxIndices, indices);
 		delete[] indices;
 
-		data.cameraUniformBuffer = UniformBuffer::Create(sizeof(BasicRendererData::CameraBuffer), 0, nullptr, BufferUsage::DynamicDraw);
-
-		data.shader = Shader::Create("Resources/Shaders/BasicShader.glsl");
+		data.shader = Shader::Create("Resources/Shaders/Renderer2D.glsl");
 
 		// Setup white texture
 		auto whiteTexture = LocalTexture2D::Create(1, 1, 4);
@@ -111,7 +102,7 @@ namespace gbc
 		data.textures[0] = Texture2D::Create(whiteTexture);
 	}
 
-	void BasicRenderer::Shutdown()
+	void Renderer2D::Shutdown()
 	{
 		delete[] data.localVertexBufferStart;
 
@@ -121,24 +112,23 @@ namespace gbc
 		data.vertexArray.reset();
 		data.vertexBuffer.reset();
 		data.indexBuffer.reset();
-		data.cameraUniformBuffer.reset();
 	}
 
-	void BasicRenderer::BeginScene(const Camera& camera, const glm::mat4& view)
+	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& view)
 	{
-		// Set shader uniforms
-		data.cameraBuffer.viewProjection = camera.GetProjection() * view;
-		data.cameraUniformBuffer->SetData(&data.cameraBuffer, sizeof(BasicRendererData::CameraBuffer));
+		Renderer::CameraBuffer cameraBuffer;
+		cameraBuffer.viewProjection = camera.GetProjection() * view;
+		Renderer::UploadCameraBuffer(cameraBuffer);
 	}
 
-	void BasicRenderer::BeginScene(const EditorCamera& camera)
+	void Renderer2D::BeginScene(const EditorCamera& camera)
 	{
-		// Set shader uniforms
-		data.cameraBuffer.viewProjection = camera.GetViewProjection();
-		data.cameraUniformBuffer->SetData(&data.cameraBuffer, sizeof(BasicRendererData::CameraBuffer));
+		Renderer::CameraBuffer cameraBuffer;
+		cameraBuffer.viewProjection = camera.GetViewProjection();
+		Renderer::UploadCameraBuffer(cameraBuffer);
 	}
 
-	void BasicRenderer::EndScene()
+	void Renderer2D::EndScene()
 	{
 		uint32_t vertexBufferSize = static_cast<uint32_t>((data.quadCount * (4 * sizeof(Vertex))));
 		if (vertexBufferSize != 0)
@@ -162,7 +152,7 @@ namespace gbc
 		Reset();
 	}
 
-	void BasicRenderer::Reset()
+	void Renderer2D::Reset()
 	{
 		data.quadCount = 0;
 		data.localVertexBufferCurrent = data.localVertexBufferStart;
@@ -173,35 +163,7 @@ namespace gbc
 		data.textureCount = 1;
 	}
 
-	void BasicRenderer::DrawQuad(const glm::vec3& translation, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation);
-		DrawQuad(transform, color, texture, tilingFactor);
-	}
-
-	void BasicRenderer::DrawQuad(const glm::vec3& translation, float rotation, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
-							* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f));
-		DrawQuad(transform, color, texture, tilingFactor);
-	}
-
-	void BasicRenderer::DrawQuad(const glm::vec3& translation, const glm::vec2& scale, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
-							* glm::scale(glm::mat4(1.0f), glm::vec3(scale, 1.0f));
-		DrawQuad(transform, color, texture, tilingFactor);
-	}
-
-	void BasicRenderer::DrawQuad(const glm::vec3& translation, float rotation, const glm::vec2& scale, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
-							* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
-							* glm::scale(glm::mat4(1.0f), glm::vec3(scale, 1.0f));
-		DrawQuad(transform, color, texture, tilingFactor);
-	}
-
-	uint32_t BasicRenderer::GetTexIndex(const Ref<Texture2D>& texture)
+	uint32_t Renderer2D::GetTexIndex(const Ref<Texture2D>& texture)
 	{
 		// If texture is null or it has a null local texture, then use white texture
 		if (!texture || (!texture->IsFramebufferTexture() && (!texture->GetTexture() || !*texture->GetTexture())))
@@ -214,13 +176,41 @@ namespace gbc
 		return data.textureCount;
 	}
 
-	void BasicRenderer::EnsureBatch(uint32_t texIndex)
+	void Renderer2D::EnsureBatch(uint32_t texIndex)
 	{
 		if (data.quadCount >= data.maxQuads || texIndex >= data.maxTextures)
 			EndScene();
 	}
 
-	void BasicRenderer::DrawQuad(const glm::mat4& transform, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
+	void Renderer2D::DrawQuad(const glm::vec3& translation, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation);
+		DrawQuad(transform, color, texture, tilingFactor);
+	}
+
+	void Renderer2D::DrawQuad(const glm::vec3& translation, float rotation, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+							* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f));
+		DrawQuad(transform, color, texture, tilingFactor);
+	}
+
+	void Renderer2D::DrawQuad(const glm::vec3& translation, const glm::vec2& scale, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+							* glm::scale(glm::mat4(1.0f), glm::vec3(scale, 1.0f));
+		DrawQuad(transform, color, texture, tilingFactor);
+	}
+
+	void Renderer2D::DrawQuad(const glm::vec3& translation, float rotation, const glm::vec2& scale, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+							* glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(0.0f, 0.0f, 1.0f))
+							* glm::scale(glm::mat4(1.0f), glm::vec3(scale, 1.0f));
+		DrawQuad(transform, color, texture, tilingFactor);
+	}
+
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, const Ref<Texture2D>& texture, const glm::vec2& tilingFactor)
 	{
 		// Handle texture
 		uint32_t texIndex = GetTexIndex(texture);
@@ -253,16 +243,14 @@ namespace gbc
 	}
 
 #if GBC_ENABLE_STATS
-	const BasicRenderer::Statistics& BasicRenderer::GetStatistics()
+	const Renderer2D::Statistics& Renderer2D::GetStatistics()
 	{
 		return data.statistics;
 	}
 
-	void BasicRenderer::ResetStatistics()
+	void Renderer2D::ResetStatistics()
 	{
-		data.statistics.drawCallCount = 0;
-		data.statistics.quadCount = 0;
-		data.statistics.textureCount = 0;
+		std::memset(&data.statistics, 0, sizeof(data.statistics));
 	}
 #endif
 }
