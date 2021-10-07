@@ -10,18 +10,17 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <regex>
+#include "Layers/EditorLayer.h"
 
 namespace gbc
 {
 	static constexpr ImGuiInputTextFlags inputTextFlags = ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_ForceScrollLeft;
 
-	const std::filesystem::path projectAssetDirectory = L"Assets";
-
 	ContentBrowserPanel::ContentBrowserPanel(const std::string& name, EditorLayer* editorLayer)
-		: Panel(name, editorLayer), assetDirectory{ projectAssetDirectory },
+		: Panel(name, editorLayer), assetDirectory{ editorLayer->projectAssetDirectory },
 		notifier{ GBC_BIND_FUNC(OnDirectoryNotification), assetDirectory.path, DirectoryChange::NotificationType_NameChanged, true }
 	{
-		cachedDirectories.push_back(projectAssetDirectory);
+		cachedDirectories.push_back(editorLayer->projectAssetDirectory);
 		currentCachedDirectory = cachedDirectories.begin();
 
 		auto& assetManager = Application::Get().GetAssetManager();
@@ -122,6 +121,7 @@ namespace gbc
 		if (directory.subdirectories.empty())
 			flags |= ImGuiTreeNodeFlags_Leaf;
 
+		auto& projectAssetDirectory = editorLayer->projectAssetDirectory;
 		bool isAssetsDirectory = directory.path == projectAssetDirectory;
 		std::string filenameString;
 		if (isAssetsDirectory)
@@ -210,7 +210,12 @@ namespace gbc
 		float thumbnailSize = 96.0f;
 		int32_t columnCount = std::max(1, static_cast<int32_t>((ImGui::GetContentRegionAvail().x - padding) / (thumbnailSize + padding)));
 
-		std::vector<FileButton> fileButtons;
+		std::vector<std::pair<File&, glm::ivec2>> fileButtons;
+
+		bool controlPressed = Input::IsKeyPressed(Keycode::LeftControl) || Input::IsKeyPressed(Keycode::RightControl);
+		bool shiftPressed = Input::IsKeyPressed(Keycode::LeftShift) || Input::IsKeyPressed(Keycode::RightShift);
+		bool altPressed = Input::IsKeyPressed(Keycode::LeftAlt) || Input::IsKeyPressed(Keycode::RightAlt);
+		bool canChangeDragSelectState = !controlPressed && !shiftPressed;
 
 		bool endDragSelect = dragSelectActive && ImGui::IsMouseReleased(ImGuiMouseButton_Left);
 		bool mouseOverFiles = false;
@@ -263,7 +268,7 @@ namespace gbc
 
 				File& file = files[i];
 
-				auto relativePath = std::filesystem::relative(file.path, projectAssetDirectory);
+				auto relativePath = std::filesystem::relative(file.path, editorLayer->projectAssetDirectory);
 				auto filename = relativePath.filename();
 				auto filenameString = filename.string();
 
@@ -286,11 +291,72 @@ namespace gbc
 
 				if (passedSearch)
 				{
-					if (endDragSelect)
-						fileButtons.emplace_back(file.path, glm::ivec2(explorerPosition.x + ImGui::GetCursorPosX(), explorerPosition.y + ImGui::GetCursorPosY()));
+					if (dragSelectActive)
+						fileButtons.emplace_back(file, glm::ivec2(explorerPosition.x + ImGui::GetCursorPosX(), explorerPosition.y + ImGui::GetCursorPosY()));
+
+					bool selected = file.selected || file.potentiallySelected; // Cache this because file.selected can change
+					if (selected)
+					{
+						float t = file.potentiallySelected && !file.selected ? 0.4f : 0.69f;
+						ImVec4 newButtonColor = ImLerp(ImGui::GetStyle().Colors[ImGuiCol_Button], ImVec4(1.0f, 1.0f, 1.0f, 1.0f), t);
+						ImGui::PushStyleColor(ImGuiCol_Button, newButtonColor);
+					}
 
 					void* textureID = (void*)static_cast<size_t>((file.isDirectory ? directoryTexture : fileTexture)->GetRendererID());
-					ImGui::ImageButton(textureID, { thumbnailSize, thumbnailSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f });
+					if (ImGui::ImageButton(textureID, { thumbnailSize, thumbnailSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }))
+					{
+						if (!altPressed)
+						{
+							if (!controlPressed && !shiftPressed)
+							{
+								// Deselect all and select or keep this file selected
+								DeselectAllFiles();
+								file.selected = true;
+								selectedFileCount = 1;
+								lastSelectedFileIndex = i;
+							}
+							else if (!shiftPressed)
+							{
+								selectedFileCount = 0;
+								for (size_t j = 0; j < files.size(); j++)
+									if (files[j].selected && i != j)
+										selectedFileCount++;
+
+								// Toggle selected state of this file
+								file.selected = !file.selected;
+								if (selectedFileCount == 0 && file.selected)
+									selectedFileCount++;
+								lastSelectedFileIndex = i;
+							}
+							else
+							{
+								// Deselect all only if control is not pressed
+								if (!controlPressed)
+									DeselectAllFiles();
+
+								// Select all from the last selected file to this file
+								if (lastSelectedFileIndex <= i)
+								{
+									for (size_t j = lastSelectedFileIndex; j <= i; j++)
+									{
+										files[j].selected = true;
+										selectedFileCount++;
+									}
+								}
+								else
+								{
+									for (size_t j = lastSelectedFileIndex + 1; j > i;)
+									{
+										files[--j].selected = true;
+										selectedFileCount++;
+									}
+								}
+							}
+						}
+					}
+
+					if (selected)
+						ImGui::PopStyleColor(1);
 
 					MakeCurrentItemDragDropSource(file.path);
 					if (file.isDirectory)
@@ -315,12 +381,19 @@ namespace gbc
 						}
 					}
 
+					if (focused && !deletingFile && Input::IsKeyPressed(Keycode::Delete))
+					{
+						deletingFile = true;
+						deleteUnselectedFile = !file.selected;
+					}
+
 					if (ImGui::BeginPopup("ContentBrowserExplorerOptions"))
 					{
 						if (ImGui::MenuItem("Delete"))
 						{
 							ImGui::CloseCurrentPopup();
 							deletingFile = true;
+							deleteUnselectedFile = !file.selected;
 						}
 						if (ImGui::MenuItem("Rename"))
 						{
@@ -402,18 +475,18 @@ namespace gbc
 			ImGui::EndTable();
 		}
 
-		if (!dragSelectActive)
+		if (!dragSelectActive && canChangeDragSelectState)
 		{
 			if (ImGui::IsWindowHovered() && !mouseOverFiles && ImGui::IsMouseDown(ImGuiMouseButton_Left) && !ImGui::GetCurrentContext()->DragDropActive)
 			{
 				BeginDragSelect();
-				UpdateDragSelect();
+				UpdateDragSelect(fileButtons, glm::ivec2(thumbnailSize, thumbnailSize));
 			}
 		}
-		else if (endDragSelect)
+		else if (endDragSelect && canChangeDragSelectState)
 			EndDragSelect(fileButtons, glm::ivec2(thumbnailSize, thumbnailSize));
 		else
-			UpdateDragSelect();
+			UpdateDragSelect(fileButtons, glm::ivec2(thumbnailSize, thumbnailSize));
 
 		ImGui::PopStyleColor();
 		ImGui::PopStyleVar(2);
@@ -481,6 +554,7 @@ namespace gbc
 		// then go all the way up
 		while (!std::filesystem::exists(*currentCachedDirectory))
 		{
+			auto& projectAssetDirectory = editorLayer->projectAssetDirectory;
 			if (*--currentCachedDirectory == projectAssetDirectory)
 			{
 				// User used filesystem or other means to delete the asset directory
@@ -517,7 +591,7 @@ namespace gbc
 		for (const auto& entry : std::filesystem::directory_iterator(*currentCachedDirectory, error))
 		{
 			// Hide the metadata
-			if (entry.path().native().ends_with(L".gmeta"))
+			if (IsMetadataFilepath(entry.path()))
 				continue;
 
 			bool isDirectory = entry.is_directory();
@@ -531,8 +605,10 @@ namespace gbc
 				files.emplace_back(entry.path(), isDirectory);
 		}
 
+#if GBC_ENABLE_LOGGING
 		if (error)
 			GBC_CORE_ERROR(error.message());
+#endif
 
 		clickedFileIndex = files.size();
 	}
@@ -544,8 +620,10 @@ namespace gbc
 			if (entry.is_directory())
 				RefreshDirectory(subdirectory.subdirectories.emplace_back(entry.path()));
 
+#if GBC_ENABLE_LOGGING
 		if (error)
 			GBC_CORE_ERROR("{0} \"{1}\"", error.message(), subdirectory.path.string());
+#endif
 	}
 
 	void ContentBrowserPanel::ShowDeleteConfirmationMessage()
@@ -556,23 +634,28 @@ namespace gbc
 		if (error) GBC_CORE_ERROR(error.message());
 #endif
 
-		std::string filenameString = tempFile.path.filename().string();
+		bool multiDelete = selectedFileCount > 1 && !deleteUnselectedFile;
+		const char* format = "Are you sure you want to delete \"%s\"%s?";
+		std::string filenameString;
+		if (multiDelete)
+			format = "Are you sure you want to delete these files?";
+		else
+			filenameString = tempFile.path.filename().string();
 		bool action;
-		if (ImGuiHelper::ConfirmAction("Delete?", &action, "Are you sure you want to delete \"%s\"%s?", filenameString.c_str(),
-			isUnemptyDirectory ? " and all its contents" : ""))
+		if (ImGuiHelper::ConfirmAction("Delete?", &action, format, filenameString.c_str(), isUnemptyDirectory ? " and all its contents" : ""))
 		{
 			if (action)
 			{
 				try
 				{
-					if (isUnemptyDirectory)
-						std::filesystem::remove_all(tempFile.path);
+					if (multiDelete)
+					{
+						for (const auto& file : files)
+							if (file.selected)
+								DeleteFileAndMedatata(file.path, isUnemptyDirectory);
+					}
 					else
-						std::filesystem::remove(tempFile.path);
-
-					std::filesystem::path metaFilepath = AppendMetadataType(tempFile.path);
-					if (std::filesystem::exists(metaFilepath))
-						std::filesystem::remove(metaFilepath);
+						DeleteFileAndMedatata(tempFile.path, isUnemptyDirectory);
 				}
 #if GBC_ENABLE_LOGGING
 				catch (std::filesystem::filesystem_error& error)
@@ -592,6 +675,18 @@ namespace gbc
 				clickedFileIndex = files.size();
 			deletingFile = false;
 		}
+	}
+
+	void ContentBrowserPanel::DeleteFileAndMedatata(const std::filesystem::path& filepath, bool isUnemptyDirectory)
+	{
+		if (isUnemptyDirectory)
+			std::filesystem::remove_all(filepath);
+		else
+			std::filesystem::remove(filepath);
+
+		std::filesystem::path metaFilepath = AppendMetadataType(filepath);
+		if (std::filesystem::exists(metaFilepath))
+			std::filesystem::remove(metaFilepath);
 	}
 
 	void ContentBrowserPanel::MakeCurrentItemDragDropSource(const std::filesystem::path& sourcePath)
@@ -638,17 +733,31 @@ namespace gbc
 	{
 		dragSelectActive = true;
 		dragSelectStart = Input::GetRelativeMousePosition(Application::Get().GetWindow().GetNativeWindow());
+		DeselectAllFiles();
 	}
 
-	void ContentBrowserPanel::UpdateDragSelect()
+	void ContentBrowserPanel::UpdateDragSelect(const std::vector<std::pair<File&, glm::ivec2>>& fileButtons, const glm::ivec2& buttonSize)
 	{
 		dragSelectCurrent = Input::GetRelativeMousePosition(Application::Get().GetWindow().GetNativeWindow());
+		UpdateSelectedFiles(fileButtons, buttonSize);
 	}
 
-	void ContentBrowserPanel::EndDragSelect(const std::vector<FileButton>& fileButtons, const glm::ivec2& buttonSize)
+	void ContentBrowserPanel::EndDragSelect(const std::vector<std::pair<File&, glm::ivec2>>& fileButtons, const glm::ivec2& buttonSize)
 	{
 		dragSelectActive = false;
+		UpdateSelectedFiles(fileButtons, buttonSize);
 
+		selectedFileCount = 0;
+		for (auto& file : files)
+		{
+			if (file.selected = file.potentiallySelected)
+				selectedFileCount++;
+			file.potentiallySelected = false;
+		}
+	}
+
+	void ContentBrowserPanel::UpdateSelectedFiles(const std::vector<std::pair<File&, glm::ivec2>>& fileButtons, const glm::ivec2& buttonSize)
+	{
 		auto Overlap = [](const glm::ivec2& position1, const glm::ivec2& size1, const glm::ivec2& position2, const glm::ivec2& size2)
 		{
 			return position1.x + size1.x >= position2.x && position1.x < position2.x + size2.x &&
@@ -658,15 +767,15 @@ namespace gbc
 		glm::ivec2 topLeft, bottomRight;
 		GetDragSelectBounds(topLeft, bottomRight);
 		glm::ivec2 dragSelectSize = bottomRight - topLeft;
-		selectedFiles.clear();
 
-		for (const auto& button : fileButtons)
-		{
-			if (Overlap(topLeft, dragSelectSize, button.position, buttonSize))
-			{
-				selectedFiles.push_back(button.filepath);
-			}
-		}
+		for (const auto& [file, buttonPosition] : fileButtons)
+			file.potentiallySelected = Overlap(topLeft, dragSelectSize, buttonPosition, buttonSize);
+	}
+
+	void ContentBrowserPanel::DeselectAllFiles()
+	{
+		for (auto& file : files)
+			file.selected = false;
 	}
 
 	void ContentBrowserPanel::GetDragSelectBounds(glm::ivec2& topLeft, glm::ivec2& bottomRight) const

@@ -6,9 +6,9 @@ namespace gbc
 	{
 		enum class BodyType { Static, Dynamic, Kinematic };
 
-		Rigidbody2DComponent() = default;
-		Rigidbody2DComponent(BodyType bodyType) : bodyType(bodyType) {}
-		Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
+		constexpr Rigidbody2DComponent() = default;
+		constexpr Rigidbody2DComponent(const Rigidbody2DComponent&) = default;
+		constexpr Rigidbody2DComponent(BodyType bodyType) : bodyType(bodyType) {}
 
 		BodyType bodyType = BodyType::Dynamic;
 		bool fixedRotation = false;

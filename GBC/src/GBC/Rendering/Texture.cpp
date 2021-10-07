@@ -5,7 +5,7 @@
 
 namespace gbc
 {
-	TextureSpecification& TextureSpecification::operator=(const TextureSpecification& specs)
+	TextureSpecification& TextureSpecification::operator=(const TextureSpecification& specs) noexcept
 	{
 		if (this != &specs)
 		{

@@ -5,53 +5,6 @@
 
 namespace gbc
 {
-	static uint32_t GetElementCount(VertexBufferElementType type)
-	{
-		switch (type)
-		{
-			case VertexBufferElementType::Int:    return 1;
-			case VertexBufferElementType::Int2:   return 2;
-			case VertexBufferElementType::Int3:   return 3;
-			case VertexBufferElementType::Int4:   return 4;
-			case VertexBufferElementType::UInt:   return 1;
-			case VertexBufferElementType::UInt2:  return 2;
-			case VertexBufferElementType::UInt3:  return 3;
-			case VertexBufferElementType::UInt4:  return 4;
-			case VertexBufferElementType::Float:  return 1;
-			case VertexBufferElementType::Float2: return 2;
-			case VertexBufferElementType::Float3: return 3;
-			case VertexBufferElementType::Float4: return 4;
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Vertex Buffer Element Type!");
-		return 0;
-	}
-
-	static uint32_t GetElementSize(VertexBufferElementType type)
-	{
-		switch (type)
-		{
-			case VertexBufferElementType::Int:    return 4;
-			case VertexBufferElementType::Int2:   return 8;
-			case VertexBufferElementType::Int3:   return 12;
-			case VertexBufferElementType::Int4:   return 16;
-			case VertexBufferElementType::UInt:   return 4;
-			case VertexBufferElementType::UInt2:  return 8;
-			case VertexBufferElementType::UInt3:  return 12;
-			case VertexBufferElementType::UInt4:  return 16;
-			case VertexBufferElementType::Float:  return 4;
-			case VertexBufferElementType::Float2: return 8;
-			case VertexBufferElementType::Float3: return 12;
-			case VertexBufferElementType::Float4: return 16;
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Vertex Buffer Element Type!");
-		return 0;
-	}
-
-	VertexBufferElement::VertexBufferElement(VertexBufferElementType type, const std::string& name, bool normalized) noexcept
-		: type(type), name(name), normalized(normalized), count(GetElementCount(type)), size(GetElementSize(type)) {}
-
 	Ref<VertexBuffer> VertexBuffer::Create(uint32_t size, const void* data, BufferUsage usage)
 	{
 		switch (RendererAPI::GetAPI())

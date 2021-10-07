@@ -25,8 +25,8 @@ namespace gbc
 		virtual bool IsMinimized() const override { return state.minimized; }
 		virtual bool IsMaximized() const override { return state.maximized; }
 
-		virtual const char* GetTitle() const override { return state.title; }
-		virtual void SetTitle(const char* title) override;
+		virtual const std::string& GetTitle() const override { return state.title; }
+		virtual void SetTitle(const std::string& title) override;
 
 		virtual void SetIcon(const Ref<LocalTexture2D>& texture) override;
 
@@ -60,8 +60,6 @@ namespace gbc
 				glm::ivec2 size{ 0 };
 			} current, preFullscreen;
 
-			const char* title = nullptr;
-
 			union
 			{
 				uint8_t flags = 0;
@@ -79,6 +77,7 @@ namespace gbc
 				};
 			};
 
+			std::string title;
 			EventCallbackFunc eventCallback;
 		} state;
 

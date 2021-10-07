@@ -90,5 +90,8 @@ project "GBC"
 			"%{library.SPIRV_Cross_GLSL_Release}"
 		}
 
+		-- These only have debug logging
+		excludes "src/GBC/Events/*.cpp"
+
 	filter "system:not windows"
 		excludes "src/Platform/System/Windows/**"

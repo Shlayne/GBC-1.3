@@ -5,6 +5,7 @@
 #include "GBC/Rendering/Context.h"
 #include "GBC/Rendering/LocalTexture2D.h"
 #include <functional>
+#include <string>
 
 namespace gbc
 {
@@ -12,7 +13,7 @@ namespace gbc
 	{
 		int32_t width = 1600;
 		int32_t height = 900;
-		const char* title = "GBC v1.3";
+		std::string title = "GBC v1.3";
 
 		bool vsync = true;
 		bool resizable = true;
@@ -41,26 +42,26 @@ namespace gbc
 		virtual bool IsMinimized() const = 0;
 		virtual bool IsMaximized() const = 0;
 
-		virtual const char* GetTitle() const = 0;
-		virtual void SetTitle(const char* title) = 0;
+		virtual const std::string& GetTitle() const = 0;
+		virtual void SetTitle(const std::string& title) = 0;
 
 		virtual void SetIcon(const Ref<LocalTexture2D>& texture) = 0;
 
 		virtual bool IsVSync() const = 0;
 		virtual void SetVSync(bool vsync) = 0;
-		inline void ToggleVSync() { SetVSync(!IsVSync()); }
+		constexpr void ToggleVSync() { SetVSync(!IsVSync()); }
 
 		virtual bool IsResizable() const = 0;
 		virtual void SetResizable(bool resizable) = 0;
-		inline void ToggleResizable() { SetResizable(!IsResizable()); }
+		constexpr void ToggleResizable() { SetResizable(!IsResizable()); }
 
 		virtual bool IsFullscreen() const = 0;
 		virtual void SetFullscreen(bool fullscreen) = 0;
-		inline void ToggleFullscreen() { SetFullscreen(!IsFullscreen()); }
+		constexpr void ToggleFullscreen() { SetFullscreen(!IsFullscreen()); }
 
 		virtual bool IsCaptureMouse() const = 0;
 		virtual void SetCaptureMouse(bool captureMouse) = 0;
-		inline void ToggleCaptureMouse() { SetCaptureMouse(!IsCaptureMouse()); }
+		constexpr void ToggleCaptureMouse() { SetCaptureMouse(!IsCaptureMouse()); }
 
 		virtual void* GetNativeWindow() = 0;
 		virtual Context& GetContext() = 0;

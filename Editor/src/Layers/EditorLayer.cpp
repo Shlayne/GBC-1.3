@@ -147,7 +147,7 @@ namespace gbc
 			float windowHeight = static_cast<float>(window.GetHeight());
 
 			float aspect = windowWidth / windowHeight;
-			Renderer2D::BeginScene(glm::ortho(-aspect * 0.5f, aspect * 0.5f, -0.5f, 0.5f), glm::mat4(1.0f));
+			Renderer2D::BeginScene(glm::ortho(-aspect * 0.5f, aspect * 0.5f, -0.5f, 0.5f));
 
 			glm::ivec2 topLeft, bottomRight;
 			contentBrowserPanel->GetDragSelectBounds(topLeft, bottomRight);
@@ -267,7 +267,6 @@ namespace gbc
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch(this, &EditorLayer::OnWindowCloseEvent);
 		dispatcher.Dispatch(this, &EditorLayer::OnKeyPressEvent);
-		dispatcher.Dispatch(this, &EditorLayer::OnMouseButtonPressEvent);
 		dispatcher.Dispatch(this, &EditorLayer::OnMouseButtonReleaseEvent);
 
 		if (!event.handled)
@@ -288,49 +287,38 @@ namespace gbc
 
 	bool EditorLayer::OnKeyPressEvent(KeyPressEvent& event)
 	{
-		// TODO: assignable keybindings
-		bool controlPressed  = Input::IsKeyPressed(Keycode::LeftControl) || Input::IsKeyPressed(Keycode::RightControl);
-		bool shiftPressed    = Input::IsKeyPressed(Keycode::LeftShift)   || Input::IsKeyPressed(Keycode::RightShift);
-		bool altPressed      = Input::IsKeyPressed(Keycode::LeftAlt)     || Input::IsKeyPressed(Keycode::RightAlt);
-
-		bool none            = !controlPressed && !shiftPressed && !altPressed;
-		bool control         =  controlPressed && !shiftPressed && !altPressed;
-		bool shift           = !controlPressed &&  shiftPressed && !altPressed;
-		bool controlShift    =  controlPressed &&  shiftPressed && !altPressed;
-		bool alt             = !controlPressed && !shiftPressed &&  altPressed;
-		bool controlAlt      =  controlPressed && !shiftPressed &&  altPressed;
-		bool shiftAlt        = !controlPressed &&  shiftPressed &&  altPressed;
-		bool controlShiftAlt =  controlPressed &&  shiftPressed &&  altPressed;
-
+		Mods mods = event.GetMods();
 		switch (event.GetKeycode())
 		{
 			// Scene
 			case Keycode::N:
-				if (control)
+				if (mods.Are(Mods_Control))
 				{
 					NewScene();
 					return true;
 				}
 				break;
 			case Keycode::O:
-				if (control)
+				if (mods.Are(Mods_Control))
 				{
 					OpenScene();
 					return true;
 				}
 				break;
 			case Keycode::S:
-				if (control || controlShift)
+				if (mods.Are(Mods_Control | Mods_Shift))
 				{
-					if (shiftPressed)
-						SaveSceneAs();
-					else
-						SaveScene();
+					SaveSceneAs();
+					return true;
+				}
+				else if (mods.Are(Mods_Control))
+				{
+					SaveScene();
 					return true;
 				}
 				break;
 			case Keycode::Delete:
-				if (none && selectedEntity)
+				if (!mods && selectedEntity && (sceneHierarchyPanel->IsFocused() || sceneViewportPanel->IsFocused()))
 				{
 					activeScene->DestroyEntity(selectedEntity);
 					selectedEntity = {};
@@ -338,7 +326,7 @@ namespace gbc
 				}
 				break;
 			case Keycode::D:
-				if (control && selectedEntity)
+				if (mods.Are(Mods_Control) && selectedEntity && (sceneHierarchyPanel->IsFocused() || sceneViewportPanel->IsFocused()))
 				{
 					selectedEntity = activeScene->DuplicateEntity(selectedEntity);
 					return true;
@@ -347,28 +335,28 @@ namespace gbc
 
 			// Gizmos
 			case Keycode::Q:
-				if (none && sceneViewportPanel->IsFocused())
+				if (!mods && sceneViewportPanel->IsFocused())
 				{
 					gizmoType = ImGuizmo::OPERATION::NONE;
 					return true;
 				}
 				break;
 			case Keycode::W:
-				if (none && sceneViewportPanel->IsFocused())
+				if (!mods && sceneViewportPanel->IsFocused())
 				{
 					gizmoType = ImGuizmo::OPERATION::TRANSLATE;
 					return true;
 				}
 				break;
 			case Keycode::E:
-				if (none && sceneViewportPanel->IsFocused())
+				if (!mods && sceneViewportPanel->IsFocused())
 				{
 					gizmoType = ImGuizmo::OPERATION::ROTATE;
 					return true;
 				}
 				break;
 			case Keycode::R:
-				if (none && sceneViewportPanel->IsFocused())
+				if (!mods && sceneViewportPanel->IsFocused())
 				{
 					gizmoType = ImGuizmo::OPERATION::SCALE;
 					return true;
@@ -376,35 +364,6 @@ namespace gbc
 				break;
 		}
 
-		return false;
-	}
-
-	bool EditorLayer::OnMouseButtonPressEvent(MouseButtonPressEvent& event)
-	{
-		// TODO: Bring back mouse picking when calculating mesh intersections is
-		// implemented rather than reading back from a framebuffer attachment.
-
-		//if (sceneViewportPanel->IsHovered() && sceneViewportPanel->IsFocused() && event.GetButton() == MouseButton::ButtonLeft && !editorCamera.IsUsing() && !ImGuizmo::IsOver())
-		//{
-		//	canUseGizmos = false;
-
-		//	glm::ivec2 relativeMousePos = absoluteMousePos - viewportPos;
-		//	relativeMousePos.y = viewportSize.y - 1 - relativeMousePos.y;
-
-		//	if (relativeMousePos.x >= 0 && relativeMousePos.x < viewportSize.x &&
-		//		relativeMousePos.y >= 0 && relativeMousePos.y < viewportSize.y)
-		//	{
-		//		int pixel = -1;
-		//		framebuffer->Bind();
-		//		framebuffer->GetColorPixel(&pixel, relativeMousePos.x, relativeMousePos.y, 1);
-		//		framebuffer->Unbind();
-
-		//		selectedEntity = pixel != -1 ? Entity(static_cast<entt::entity>(pixel), scene.get()) : Entity();
-		//		return true;
-		//	}
-		//}
-
-		//canUseGizmos = true;
 		return false;
 	}
 
@@ -451,8 +410,7 @@ namespace gbc
 
 		if (allowedDiscard)
 		{
-			// TODO: open from project's assets directory
-			auto filepath = FileDialog::OpenFile(GetFilter(FileType::scene), std::filesystem::current_path() /= L"Assets");
+			auto filepath = FileDialog::OpenFile(GetFilter(FileType::scene), projectAssetDirectory);
 			if (!filepath.empty())
 				OpenSceneFile(filepath);
 		}
@@ -492,7 +450,7 @@ namespace gbc
 
 	void EditorLayer::SaveSceneAs()
 	{
-		auto filepath = FileDialog::SaveFile(GetFilter(FileType::scene), std::filesystem::current_path() /= "Assets");
+		auto filepath = FileDialog::SaveFile(GetFilter(FileType::scene), projectAssetDirectory);
 		if (!filepath.empty())
 		{
 			// Add extension to extensionless path

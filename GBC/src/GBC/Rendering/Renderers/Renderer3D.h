@@ -10,8 +10,7 @@ namespace gbc
 	class Renderer3D
 	{
 	public:
-		static void BeginScene(const Camera& camera, const glm::mat4& view);
-		static void BeginScene(const EditorCamera& camera);
+		static void BeginScene(const glm::mat4& viewProjection);
 		static void EndScene();
 	public:
 		static void Submit(const Ref<Mesh3D>& mesh, const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr);
@@ -24,16 +23,16 @@ namespace gbc
 		friend class Renderer;
 		static void Init();
 		static void Shutdown();
-	public:
 #if GBC_ENABLE_STATS
+	public:
 		struct Statistics
 		{
 		public:
-			inline uint32_t GetDrawCallCount() const noexcept { return drawCallCount; }
-			inline uint32_t GetVertexCount() const noexcept { return vertexCount; }
-			inline uint32_t GetIndexCount() const noexcept { return indexCount; }
-			inline uint32_t GetMeshCount() const noexcept { return meshCount; }
-			inline uint32_t GetTextureCount() const noexcept { return textureCount; }
+			constexpr uint32_t GetDrawCallCount() const noexcept { return drawCallCount; }
+			constexpr uint32_t GetVertexCount() const noexcept { return vertexCount; }
+			constexpr uint32_t GetIndexCount() const noexcept { return indexCount; }
+			constexpr uint32_t GetMeshCount() const noexcept { return meshCount; }
+			constexpr uint32_t GetTextureCount() const noexcept { return textureCount; }
 		private:
 			friend class Renderer3D;
 			uint32_t drawCallCount = 0;

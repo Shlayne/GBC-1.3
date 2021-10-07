@@ -5,7 +5,7 @@
 
 namespace gbc
 {
-	static GLenum GetOpenGLFilterMode(FramebufferFilterMode filter)
+	static constexpr GLenum GetOpenGLFilterMode(FramebufferFilterMode filter)
 	{
 		switch (filter)
 		{
@@ -17,7 +17,7 @@ namespace gbc
 		return 0;
 	}
 
-	static GLenum GetOpenGLWrapMode(FramebufferWrapMode wrap)
+	static constexpr GLenum GetOpenGLWrapMode(FramebufferWrapMode wrap)
 	{
 		switch (wrap)
 		{
@@ -29,7 +29,7 @@ namespace gbc
 		return 0;
 	}
 
-	static GLenum GetOpenGLFormat(FramebufferTextureFormat format)
+	static constexpr GLenum GetOpenGLFormat(FramebufferTextureFormat format)
 	{
 		switch (format)
 		{
@@ -41,7 +41,7 @@ namespace gbc
 		return 0;
 	}
 
-	static GLenum GetTextureTarget(bool multisampled)
+	static constexpr GLenum GetTextureTarget(bool multisampled)
 	{
 		return multisampled ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 	}

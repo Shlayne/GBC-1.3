@@ -13,6 +13,16 @@
 
 namespace gbc
 {
+	static constexpr Mods glfwModsToGBCMods(int32_t mods)
+	{
+		return (mods & GLFW_MOD_SHIFT     ? Mods_Shift    : Mods_None) |
+			   (mods & GLFW_MOD_CONTROL   ? Mods_Control  : Mods_None) |
+			   (mods & GLFW_MOD_ALT       ? Mods_Alt      : Mods_None) |
+			   (mods & GLFW_MOD_SUPER     ? Mods_Super    : Mods_None) |
+			   (mods & GLFW_MOD_CAPS_LOCK ? Mods_CapsLock : Mods_None) |
+			   (mods & GLFW_MOD_NUM_LOCK  ? Mods_NumLock  : Mods_None);
+	}
+
 	static uint8_t glfwWindowCount = 0;
 	static void glfwErrorCallback(int32_t error, const char* description)
 	{
@@ -30,17 +40,11 @@ namespace gbc
 
 		if (glfwWindowCount == 0)
 		{
-			Input::PreInit();
+			GBC_PROFILE_SCOPE("glfwInit");
 
-			{
-				GBC_PROFILE_SCOPE("glfwInit");
-
-				int32_t initState = glfwInit();
-				GBC_CORE_ASSERT(initState == GLFW_TRUE, "Failed to initialize GLFW!");
-			}
-
+			int32_t initState = glfwInit();
+			GBC_CORE_ASSERT(initState == GLFW_TRUE, "Failed to initialize GLFW!");
 			glfwSetErrorCallback(glfwErrorCallback);
-			Input::Init();
 		}
 
 		state.current.size = { specification.width, specification.height };
@@ -69,7 +73,7 @@ namespace gbc
 
 		{
 			GBC_PROFILE_SCOPE("glfwCreateWindow");
-			window = glfwCreateWindow(state.current.size.x, state.current.size.y, state.title, state.fullscreen ? primaryMonitor : nullptr, nullptr);
+			window = glfwCreateWindow(state.current.size.x, state.current.size.y, state.title.c_str(), state.fullscreen ? primaryMonitor : nullptr, nullptr);
 		}
 		GBC_CORE_ASSERT(window != nullptr, "Failed to create window!");
 		glfwWindowCount++;
@@ -128,16 +132,21 @@ namespace gbc
 		context->SwapBuffers();
 	}
 
-	void WindowsWindow::SetTitle(const char* title)
+	void WindowsWindow::SetTitle(const std::string& title)
 	{
-		glfwSetWindowTitle(window, title);
+		glfwSetWindowTitle(window, title.c_str());
 		state.title = title;
 	}
 
 	void WindowsWindow::SetIcon(const Ref<LocalTexture2D>& texture)
 	{
-		GLFWimage image{ texture->GetWidth(), texture->GetHeight(), texture->GetData() };
-		glfwSetWindowIcon(window, 1, &image);
+		if (texture)
+		{
+			GLFWimage image{ texture->GetWidth(), texture->GetHeight(), texture->GetData() };
+			glfwSetWindowIcon(window, 1, &image);
+		}
+		else
+			glfwSetWindowIcon(window, 0, nullptr);
 	}
 
 	void WindowsWindow::SetVSync(bool vsync)
@@ -389,19 +398,19 @@ namespace gbc
 			{
 				case GLFW_PRESS:
 				{
-					KeyPressEvent event(static_cast<Keycode>(keycode), mods);
+					KeyPressEvent event(static_cast<Keycode>(keycode), glfwModsToGBCMods(mods));
 					state->eventCallback(event);
 					break;
 				}
 				case GLFW_REPEAT:
 				{
-					KeyRepeatEvent event(static_cast<Keycode>(keycode), mods);
+					KeyRepeatEvent event(static_cast<Keycode>(keycode), glfwModsToGBCMods(mods));
 					state->eventCallback(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					KeyReleaseEvent event(static_cast<Keycode>(keycode), mods);
+					KeyReleaseEvent event(static_cast<Keycode>(keycode), glfwModsToGBCMods(mods));
 					state->eventCallback(event);
 					break;
 				}
@@ -430,7 +439,7 @@ namespace gbc
 
 		if (WindowState* state = static_cast<WindowState*>(glfwGetWindowUserPointer(window)); state != nullptr)
 		{
-			KeyCharModsEvent event(codepoint, mods);
+			KeyCharModsEvent event(codepoint, glfwModsToGBCMods(mods));
 			state->eventCallback(event);
 		}
 
@@ -449,13 +458,13 @@ namespace gbc
 			{
 				case GLFW_PRESS:
 				{
-					MouseButtonPressEvent event(static_cast<MouseButton>(button), mods);
+					MouseButtonPressEvent event(static_cast<MouseButton>(button), glfwModsToGBCMods(mods));
 					state->eventCallback(event);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
-					MouseButtonReleaseEvent event(static_cast<MouseButton>(button), mods);
+					MouseButtonReleaseEvent event(static_cast<MouseButton>(button), glfwModsToGBCMods(mods));
 					state->eventCallback(event);
 					break;
 				}

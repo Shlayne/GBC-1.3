@@ -49,20 +49,19 @@ namespace gbc
 		bool OnWindowFramebufferResizeEvent(WindowFramebufferResizeEvent& event);
 		bool OnWindowFocusEvent(WindowFocusEvent& event);
 		bool OnWindowMinimizeEvent(WindowMinimizeEvent& event);
-
+	private:
 		static Application* instance;
 		AssetManager assetManager;
-
-		bool running = true;
-		bool rendering = true;
-		bool windowZeroSize = false;
-
 		Scope<Window> window;
 		void* focusedNativeWindow = nullptr;
 #if GBC_ENABLE_IMGUI
 		ImGuiWrapper* imguiWrapper;
 #endif
 		LayerStack layerStack;
+	private:
+		bool running = true;
+		bool rendering = true;
+		bool windowZeroSize = false;
 	private:
 		friend int ::main(int argc, char** argv);
 		void Run();

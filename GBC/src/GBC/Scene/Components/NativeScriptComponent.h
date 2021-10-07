@@ -11,7 +11,7 @@ namespace gbc
 		ScriptableEntity*(*createFunc)();
 		void(*destroyFunc)(NativeScriptComponent*);
 
-		template<typename T> void Bind();
+		template<typename T> constexpr void Bind();
 	};
 }
 

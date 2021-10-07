@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GBC/Events/Event.h"
 #include <glm/glm.hpp>
 #include <string>
 
@@ -10,24 +11,24 @@ namespace gbc
 	class Panel
 	{
 	public:
-		Panel() = default;
+		constexpr Panel() noexcept = default;
 		Panel(const std::string& name, EditorLayer* editorLayer);
 		virtual ~Panel() = default;
 
 		virtual void OnImGuiRender() {}
 
-		inline const std::string& GetName() const noexcept { return name; }
+		constexpr const std::string& GetName() const noexcept { return name; }
 
-		inline bool IsEnabled() const noexcept { return enabled; }
-		inline void SetEnabled(bool enabled) noexcept { this->enabled = enabled; }
-		inline void ToggleEnabled() noexcept { enabled = !enabled; }
+		constexpr bool IsEnabled() const noexcept { return enabled; }
+		constexpr void SetEnabled(bool enabled) noexcept { this->enabled = enabled; }
+		constexpr void ToggleEnabled() noexcept { enabled = !enabled; }
 
-		inline bool IsFocused() const noexcept { return focused; }
-		inline bool IsHovered() const noexcept { return hovered; }
+		constexpr bool IsFocused() const noexcept { return focused; }
+		constexpr bool IsHovered() const noexcept { return hovered; }
 
-		inline bool HasSizeChanged() const noexcept { return sizeChanged && size.x > 0 && size.y > 0; }
-		inline const glm::ivec2& GetSize() const noexcept { return size; }
-		inline const glm::ivec2& GetPosition() const noexcept { return position; }
+		constexpr bool HasSizeChanged() const noexcept { return sizeChanged && size.x > 0 && size.y > 0; }
+		constexpr const glm::ivec2& GetSize() const noexcept { return size; }
+		constexpr const glm::ivec2& GetPosition() const noexcept { return position; }
 	protected:
 		void Update();
 

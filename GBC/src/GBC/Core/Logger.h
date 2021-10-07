@@ -10,8 +10,8 @@ namespace gbc
 	class Logger
 	{
 	public:
-		inline static Ref<spdlog::logger>& GetCoreLogger() { return coreLogger; }
-		inline static Ref<spdlog::logger>& GetClientLogger() { return clientLogger; }
+		inline static Ref<spdlog::logger>& GetCoreLogger() noexcept { return coreLogger; }
+		inline static Ref<spdlog::logger>& GetClientLogger() noexcept { return clientLogger; }
 	private:
 		static Ref<spdlog::logger> coreLogger;
 		static Ref<spdlog::logger> clientLogger;

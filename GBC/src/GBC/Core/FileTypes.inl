@@ -11,7 +11,6 @@ namespace gbc
 		void CreateFilter(std::wstring_view fileTypeName, std::wstring_view extension) noexcept;
 		template<size_t Size> void CreateFilter(std::wstring_view fileTypeName, const std::array<std::wstring_view, Size>& extensions) noexcept;
 		const wchar_t* GetFilter(std::wstring_view extension) noexcept;
-		template<size_t Size> const wchar_t* GetFilter(const std::array<std::wstring_view, Size>& extensions) noexcept;
 
 		friend const wchar_t* gbc::GetFilter(std::wstring_view extension) noexcept;
 		template<size_t Size> friend const wchar_t* gbc::GetFilter(const std::array<std::wstring_view, Size>& extensions) noexcept;
@@ -59,17 +58,9 @@ namespace gbc
 	}
 
 	template<size_t Size>
-	const wchar_t* FilterGenerator::GetFilter(const std::array<std::wstring_view, Size>& extensions) noexcept
-	{
-		if (auto it = filters.find(extensions.front()); it != filters.end())
-			return it->second;
-		return nullptr;
-	}
-
-	template<size_t Size>
 	const wchar_t* GetFilter(const std::array<std::wstring_view, Size>& extensions) noexcept
 	{
-		return FilterGenerator::Get().GetFilter(extensions);
+		return FilterGenerator::Get().GetFilter(extensions.front());
 	}
 
 	template<size_t Size>

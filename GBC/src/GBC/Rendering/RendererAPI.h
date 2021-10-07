@@ -5,7 +5,7 @@
 
 namespace gbc
 {
-	enum class RendererPrimitive
+	enum class RendererPrimitive : uint8_t
 	{
 		// OpenGL, Vulkan, Direct3D, and Metal support these
 		Points,
@@ -54,7 +54,7 @@ namespace gbc
 		virtual int GetMaxFramebufferColorAttachments() = 0;
 
 		enum class API { Headless, OpenGL, Vulkan, Direct3D, Metal };
-		static API GetAPI() { return api; }
+		static API GetAPI() noexcept { return api; }
 	private:
 		friend class Renderer;
 		static API api;

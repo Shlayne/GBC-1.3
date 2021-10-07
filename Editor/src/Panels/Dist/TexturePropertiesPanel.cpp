@@ -17,70 +17,81 @@ namespace gbc
 		{
 			ImGui::Begin(name.c_str(), &enabled);
 
-			bool editingTextureProperties = true;
-
-			auto& selectedFiles = editorLayer->contentBrowserPanel->GetSelectedFiles();
-			if (selectedFiles.empty())
-				editingTextureProperties = false;
-			else
+			auto& contentBrowserPanel = editorLayer->contentBrowserPanel;
+			if (contentBrowserPanel->HasSelectedFiles())
 			{
-				for (auto& selectedFile : selectedFiles)
+				// Get selected texture files
+				std::vector<const std::filesystem::path*> selectedFilepaths;
+				size_t lastSelectedFilepathIndex = 0;
+
+				auto& files = contentBrowserPanel->GetFilesInCurrentDirectory();
+				size_t lastSelectedFileIndex = contentBrowserPanel->GetLastSelectedFileIndex();
+				for (size_t i = 0; i < files.size(); i++)
 				{
-					if (!IsTextureFilepath(selectedFile))
+					const ContentBrowserPanel::File& file = files[i];
+
+					if (file.selected)
 					{
-						editingTextureProperties = false;
-						break;
+						if (!IsTextureFilepath(file.path))
+						{
+							selectedFilepaths.clear();
+							break;
+						}
+
+						if (i == lastSelectedFileIndex)
+							lastSelectedFilepathIndex = selectedFilepaths.size();
+						selectedFilepaths.push_back(&file.path);
 					}
 				}
-			}
 
-
-			if (editingTextureProperties && ImGuiHelper::BeginTable("TextureProperties", 2))
-			{
-				auto& assetManager = Application::Get().GetAssetManager();
-				Ref<Texture2D> texture = assetManager.GetOrLoadTexture(selectedFiles.back());
-				TextureSpecification specs = texture->GetSpecification();
-				bool changed = false;
-
-				static constexpr const char* names1[]{ "Linear", "Nearest" };
-				static constexpr const char* names2[]{ "ClampToEdge", "Repeat" };
-
-				int selectedItem = static_cast<int>(specs.minFilter);
-				if (changed = ImGuiHelper::Combo("Min Filter", &selectedItem, names1, sizeof(names1) / sizeof(*names1)))
+				// If at least one file is selected and the only selected files are textures, then change their properties.
+				if (!selectedFilepaths.empty() && ImGuiHelper::BeginTable("TextureProperties", 2))
 				{
-					specs.minFilter = static_cast<TextureFilterMode>(selectedItem);
-					changed = true;
+					auto& assetManager = Application::Get().GetAssetManager();
+					Ref<Texture2D> texture = assetManager.GetOrLoadTexture(*selectedFilepaths[lastSelectedFilepathIndex]);
+					TextureSpecification specs = texture->GetSpecification();
+					bool changed = false;
+
+					static constexpr const char* names1[]{ "Linear", "Nearest" };
+					static constexpr const char* names2[]{ "ClampToEdge", "Repeat" };
+
+					int selectedItem = static_cast<int>(specs.minFilter);
+					if (changed = ImGuiHelper::Combo("Min Filter", &selectedItem, names1, sizeof(names1) / sizeof(*names1)))
+					{
+						specs.minFilter = static_cast<TextureFilterMode>(selectedItem);
+						changed = true;
+					}
+
+					ImGuiHelper::NextTableColumn();
+					selectedItem = static_cast<int>(specs.magFilter);
+					if (ImGuiHelper::Combo("Mag Filter", &selectedItem, names1, sizeof(names1) / sizeof(*names1)) && !changed)
+					{
+						specs.magFilter = static_cast<TextureFilterMode>(selectedItem);
+						changed = true;
+					}
+
+					ImGuiHelper::NextTableColumn();
+					selectedItem = static_cast<int>(specs.wrapS);
+					if (ImGuiHelper::Combo("Wrap S", &selectedItem, names2, sizeof(names2) / sizeof(*names2)) && !changed)
+					{
+						specs.wrapS = static_cast<TextureWrapMode>(selectedItem);
+						changed = true;
+					}
+
+					ImGuiHelper::NextTableColumn();
+					selectedItem = static_cast<int>(specs.wrapT);
+					if (ImGuiHelper::Combo("Wrap T", &selectedItem, names2, sizeof(names2) / sizeof(*names2)) && !changed)
+					{
+						specs.wrapT = static_cast<TextureWrapMode>(selectedItem);
+						changed = true;
+					}
+
+					if (changed)
+						for (const auto& selectedFilepath : selectedFilepaths)
+							assetManager.UpdateSpecifications(assetManager.GetOrLoadTexture(*selectedFilepath)->GetUUID(), specs);
+
+					ImGuiHelper::EndTable();
 				}
-
-				ImGuiHelper::NextTableColumn();
-				selectedItem = static_cast<int>(specs.magFilter);
-				if (ImGuiHelper::Combo("Mag Filter", &selectedItem, names1, sizeof(names1) / sizeof(*names1)) && !changed)
-				{
-					specs.magFilter = static_cast<TextureFilterMode>(selectedItem);
-					changed = true;
-				}
-
-				ImGuiHelper::NextTableColumn();
-				selectedItem = static_cast<int>(specs.wrapS);
-				if (ImGuiHelper::Combo("Wrap S", &selectedItem, names2, sizeof(names2) / sizeof(*names2)) && !changed)
-				{
-					specs.wrapS = static_cast<TextureWrapMode>(selectedItem);
-					changed = true;
-				}
-
-				ImGuiHelper::NextTableColumn();
-				selectedItem = static_cast<int>(specs.wrapT);
-				if (ImGuiHelper::Combo("Wrap T", &selectedItem, names2, sizeof(names2) / sizeof(*names2)) && !changed)
-				{
-					specs.wrapT = static_cast<TextureWrapMode>(selectedItem);
-					changed = true;
-				}
-
-				if (changed)
-					for (const auto& selectedFile : selectedFiles)
-						assetManager.UpdateSpecifications(assetManager.GetOrLoadTexture(selectedFile)->GetUUID(), specs);
-
-				ImGuiHelper::EndTable();
 			}
 
 			ImGui::End();

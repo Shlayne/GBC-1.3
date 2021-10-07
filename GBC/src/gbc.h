@@ -23,6 +23,7 @@
 #include "GBC/Events/DeviceEvents.h"
 #include "GBC/Events/Event.h"
 #include "GBC/Events/KeyEvents.h"
+#include "GBC/Events/Mods.h"
 #include "GBC/Events/MouseEvents.h"
 #include "GBC/Events/WindowEvents.h"
 

@@ -4,7 +4,7 @@
 
 namespace gbc
 {
-	static void DebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+	static constexpr void DebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 	{
 		switch (severity)
 		{
@@ -17,7 +17,7 @@ namespace gbc
 		GBC_CORE_ASSERT(false, "Unknown OpenGL severity level.");
 	}
 
-	static GLenum GetOpenGLPrimitive(RendererPrimitive primitive)
+	static constexpr GLenum GetOpenGLPrimitive(RendererPrimitive primitive)
 	{
 		switch (primitive)
 		{
@@ -38,7 +38,7 @@ namespace gbc
 		return 0;
 	}
 
-	static GLenum GetOpenGLIndexType(IndexBufferElementType indexType)
+	static constexpr GLenum GetOpenGLIndexType(IndexBufferElementType indexType)
 	{
 		switch (indexType)
 		{

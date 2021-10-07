@@ -1,9 +1,9 @@
 #include "gbcpch.h"
 #include "FileIO.h"
 
-namespace gbc
+namespace gbc::FileIO
 {
-	std::string FileIO::ReadFile(const std::filesystem::path& filepath)
+	std::string ReadFile(const std::filesystem::path& filepath)
 	{
 		std::ifstream file(filepath);
 		if (file.is_open())
@@ -16,7 +16,7 @@ namespace gbc
 		return {};
 	}
 
-	std::vector<uint8_t> FileIO::ReadBinaryFile(const std::filesystem::path& filepath)
+	std::vector<uint8_t> ReadBinaryFile(const std::filesystem::path& filepath)
 	{
 		std::ifstream file(filepath, std::ios::binary);
 		if (file.is_open())
@@ -33,7 +33,7 @@ namespace gbc
 		return {};
 	}
 
-	bool FileIO::WriteFile(const std::filesystem::path& filepath, std::string_view contents)
+	bool WriteFile(const std::filesystem::path& filepath, std::string_view contents)
 	{
 		std::ofstream file(filepath);
 		if (file.is_open())
@@ -45,7 +45,7 @@ namespace gbc
 		return false;
 	}
 
-	bool FileIO::WriteBinaryFile(const std::filesystem::path& filepath, const std::vector<uint8_t>& contents)
+	bool WriteBinaryFile(const std::filesystem::path& filepath, const std::vector<uint8_t>& contents)
 	{
 		std::ofstream file(filepath, std::ios::binary);
 		if (file.is_open())

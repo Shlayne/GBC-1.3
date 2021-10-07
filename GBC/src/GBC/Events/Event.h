@@ -29,19 +29,17 @@ namespace gbc
 		EventCategory_Device      = 1 << 5
 	};
 
-#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return type; }\
-							   virtual EventType GetType() const override { return GetStaticType(); }
+#define EVENT_CLASS_TYPE(type) static constexpr EventType GetStaticType() noexcept { return type; }\
+							   constexpr virtual EventType GetType() const noexcept override { return GetStaticType(); }
 
-#define EVENT_CLASS_CATEGORY(categories) virtual EventCategoryFlags GetCategoryFlags() const override { return categories; }
+#define EVENT_CLASS_CATEGORY(categories) constexpr virtual EventCategoryFlags GetCategoryFlags() const noexcept override { return categories; }
 
 	class Event
 	{
 	public:
-		virtual ~Event() = default;
-
-		virtual EventType GetType() const = 0;
-		virtual EventCategoryFlags GetCategoryFlags() const = 0;
-		inline bool IsInCategory(EventCategoryFlags category) const noexcept;
+		constexpr virtual EventType GetType() const noexcept = 0;
+		constexpr virtual EventCategoryFlags GetCategoryFlags() const noexcept = 0;
+		constexpr bool IsInCategory(EventCategoryFlags category) const noexcept;
 
 #if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const = 0;
@@ -55,7 +53,7 @@ namespace gbc
 	public:
 		EventDispatcher(Event& event) : event(event) {}
 	public:
-		template<typename C, typename E> bool Dispatch(C* object, bool(C::* func)(E&));
+		template<typename C, typename E> bool Dispatch(C* object, bool(C::*func)(E&));
 		template<typename E> bool Dispatch(bool(*func)(E&));
 	private:
 		Event& event;

@@ -27,14 +27,14 @@ namespace gbc
 		};
 
 		glm::vec3 halfSize = glm::abs(size) * 0.5f;
-		glm::vec3 positionLeftBottomBack  { -halfSize.x , -halfSize.y, -halfSize.z };
-		glm::vec3 positionRightBottomBack {  halfSize.x , -halfSize.y, -halfSize.z };
-		glm::vec3 positionLeftTopBack     { -halfSize.x ,  halfSize.y, -halfSize.z };
-		glm::vec3 positionRightTopBack    {  halfSize.x ,  halfSize.y, -halfSize.z };
-		glm::vec3 positionLeftBottomFront { -halfSize.x , -halfSize.y,  halfSize.z };
-		glm::vec3 positionRightBottomFront{  halfSize.x , -halfSize.y,  halfSize.z };
-		glm::vec3 positionLeftTopFront    { -halfSize.x ,  halfSize.y,  halfSize.z };
-		glm::vec3 positionRightTopFront   {  halfSize.x ,  halfSize.y,  halfSize.z };
+		glm::vec3 positionLeftBottomBack  { -halfSize.x, -halfSize.y, -halfSize.z };
+		glm::vec3 positionRightBottomBack {  halfSize.x, -halfSize.y, -halfSize.z };
+		glm::vec3 positionLeftTopBack     { -halfSize.x,  halfSize.y, -halfSize.z };
+		glm::vec3 positionRightTopBack    {  halfSize.x,  halfSize.y, -halfSize.z };
+		glm::vec3 positionLeftBottomFront { -halfSize.x, -halfSize.y,  halfSize.z };
+		glm::vec3 positionRightBottomFront{  halfSize.x, -halfSize.y,  halfSize.z };
+		glm::vec3 positionLeftTopFront    { -halfSize.x,  halfSize.y,  halfSize.z };
+		glm::vec3 positionRightTopFront   {  halfSize.x,  halfSize.y,  halfSize.z };
 
 		static constexpr glm::vec3 normalLeft  { -1.0f,  0.0f,  0.0f };
 		static constexpr glm::vec3 normalRight {  1.0f,  0.0f,  0.0f };
@@ -108,7 +108,7 @@ namespace gbc
 		auto& indices = mesh->indices;
 		mesh->filepath = ellipsoidID;
 
-
+		glm::vec2 absSize = glm::abs(size);
 
 		return mesh;
 	}

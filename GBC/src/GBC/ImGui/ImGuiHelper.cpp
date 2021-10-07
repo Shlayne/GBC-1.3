@@ -124,10 +124,12 @@ namespace gbc
 
 	void ImGuiHelper::EndTable()
 	{
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 4.0f, 2.0f });
+
 		ImGui::EndTable();
 		ImGui::PopID();
 
-		ImGui::PopStyleVar();
+		ImGui::PopStyleVar(2);
 	}
 
 	bool ImGuiHelper::InputText(char* buffer, size_t size, ImGuiInputTextFlags flags)

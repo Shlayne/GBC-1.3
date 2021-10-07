@@ -1,10 +1,10 @@
 #include "gbcpch.h"
 #include "Math.h"
 
-namespace gbc
+namespace gbc::Math
 {
 	// From "glm/gtx/matrix_decompose.inl"
-	bool Math::Decompose(const glm::mat4& transform, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale)
+	bool Decompose(const glm::mat4& transform, glm::vec3& translation, glm::vec3& rotation, glm::vec3& scale)
 	{
 		glm::mat4 localMatrix = transform;
 

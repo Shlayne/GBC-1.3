@@ -21,21 +21,6 @@ namespace gbc
 		Depth = Depth24Stencil8
 	};
 
-	static bool IsDepthFormat(FramebufferTextureFormat format)
-	{
-		switch (format)
-		{
-			case FramebufferTextureFormat::Depth24Stencil8:
-				return true;
-			case FramebufferTextureFormat::RGBA8:
-			case FramebufferTextureFormat::RedInteger:
-				return false;
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Framebuffer Texture Format!");
-		return false;
-	}
-
 	enum class FramebufferFilterMode : uint8_t
 	{
 		Linear,
@@ -50,11 +35,9 @@ namespace gbc
 
 	struct FramebufferTextureSpecification
 	{
-		FramebufferTextureSpecification() = default;
-		FramebufferTextureSpecification(FramebufferTextureFormat format)
-			: format(format) {}
-		FramebufferTextureSpecification(FramebufferTextureFormat format, FramebufferFilterMode minFilter, FramebufferFilterMode magFilter, FramebufferWrapMode wrapS, FramebufferWrapMode wrapT)
-			: format(format), minFilter(minFilter), magFilter(magFilter), wrapS(wrapS), wrapT(wrapT) {}
+		constexpr FramebufferTextureSpecification() noexcept = default;
+		constexpr FramebufferTextureSpecification(FramebufferTextureFormat format) noexcept;
+		constexpr FramebufferTextureSpecification(FramebufferTextureFormat format, FramebufferFilterMode minFilter, FramebufferFilterMode magFilter, FramebufferWrapMode wrapS, FramebufferWrapMode wrapT) noexcept;
 
 		FramebufferTextureFormat format = FramebufferTextureFormat::None;
 		FramebufferFilterMode minFilter = FramebufferFilterMode::Linear;
@@ -65,9 +48,8 @@ namespace gbc
 
 	struct FramebufferAttachmentSpecification
 	{
-		FramebufferAttachmentSpecification() = default;
-		FramebufferAttachmentSpecification(std::initializer_list<FramebufferTextureSpecification> attachments)
-			: attachments(attachments) {}
+		constexpr FramebufferAttachmentSpecification() noexcept = default;
+		constexpr FramebufferAttachmentSpecification(std::initializer_list<FramebufferTextureSpecification> attachments) noexcept;
 
 		std::vector<FramebufferTextureSpecification> attachments;
 	};
@@ -79,6 +61,8 @@ namespace gbc
 		int32_t samples = 1;
 		FramebufferAttachmentSpecification attachments;
 	};
+
+	static constexpr bool IsDepthFormat(FramebufferTextureFormat format);
 
 	class Framebuffer
 	{
@@ -101,3 +85,5 @@ namespace gbc
 		static Ref<Framebuffer> Create(const FramebufferSpecification& specification); 
 	};
 }
+
+#include "Framebuffer.inl"

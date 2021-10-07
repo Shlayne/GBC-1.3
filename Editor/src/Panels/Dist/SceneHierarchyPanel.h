@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Panels/Panel.h"
+#include "GBC/Events/KeyEvents.h"
 #include "GBC/Scene/Entity.h"
 
 namespace gbc

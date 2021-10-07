@@ -21,8 +21,8 @@ namespace gbc
 #endif
 		virtual void OnEvent(Event& event) {}
 	public:
-		inline bool IsEnabled() const noexcept { return enabled; }
-		inline void SetEnabled(bool enabled) noexcept { this->enabled = enabled; }
+		constexpr bool IsEnabled() const noexcept { return enabled; }
+		constexpr void SetEnabled(bool enabled) noexcept { this->enabled = enabled; }
 	private:
 		bool enabled = true;
 	};

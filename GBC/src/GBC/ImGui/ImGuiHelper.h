@@ -11,8 +11,8 @@ namespace gbc
 	class ImGuiHelper
 	{
 	private:
-		static void Init();
 		friend class ImGuiWrapper;
+		static void Init();
 	public:
 		static constexpr float defaultSpeed = 0.1f;
 		static constexpr ImGuiTableFlags defaultTableFlags = ImGuiTableFlags_BordersInnerV;

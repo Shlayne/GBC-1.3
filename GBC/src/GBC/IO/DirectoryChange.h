@@ -16,7 +16,6 @@ namespace gbc::DirectoryChange
 		NotificationType_SizeChanged          = 1 << 3, // Changing the size of a file or directory.
 		NotificationType_LastWriteChanged     = 1 << 4, // Writing to a file or directory
 		NotificationType_SecurityChanged      = 1 << 5, // Changing the security of a file or directory.
-
 		NotificationType_NameChanged = NotificationType_FileNameChanged | NotificationType_DirectoryNameChanged,
 		NotificationType_Any = NotificationType_FileNameChanged | NotificationType_DirectoryNameChanged
 								| NotificationType_AttributesChanged | NotificationType_SizeChanged
@@ -24,20 +23,21 @@ namespace gbc::DirectoryChange
 	};
 
 	// Parameter: if everything went smoothly and a notification was received
+	//	if false, an error occurred and this notifier will close.
 	// Return value: if you want to continue waiting for notifications
 	using NotificationFunc = std::function<bool(bool)>;
 
-	struct Notifier
+	class Notifier
 	{
+	public:
 		Notifier(const NotificationFunc& notificationFunc, const std::filesystem::path& directoryPath, NotificationType notificationType, bool checkSubdirectories);
 		Notifier() noexcept = default;
-		Notifier(Notifier&& notification) noexcept;
-		Notifier& operator=(Notifier&& notification) noexcept;
+		Notifier(Notifier&& notifier) noexcept;
+		Notifier& operator=(Notifier&& notifier) noexcept;
 		~Notifier();
 
 		void Remove();
 	private:
-		Notifier(std::thread&& thread);
 		std::thread thread;
 		void* closeHandle = nullptr;
 	};

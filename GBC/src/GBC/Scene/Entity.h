@@ -13,9 +13,9 @@ namespace gbc
 	class Entity
 	{
 	public:
-		Entity() = default;
-		Entity(const Entity&) = default;
-		Entity(entt::entity handle, Scene* context) noexcept;
+		constexpr Entity() noexcept = default;
+		constexpr Entity(const Entity&) noexcept = default;
+		constexpr Entity(entt::entity handle, Scene* context) noexcept : handle(handle), context(context) {}
 	public:
 		template<typename Component, typename... Args> Component& Add(Args&&... args);
 		template<typename Component, typename... Args> Component& AddOrReplace(Args&&... args);
@@ -44,12 +44,12 @@ namespace gbc
 		bool IsChildOf(Entity entity) const;
 		bool IsSubChildOf(Entity entity) const;
 	public:
-		inline operator bool() const noexcept;
-		inline operator uint32_t() const noexcept;
-		inline operator entt::entity() const noexcept;
+		constexpr operator bool() const noexcept;
+		constexpr operator uint32_t() const noexcept;
+		constexpr operator entt::entity() const noexcept;
 	public:
-		inline bool operator==(const Entity& entity) const noexcept;
-		inline bool operator!=(const Entity& entity) const noexcept;
+		constexpr bool operator==(const Entity& entity) const noexcept;
+		constexpr bool operator!=(const Entity& entity) const noexcept;
 	private:
 		void GetAbsoluteTransformInternal(glm::mat4& transform) const;
 		void RemoveParentInternal(Entity currentParent, RelationshipComponent& currentParentRelationship, RelationshipComponent& childRelationship);

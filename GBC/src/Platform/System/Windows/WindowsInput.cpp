@@ -8,25 +8,15 @@ namespace gbc
 {
 	struct InputData
 	{
-		// Key
-		std::array<bool, GLFW_KEY_LAST + 1> keys{};
-
-		// Mouse
-		std::array<bool, GLFW_MOUSE_BUTTON_LAST + 1> mouseButtons{};
-
-		// Joystick
-		std::array<JoystickState, GLFW_JOYSTICK_LAST + 1> joysticks{};
-
-		// Callback
+		std::array<bool, GLFW_KEY_LAST + 1> keys{ false };
+		std::array<bool, GLFW_MOUSE_BUTTON_LAST + 1> mouseButtons{ false };
+		std::array<JoystickState, GLFW_JOYSTICK_LAST + 1> joysticks;
 		EventCallbackFunc eventCallback;
 	};
 	static InputData data;
 
 	void Input::PreInit()
 	{
-		data.keys.fill(false);
-		data.mouseButtons.fill(false);
-
 		glfwInitHint(GLFW_JOYSTICK_HAT_BUTTONS, GLFW_FALSE);
 	}
 
@@ -34,10 +24,13 @@ namespace gbc
 	{
 		glfwSetJoystickCallback([](int32_t jid, int32_t deviceEvent)
 		{
+			GBC_CORE_ASSERT(jid < static_cast<uint8_t>(Joystick::Count), "Joystick out of bounds!");
+			Joystick joystick = static_cast<Joystick>(jid);
+
 			switch (deviceEvent)
 			{
-				case GLFW_CONNECTED: OnJoystickConnected(jid); break;
-				case GLFW_DISCONNECTED: OnJoystickDisconnected(jid); break;
+				case GLFW_CONNECTED: OnJoystickConnected(joystick); break;
+				case GLFW_DISCONNECTED: OnJoystickDisconnected(joystick); break;
 			}
 		});
 
@@ -45,11 +38,13 @@ namespace gbc
 		// for joysticks that were connected prior to running the application.
 		for (int jid = GLFW_JOYSTICK_1; jid <= GLFW_JOYSTICK_LAST; jid++)
 			if (glfwJoystickPresent(jid) == GLFW_TRUE)
-				OnJoystickConnected(jid);
+				OnJoystickConnected(static_cast<Joystick>(jid));
 	}
 
-	void Input::OnJoystickConnected(int32_t jid)
+	void Input::OnJoystickConnected(Joystick joystick)
 	{
+		int32_t jid = static_cast<int32_t>(joystick);
+
 		uint32_t buttonCount = 0;
 		uint32_t axisCount = 0;
 		uint32_t hatCount = 0;
@@ -68,14 +63,14 @@ namespace gbc
 		}
 
 		data.joysticks[jid].OnConnect(buttonCount, axisCount, hatCount);
-		JoystickConnectEvent event(jid, true);
+		JoystickConnectEvent event(joystick, true);
 		data.eventCallback(event);
 	}
 
-	void Input::OnJoystickDisconnected(int32_t jid)
+	void Input::OnJoystickDisconnected(Joystick joystick)
 	{
-		data.joysticks[jid].OnDisconnect();
-		JoystickConnectEvent event(jid, false);
+		data.joysticks[static_cast<uint8_t>(joystick)].OnDisconnect();
+		JoystickConnectEvent event(joystick, false);
 		data.eventCallback(event);
 	}
 

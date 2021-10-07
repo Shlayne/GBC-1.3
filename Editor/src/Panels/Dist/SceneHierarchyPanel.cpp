@@ -31,6 +31,8 @@ namespace gbc
 			//	add a single blue line at the index to move the entity to
 			//		with the proper length depending on child status
 			ImGui::BeginChild("SceneHierarchyPanelChild", { 0.0f, 0.0f }, false, ImGuiWindowFlags_HorizontalScrollbar);
+			focused |= ImGui::IsWindowFocused();
+			hovered |= ImGui::IsWindowHovered();
 
 			for (auto entity : context->entities)
 				DrawEntityNode({ entity, context.get() });
@@ -38,7 +40,7 @@ namespace gbc
 			{
 				if (selectedEntity && (selectedEntity == entityToDelete || selectedEntity.IsSubChildOf(entityToDelete)))
 					selectedEntity = {};
-				context->DestroyEntity(entityToDelete);
+				context->DestroyEntity(entityToDelete ? entityToDelete : selectedEntity);
 				entityToDelete = {};
 			}
 

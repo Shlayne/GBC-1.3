@@ -5,13 +5,13 @@
 
 namespace gbc
 {
+	Scope<RendererAPI> Renderer::api = nullptr;
+
 	struct RendererData
 	{
 		Ref<UniformBuffer> cameraUniformBuffer;
 	};
 	static RendererData data;
-
-	Scope<RendererAPI> Renderer::api = nullptr;
 
 	void Renderer::Init()
 	{

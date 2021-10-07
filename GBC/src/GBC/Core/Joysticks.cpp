@@ -44,6 +44,7 @@ namespace gbc
 
 	bool JoystickState::GetButton(JoystickButton button) const
 	{
+		GBC_CORE_ASSERT(connected, "Cannot get button of disconnected joystick!");
 		GBC_CORE_ASSERT(static_cast<uint32_t>(button) < buttonCount, "Joystick button index out of bounds!");
 
 		uint8_t buttonBits = static_cast<uint8_t>(button);
@@ -52,12 +53,14 @@ namespace gbc
 
 	float JoystickState::GetAxis(JoystickAxis axis) const
 	{
+		GBC_CORE_ASSERT(connected, "Cannot get axis of disconnected joystick!");
 		GBC_CORE_ASSERT(static_cast<uint32_t>(axis) < axisCount, "Joystick axis index out of bounds!");
-		return axes[static_cast<size_t>(axis)];
+		return axes[static_cast<uint32_t>(axis)];
 	}
 
 	JoystickHatState JoystickState::GetHat(JoystickHat hat) const
 	{
+		GBC_CORE_ASSERT(connected, "Cannot get hat of disconnected joystick!");
 		GBC_CORE_ASSERT(static_cast<uint32_t>(hat) < hatCount, "Joystick hat index out of bounds!");
 
 		uint8_t hatBits = static_cast<uint8_t>(hat);
@@ -66,6 +69,7 @@ namespace gbc
 
 	void JoystickState::SetButton(JoystickButton button, bool value)
 	{
+		GBC_CORE_ASSERT(connected, "Cannot set button of disconnected joystick!");
 		GBC_CORE_ASSERT(static_cast<uint32_t>(button) < buttonCount, "Joystick button index out of bounds!");
 
 		uint8_t buttonBits = static_cast<uint8_t>(button);
@@ -78,12 +82,14 @@ namespace gbc
 
 	void JoystickState::SetAxis(JoystickAxis axis, float value)
 	{
+		GBC_CORE_ASSERT(connected, "Cannot set axis of disconnected joystick!");
 		GBC_CORE_ASSERT(static_cast<uint32_t>(axis) < axisCount, "Joystick axis index out of bounds!");
-		axes[static_cast<size_t>(axis)] = value;
+		axes[static_cast<uint32_t>(axis)] = value;
 	}
 
 	void JoystickState::SetHat(JoystickHat hat, JoystickHatState value)
 	{
+		GBC_CORE_ASSERT(connected, "Cannot set hat of disconnected joystick!");
 		GBC_CORE_ASSERT(static_cast<uint32_t>(hat) < hatCount, "Joystick hat index out of bounds!");
 
 		uint8_t hatBits = static_cast<uint8_t>(hat);

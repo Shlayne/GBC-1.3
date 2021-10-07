@@ -96,17 +96,10 @@ namespace gbc
 		data.indexBuffer.reset();
 	}
 
-	void Renderer3D::BeginScene(const Camera& camera, const glm::mat4& view)
+	void Renderer3D::BeginScene(const glm::mat4& viewProjection)
 	{
 		Renderer::CameraBuffer cameraBuffer;
-		cameraBuffer.viewProjection = camera.GetProjection() * view;
-		Renderer::UploadCameraBuffer(cameraBuffer);
-	}
-
-	void Renderer3D::BeginScene(const EditorCamera& camera)
-	{
-		Renderer::CameraBuffer cameraBuffer;
-		cameraBuffer.viewProjection = camera.GetViewProjection();
+		cameraBuffer.viewProjection = viewProjection;
 		Renderer::UploadCameraBuffer(cameraBuffer);
 	}
 
@@ -212,6 +205,7 @@ namespace gbc
 #endif
 	}
 
+#if GBC_ENABLE_STATS
 	const Renderer3D::Statistics& Renderer3D::GetStatistics()
 	{
 		return data.statistics;
@@ -221,4 +215,5 @@ namespace gbc
 	{
 		std::memset(&data.statistics, 0, sizeof(data.statistics));
 	}
+#endif
 }

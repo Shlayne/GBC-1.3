@@ -100,7 +100,9 @@ namespace gbc
 	{
 		if (enabled)
 		{
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 4.0f, 2.0f });
 			ImGui::Begin(name.c_str(), &enabled);
+			ImGui::PopStyleVar();
 			Update();
 
 			auto& selectedEntity = editorLayer->selectedEntity;
@@ -113,7 +115,7 @@ namespace gbc
 					ImGuiStyle& style = ImGui::GetStyle();
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { style.ItemSpacing.x * 0.5f, style.ItemSpacing.y * 0.5f });
 
-					if (ImGui::BeginTable("TagComponent", 2, ImGuiHelper::defaultTableFlags))
+					if (ImGui::BeginTable("TagComponent", 2))
 					{
 						ImGui::TableSetupColumn(nullptr, ImGuiTableColumnFlags_None);
 						ImGui::TableSetupColumn(nullptr, ImGuiTableColumnFlags_WidthAuto);
@@ -209,7 +211,7 @@ namespace gbc
 						buttonText = component.mesh->filepath.string();
 
 					if (const ImGuiPayload* payload = ImGuiHelper::ButtonDragDropTarget("Mesh", buttonText.c_str(), "CONTENT_BROWSER_ITEM",
-						[](void* payloadData) { return Is3DObjectFile(static_cast<const wchar_t*>(payloadData)); }))
+						[](void* payloadData) { return Is3DModelFile(static_cast<const wchar_t*>(payloadData)); }))
 					{
 						// TODO: load obj into mesh
 					}
@@ -232,18 +234,6 @@ namespace gbc
 					TextureButton(component.texture);
 				});
 
-				DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", selectedEntity, true, [](Rigidbody2DComponent& component)
-				{
-					static constexpr const char* names[]{ "Static", "Dynamic", "Kinematic" };
-
-					int selectedItem = static_cast<int>(component.bodyType);
-					if (ImGuiHelper::Combo("Body Type", &selectedItem, names, sizeof(names) / sizeof(*names)))
-						component.bodyType = static_cast<Rigidbody2DComponent::BodyType>(selectedItem);
-					ImGuiHelper::NextTableColumn();
-
-					ImGuiHelper::Checkbox("Fixed Rotation", &component.fixedRotation);
-				});
-
 				DrawComponent<BoxCollider2DComponent>("Box Collider", selectedEntity, true, [](BoxCollider2DComponent& component)
 				{
 					ImGuiHelper::FloatEdit2("Size", &component.size.x, 0.1f, 0.0f, FLT_MAX);
@@ -257,6 +247,18 @@ namespace gbc
 					ImGuiHelper::FloatEdit("Restitution", &component.restitution, 0.1f, 0.0f, FLT_MAX);
 					ImGuiHelper::NextTableColumn();
 					ImGuiHelper::FloatEdit("Restitution Threshold", &component.restitutionThreshold, 0.1f, 0.0f, FLT_MAX);
+				});
+
+				DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", selectedEntity, true, [](Rigidbody2DComponent& component)
+				{
+					static constexpr const char* names[]{ "Static", "Dynamic", "Kinematic" };
+
+					int selectedItem = static_cast<int>(component.bodyType);
+					if (ImGuiHelper::Combo("Body Type", &selectedItem, names, sizeof(names) / sizeof(*names)))
+						component.bodyType = static_cast<Rigidbody2DComponent::BodyType>(selectedItem);
+					ImGuiHelper::NextTableColumn();
+
+					ImGuiHelper::Checkbox("Fixed Rotation", &component.fixedRotation);
 				});
 
 				ImGui::Separator();

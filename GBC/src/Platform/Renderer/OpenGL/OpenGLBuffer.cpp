@@ -4,7 +4,7 @@
 
 namespace gbc
 {
-	static GLenum GetOpenGLUsage(BufferUsage usage)
+	static constexpr GLenum GetOpenGLUsage(BufferUsage usage)
 	{
 		switch (usage)
 		{

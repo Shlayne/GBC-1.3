@@ -9,6 +9,7 @@ project "Editor"
 
 	files {
 		"src/**.h",
+		"src/**.inl",
 		"src/**.cpp"
 	}
 
@@ -53,10 +54,17 @@ project "Editor"
 		runtime "Release"
 		optimize "on"
 
+		excludes "src/Panels/Debug/*.cpp"
+
 	filter "configurations:Dist"
 		defines "GBC_CONFIG_DIST"
 		runtime "Release"
 		optimize "on"
+
+		excludes {
+			"src/Panels/Debug/*.cpp",
+			"src/Panels/Release/*.cpp"
+		}
 
 -- Remove the console in Dist on Windows
 	filter { "configurations:Dist", "system:windows" }

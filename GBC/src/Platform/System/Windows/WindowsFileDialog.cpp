@@ -8,9 +8,9 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <glfw/glfw3native.h>
 
-namespace gbc
+namespace gbc::FileDialog
 {
-	std::filesystem::path FileDialog::OpenFile(const wchar_t* filter, const std::filesystem::path& initialDirectoryPath)
+	std::filesystem::path OpenFile(const wchar_t* filter, const std::filesystem::path& initialDirectoryPath)
 	{
 		OPENFILENAMEW ofn;
 		WCHAR szFile[__std_fs_max_path]{ L'\0' };
@@ -29,7 +29,7 @@ namespace gbc
 		return {};
 	}
 
-	std::filesystem::path FileDialog::OpenFile(const wchar_t* filter)
+	std::filesystem::path OpenFile(const wchar_t* filter)
 	{
 		static constexpr size_t initialDirectoryMaxSize = __std_fs_max_path;
 		std::string initialDirectory(initialDirectoryMaxSize, L'\0');
@@ -37,7 +37,7 @@ namespace gbc
 		return OpenFile(filter, initialDirectory);
 	}
 
-	std::filesystem::path FileDialog::SaveFile(const wchar_t* filter, const std::filesystem::path& initialDirectoryPath)
+	std::filesystem::path SaveFile(const wchar_t* filter, const std::filesystem::path& initialDirectoryPath)
 	{
 		OPENFILENAMEW ofn;
 		WCHAR szFile[__std_fs_max_path]{ L'\0' };
@@ -57,7 +57,7 @@ namespace gbc
 		return {};
 	}
 
-	std::filesystem::path FileDialog::SaveFile(const wchar_t* filter)
+	std::filesystem::path SaveFile(const wchar_t* filter)
 	{
 		static constexpr size_t initialDirectoryMaxSize = __std_fs_max_path;
 		std::wstring initialDirectory(initialDirectoryMaxSize, L'\0');
@@ -65,7 +65,7 @@ namespace gbc
 		return SaveFile(filter, initialDirectory);
 	}
 
-	void FileDialog::OpenFolder(const std::filesystem::path& directoryPath)
+	void OpenFolder(const std::filesystem::path& directoryPath)
 	{
 		ShellExecuteW(nullptr, nullptr, directoryPath.c_str(), nullptr, nullptr, SW_SHOWDEFAULT);
 	}

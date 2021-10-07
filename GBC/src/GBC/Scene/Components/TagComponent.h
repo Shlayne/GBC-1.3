@@ -6,15 +6,14 @@ namespace gbc
 {
 	struct TagComponent
 	{
-		TagComponent() noexcept = default;
-		TagComponent(const std::string& tag);
-		TagComponent(std::string&& tag) noexcept;
-		TagComponent& operator=(const std::string& tag);
-		TagComponent& operator=(std::string&& tag) noexcept;
-
-		inline operator std::string&() noexcept { return tag; }
-		inline operator const std::string&() const noexcept { return tag; }
+		constexpr TagComponent() noexcept = default;
+		constexpr TagComponent(const std::string& tag);
+		constexpr TagComponent(std::string&& tag) noexcept;
+		constexpr TagComponent& operator=(const std::string& tag);
+		constexpr TagComponent& operator=(std::string&& tag) noexcept;
 
 		std::string tag;
 	};
 }
+
+#include "TagComponent.inl"

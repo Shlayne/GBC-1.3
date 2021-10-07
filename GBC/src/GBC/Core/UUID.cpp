@@ -9,5 +9,4 @@ namespace gbc
 	static std::uniform_int_distribution<uint64_t> distribution;
 
 	UUID::UUID() : uuid(distribution(engine)) {}
-	UUID::UUID(uint64_t uuid) : uuid(uuid) {}
 }

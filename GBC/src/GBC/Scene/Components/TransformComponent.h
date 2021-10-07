@@ -6,9 +6,9 @@ namespace gbc
 {
 	struct TransformComponent
 	{
-		TransformComponent() = default;
-		TransformComponent(const TransformComponent&) = default;
-		TransformComponent(const glm::vec3& translation) noexcept;
+		constexpr TransformComponent() noexcept = default;
+		constexpr TransformComponent(const TransformComponent&) noexcept = default;
+		constexpr TransformComponent(const glm::vec3& translation) noexcept : translation(translation) {}
 
 		operator glm::mat4() const noexcept;
 

@@ -24,11 +24,11 @@ namespace gbc
 		// powers of 2, e.g.: 1x1, 2x2, 4x4... 256x256, 512x512, 1024x1024...
 		Ref<LocalTexture2D> Create();
 
-		inline const glm::ivec2& GetTextureSize() const noexcept { return atlasTextureSize; }
+		constexpr const glm::ivec2& GetTextureSize() const noexcept { return atlasTextureSize; }
 	private:
 		struct TextureNode
 		{
-			TextureNode(const glm::ivec2& position, const glm::ivec2& size) noexcept
+			constexpr TextureNode(const glm::ivec2& position, const glm::ivec2& size) noexcept
 				: position(position), size(size) {}
 
 			Ref<LocalTexture2D> texture = nullptr;

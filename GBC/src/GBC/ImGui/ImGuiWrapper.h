@@ -16,7 +16,7 @@ namespace gbc
 		void End();
 	public:
 		void OnEvent(Event& event);
-		inline void SetBlockEvents(bool blockEvents) noexcept { this->blockEvents = blockEvents; }
+		constexpr void SetBlockEvents(bool blockEvents) noexcept { this->blockEvents = blockEvents; }
 
 		bool ImGuiHasWindows() const;
 	private:

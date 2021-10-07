@@ -15,13 +15,15 @@ namespace gbc
 		ContentBrowserPanel(const std::string& name, EditorLayer* editorLayer);
 
 		virtual void OnImGuiRender() override;
-	private:
+	public:
 		struct File
 		{
 			std::filesystem::path path;
 			bool isDirectory = false;
+			bool selected = false;
+			bool potentiallySelected = false;
 		};
-
+	private:
 		struct Directory
 		{
 			std::filesystem::path path;
@@ -39,22 +41,21 @@ namespace gbc
 		void RefreshDirectory(Directory& subdirectory);
 	private:
 		void ShowDeleteConfirmationMessage();
+		void DeleteFileAndMedatata(const std::filesystem::path& filepath, bool isUnemptyDirectory);
 		void MakeCurrentItemDragDropSource(const std::filesystem::path& sourcePath);
 		void MakeCurrentItemDragDropTarget(const std::filesystem::path& targetPath);
 	private:
-		struct FileButton
-		{
-			const std::filesystem::path& filepath;
-			glm::ivec2 position;
-		};
-
 		void BeginDragSelect();
-		void UpdateDragSelect();
-		void EndDragSelect(const std::vector<FileButton>& fileButtons, const glm::ivec2& buttonSize);
+		void UpdateDragSelect(const std::vector<std::pair<File&, glm::ivec2>>& fileButtons, const glm::ivec2& buttonSize);
+		void EndDragSelect(const std::vector<std::pair<File&, glm::ivec2>>& fileButtons, const glm::ivec2& buttonSize);
+		void UpdateSelectedFiles(const std::vector<std::pair<File&, glm::ivec2>>& fileButtons, const glm::ivec2& buttonSize);
+		void DeselectAllFiles();
 	public:
 		inline bool IsDragSelectActive() const noexcept { return dragSelectActive; }
 		void GetDragSelectBounds(glm::ivec2& topLeft, glm::ivec2& bottomRight) const;
-		inline const std::list<std::filesystem::path>& GetSelectedFiles() const noexcept { return selectedFiles; }
+		inline const std::vector<File>& GetFilesInCurrentDirectory() const noexcept { return files; }
+		inline size_t GetLastSelectedFileIndex() const noexcept { return lastSelectedFileIndex; }
+		inline bool HasSelectedFiles() const noexcept { return selectedFileCount > 0; }
 
 		inline bool HasExplorerSizeChanged() const noexcept { return explorerSizeChanged; }
 		inline const glm::ivec2& GetExplorerSize() const noexcept { return explorerSize; }
@@ -104,8 +105,10 @@ namespace gbc
 		static constexpr size_t searchBufferSize = __std_fs_max_path;
 		char searchBuffer[searchBufferSize]{ '\0' };
 
-		// Drag select
-		std::list<std::filesystem::path> selectedFiles;
+		// Selected files
+		bool deleteUnselectedFile = false;
+		size_t selectedFileCount = 0;
+		size_t lastSelectedFileIndex = 0;
 
 		bool dragSelectActive = false;
 		glm::ivec2 dragSelectStart{ 0 };

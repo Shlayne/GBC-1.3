@@ -6,13 +6,10 @@ namespace gbc
 {
 	struct CameraComponent
 	{
-		CameraComponent() noexcept = default;
-		CameraComponent(const CameraComponent&) = default;
-		CameraComponent(const SceneCamera& camera);
-		CameraComponent& operator=(const SceneCamera& camera);
-
-		inline operator SceneCamera&() noexcept { return camera; }
-		inline operator const SceneCamera&() const noexcept { return camera; }
+		constexpr CameraComponent() noexcept = default;
+		constexpr CameraComponent(const CameraComponent&) noexcept = default;
+		constexpr CameraComponent(const SceneCamera& camera) noexcept : camera(camera) {}
+		CameraComponent& operator=(const SceneCamera& camera) noexcept;
 
 		SceneCamera camera;
 		bool fixedAspectRatio = false;

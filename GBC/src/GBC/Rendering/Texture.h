@@ -28,16 +28,16 @@ namespace gbc
 
 	struct TextureSpecification
 	{
-		TextureSpecification() = default;
-		TextureSpecification(const Ref<LocalTexture2D>& texture)
+		constexpr TextureSpecification() noexcept = default;
+		TextureSpecification(const Ref<LocalTexture2D>& texture) noexcept
 			: texture(texture) {}
-		TextureSpecification(const Ref<LocalTexture2D>& texture, TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapS, TextureWrapMode wrapT)
+		TextureSpecification(const Ref<LocalTexture2D>& texture, TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapS, TextureWrapMode wrapT) noexcept
 			: texture(texture), minFilter(minFilter), magFilter(magFilter), wrapS(wrapS), wrapT(wrapT) {}
-		TextureSpecification(TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapS, TextureWrapMode wrapT)
+		TextureSpecification(TextureFilterMode minFilter, TextureFilterMode magFilter, TextureWrapMode wrapS, TextureWrapMode wrapT) noexcept
 			: minFilter(minFilter), magFilter(magFilter), wrapS(wrapS), wrapT(wrapT) {}
-		TextureSpecification(const TextureSpecification& specs)
+		TextureSpecification(const TextureSpecification& specs) noexcept
 			: texture(specs.texture), minFilter(specs.minFilter), magFilter(specs.magFilter), wrapS(specs.wrapS), wrapT(specs.wrapT) {}
-		TextureSpecification& operator=(const TextureSpecification& specs);
+		TextureSpecification& operator=(const TextureSpecification& specs) noexcept;
 
 		Ref<LocalTexture2D> texture = nullptr;
 		TextureFilterMode minFilter = TextureFilterMode::Linear;

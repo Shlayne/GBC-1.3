@@ -9,7 +9,7 @@
 
 namespace gbc
 {
-	static GLenum StringToGLShaderStage(std::string_view type)
+	static constexpr GLenum StringToGLShaderStage(std::string_view type)
 	{
 		if (type == "vertex")                 return GL_VERTEX_SHADER;
 		if (type == "fragment")               return GL_FRAGMENT_SHADER;
@@ -22,7 +22,7 @@ namespace gbc
 		return 0;
 	}
 
-	static const char* GLShaderStageToString(GLenum stage)
+	static constexpr const char* GLShaderStageToString(GLenum stage)
 	{
 		switch (stage)
 		{
@@ -38,7 +38,7 @@ namespace gbc
 		return nullptr;
 	}
 
-	static shaderc_shader_kind GLShaderStageToShaderC(GLenum stage)
+	static constexpr shaderc_shader_kind GLShaderStageToShaderC(GLenum stage)
 	{
 		switch (stage)
 		{
@@ -66,7 +66,7 @@ namespace gbc
 			std::filesystem::create_directories(directoryPath);
 	}
 
-	static const char* GetShaderStageCachedVulkanFileExtensions(uint32_t stage)
+	static constexpr const char* GetShaderStageCachedVulkanFileExtensions(uint32_t stage)
 	{
 		switch (stage)
 		{
@@ -78,7 +78,7 @@ namespace gbc
 		return nullptr;
 	}
 
-	static const char* GetShaderStageCachedOpenGLFileExtensions(uint32_t stage)
+	static constexpr const char* GetShaderStageCachedOpenGLFileExtensions(uint32_t stage)
 	{
 		switch (stage)
 		{

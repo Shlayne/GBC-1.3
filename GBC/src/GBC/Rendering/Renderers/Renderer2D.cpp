@@ -114,17 +114,10 @@ namespace gbc
 		data.indexBuffer.reset();
 	}
 
-	void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& view)
+	void Renderer2D::BeginScene(const glm::mat4& viewProjection)
 	{
 		Renderer::CameraBuffer cameraBuffer;
-		cameraBuffer.viewProjection = camera.GetProjection() * view;
-		Renderer::UploadCameraBuffer(cameraBuffer);
-	}
-
-	void Renderer2D::BeginScene(const EditorCamera& camera)
-	{
-		Renderer::CameraBuffer cameraBuffer;
-		cameraBuffer.viewProjection = camera.GetViewProjection();
+		cameraBuffer.viewProjection = viewProjection;
 		Renderer::UploadCameraBuffer(cameraBuffer);
 	}
 

@@ -4,7 +4,7 @@
 
 namespace gbc
 {
-	static GLenum GetOpenGLElementType(VertexBufferElementType type)
+	static constexpr GLenum GetOpenGLElementType(VertexBufferElementType type)
 	{
 		switch (type)
 		{

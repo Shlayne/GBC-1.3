@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GBC/Events/Event.h"
+#include "GBC/Events/Mods.h"
 #include "GBC/Core/MouseButtons.h"
 
 namespace gbc
@@ -8,48 +9,48 @@ namespace gbc
 	class MouseButtonPressEvent : public Event
 	{
 	public:
-		MouseButtonPressEvent(MouseButton button, int32_t mods);
+		constexpr MouseButtonPressEvent(MouseButton button, Mods mods) : button(button), mods(mods) {}
 		EVENT_CLASS_TYPE(EventType::MouseButtonPress);
 		EVENT_CLASS_CATEGORY(EventCategory_Mouse | EventCategory_MouseButton);
 
-		inline MouseButton GetButton() const noexcept { return button; }
-		inline int32_t GetMods() const noexcept { return mods; }
+		constexpr MouseButton GetButton() const noexcept { return button; }
+		constexpr Mods GetMods() const noexcept { return mods; }
 
 #if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
 #endif
 	private:
 		MouseButton button;
-		int32_t mods;
+		Mods mods;
 	};
 
 	class MouseButtonReleaseEvent : public Event
 	{
 	public:
-		MouseButtonReleaseEvent(MouseButton button, int32_t mods);
+		constexpr MouseButtonReleaseEvent(MouseButton button, Mods mods) : button(button), mods(mods) {}
 		EVENT_CLASS_TYPE(EventType::MouseButtonRelease);
 		EVENT_CLASS_CATEGORY(EventCategory_Mouse | EventCategory_MouseButton);
 
-		inline MouseButton GetButton() const noexcept { return button; }
-		inline int32_t GetMods() const noexcept { return mods; }
+		constexpr MouseButton GetButton() const noexcept { return button; }
+		constexpr Mods GetMods() const noexcept { return mods; }
 
 #if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
 #endif
 	private:
 		MouseButton button;
-		int32_t mods;
+		Mods mods;
 	};
 
 	class MouseMoveEvent : public Event
 	{
 	public:
-		MouseMoveEvent(float x, float y);
+		constexpr MouseMoveEvent(float x, float y) : x(x), y(y) {}
 		EVENT_CLASS_TYPE(EventType::MouseMove);
 		EVENT_CLASS_CATEGORY(EventCategory_Mouse);
 
-		inline float GetX() const noexcept { return x; }
-		inline float GetY() const noexcept { return y; }
+		constexpr float GetX() const noexcept { return x; }
+		constexpr float GetY() const noexcept { return y; }
 
 #if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
@@ -62,12 +63,12 @@ namespace gbc
 	class MouseScrollEvent : public Event
 	{
 	public:
-		MouseScrollEvent(float offsetX, float offsetY);
+		constexpr MouseScrollEvent(float offsetX, float offsetY) : offsetX(offsetX), offsetY(offsetY) {}
 		EVENT_CLASS_TYPE(EventType::MouseScroll);
 		EVENT_CLASS_CATEGORY(EventCategory_Mouse);
 
-		inline float GetOffsetX() const noexcept { return offsetX; }
-		inline float GetOffsetY() const noexcept { return offsetY; }
+		constexpr float GetOffsetX() const noexcept { return offsetX; }
+		constexpr float GetOffsetY() const noexcept { return offsetY; }
 
 #if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;
@@ -80,11 +81,11 @@ namespace gbc
 	class MouseEnterEvent : public Event
 	{
 	public:
-		MouseEnterEvent(bool enter);
+		constexpr MouseEnterEvent(bool enter) : enter(enter) {}
 		EVENT_CLASS_TYPE(EventType::MouseEnter);
 		EVENT_CLASS_CATEGORY(EventCategory_Mouse);
 
-		inline bool HasEntered() const noexcept { return enter; }
+		constexpr bool HasEntered() const noexcept { return enter; }
 
 #if GBC_ENABLE_LOGGING
 		virtual std::string ToString() const override;

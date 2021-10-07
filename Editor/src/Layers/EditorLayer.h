@@ -27,7 +27,6 @@ namespace gbc
 	private:
 		bool OnWindowCloseEvent(WindowCloseEvent& event);
 		bool OnKeyPressEvent(KeyPressEvent& event);
-		bool OnMouseButtonPressEvent(MouseButtonPressEvent& event);
 		bool OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& event);
 
 		// Scene
@@ -40,6 +39,7 @@ namespace gbc
 		void OnScenePlay();
 		void OnSceneStop();
 
+		std::filesystem::path projectAssetDirectory = L"Assets";
 		std::filesystem::path sceneFilepath;
 		bool hasUnsavedChanges = false;
 

@@ -9,15 +9,9 @@ namespace gbc
 {
 	enum class BufferUsage
 	{
-		StreamDraw,
-		StreamRead,
-		StreamCopy,
-		StaticDraw,
-		StaticRead,
-		StaticCopy,
-		DynamicDraw,
-		DynamicRead,
-		DynamicCopy
+		StreamDraw,  StreamRead,  StreamCopy,
+		StaticDraw,  StaticRead,  StaticCopy,
+		DynamicDraw, DynamicRead, DynamicCopy
 	};
 
 	enum class VertexBufferElementType : uint8_t
@@ -29,7 +23,7 @@ namespace gbc
 
 	struct VertexBufferElement
 	{
-		VertexBufferElement(VertexBufferElementType type, const std::string& name, bool normalized = false) noexcept;
+		constexpr VertexBufferElement(VertexBufferElementType type, const std::string& name, bool normalized = false) noexcept;
 
 		VertexBufferElementType type;
 		std::string name;
@@ -43,34 +37,23 @@ namespace gbc
 	{
 	public:
 		constexpr VertexBufferLayout() noexcept = default;
-		constexpr VertexBufferLayout(std::initializer_list<VertexBufferElement> elements) noexcept
-			: elements(elements)
-		{
-			uint64_t offset = 0;
-
-			for (VertexBufferElement& element : this->elements)
-			{
-				element.offset = offset;
-				offset += element.size;
-				stride += element.size;
-			}
-		}
-
-		constexpr const std::vector<VertexBufferElement>& GetElements() const noexcept { return elements; }
-		constexpr uint32_t GetStride() const noexcept { return stride; }
-
-		constexpr auto begin() noexcept { return elements.begin(); }
-		constexpr auto begin() const noexcept { return elements.begin(); }
-		constexpr auto end() noexcept { return elements.end(); }
-		constexpr auto end() const noexcept { return elements.end(); }
-		constexpr auto rbegin() noexcept { return elements.rbegin(); }
-		constexpr auto rbegin() const noexcept { return elements.rbegin(); }
-		constexpr auto rend() noexcept { return elements.rend(); }
-		constexpr auto rend() const noexcept { return elements.rend(); }
-		constexpr auto cbegin() const noexcept { return elements.cbegin(); }
-		constexpr auto cend() const noexcept { return elements.cend(); }
-		constexpr auto crbegin() const noexcept { return elements.crbegin(); }
-		constexpr auto crend() const noexcept { return elements.crend(); }
+		constexpr VertexBufferLayout(std::initializer_list<VertexBufferElement> elements) noexcept;
+	public:
+		constexpr const std::vector<VertexBufferElement>& GetElements() const noexcept;
+		constexpr uint32_t GetStride() const noexcept;
+	public:
+		constexpr auto begin() noexcept;
+		constexpr auto begin() const noexcept;
+		constexpr auto end() noexcept;
+		constexpr auto end() const noexcept;
+		constexpr auto rbegin() noexcept;
+		constexpr auto rbegin() const noexcept;
+		constexpr auto rend() noexcept;
+		constexpr auto rend() const noexcept;
+		constexpr auto cbegin() const noexcept;
+		constexpr auto cend() const noexcept;
+		constexpr auto crbegin() const noexcept;
+		constexpr auto crend() const noexcept;
 	private:
 		std::vector<VertexBufferElement> elements;
 		uint32_t stride = 0;
@@ -99,19 +82,6 @@ namespace gbc
 		UInt8,
 	};
 
-	static uint32_t GetIndexBufferElementSize(IndexBufferElementType type)
-	{
-		switch (type)
-		{
-			case IndexBufferElementType::UInt32: return sizeof(uint32_t);
-			case IndexBufferElementType::UInt16: return sizeof(uint16_t);
-			case IndexBufferElementType::UInt8:  return sizeof(uint8_t);
-		}
-
-		GBC_CORE_ASSERT(false, "Unknown Index Buffer Element Type!");
-		return 0;
-	}
-
 	class IndexBuffer
 	{
 	public:
@@ -138,3 +108,5 @@ namespace gbc
 		static Ref<UniformBuffer> Create(uint32_t size, uint32_t binding, const void* data = nullptr, BufferUsage usage = BufferUsage::StaticDraw);
 	};
 }
+
+#include "Buffer.inl"

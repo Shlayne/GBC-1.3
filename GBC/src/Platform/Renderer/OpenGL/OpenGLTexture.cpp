@@ -4,7 +4,7 @@
 
 namespace gbc
 {
-	static GLenum GetOpenGLFilterMode(TextureFilterMode filter)
+	static constexpr GLenum GetOpenGLFilterMode(TextureFilterMode filter)
 	{
 		switch (filter)
 		{
@@ -16,7 +16,7 @@ namespace gbc
 		return 0;
 	}
 
-	static GLenum GetOpenGLWrapMode(TextureWrapMode wrap)
+	static constexpr GLenum GetOpenGLWrapMode(TextureWrapMode wrap)
 	{
 		switch (wrap)
 		{
@@ -28,7 +28,7 @@ namespace gbc
 		return 0;
 	}
 
-	TextureFormat GetTextureFormat(int32_t channels)
+	static constexpr TextureFormat GetTextureFormat(int32_t channels)
 	{
 		switch (channels)
 		{
@@ -40,7 +40,7 @@ namespace gbc
 		return TextureFormat::None;
 	}
 
-	void GetOpenGLTypes(TextureFormat inFormat, GLenum& internalFormat, GLenum& format, GLenum& type)
+	static constexpr void GetOpenGLTypes(TextureFormat inFormat, GLenum& internalFormat, GLenum& format, GLenum& type)
 	{
 		switch (inFormat)
 		{

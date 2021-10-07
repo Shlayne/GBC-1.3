@@ -3,10 +3,7 @@
 
 namespace gbc
 {
-	CameraComponent::CameraComponent(const SceneCamera& camera)
-		: camera(camera) {}
-
-	CameraComponent& CameraComponent::operator=(const SceneCamera& camera)
+	CameraComponent& CameraComponent::operator=(const SceneCamera& camera) noexcept
 	{
 		this->camera = camera;
 		return *this;

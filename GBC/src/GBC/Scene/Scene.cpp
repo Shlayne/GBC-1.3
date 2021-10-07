@@ -65,7 +65,7 @@ namespace gbc
 		auto view = source->view<Component>();
 		for (auto handle : view)
 		{
-			UUID uuid = source->get<IDComponent>(handle);
+			UUID uuid = source->get<IDComponent>(handle).id;
 			GBC_CORE_ASSERT(entities.find(uuid) != entities.cend(), "Entity UUID not found when copying scene!");
 			auto destinationHandle = entities.at(uuid);
 			auto& component = view.get<Component>(handle);
@@ -111,7 +111,7 @@ namespace gbc
 
 	Entity Scene::CopyEntity(entt::entity handle, entt::registry* source, Scene* sourceScene, Ref<Scene>& newScene, std::unordered_map<UUID, entt::entity>& entities, bool hasParent)
 	{
-		UUID uuid = source->get<IDComponent>(handle);
+		UUID uuid = source->get<IDComponent>(handle).id;
 		const auto& name = source->get<TagComponent>(handle).tag;
 		Entity newEntity = newScene->CreateEntity(uuid, name);
 		entities[uuid] = newEntity;
@@ -277,11 +277,11 @@ namespace gbc
 		if (Entity primaryCamera = GetPrimaryCameraEntity())
 		{
 			const auto& camera = primaryCamera.Get<CameraComponent>();
-			glm::mat4 cameraView = glm::inverse(primaryCamera.GetAbsoluteTransform());
+			glm::mat4 viewProjection = camera.camera.GetProjection() * glm::inverse(primaryCamera.GetAbsoluteTransform());
 
 			if (auto view = registry->view<SpriteRendererComponent>(); !view.empty())
 			{
-				Renderer2D::BeginScene(camera, cameraView);
+				Renderer2D::BeginScene(viewProjection);
 
 				for (auto handle : view)
 				{
@@ -297,7 +297,7 @@ namespace gbc
 
 			if (auto view = registry->view<Mesh3DComponent>(); !view.empty())
 			{
-				Renderer3D::BeginScene(camera, cameraView);
+				Renderer3D::BeginScene(viewProjection);
 
 				for (auto handle : view)
 				{
@@ -318,9 +318,11 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
+		glm::mat4 viewProjection = camera.GetViewProjection();
+
 		if (auto view = registry->view<SpriteRendererComponent>(); !view.empty())
 		{
-			Renderer2D::BeginScene(camera);
+			Renderer2D::BeginScene(viewProjection);
 
 			for (auto handle : view)
 			{
@@ -336,7 +338,7 @@ namespace gbc
 
 		if (auto view = registry->view<Mesh3DComponent>(); !view.empty())
 		{
-			Renderer3D::BeginScene(camera);
+			Renderer3D::BeginScene(viewProjection);
 
 			for (auto handle : view)
 			{

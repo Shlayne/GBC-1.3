@@ -72,10 +72,10 @@ namespace gbc
 	inline TransformComponent& Entity::GetTransform() { return Get<TransformComponent>(); }
 	inline const TransformComponent& Entity::GetTransform() const { return Get<TransformComponent>(); }
 
-	inline Entity::operator bool() const noexcept { return handle != entt::null && context != nullptr; }
-	inline Entity::operator uint32_t() const noexcept { return static_cast<uint32_t>(handle); }
-	inline Entity::operator entt::entity() const noexcept { return handle; }
+	constexpr Entity::operator bool() const noexcept { return handle != entt::null && context != nullptr; }
+	constexpr Entity::operator uint32_t() const noexcept { return static_cast<uint32_t>(handle); }
+	constexpr Entity::operator entt::entity() const noexcept { return handle; }
 
-	inline bool Entity::operator==(const Entity& entity) const noexcept { return handle == entity.handle && context == entity.context; }
-	inline bool Entity::operator!=(const Entity& entity) const noexcept { return !(*this == entity); }
+	constexpr bool Entity::operator==(const Entity& entity) const noexcept { return handle == entity.handle && context == entity.context; }
+	constexpr bool Entity::operator!=(const Entity& entity) const noexcept { return !(*this == entity); }
 }

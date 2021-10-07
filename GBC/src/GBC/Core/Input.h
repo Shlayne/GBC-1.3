@@ -13,42 +13,45 @@ namespace gbc
 	class Input
 	{
 	public:
-		static void PreInit();
-		static void Init();
-		static void Update();
-
-		// Key
+		// Returns true if the key is currently pressed, false otherwise
 		static bool IsKeyPressed(Keycode keycode);
+		// Returns true if the key is currently released, false otherwise
 		static bool IsKeyReleased(Keycode keycode);
 
-		// Mouse
+		// Returns true if the mouse button is currently pressed, false otherwise
 		static bool IsMouseButtonPressed(MouseButton button);
+		// Returns true if the mouse button is currently released, false otherwise
 		static bool IsMouseButtonReleased(MouseButton button);
 
 		// Gets the position of the mouse relative to the top left corner of the primary monitor.
 		static glm::vec2 GetAbsoluteMousePosition();
-		// Gets the position of the mouse relative to the window associated with nativeWindow.
+		// Gets the position of the mouse relative to the top left of nativeWindow's content area.
 		static glm::vec2 GetRelativeMousePosition(void* nativeWindow);
 
-		// Joystick
+		// Returns the current state of a joystick
 		static const JoystickState& GetJoystickState(Joystick joystick);
-
+		// Returns true if the joystick button is currently pressed, false otherwise
 		static bool IsJoystickButtonPressed(Joystick joystick, JoystickButton button);
+		// Returns true if the joystick button is currently released, false otherwise
 		static bool IsJoystickButtonReleased(Joystick joystick, JoystickButton button);
-
+		// Returns the current value of a joystick axis
 		static float GetJoystickAxis(Joystick joystick, JoystickAxis axis);
-
+		// Returns the current value of a joystick hat
 		static JoystickHatState GetJoystickHat(Joystick joystick, JoystickHat hat);
-
 	private:
 		friend class Application;
+
+		static void PreInit();
+		static void Init();
+		static void Update();
+
 		static void SetEventCallback(const EventCallbackFunc& callback);
 		static bool OnKeyPressEvent(KeyPressEvent& event);
 		static bool OnKeyReleaseEvent(KeyReleaseEvent& event);
 		static bool OnMouseButtonPressEvent(MouseButtonPressEvent& event);
 		static bool OnMouseButtonReleaseEvent(MouseButtonReleaseEvent& event);
 
-		static void OnJoystickConnected(int32_t jid);
-		static void OnJoystickDisconnected(int32_t jid);
+		static void OnJoystickConnected(Joystick joystick);
+		static void OnJoystickDisconnected(Joystick joystick);
 	};
 }

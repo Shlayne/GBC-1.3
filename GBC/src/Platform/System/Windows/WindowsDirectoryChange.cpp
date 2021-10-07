@@ -3,11 +3,11 @@
 
 namespace gbc::DirectoryChange
 {
-	static DWORD GetWindowsNotificationType(NotificationType notificationType)
+	static constexpr DWORD allTypes = FILE_NOTIFY_CHANGE_FILE_NAME  | FILE_NOTIFY_CHANGE_DIR_NAME
+									| FILE_NOTIFY_CHANGE_ATTRIBUTES | FILE_NOTIFY_CHANGE_SIZE
+									| FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_SECURITY;
+	static constexpr DWORD GetWindowsNotificationType(NotificationType notificationType)
 	{
-		static constexpr DWORD allTypes = FILE_NOTIFY_CHANGE_FILE_NAME  | FILE_NOTIFY_CHANGE_DIR_NAME
-										| FILE_NOTIFY_CHANGE_ATTRIBUTES | FILE_NOTIFY_CHANGE_SIZE
-										| FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_SECURITY;
 		DWORD type = 0;
 
 		if (notificationType & NotificationType_FileNameChanged)      type |= FILE_NOTIFY_CHANGE_FILE_NAME;
@@ -21,22 +21,19 @@ namespace gbc::DirectoryChange
 		return type;
 	}
 
-	Notifier::Notifier(std::thread&& thread)
-		: thread(std::move(thread)) {}
-
-	Notifier::Notifier(Notifier&& notification) noexcept
-		: thread(std::move(notification.thread)), closeHandle(notification.closeHandle)
+	Notifier::Notifier(Notifier&& notifier) noexcept
+		: thread(std::move(notifier.thread)), closeHandle(notifier.closeHandle)
 	{
-		notification.closeHandle = nullptr;
+		notifier.closeHandle = nullptr;
 	}
 
-	Notifier& Notifier::operator=(Notifier&& notification) noexcept
+	Notifier& Notifier::operator=(Notifier&& notifier) noexcept
 	{
-		if (this != &notification)
+		if (this != &notifier)
 		{
-			thread = std::move(notification.thread);
-			closeHandle = notification.closeHandle;
-			notification.closeHandle = nullptr;
+			thread = std::move(notifier.thread);
+			closeHandle = notifier.closeHandle;
+			notifier.closeHandle = nullptr;
 		}
 		return *this;
 	}
@@ -66,8 +63,8 @@ namespace gbc::DirectoryChange
 		static wchar_t eventNameBuffer[] = L"GBCDirectoryChange\0\0\0\0\0\0\0\0\0\0\0\0\0";
 		_ui64tow_s(++id, eventNameBuffer + 18, 14, 36);
 
-		bool closeHandleSet = false;
-		bool waiting = true;
+		std::atomic_bool closeHandleSet = false;
+		std::atomic_bool waiting = true;
 
 		std::thread thread = std::thread([&](const NotificationFunc& notificationFunc)
 		{
@@ -109,13 +106,9 @@ namespace gbc::DirectoryChange
 						break;
 					case WAIT_OBJECT_0 + 1:
 						running = notificationFunc(false);
-						if (!FindNextChangeNotification(handles[1]))
-						{
-							// Inform user that an error occurred and this notification will now close
-							(void)notificationFunc(true);
-							running = false;
-						}
-						break;
+						if (FindNextChangeNotification(handles[1]))
+							break;
+						[[fallthrough]];
 					case WAIT_FAILED:
 						// Inform user that an error occurred and this notification will now close
 						(void)notificationFunc(true);
@@ -129,6 +122,7 @@ namespace gbc::DirectoryChange
 		}, notificationFunc);
 
 		// Wait for this notification's closeHandle to be set or for an error to occur
+		// This was getting "optimized" out in release and dist if waiting wasn't atomic.
 		while (waiting);
 
 		if (closeHandleSet)

@@ -97,12 +97,12 @@ namespace gbc
 		float GetAxis(JoystickAxis axis) const;
 		JoystickHatState GetHat(JoystickHat hat) const;
 	private:
+		friend class Input;
 		void OnConnect(uint32_t buttonCount, uint32_t axisCount, uint32_t hatCount);
 		void OnDisconnect();
 		void SetButton(JoystickButton button, bool value);
 		void SetAxis(JoystickAxis axis, float value);
 		void SetHat(JoystickHat hat, JoystickHatState value);
-		friend class Input;
 	private:
 		bool connected = false;
 		uint32_t buttonCount = 0;

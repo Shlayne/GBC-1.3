@@ -2,23 +2,18 @@
 
 #include <filesystem>
 
-namespace gbc
+namespace gbc::FileDialog
 {
-	class FileDialog
-	{
-	public:
-		static std::filesystem::path OpenFile(const wchar_t* filter, const std::filesystem::path& initialDirectoryPath);
-		static std::filesystem::path OpenFile(const wchar_t* filter);
-		static std::filesystem::path SaveFile(const wchar_t* filter, const std::filesystem::path& initialDirectoryPath);
-		static std::filesystem::path SaveFile(const wchar_t* filter);
+	// Opens an open file window at the initial directory
+	std::filesystem::path OpenFile(const wchar_t* filter, const std::filesystem::path& initialDirectoryPath);
+	// Opens an open file window
+	std::filesystem::path OpenFile(const wchar_t* filter);
 
-		static void OpenFolder(const std::filesystem::path& directoryPath);
-	private:
-		FileDialog() = delete;
-		FileDialog(const FileDialog&) = delete;
-		FileDialog(FileDialog&&) = delete;
-		FileDialog& operator=(const FileDialog&) = delete;
-		FileDialog& operator=(FileDialog&&) = delete;
-		~FileDialog() = delete;
-	};
+	// Opens a save file window at the initial directory
+	std::filesystem::path SaveFile(const wchar_t* filter, const std::filesystem::path& initialDirectoryPath);
+	// Opens a save file window
+	std::filesystem::path SaveFile(const wchar_t* filter);
+
+	// Opens a the directory in the file explorer
+	void OpenFolder(const std::filesystem::path& directoryPath);
 }

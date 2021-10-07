@@ -3,9 +3,6 @@
 
 namespace gbc
 {
-	Entity::Entity(entt::entity handle, Scene* context) noexcept
-		: handle(handle), context(context) {}
-
 	glm::mat4 Entity::GetAbsoluteTransform() const
 	{
 		glm::mat4 transform{ 1.0f };

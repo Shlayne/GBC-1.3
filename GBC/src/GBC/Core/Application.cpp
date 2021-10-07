@@ -17,9 +17,11 @@ namespace gbc
 		instance = this;
 
 		auto eventCallback = GBC_BIND_FUNC(OnEvent);
+		Input::PreInit();
 		window = Window::Create(windowSpecs);
 		window->SetEventCallback(eventCallback);
 		Input::SetEventCallback(eventCallback);
+		Input::Init();
 
 		if (windowSpecs.focusOnShow)
 		{
@@ -59,9 +61,9 @@ namespace gbc
 		{
 			GBC_PROFILE_SCOPE("RunLoop");
 
-			Input::Update();
-
 			timestep = window->GetContext().GetElapsedTime();
+
+			Input::Update();
 
 			for (Layer* layer : layerStack)
 				if (layer->IsEnabled())
@@ -140,7 +142,7 @@ namespace gbc
 
 		EventDispatcher dispatcher(event);
 
-		// All of these return false, so the event is never handled.
+		// All of Input's event methods return false, so the event is never handled.
 		dispatcher.Dispatch(&Input::OnKeyPressEvent);
 		dispatcher.Dispatch(&Input::OnKeyReleaseEvent);
 		dispatcher.Dispatch(&Input::OnMouseButtonPressEvent);
