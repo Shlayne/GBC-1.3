@@ -69,7 +69,7 @@ namespace gbc
 			if (ImGui::BeginTable("ContentBrowser", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV))
 			{
 				ImGui::TableNextColumn();
-				ImGui::BeginChild("ContentBrowserHierarchy", { 0.0f, 0.0f }, false, ImGuiWindowFlags_HorizontalScrollbar);
+				ImGui::BeginChild("ContentBrowserHierarchy", { 0.0f }, false, ImGuiWindowFlags_HorizontalScrollbar);
 				hierarchyOptionsOpen = false;
 				DrawHierarchy(assetDirectory);
 
@@ -90,7 +90,7 @@ namespace gbc
 				ImGui::EndChild();
 
 				ImGui::TableNextColumn();
-				ImGui::BeginChild("ContentBrowserSearchBarExplorer", { 0.0f, 0.0f }, false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+				ImGui::BeginChild("ContentBrowserSearchBarExplorer", { 0.0f }, false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 				if (ImGui::BeginTable("ContentBrowserSearchBar", 1, ImGuiTableFlags_NoPadOuterX))
 				{
 					ImGui::TableNextColumn();
@@ -195,16 +195,13 @@ namespace gbc
 			if (explorerSizeChanged)
 				explorerSize = { imguiSize.x, imguiSize.y };
 
-			ImVec2 windowPos = ImGui::GetWindowPos();
-			ImVec2 viewportOffset = ImGui::GetCursorPos();
-			ImVec2 viewportPos = ImGui::GetMainViewport()->Pos;
-			explorerPosition = { windowPos.x + viewportOffset.x - viewportPos.x, windowPos.y + viewportOffset.y - viewportPos.y };
+			explorerPosition = ImGui::GetWindowPos() + ImGui::GetCursorPos() - ImGui::GetMainViewport()->Pos;
 		}
 
 		ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.0f);
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 2.0f, 0.0f });
-		ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.0f, 0.0f, 0.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 0.0f, 0.0f });
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{ 0.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 0.0f });
 
 		float padding = ImGui::GetStyle().CellPadding.x;
 		float thumbnailSize = 96.0f;
@@ -227,8 +224,8 @@ namespace gbc
 			{
 				ImGui::PushID(-1);
 
-				auto textureID = (void*)static_cast<size_t>(directoryTexture->GetRendererID());
-				ImGui::ImageButton(textureID, { thumbnailSize, thumbnailSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f });
+				auto textureID = directoryTexture->GetRendererID();
+				ImGui::ImageButton(textureID, { thumbnailSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f });
 
 				if (ImGuiHelper::InputText(fileNameBuffer, fileNameBufferSize, inputTextFlags))
 				{
@@ -298,12 +295,12 @@ namespace gbc
 					if (selected)
 					{
 						float t = file.potentiallySelected && !file.selected ? 0.4f : 0.69f;
-						ImVec4 newButtonColor = ImLerp(ImGui::GetStyle().Colors[ImGuiCol_Button], ImVec4(1.0f, 1.0f, 1.0f, 1.0f), t);
+						ImVec4 newButtonColor = ImLerp(ImGui::GetStyle().Colors[ImGuiCol_Button], ImVec4{ 1.0f }, t);
 						ImGui::PushStyleColor(ImGuiCol_Button, newButtonColor);
 					}
 
-					void* textureID = (void*)static_cast<size_t>((file.isDirectory ? directoryTexture : fileTexture)->GetRendererID());
-					if (ImGui::ImageButton(textureID, { thumbnailSize, thumbnailSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }))
+					auto textureID = (file.isDirectory ? directoryTexture : fileTexture)->GetRendererID();
+					if (ImGui::ImageButton(textureID, { thumbnailSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }))
 					{
 						if (!altPressed)
 						{

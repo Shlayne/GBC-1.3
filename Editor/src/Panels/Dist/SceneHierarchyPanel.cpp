@@ -30,7 +30,7 @@ namespace gbc
 			// TODO: add reordering of elements
 			//	add a single blue line at the index to move the entity to
 			//		with the proper length depending on child status
-			ImGui::BeginChild("SceneHierarchyPanelChild", { 0.0f, 0.0f }, false, ImGuiWindowFlags_HorizontalScrollbar);
+			ImGui::BeginChild("SceneHierarchyPanelChild", { 0.0f }, false, ImGuiWindowFlags_HorizontalScrollbar);
 			focused |= ImGui::IsWindowFocused();
 			hovered |= ImGui::IsWindowHovered();
 

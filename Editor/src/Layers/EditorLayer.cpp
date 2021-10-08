@@ -175,7 +175,7 @@ namespace gbc
 		ImGui::SetNextWindowSize(viewport->GetWorkSize());
 		ImGui::SetNextWindowViewport(viewport->ID);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f });
 		ImGui::Begin("Dockspace", nullptr, dockspaceFlags);
 		ImGui::PopStyleVar(2);
 
@@ -237,14 +237,14 @@ namespace gbc
 		ImGuiStyle& style = ImGui::GetStyle();
 		auto& colors = style.Colors;
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f, 0.0f });
-		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, { 0.0f, 0.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2{ 0.0f });
 
 		float buttonSize = ImGui::GetItemRectSize().y + 4.0f;
-		Ref<Texture2D> icon = sceneState == SceneState::Edit ? playButtonTexture : stopButtonTexture;
+		auto textureID = (sceneState == SceneState::Edit ? playButtonTexture : stopButtonTexture)->GetRendererID();
 
 		ImGui::SetCursorPos({ (ImGui::GetWindowContentRegionWidth() - buttonSize) * 0.5f, 0.0f });
-		if (ImGui::ImageButton((void*)(size_t)icon->GetRendererID(), { buttonSize, buttonSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
+		if (ImGui::ImageButton(textureID, { buttonSize, buttonSize }, { 0.0f, 1.0f }, { 1.0f, 0.0f }, 0))
 		{
 			switch (sceneState)
 			{

@@ -38,7 +38,7 @@ namespace gbc
 
 		// TODO: this could most definitely use some actual hardcoded colors and not just a tint
 		for (int32_t i = 0; i < ImGuiCol_COUNT; i++)
-			colors[i] = { colors[i].x * 0.8f, colors[i].y * 0.8f, colors[i].z * 1.0f, colors[i].w };
+			colors[i] = { colors[i].x * 0.69f, colors[i].y * 0.69f, colors[i].z * 1.0f, colors[i].w };
 	}
 
 	void ImGuiHelper::SetSceneEditColors()

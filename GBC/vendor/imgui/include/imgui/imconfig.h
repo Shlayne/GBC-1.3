@@ -14,9 +14,13 @@
 
 #pragma once
 
+#include "GBC/Core/Core.h"
+
+#define ImTextureID gbc::RendererID
+
 //---- Define assertion handler. Defaults to calling assert().
 // If your macro uses multiple statements, make sure is enclosed in a 'do { .. } while (0)' block so it can be used as a single statement.
-//#define IM_ASSERT(_EXPR)  MyAssert(_EXPR)
+#define IM_ASSERT(_EXPR)  GBC_CORE_ASSERT(_EXPR)
 //#define IM_ASSERT(_EXPR)  ((void)(_EXPR))     // Disable asserts
 
 //---- Define attributes of all API symbols declarations, e.g. for DLL under Windows
@@ -31,6 +35,9 @@
 // It is very strongly recommended to NOT disable the demo windows during development. Please read comments in imgui_demo.cpp.
 //#define IMGUI_DISABLE                                     // Disable everything: all headers and source files will be empty.
 //#define IMGUI_DISABLE_DEMO_WINDOWS                        // Disable demo windows: ShowDemoWindow()/ShowStyleEditor() will be empty. Not recommended.
+#if !GBC_CONFIG_DEBUG
+	#define IMGUI_DISABLE_DEMO_WINDOWS
+#endif
 //#define IMGUI_DISABLE_METRICS_WINDOW                      // Disable metrics/debugger window: ShowMetricsWindow() will be empty.
 
 //---- Don't implement some functions to reduce linkage requirements.
@@ -65,15 +72,75 @@
 
 //---- Define constructor and implicit cast operators to convert back<>forth between your math types and ImVec2/ImVec4.
 // This will be inlined as part of ImVec2 and ImVec4 class declarations.
-/*
-#define IM_VEC2_CLASS_EXTRA                                                 \
-        ImVec2(const MyVec2& f) { x = f.x; y = f.y; }                       \
-        operator MyVec2() const { return MyVec2(x,y); }
 
-#define IM_VEC4_CLASS_EXTRA                                                 \
-        ImVec4(const MyVec4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }     \
-        operator MyVec4() const { return MyVec4(x,y,z,w); }
-*/
+#include <glm/glm.hpp>
+
+#define IMGUI_DEFINE_MATH_OPERATORS 0
+
+#define IM_VEC2_CLASS_EXTRA \
+        constexpr ImVec2(float n) : x(n), y(n) {} \
+        constexpr ImVec2(const glm::vec2& v) noexcept : x(v.x), y(v.y) {} \
+        constexpr ImVec2& operator=(const glm::vec2& v) noexcept { x = v.x; y = v.y; return *this; } \
+        constexpr ImVec2 operator+() const noexcept { return { +x, +y }; } \
+        constexpr ImVec2 operator-() const noexcept { return { -x, -y }; } \
+        constexpr operator glm::vec2() const noexcept { return { x, y }; } \
+        constexpr operator glm::ivec2() const noexcept { return { x, y }; } \
+        constexpr ImVec2& operator+=(const ImVec2& v) noexcept { x += v.x; y += v.y; return *this; } \
+        constexpr ImVec2 operator+(const ImVec2& v) const noexcept { ImVec2 i = *this; return i += v; } \
+        constexpr ImVec2& operator-=(const ImVec2& v) noexcept { x -= v.x; y -= v.y; return *this; } \
+        constexpr ImVec2 operator-(const ImVec2& v) const noexcept { ImVec2 i = *this; return i -= v; } \
+        constexpr ImVec2& operator*=(const ImVec2& v) noexcept { x *= v.x; y *= v.y; return *this; } \
+        constexpr ImVec2 operator*(const ImVec2& v) const noexcept { ImVec2 i = *this; return i *= v; } \
+        constexpr ImVec2& operator/=(const ImVec2& v) noexcept { x /= v.x; y /= v.y; return *this; } \
+        constexpr ImVec2 operator/(const ImVec2& v) const noexcept { ImVec2 i = *this; return i /= v; } \
+        constexpr ImVec2 operator+(float n) const noexcept { ImVec2 i = *this; return i += ImVec2(n); } \
+        constexpr ImVec2& operator+=(float n) noexcept { return *this += ImVec2(n); } \
+        constexpr ImVec2 operator-(float n) const noexcept { ImVec2 i = *this; return i -= ImVec2(n); } \
+        constexpr ImVec2& operator-=(float n) noexcept { return *this -= ImVec2(n); } \
+        constexpr ImVec2 operator*(float n) const noexcept { ImVec2 i = *this; return i *= ImVec2(n); } \
+        constexpr ImVec2& operator*=(float n) noexcept { return *this *= ImVec2(n); } \
+        constexpr ImVec2 operator/(float n) const noexcept { ImVec2 i = *this; return i /= ImVec2(n); } \
+        constexpr ImVec2& operator/=(float n) noexcept { return *this /= ImVec2(n); } \
+        constexpr ImVec2& operator+=(const glm::vec2& v) noexcept { x += v.x; y += v.y; return *this; } \
+        constexpr ImVec2 operator+(const glm::vec2& v) const noexcept { ImVec2 i = *this; return i += v; } \
+        constexpr ImVec2& operator-=(const glm::vec2& v) noexcept { x -= v.x; y -= v.y; return *this; } \
+        constexpr ImVec2 operator-(const glm::vec2& v) const noexcept { ImVec2 i = *this; return i -= v; } \
+        constexpr ImVec2& operator*=(const glm::vec2& v) noexcept { x *= v.x; y *= v.y; return *this; } \
+        constexpr ImVec2 operator*(const glm::vec2& v) const noexcept { ImVec2 i = *this; return i *= v; } \
+        constexpr ImVec2& operator/=(const glm::vec2& v) noexcept { x /= v.x; y /= v.y; return *this; } \
+        constexpr ImVec2 operator/(const glm::vec2& v) const noexcept { ImVec2 i = *this; return i /= v; }
+
+#define IM_VEC4_CLASS_EXTRA \
+        constexpr ImVec4(float n) : x(n), y(n), z(n), w(n) {} \
+        constexpr ImVec4(const glm::vec4& v) noexcept : x(v.x), y(v.y), z(v.z), w(v.w) {} \
+        constexpr ImVec4& operator=(const glm::vec4& v) noexcept { x = v.x; y = v.y; z = v.z; w = v.w; return *this; } \
+        constexpr ImVec4 operator+() const noexcept { return { +x, +y, +z, +w }; } \
+        constexpr ImVec4 operator-() const noexcept { return { -x, -y, -z, -w }; } \
+        constexpr operator glm::vec4() const noexcept { return { x, y, z, w }; } \
+        constexpr ImVec4& operator+=(const ImVec4& v) noexcept { x += v.x; y += v.y; z += v.z; w += v.w; return *this; } \
+        constexpr ImVec4 operator+(const ImVec4& v) const noexcept { ImVec4 i = *this; return i += v; } \
+        constexpr ImVec4& operator-=(const ImVec4& v) noexcept { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; } \
+        constexpr ImVec4 operator-(const ImVec4& v) const noexcept { ImVec4 i = *this; return i -= v; } \
+        constexpr ImVec4& operator*=(const ImVec4& v) noexcept { x *= v.x; y *= v.y; z *= v.z; w *= v.w; return *this; } \
+        constexpr ImVec4 operator*(const ImVec4& v) const noexcept { ImVec4 i = *this; return i *= v; } \
+        constexpr ImVec4& operator/=(const ImVec4& v) noexcept { x /= v.x; y /= v.y; z /= v.z; w /= v.w; return *this; } \
+        constexpr ImVec4 operator/(const ImVec4& v) const noexcept { ImVec4 i = *this; return i /= v; } \
+        constexpr ImVec4 operator+(float n) const noexcept { ImVec4 i = *this; return i += ImVec4(n); } \
+        constexpr ImVec4& operator+=(float n) noexcept { return *this += ImVec4(n); } \
+        constexpr ImVec4 operator-(float n) const noexcept { ImVec4 i = *this; return i -= ImVec4(n); } \
+        constexpr ImVec4& operator-=(float n) noexcept { return *this -= ImVec4(n); } \
+        constexpr ImVec4 operator*(float n) const noexcept { ImVec4 i = *this; return i *= ImVec4(n); } \
+        constexpr ImVec4& operator*=(float n) noexcept { return *this *= ImVec4(n); } \
+        constexpr ImVec4 operator/(float n) const noexcept { ImVec4 i = *this; return i /= ImVec4(n); } \
+        constexpr ImVec4& operator/=(float n) noexcept { return *this /= ImVec4(n); } \
+        constexpr ImVec4& operator+=(const glm::vec4& v) noexcept { x += v.x; y += v.y; z += v.z; w += v.w; return *this; } \
+        constexpr ImVec4 operator+(const glm::vec4& v) const noexcept { ImVec4 i = *this; return i += v; } \
+        constexpr ImVec4& operator-=(const glm::vec4& v) noexcept { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; } \
+        constexpr ImVec4 operator-(const glm::vec4& v) const noexcept { ImVec4 i = *this; return i -= v; } \
+        constexpr ImVec4& operator*=(const glm::vec4& v) noexcept { x *= v.x; y *= v.y; z *= v.z; w *= v.w; return *this; } \
+        constexpr ImVec4 operator*(const glm::vec4& v) const noexcept { ImVec4 i = *this; return i *= v; } \
+        constexpr ImVec4& operator/=(const glm::vec4& v) noexcept { x /= v.x; y /= v.y; z /= v.z; w /= v.w; return *this; } \
+        constexpr ImVec4 operator/(const glm::vec4& v) const noexcept { ImVec4 i = *this; return i /= v; }
 
 //---- Use 32-bit vertex indices (default is 16-bit) is one way to allow large meshes with more than 64K vertices.
 // Your renderer backend will need to support it (most example renderer backends support both 16/32-bit indices).
@@ -90,7 +157,7 @@
 //---- Debug Tools: Macro to break in Debugger
 // (use 'Metrics->Tools->Item Picker' to pick widgets with the mouse and break into them for easy debugging.)
 //#define IM_DEBUG_BREAK  IM_ASSERT(0)
-//#define IM_DEBUG_BREAK  __debugbreak()
+#define IM_DEBUG_BREAK  GBC_DEBUGBREAK
 
 //---- Debug Tools: Have the Item Picker break in the ItemAdd() function instead of ItemHoverable(),
 // (which comes earlier in the code, will catch a few extra items, allow picking items other than Hovered one.)

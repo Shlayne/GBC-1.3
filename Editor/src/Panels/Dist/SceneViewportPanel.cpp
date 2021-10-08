@@ -24,7 +24,7 @@ namespace gbc
 	{
 		if (enabled)
 		{
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0.0f , 0.0f });
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0.0f });
 			ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
 			ImGui::Begin(name.c_str(), &enabled);
 			ImGui::PopStyleVar(2);
@@ -37,7 +37,7 @@ namespace gbc
 			auto& editorCamera = editorLayer->editorCamera;
 			auto& canUseGizmos = editorLayer->canUseGizmos;
 
-			auto textureID = (void*)static_cast<size_t>(framebuffer->GetColorAttachment());
+			auto textureID = framebuffer->GetColorAttachment();
 			ImVec2 textureSize{ static_cast<float>(size.x), static_cast<float>(size.y) };
 			ImGui::Image(textureID, textureSize, { 0.0f, 1.0f }, { 1.0f, 0.0f });
 

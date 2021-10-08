@@ -231,11 +231,11 @@ typedef unsigned long long  ImU64;  // 64-bit unsigned integer (post C++11)
 // 2D vector (often used to store positions or sizes)
 struct ImVec2
 {
-    float                                   x, y;
-    ImVec2()                                { x = y = 0.0f; }
-    ImVec2(float _x, float _y)              { x = _x; y = _y; }
-    float  operator[] (size_t idx) const    { IM_ASSERT(idx <= 1); return (&x)[idx]; }    // We very rarely use this [] operator, the assert overhead is fine.
-    float& operator[] (size_t idx)          { IM_ASSERT(idx <= 1); return (&x)[idx]; }    // We very rarely use this [] operator, the assert overhead is fine.
+    float x, y;
+    constexpr ImVec2() noexcept : x(0.0f), y(0.0f) {}
+    constexpr ImVec2(float x, float y) noexcept : x(x), y(y) {}
+    constexpr float  operator[](size_t idx) const { IM_ASSERT(idx <= 1); return (&x)[idx]; } // We very rarely use this [] operator, the assert overhead is fine.
+    constexpr float& operator[](size_t idx)       { IM_ASSERT(idx <= 1); return (&x)[idx]; } // We very rarely use this [] operator, the assert overhead is fine.
 #ifdef IM_VEC2_CLASS_EXTRA
     IM_VEC2_CLASS_EXTRA     // Define additional constructors and implicit cast operators in imconfig.h to convert back and forth between your math types and ImVec2.
 #endif
@@ -244,9 +244,9 @@ struct ImVec2
 // 4D vector (often used to store floating-point colors)
 struct ImVec4
 {
-    float                                           x, y, z, w;
-    ImVec4()                                        { x = y = z = w = 0.0f; }
-    ImVec4(float _x, float _y, float _z, float _w)  { x = _x; y = _y; z = _z; w = _w; }
+    float x, y, z, w;
+    constexpr ImVec4() noexcept : x(0.0f), y(0.0f), z(0.0f), w(0.0f) {}
+    constexpr ImVec4(float x, float y, float z, float w) noexcept : x(x), y(y), z(z), w(w) {}
 #ifdef IM_VEC4_CLASS_EXTRA
     IM_VEC4_CLASS_EXTRA     // Define additional constructors and implicit cast operators in imconfig.h to convert back and forth between your math types and ImVec4.
 #endif

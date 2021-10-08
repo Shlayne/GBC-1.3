@@ -37,7 +37,7 @@ namespace gbc
 
 			// TODO: This will eventually have more than just remove component, i.e. other settings.
 			ImGui::SameLine(contentRegionAvailable.x - lineHeight + style.FramePadding.x);
-			if (ImGui::Button("+", { lineHeight, lineHeight }))
+			if (ImGui::Button("+", ImVec2{ lineHeight }))
 				ImGui::OpenPopup("ComponentSettings");
 
 			bool removeComponent = false;
@@ -113,7 +113,7 @@ namespace gbc
 
 				{
 					ImGuiStyle& style = ImGui::GetStyle();
-					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { style.ItemSpacing.x * 0.5f, style.ItemSpacing.y * 0.5f });
+					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, style.ItemSpacing * 0.5f);
 
 					if (ImGui::BeginTable("TagComponent", 2))
 					{
@@ -265,9 +265,7 @@ namespace gbc
 
 				static constexpr char addComponentText[] = "Add Component";
 				ImGuiStyle& style = ImGui::GetStyle();
-				ImVec2 addComponentButtonSize = ImGui::CalcTextSize(addComponentText);
-				addComponentButtonSize.x += style.FramePadding.x * 2.0f;
-				addComponentButtonSize.y += style.FramePadding.y * 2.0f;
+				ImVec2 addComponentButtonSize = ImGui::CalcTextSize(addComponentText) + style.FramePadding * 2.0f;
 
 				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (ImGui::GetWindowContentRegionWidth() - addComponentButtonSize.x) * 0.5f);
 				if (ImGui::Button(addComponentText, addComponentButtonSize))

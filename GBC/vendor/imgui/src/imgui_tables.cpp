@@ -145,6 +145,10 @@ Index of this file:
 // - Scrolling tables with a known outer size can be clipped earlier as BeginTable() will return false.
 //-----------------------------------------------------------------------------
 
+// I don't want to add do {} while (false) to all of my macro definitions since only ImGui causes this warning
+#pragma warning(push)
+#pragma warning(disable: 4390)
+
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -3841,3 +3845,5 @@ void ImGui::Columns(int columns_count, const char* id, bool border)
 //-------------------------------------------------------------------------
 
 #endif // #ifndef IMGUI_DISABLE
+
+#pragma warning(pop)

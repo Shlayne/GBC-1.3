@@ -740,6 +740,10 @@ CODE
 
 */
 
+// I don't want to add do {} while (false) to all of my macro definitions since only ImGui causes this warning
+#pragma warning(push)
+#pragma warning(disable: 4390)
+
 //-------------------------------------------------------------------------
 // [SECTION] INCLUDES
 //-------------------------------------------------------------------------
@@ -752,7 +756,7 @@ CODE
 #ifndef IMGUI_DISABLE
 
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
-#define IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS 1
 #endif
 #include "imgui_internal.h"
 
@@ -16492,3 +16496,5 @@ void ImGui::DebugNodeViewport(ImGuiViewportP*) {}
 //-----------------------------------------------------------------------------
 
 #endif // #ifndef IMGUI_DISABLE
+
+#pragma warning(pop)

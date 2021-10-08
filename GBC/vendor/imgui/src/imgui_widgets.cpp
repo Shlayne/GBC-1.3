@@ -28,6 +28,10 @@ Index of this file:
 
 */
 
+// I don't want to add do {} while (false) to all of my macro definitions since only ImGui causes this warning
+#pragma warning(push)
+#pragma warning(disable: 4390)
+
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -8042,3 +8046,5 @@ void ImGui::TabItemLabelAndCloseButton(ImDrawList* draw_list, const ImRect& bb, 
 
 
 #endif // #ifndef IMGUI_DISABLE
+
+#pragma warning(pop)

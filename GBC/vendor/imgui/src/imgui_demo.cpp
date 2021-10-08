@@ -76,6 +76,7 @@ Index of this file:
 #endif
 
 #include "imgui.h"
+#if !defined(IMGUI_DISABLE_DEMO_WINDOWS)
 #ifndef IMGUI_DISABLE
 
 // System includes
@@ -121,11 +122,11 @@ Index of this file:
 #endif
 
 // Play it nice with Windows users (Update: May 2018, Notepad now supports Unix-style carriage returns!)
-#ifdef _WIN32
-#define IM_NEWLINE  "\r\n"
-#else
+//#ifdef _WIN32
+//#define IM_NEWLINE  "\r\n"
+//#else
 #define IM_NEWLINE  "\n"
-#endif
+//#endif
 
 // Helpers
 #if defined(_MSC_VER) && !defined(snprintf)
@@ -155,8 +156,6 @@ Index of this file:
 //-----------------------------------------------------------------------------
 // [SECTION] Forward Declarations, Helpers
 //-----------------------------------------------------------------------------
-
-#if !defined(IMGUI_DISABLE_DEMO_WINDOWS)
 
 // Forward Declarations
 static void ShowExampleAppDockSpace(bool* p_open);
