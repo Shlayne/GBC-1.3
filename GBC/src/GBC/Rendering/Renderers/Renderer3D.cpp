@@ -6,7 +6,7 @@
 
 namespace gbc
 {
-	struct Vertex
+	struct QuadVertex
 	{
 		glm::vec3 position;
 		glm::vec3 normal;
@@ -22,8 +22,8 @@ namespace gbc
 		Ref<IndexBuffer> indexBuffer;
 
 		uint32_t localVertexCount = 0;
-		Vertex* localVertexBufferStart = nullptr;
-		Vertex* localVertexBufferCurrent = nullptr;
+		QuadVertex* localVertexBufferStart = nullptr;
+		QuadVertex* localVertexBufferCurrent = nullptr;
 		uint32_t localIndexCount = 0;
 		uint32_t* localIndexBufferStart = nullptr;
 		uint32_t* localIndexBufferCurrent = nullptr;
@@ -54,13 +54,13 @@ namespace gbc
 		// Setup local buffers
 		data.maxVertices = 900000; // TODO: query drivers
 		data.maxIndices  = 600000; // TODO: query drivers
-		data.localVertexBufferStart = new Vertex[data.maxVertices];
+		data.localVertexBufferStart = new QuadVertex[data.maxVertices];
 		data.localVertexBufferCurrent = data.localVertexBufferStart;
 		data.localIndexBufferStart = new uint32_t[data.maxIndices];
 		data.localIndexBufferCurrent = data.localIndexBufferStart;
 
 		// Setup buffers
-		data.vertexBuffer = VertexBuffer::Create(data.maxVertices * sizeof(Vertex), nullptr, BufferUsage::DynamicDraw);
+		data.vertexBuffer = VertexBuffer::Create(data.maxVertices * sizeof(QuadVertex), nullptr, BufferUsage::DynamicDraw);
 		data.vertexBuffer->SetLayout({
 			{ VertexBufferElementType::Float3, "position"  },
 			{ VertexBufferElementType::Float3, "normal"    },
@@ -103,7 +103,7 @@ namespace gbc
 
 	void Renderer3D::EndScene()
 	{
-		uint32_t vertexBufferSize = static_cast<uint32_t>(data.localVertexCount * sizeof(Vertex));
+		uint32_t vertexBufferSize = static_cast<uint32_t>(data.localVertexCount * sizeof(QuadVertex));
 		uint32_t indexBufferSize = static_cast<uint32_t>(data.localIndexCount * sizeof(uint32_t));
 		if (vertexBufferSize != 0)
 		{

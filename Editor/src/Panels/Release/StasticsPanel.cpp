@@ -36,6 +36,12 @@ namespace gbc
 				ImGuiHelper::Text(text.c_str());
 				ImGuiHelper::NextTableColumn();
 
+				ImGuiHelper::Text("Circle Count");
+				ImGuiHelper::NextTableColumn();
+				text = std::to_string(statistics.GetCircleCount());
+				ImGuiHelper::Text(text.c_str());
+				ImGuiHelper::NextTableColumn();
+
 				ImGuiHelper::Text("Vertex Count");
 				ImGuiHelper::NextTableColumn();
 				text = std::to_string(statistics.GetVertexCount());

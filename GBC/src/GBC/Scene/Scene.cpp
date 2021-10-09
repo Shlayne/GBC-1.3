@@ -7,6 +7,7 @@
 #include "GBC/Scene/Entity.h"
 #include "GBC/Scene/ScriptableEntity.h"
 #include "GBC/Scene/Components/CameraComponent.h"
+#include "GBC/Scene/Components/CircleRendererComponent.h"
 #include "GBC/Scene/Components/IDComponent.h"
 #include "GBC/Scene/Components/Mesh3DComponent.h"
 #include "GBC/Scene/Components/NativeScriptComponent.h"
@@ -97,6 +98,7 @@ namespace gbc
 			CopyEntity(handle, source, sourceScene, newScene, entities, false);
 
 		// Copy all components except for IDComponent, TagComponent, and RelationshipComponent
+		CopyComponent<CircleRendererComponent>(destination, source, sourceScene, entities);
 		CopyComponent<CameraComponent>(destination, source, sourceScene, entities);
 		CopyComponent<Mesh3DComponent>(destination, source, sourceScene, entities);
 		CopyComponent<NativeScriptComponent>(destination, source, sourceScene, entities);
@@ -164,6 +166,7 @@ namespace gbc
 		}
 
 		// Copy all components except for IDComponent, TagComponent, and RelationshipComponent
+		CopyComponentIfExists<CircleRendererComponent>(newEntity, entity);
 		CopyComponentIfExists<CameraComponent>(newEntity, entity);
 		CopyComponentIfExists<Mesh3DComponent>(newEntity, entity);
 		CopyComponentIfExists<NativeScriptComponent>(newEntity, entity);
@@ -277,40 +280,7 @@ namespace gbc
 		if (Entity primaryCamera = GetPrimaryCameraEntity())
 		{
 			const auto& camera = primaryCamera.Get<CameraComponent>();
-			glm::mat4 viewProjection = camera.camera.GetProjection() * glm::inverse(primaryCamera.GetAbsoluteTransform());
-
-			if (auto view = registry->view<SpriteRendererComponent>(); !view.empty())
-			{
-				Renderer2D::BeginScene(viewProjection);
-
-				for (auto handle : view)
-				{
-					Entity entity{ handle, this };
-					glm::mat4 transform = entity.GetAbsoluteTransform();
-
-					auto& spriteRendererComponent = view.get<SpriteRendererComponent>(handle);
-					Renderer2D::DrawQuad(transform, spriteRendererComponent);
-				}
-
-				Renderer2D::EndScene();
-			}
-
-			if (auto view = registry->view<Mesh3DComponent>(); !view.empty())
-			{
-				Renderer3D::BeginScene(viewProjection);
-
-				for (auto handle : view)
-				{
-					Entity entity{ handle, this };
-					glm::mat4 transform = entity.GetAbsoluteTransform();
-
-					auto& meshComponent = view.get<Mesh3DComponent>(handle);
-					if (meshComponent.mesh)
-						Renderer3D::Submit(meshComponent.mesh, transform, meshComponent.texture);
-				}
-
-				Renderer3D::EndScene();
-			}
+			Render(camera.camera.GetProjection() * glm::inverse(primaryCamera.GetAbsoluteTransform()));
 		}
 	}
 
@@ -318,24 +288,43 @@ namespace gbc
 	{
 		GBC_PROFILE_FUNCTION();
 
-		glm::mat4 viewProjection = camera.GetViewProjection();
+		Render(camera.GetViewProjection());
+	}
 
-		if (auto view = registry->view<SpriteRendererComponent>(); !view.empty())
+	void Scene::Render(const glm::mat4& viewProjection)
+	{
+		// 2D Rendering
 		{
-			Renderer2D::BeginScene(viewProjection);
+			auto spriteView = registry->view<SpriteRendererComponent>();
+			auto circleView = registry->view<CircleRendererComponent>();
 
-			for (auto handle : view)
+			if (!spriteView.empty() || !circleView.empty())
 			{
-				Entity entity{ handle, this };
-				glm::mat4 transform = entity.GetAbsoluteTransform();
+				Renderer2D::BeginScene(viewProjection);
 
-				auto& spriteRendererComponent = view.get<SpriteRendererComponent>(handle);
-				Renderer2D::DrawQuad(transform, spriteRendererComponent);
+				for (auto handle : spriteView)
+				{
+					Entity entity{ handle, this };
+					glm::mat4 transform = entity.GetAbsoluteTransform();
+
+					auto& sprite = spriteView.get<SpriteRendererComponent>(handle);
+					Renderer2D::DrawQuad(transform, sprite);
+				}
+
+				for (auto handle : circleView)
+				{
+					Entity entity{ handle, this };
+					glm::mat4 transform = entity.GetAbsoluteTransform();
+
+					auto& circle = circleView.get<CircleRendererComponent>(handle);
+					Renderer2D::DrawCircle(transform, circle);
+				}
+
+				Renderer2D::EndScene();
 			}
-
-			Renderer2D::EndScene();
 		}
 
+		// 3D Rendering
 		if (auto view = registry->view<Mesh3DComponent>(); !view.empty())
 		{
 			Renderer3D::BeginScene(viewProjection);
@@ -451,6 +440,7 @@ namespace gbc
 	// OnComponentAdded
 	template<typename T> void Scene::OnComponentAdded(Entity entity, T& component) { static_assert(false); }
 
+	template<> void Scene::OnComponentAdded<CircleRendererComponent>(Entity entity, CircleRendererComponent& component) {}
 	template<> void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
 	{
 		component.camera.OnViewportResize(viewportSize.x, viewportSize.y);
@@ -482,6 +472,7 @@ namespace gbc
 	// OnComponentRemoved
 	template<typename T> void Scene::OnComponentRemoved(Entity entity, T& component) { static_assert(false); }
 
+	template<> void Scene::OnComponentRemoved<CircleRendererComponent>(Entity entity, CircleRendererComponent& component) {}
 	template<> void Scene::OnComponentRemoved<CameraComponent>(Entity entity, CameraComponent& component) {}
 	template<> void Scene::OnComponentRemoved<IDComponent>(Entity entity, IDComponent& component) {}
 	template<> void Scene::OnComponentRemoved<Mesh3DComponent>(Entity entity, Mesh3DComponent& component) {}

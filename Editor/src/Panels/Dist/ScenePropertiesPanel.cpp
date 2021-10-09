@@ -4,6 +4,7 @@
 #include "GBC/ImGui/ImGuiHelper.h"
 #include "GBC/IO/FileDialog.h"
 #include "GBC/Scene/Components/CameraComponent.h"
+#include "GBC/Scene/Components/CircleRendererComponent.h"
 #include "GBC/Scene/Components/Mesh3DComponent.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
@@ -204,6 +205,14 @@ namespace gbc
 					}
 				});
 
+				DrawComponent<CircleRendererComponent>("Circle Renderer", selectedEntity, true, [](CircleRendererComponent& component)
+				{
+					ImGuiHelper::FloatEdit("Thickness", &component.thickness, 0.01f, 0.0f, 1.0f);
+					ImGuiHelper::NextTableColumn();
+
+					ImGuiHelper::ColorEdit4("Color", &component.color.r);
+				});
+
 				DrawComponent<Mesh3DComponent>("3D Mesh", selectedEntity, true, [](Mesh3DComponent& component)
 				{
 					std::string buttonText = "Null";
@@ -223,7 +232,7 @@ namespace gbc
 
 				DrawComponent<SpriteRendererComponent>("Sprite Renderer", selectedEntity, true, [](SpriteRendererComponent& component)
 				{
-					ImGuiHelper::ColorEdit4("Tint Color", &component.color.x);
+					ImGuiHelper::ColorEdit4("Tint Color", &component.color.r);
 					ImGuiHelper::NextTableColumn();
 
 					ImGuiHelper::FloatEdit2("Tiling Factor", &component.tilingFactor.x);
@@ -271,6 +280,7 @@ namespace gbc
 				if (ImGui::BeginPopup("AddComponent"))
 				{
 					DrawAdd<CameraComponent>("Camera", selectedEntity);
+					DrawAdd<CircleRendererComponent>("Circle Renderer", selectedEntity);
 					DrawAdd<Mesh3DComponent>("Mesh 3D", selectedEntity);
 					DrawAdd<SpriteRendererComponent>("Sprite Renderer", selectedEntity);
 					DrawAdd<BoxCollider2DComponent>("Box Collider", selectedEntity);

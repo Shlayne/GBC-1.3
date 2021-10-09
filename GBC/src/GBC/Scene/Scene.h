@@ -59,6 +59,8 @@ namespace gbc
 
 		Entity GetPrimaryCameraEntity();
 	private:
+		void Render(const glm::mat4& viewProjection);
+	private:
 		template<typename T>
 		void OnComponentAdded(Entity entity, T& component);
 		template<typename T>

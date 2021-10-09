@@ -6,6 +6,7 @@
 #include "GBC/Model/MeshFactory3D.h"
 #include "GBC/Scene/Entity.h"
 #include "GBC/Scene/Components/CameraComponent.h"
+#include "GBC/Scene/Components/CircleRendererComponent.h"
 #include "GBC/Scene/Components/Mesh3DComponent.h"
 #include "GBC/Scene/Components/NativeScriptComponent.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
@@ -84,6 +85,11 @@ namespace gbc
 				<< YAML::Key << "OrthographicFar" << YAML::Value << camera.GetOrthographicFarClip()
 				<< YAML::EndMap
 				<< YAML::Key << "Primary" << YAML::Value << component.primary;
+		});
+		Serialize<CircleRendererComponent>(out, entity, "CircleRendererComponent", [](YAML::Emitter& out, CircleRendererComponent& component)
+		{
+			out << YAML::Key << "Thickness" << YAML::Value << component.thickness
+				<< YAML::Key << "Color" << YAML::Value << component.color;
 		});
 		Serialize<Mesh3DComponent>(out, entity, "Mesh3DComponent", [](YAML::Emitter& out, Mesh3DComponent& component)
 		{
@@ -240,6 +246,12 @@ namespace gbc
 					camera.SetOrthographicFarClip(cameraNode["OrthographicFar"].as<float>());
 
 					cameraComponent.primary = cameraComponentNode["Primary"].as<bool>();
+				}
+				if (auto circleRendererComponentNode = entityNode["CircleRendererComponent"])
+				{
+					auto& circleRendererComponent = entity.Add<CircleRendererComponent>();
+					circleRendererComponent.thickness = circleRendererComponentNode["Thickness"].as<float>();
+					circleRendererComponent.color = circleRendererComponentNode["Color"].as<glm::vec4>();
 				}
 				if (auto mesh3DComponentNode = entityNode["Mesh3DComponent"])
 				{

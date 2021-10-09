@@ -3,6 +3,7 @@
 #include "GBC/ImGui/ImGuiHelper.h"
 #include "GBC/Model/MeshFactory3D.h"
 #include "GBC/Scene/Components/CameraComponent.h"
+#include "GBC/Scene/Components/CircleRendererComponent.h"
 #include "GBC/Scene/Components/Mesh3DComponent.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
@@ -62,6 +63,11 @@ namespace gbc
 					{
 						selectedEntity = context->CreateEntity("Quad");
 						selectedEntity.Add<SpriteRendererComponent>();
+					}
+					if (ImGui::MenuItem("Circle"))
+					{
+						selectedEntity = context->CreateEntity("Circle");
+						selectedEntity.Add<CircleRendererComponent>();
 					}
 					if (ImGui::BeginMenu("3D Mesh"))
 					{
