@@ -213,11 +213,9 @@ namespace gbc
 					if (const ImGuiPayload* payload = ImGuiHelper::ButtonDragDropTarget("Mesh", buttonText.c_str(), "CONTENT_BROWSER_ITEM",
 						[](void* payloadData) { return Is3DModelFile(static_cast<const wchar_t*>(payloadData)); }))
 					{
-						// TODO: load obj into mesh
+						//std::filesystem::path filepath = static_cast<const wchar_t*>(payload->Data);
+						//component.mesh = Application::Get().GetAssetManager().GetOrLoad3DModel(filepath);
 					}
-					ImGuiHelper::NextTableColumn();
-
-					ImGuiHelper::ColorEdit4("Tint Color", &component.tintColor.x);
 					ImGuiHelper::NextTableColumn();
 
 					TextureButton(component.texture);

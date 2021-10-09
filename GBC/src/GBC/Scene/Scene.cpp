@@ -306,7 +306,7 @@ namespace gbc
 
 					auto& meshComponent = view.get<Mesh3DComponent>(handle);
 					if (meshComponent.mesh)
-						Renderer3D::Submit(meshComponent.mesh, transform, meshComponent.tintColor, meshComponent.texture);
+						Renderer3D::Submit(meshComponent.mesh, transform, meshComponent.texture);
 				}
 
 				Renderer3D::EndScene();
@@ -347,7 +347,7 @@ namespace gbc
 
 				auto& meshComponent = view.get<Mesh3DComponent>(handle);
 				if (meshComponent.mesh)
-					Renderer3D::Submit(meshComponent.mesh, transform, meshComponent.tintColor, meshComponent.texture);
+					Renderer3D::Submit(meshComponent.mesh, transform, meshComponent.texture);
 			}
 
 			Renderer3D::EndScene();

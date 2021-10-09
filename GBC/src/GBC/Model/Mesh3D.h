@@ -10,7 +10,6 @@ namespace gbc
 	{
 		glm::vec3 position;
 		glm::vec3 normal;
-		glm::vec4 tintColor;
 		glm::vec2 texCoord;
 	};
 

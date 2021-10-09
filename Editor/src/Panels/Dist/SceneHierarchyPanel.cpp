@@ -73,12 +73,12 @@ namespace gbc
 						if (ImGui::MenuItem("Cube"))
 						{
 							selectedEntity = context->CreateEntity("Cube");
-							selectedEntity.Add<Mesh3DComponent>().mesh = MeshFactory3D::CreateCuboid();
+							selectedEntity.Add<Mesh3DComponent>().mesh = MeshFactory3D::CreateCube();
 						}
 						if (ImGui::MenuItem("Sphere"))
 						{
 							selectedEntity = context->CreateEntity("Sphere");
-							selectedEntity.Add<Mesh3DComponent>().mesh = MeshFactory3D::CreateEllipsoid();
+							selectedEntity.Add<Mesh3DComponent>().mesh = MeshFactory3D::CreateSphere();
 						}
 						if (ImGui::MenuItem("Plane"))
 						{

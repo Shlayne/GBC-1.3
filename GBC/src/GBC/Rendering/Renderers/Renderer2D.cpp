@@ -43,10 +43,10 @@ namespace gbc
 		};
 		static constexpr glm::vec2 quadVertexTexCoords[4]
 		{
-			{ 0.0f, 0.0f },
-			{ 1.0f, 0.0f },
+			{ 0.0f, 1.0f },
 			{ 1.0f, 1.0f },
-			{ 0.0f, 1.0f }
+			{ 1.0f, 0.0f },
+			{ 0.0f, 0.0f }
 		};
 
 #if GBC_ENABLE_STATS
@@ -219,13 +219,29 @@ namespace gbc
 		}
 
 		// Handle vertices
-		for (uint32_t i = 0; i < 4; i++, data.localVertexBufferCurrent++)
+		if (RendererAPI::GetAPI() == RendererAPI::API::OpenGL)
 		{
-			data.localVertexBufferCurrent->position = transform * data.quadVertexPositions[i];
-			data.localVertexBufferCurrent->tintColor = color;
-			data.localVertexBufferCurrent->texCoord = data.quadVertexTexCoords[i];
-			data.localVertexBufferCurrent->texIndex = texIndex;
-			data.localVertexBufferCurrent->tilingFactor = tilingFactor;
+			for (uint32_t i = 0; i < 4; i++, data.localVertexBufferCurrent++)
+			{
+				data.localVertexBufferCurrent->position = transform * data.quadVertexPositions[i];
+				data.localVertexBufferCurrent->tintColor = color;
+				glm::vec2 texCoord = data.quadVertexTexCoords[i];
+				texCoord.y = 1.0f - texCoord.y;
+				data.localVertexBufferCurrent->texCoord = texCoord;
+				data.localVertexBufferCurrent->texIndex = texIndex;
+				data.localVertexBufferCurrent->tilingFactor = tilingFactor;
+			}
+		}
+		else
+		{
+			for (uint32_t i = 0; i < 4; i++, data.localVertexBufferCurrent++)
+			{
+				data.localVertexBufferCurrent->position = transform * data.quadVertexPositions[i];
+				data.localVertexBufferCurrent->tintColor = color;
+				data.localVertexBufferCurrent->texCoord = data.quadVertexTexCoords[i];
+				data.localVertexBufferCurrent->texIndex = texIndex;
+				data.localVertexBufferCurrent->tilingFactor = tilingFactor;
+			}
 		}
 
 		// Update counts

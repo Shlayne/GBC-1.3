@@ -13,7 +13,7 @@ namespace gbc
 		static void BeginScene(const glm::mat4& viewProjection);
 		static void EndScene();
 	public:
-		static void Submit(const Ref<Mesh3D>& mesh, const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f), const Ref<Texture2D>& texture = nullptr);
+		static void Submit(const Ref<Mesh3D>& mesh, const glm::mat4& transform, const Ref<Texture2D>& texture = nullptr);
 	private:
 		static void Reset();
 

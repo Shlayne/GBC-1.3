@@ -9,8 +9,7 @@ namespace gbc
 	{
 		Ref<Mesh3D> mesh;
 
-		// TODO: move these to MaterialComponent
-		glm::vec4 tintColor{ 1.0f };
+		// TODO: move this to MaterialComponent
 		Ref<Texture2D> texture;
 	};
 }

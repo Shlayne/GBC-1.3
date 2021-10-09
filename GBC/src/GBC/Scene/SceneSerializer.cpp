@@ -93,8 +93,6 @@ namespace gbc
 				out << YAML::Key << "Mesh" << YAML::Value << filepath;
 			}
 
-			out << YAML::Key << "TintColor" << YAML::Value << component.tintColor;
-
 			if (component.texture && component.texture->GetTexture())
 			{
 				std::string filepath = component.texture->GetTexture()->GetFilepath().string();
@@ -213,6 +211,7 @@ namespace gbc
 				entityIDMappings[uuid] = scene->CreateEntity(uuid, name);
 			}
 
+			auto& assetManager = Application::Get().GetAssetManager();
 			for (auto entityNode : entities)
 			{
 				Entity entity{ entityIDMappings[entityNode["Entity"].as<uint64_t>()], scene.get() };
@@ -250,18 +249,13 @@ namespace gbc
 					{
 						std::filesystem::path filepath = meshNode.as<std::string>();
 						if (filepath.native().starts_with(L"GBC:"))
-							mesh3DComponent.mesh = MeshFactory3D::CreateFromID(&filepath.native()[4]);
-						else
-						{
-							// TODO: load object file through asset manager
-						}
+							mesh3DComponent.mesh = MeshFactory3D::CreateFromID(filepath.native());
+						//else
+						//	mesh3DComponent.texture = assetManager.GetOrLoad3DModel(filepath);
 					}
-
-					mesh3DComponent.tintColor = mesh3DComponentNode.as<glm::vec4>();
 
 					if (auto textureNode = mesh3DComponentNode["Texture"])
 					{
-						auto& assetManager = Application::Get().GetAssetManager();
 						mesh3DComponent.texture = assetManager.GetOrLoadTexture(textureNode.as<std::string>());
 					}
 				}
@@ -289,10 +283,7 @@ namespace gbc
 					spriteRendererComponent.tilingFactor = spriteRendererComponentNode["TilingFactor"].as<glm::vec2>();
 
 					if (auto textureNode = spriteRendererComponentNode["Texture"])
-					{
-						auto& assetManager = Application::Get().GetAssetManager();
 						spriteRendererComponent.texture = assetManager.GetOrLoadTexture(textureNode.as<std::string>());
-					}
 				}
 
 				if (auto boxCollider2DComponentNode = entityNode["BoxCollider2DComponent"])

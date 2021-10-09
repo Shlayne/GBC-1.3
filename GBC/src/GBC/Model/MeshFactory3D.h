@@ -8,9 +8,12 @@ namespace gbc
 	class MeshFactory3D
 	{
 	public:
-		static Ref<Mesh3D> CreateCuboid(const glm::vec3& size = glm::vec3(1.0f));
-		static Ref<Mesh3D> CreateEllipsoid(uint32_t subdivisions = 4, const glm::vec3& size = glm::vec3(1.0f));
-		static Ref<Mesh3D> CreatePlane(const glm::uvec2& subdivisions = glm::ivec2(1), const glm::vec2& size = glm::vec2(1.0f));
+		// Creates a cube
+		static Ref<Mesh3D> CreateCube();
+		// Creates an icosphere
+		static Ref<Mesh3D> CreateSphere();
+		// Creates a plane
+		static Ref<Mesh3D> CreatePlane();
 		static Ref<Mesh3D> CreateFromID(std::wstring_view id);
 	private:
 		MeshFactory3D() = delete;

@@ -3,9 +3,8 @@
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
-layout(location = 2) in vec4 tintColor;
-layout(location = 3) in vec2 texCoord;
-layout(location = 4) in uint texIndex;
+layout(location = 2) in vec2 texCoord;
+layout(location = 3) in uint texIndex;
 
 layout(std140, binding = 0) uniform Camera
 {
@@ -15,17 +14,15 @@ layout(std140, binding = 0) uniform Camera
 struct VertexOutput
 {
 	vec3 normal;
-	vec4 tintColor;
 	vec2 texCoord;
 };
 
 layout(location = 0) out VertexOutput Output;
-layout(location = 3) out flat uint Output_texIndex;
+layout(location = 2) out flat uint Output_texIndex;
 
 void main()
 {
 	Output.normal = normal;
-	Output.tintColor = tintColor;
 	Output.texCoord = texCoord;
 	Output_texIndex = texIndex;
 	gl_Position = viewProjection * vec4(position, 1.0);
@@ -37,12 +34,11 @@ void main()
 struct VertexOutput
 {
 	vec3 normal;
-	vec4 tintColor;
 	vec2 texCoord;
 };
 
 layout(location = 0) in VertexOutput Input;
-layout(location = 3) in flat uint Input_texIndex;
+layout(location = 2) in flat uint Input_texIndex;
 
 layout(location = 0) out vec4 outColor;
 
@@ -92,7 +88,7 @@ void main()
 {
 	// TODO: use the normal for lighting calculations
 
-	outColor = Input.tintColor * GetTextureColor(Input_texIndex, Input.texCoord);
+	outColor = GetTextureColor(Input_texIndex, Input.texCoord);
 	if (outColor.a == 0.0)
 		discard;
 }
