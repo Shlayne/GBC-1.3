@@ -6,17 +6,8 @@
 #include "GBC/Rendering/Renderers/Renderer3D.h"
 #include "GBC/Scene/Entity.h"
 #include "GBC/Scene/ScriptableEntity.h"
-#include "GBC/Scene/Components/CameraComponent.h"
-#include "GBC/Scene/Components/CircleRendererComponent.h"
-#include "GBC/Scene/Components/IDComponent.h"
-#include "GBC/Scene/Components/Mesh3DComponent.h"
-#include "GBC/Scene/Components/NativeScriptComponent.h"
-#include "GBC/Scene/Components/RelationshipComponent.h"
-#include "GBC/Scene/Components/SpriteRendererComponent.h"
-#include "GBC/Scene/Components/TagComponent.h"
-#include "GBC/Scene/Components/TransformComponent.h"
-#include "GBC/Scene/Components/Physics/BoxCollider2DComponent.h"
-#include "GBC/Scene/Components/Physics/Rigidbody2DComponent.h"
+#include "GBC/Scene/Components/AllComponents.h"
+#include "GBC/Math/Math.h"
 #include <box2d/b2_body.h>
 #include <box2d/b2_fixture.h>
 #include <box2d/b2_polygon_shape.h>
@@ -60,26 +51,36 @@ namespace gbc
 		delete registry;
 	}
 
-	template<typename Component>
-	static void CopyComponent(entt::registry* destination, entt::registry* source, Scene* scene, const std::unordered_map<UUID, entt::entity>& entities)
+	template<typename... Component>
+	static void CopyComponent(ComponentGroup<Component...>, entt::registry* destination, entt::registry* source, Scene* scene, const std::unordered_map<UUID, entt::entity>& entities)
 	{
-		auto view = source->view<Component>();
-		for (auto handle : view)
+		([&]()
 		{
-			UUID uuid = source->get<IDComponent>(handle).id;
-			GBC_CORE_ASSERT(entities.find(uuid) != entities.cend(), "Entity UUID not found when copying scene!");
-			auto destinationHandle = entities.at(uuid);
-			auto& component = view.get<Component>(handle);
-			destination->emplace_or_replace<Component>(destinationHandle, component);
-		}
+			auto view = source->view<Component>();
+			for (auto handle : view)
+			{
+				UUID uuid = source->get<IDComponent>(handle).id;
+				GBC_CORE_ASSERT(entities.find(uuid) != entities.cend(), "Entity UUID not found when copying scene!");
+				auto destinationHandle = entities.at(uuid);
+				auto& sourceComponent = view.get<Component>(handle);
+				destination->emplace_or_replace<Component>(destinationHandle, sourceComponent);
+			}
+		}(), ...);
 	}
+	inline static void CopyAllComponents(entt::registry* destination, entt::registry* source, Scene* scene, const std::unordered_map<UUID, entt::entity>& entities)
+	{ CopyComponent(AllCopyableComponents{}, destination, source, scene, entities); }
 
-	template<typename Component>
-	static void CopyComponentIfExists(Entity destination, Entity source)
+	template<typename... Component>
+	static void CopyComponentIfExists(ComponentGroup<Component...>, Entity destination, Entity source)
 	{
-		if (source.Has<Component>())
-			destination.AddOrReplace<Component>(source.Get<Component>());
+		([&]()
+		{
+			if (source.Has<Component>())
+				destination.AddOrReplace<Component>(source.Get<Component>());
+		}(), ...);
 	}
+	inline static void CopyAllExistingComponents(Entity destination, Entity source)
+	{ CopyComponentIfExists(AllCopyableComponents{}, destination, source); }
 
 	Ref<Scene> Scene::Copy(const Ref<Scene>& scene)
 	{
@@ -96,17 +97,7 @@ namespace gbc
 		// Create new entities
 		for (auto handle : scene->entities)
 			CopyEntity(handle, source, sourceScene, newScene, entities, false);
-
-		// Copy all components except for IDComponent, TagComponent, and RelationshipComponent
-		CopyComponent<CircleRendererComponent>(destination, source, sourceScene, entities);
-		CopyComponent<CameraComponent>(destination, source, sourceScene, entities);
-		CopyComponent<Mesh3DComponent>(destination, source, sourceScene, entities);
-		CopyComponent<NativeScriptComponent>(destination, source, sourceScene, entities);
-		CopyComponent<SpriteRendererComponent>(destination, source, sourceScene, entities);
-		CopyComponent<TransformComponent>(destination, source, sourceScene, entities);
-
-		CopyComponent<BoxCollider2DComponent>(destination, source, sourceScene, entities);
-		CopyComponent<Rigidbody2DComponent>(destination, source, sourceScene, entities);
+		CopyAllComponents(destination, source, sourceScene, entities);
 
 		return newScene;
 	}
@@ -157,7 +148,7 @@ namespace gbc
 		auto name = entity.GetName();
 		Entity newEntity = CreateEntity(name);
 
-		// Copy RelationshipComponent
+		// Copy RelationshipComponent manually because it requires extra attention
 		newEntity.SetParent(entity.GetParent());
 		for (Entity child = entity.GetFirstChild(); child; child = child.GetNextSibling())
 		{
@@ -165,16 +156,7 @@ namespace gbc
 			newChild.SetParent(newEntity);
 		}
 
-		// Copy all components except for IDComponent, TagComponent, and RelationshipComponent
-		CopyComponentIfExists<CircleRendererComponent>(newEntity, entity);
-		CopyComponentIfExists<CameraComponent>(newEntity, entity);
-		CopyComponentIfExists<Mesh3DComponent>(newEntity, entity);
-		CopyComponentIfExists<NativeScriptComponent>(newEntity, entity);
-		CopyComponentIfExists<SpriteRendererComponent>(newEntity, entity);
-		CopyComponentIfExists<TransformComponent>(newEntity, entity);
-
-		CopyComponentIfExists<BoxCollider2DComponent>(newEntity, entity);
-		CopyComponentIfExists<Rigidbody2DComponent>(newEntity, entity);
+		CopyAllExistingComponents(newEntity, entity);
 
 		return newEntity;
 	}
@@ -371,11 +353,12 @@ namespace gbc
 
 	void Scene::UpdatePhysicsEntity(Entity entity)
 	{
-		auto& transform = entity.Get<TransformComponent>();
+		auto& transform = entity.GetTransform();
 		auto& rigidbody = entity.Get<Rigidbody2DComponent>();
 
 		b2Body* body = static_cast<b2Body*>(rigidbody.runtimeBody);
 		const auto& position = body->GetPosition();
+		// FIXME: some how, get the local transform from Box2D's absolute transform and set this entity's local transform
 		transform.translation.x = position.x;
 		transform.translation.y = position.y;
 		transform.rotation.z = body->GetAngle();
@@ -383,29 +366,34 @@ namespace gbc
 
 	void Scene::InitializePhysicsEntityRigidbody2D(Entity entity)
 	{
-		auto& transform = entity.Get<TransformComponent>();
+		glm::mat4 transform = entity.GetTransform();
+		glm::vec3 translation, rotation, scale;
+		bool decomposed = Math::Decompose(transform, translation, rotation, scale);
+		GBC_CORE_ASSERT(decomposed, "Unable to decompose physics entity's absolute transform!");
+
+		// FIXME: Box2D needs to be given the absolute transform, but needs to give back the relative transform
+
 		auto& rigidbody = entity.Get<Rigidbody2DComponent>();
 
 		b2BodyDef bodyDef;
 		bodyDef.type = Rigidbody2DTypeToB2BodyType(rigidbody.bodyType);
-		bodyDef.position.Set(transform.translation.x, transform.translation.y);
-		bodyDef.angle = transform.rotation.z;
+		bodyDef.position.Set(translation.x, translation.y);
+		bodyDef.angle = rotation.z;
 
 		b2Body* body = physicsWorld->CreateBody(&bodyDef);
 		body->SetFixedRotation(rigidbody.fixedRotation);
 		rigidbody.runtimeBody = body;
 
 		if (entity.Has<BoxCollider2DComponent>())
-			InitializePhysicsEntityBoxCollider2D(entity, transform, rigidbody);
+			InitializePhysicsEntityBoxCollider2D(entity, scale, rigidbody);
 	}
 
-	void Scene::InitializePhysicsEntityBoxCollider2D(Entity entity, TransformComponent& transform, Rigidbody2DComponent& rigidbody)
+	void Scene::InitializePhysicsEntityBoxCollider2D(Entity entity, const glm::vec2& scale, Rigidbody2DComponent& rigidbody)
 	{
 		auto& collider = entity.Get<BoxCollider2DComponent>();
 		if (collider.runtimeFixture == nullptr)
 		{
 			b2PolygonShape shape;
-			glm::vec2 scale = transform.scale; // converts from glm::vec3 to glm::vec2 only once
 			glm::vec2 size = scale * collider.size;
 			glm::vec2 offset = scale * collider.offset;
 			shape.SetAsBox(size.x, size.y, { offset.x, offset.y }, 0.0f);
@@ -458,9 +446,13 @@ namespace gbc
 	{
 		if (physicsWorld && entity.Has<Rigidbody2DComponent>())
 		{
-			auto& transform = entity.Get<TransformComponent>();
+			glm::mat4 transform = entity.GetAbsoluteTransform();
+			glm::vec3 translation, rotation, scale;
+			bool decomposed = Math::Decompose(transform, translation, rotation, scale);
+			GBC_CORE_ASSERT(decomposed, "Unable to decompose physics entity's absolute transform!");
+
 			auto& rigidbody = entity.Get<Rigidbody2DComponent>();
-			InitializePhysicsEntityBoxCollider2D(entity, transform, rigidbody);
+			InitializePhysicsEntityBoxCollider2D(entity, scale, rigidbody);
 		}
 	}
 	template<> void Scene::OnComponentAdded<Rigidbody2DComponent>(Entity entity, Rigidbody2DComponent& component)

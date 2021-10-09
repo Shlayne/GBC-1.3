@@ -74,7 +74,7 @@ namespace gbc
 	private:
 		void UpdatePhysicsEntity(Entity entity);
 		void InitializePhysicsEntityRigidbody2D(Entity entity);
-		void InitializePhysicsEntityBoxCollider2D(Entity entity, TransformComponent& transform, Rigidbody2DComponent& rigidbody);
+		void InitializePhysicsEntityBoxCollider2D(Entity entity, const glm::vec2& scale, Rigidbody2DComponent& rigidbody);
 		void DestroyPhysicsEntityRigidbody2D(Entity entity);
 		void DestroyPhysicsEntityBoxCollider2D(Entity entity, Rigidbody2DComponent& rigidbody);
 

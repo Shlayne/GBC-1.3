@@ -2,13 +2,7 @@
 #include "GBC/Core/Input.h"
 #include "GBC/ImGui/ImGuiHelper.h"
 #include "GBC/Model/MeshFactory3D.h"
-#include "GBC/Scene/Components/CameraComponent.h"
-#include "GBC/Scene/Components/CircleRendererComponent.h"
-#include "GBC/Scene/Components/Mesh3DComponent.h"
-#include "GBC/Scene/Components/SpriteRendererComponent.h"
-#include "GBC/Scene/Components/TagComponent.h"
-#include "GBC/Scene/Components/Physics/BoxCollider2DComponent.h"
-#include "GBC/Scene/Components/Physics/Rigidbody2DComponent.h"
+#include "GBC/Scene/Components/AllComponents.h"
 #include <imgui/imgui.h>
 #include "Layers/EditorLayer.h"
 
