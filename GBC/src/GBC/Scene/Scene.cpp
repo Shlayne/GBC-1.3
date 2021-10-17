@@ -307,7 +307,7 @@ namespace gbc
 		}
 
 		// 3D Rendering
-		if (auto view = registry->view<Mesh3DComponent>(); !view.empty())
+		if (auto view = registry->view<Model3DComponent>(); !view.empty())
 		{
 			Renderer3D::BeginScene(viewProjection);
 
@@ -316,9 +316,9 @@ namespace gbc
 				Entity entity{ handle, this };
 				glm::mat4 transform = entity.GetAbsoluteTransform();
 
-				auto& meshComponent = view.get<Mesh3DComponent>(handle);
-				if (meshComponent.mesh)
-					Renderer3D::Submit(meshComponent.mesh, transform, meshComponent.texture);
+				auto& model3DComponent = view.get<Model3DComponent>(handle);
+				if (model3DComponent.model)
+					Renderer3D::Submit(model3DComponent.model, transform);
 			}
 
 			Renderer3D::EndScene();
@@ -436,7 +436,7 @@ namespace gbc
 	template<> void Scene::OnComponentAdded<IDComponent>(Entity entity, IDComponent& component) {}
 	template<> void Scene::OnComponentAdded<RelationshipComponent>(Entity entity, RelationshipComponent& component) {}
 	template<> void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent & component) {}
-	template<> void Scene::OnComponentAdded<Mesh3DComponent>(Entity entity, Mesh3DComponent& component) {}
+	template<> void Scene::OnComponentAdded<Model3DComponent>(Entity entity, Model3DComponent& component) {}
 	template<> void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent & component) {}
 	template<> void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent & component) {}
 	template<> void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent & component) {}
@@ -467,7 +467,7 @@ namespace gbc
 	template<> void Scene::OnComponentRemoved<CircleRendererComponent>(Entity entity, CircleRendererComponent& component) {}
 	template<> void Scene::OnComponentRemoved<CameraComponent>(Entity entity, CameraComponent& component) {}
 	template<> void Scene::OnComponentRemoved<IDComponent>(Entity entity, IDComponent& component) {}
-	template<> void Scene::OnComponentRemoved<Mesh3DComponent>(Entity entity, Mesh3DComponent& component) {}
+	template<> void Scene::OnComponentRemoved<Model3DComponent>(Entity entity, Model3DComponent& component) {}
 	template<> void Scene::OnComponentRemoved<NativeScriptComponent>(Entity entity, NativeScriptComponent& component) {}
 	template<> void Scene::OnComponentRemoved<RelationshipComponent>(Entity entity, RelationshipComponent& component) {}
 	template<> void Scene::OnComponentRemoved<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component) {}

@@ -11,6 +11,10 @@ namespace gbc
 		for (auto& [uuid, texture] : textures)
 			if (texture.second)
 				WriteTextureMeta(texture.first, AppendMetadataType(texture.first->GetTexture()->GetFilepath()));
+
+		for (auto& [uuid, model] : model3Ds)
+			if (model.second)
+				Write3DModelMeta(model.first, AppendMetadataType(model.first->GetFilepath()));
 	}
 
 	Ref<Texture2D> AssetManager::GetOrLoadTexture(const std::filesystem::path& filepath)
@@ -115,6 +119,84 @@ namespace gbc
 				specs.texture = LocalTexture2D::Create(filepath);
 
 				return Texture2D::Create(specs, uuid);
+			}
+		}
+
+		return nullptr;
+	}
+
+	Ref<Model3D> AssetManager::GetOrLoad3DModel(const std::filesystem::path& filepath)
+	{
+		if (auto it = model3DFilepaths.find(filepath); it != model3DFilepaths.end())
+			return model3Ds.at(it->second).first;
+
+		if (!std::filesystem::exists(filepath))
+			return nullptr;
+
+		std::filesystem::path metaFilepath = AppendMetadataType(filepath);
+		if (!std::filesystem::exists(metaFilepath))
+			CreateDefault3DModelMeta(metaFilepath);
+
+		Ref<Model3D> model3D = Read3DModel(filepath, metaFilepath);
+		if (model3D)
+		{
+			UUID uuid = model3D->GetUUID();
+			textureFilepaths[filepath] = uuid;
+			model3Ds[uuid] = { model3D, false };
+		}
+		return model3D;
+	}
+
+	Ref<Model3D> AssetManager::GetExisting3DModel(UUID uuid)
+	{
+		auto it = model3Ds.find(uuid);
+		return it != model3Ds.end() ? it->second.first : nullptr;
+	}
+
+	bool AssetManager::CreateDefault3DModelMeta(const std::filesystem::path& metaFilepath)
+	{
+		std::ofstream file(metaFilepath);
+		if (!file.is_open())
+			return false;
+
+		YAML::Emitter out;
+
+		out << YAML::BeginMap << "UUID" << YAML::Value << UUID()
+			<< YAML::EndMap;
+
+		file << out.c_str();
+		file.close();
+		return true;
+	}
+
+	bool AssetManager::Write3DModelMeta(const Ref<Model3D>& model3D, const std::filesystem::path& metaFilepath)
+	{
+		std::ofstream file(metaFilepath);
+		if (!file.is_open())
+			return false;
+
+		YAML::Emitter out;
+
+		out << YAML::BeginMap << "UUID" << YAML::Value << model3D->GetUUID()
+			<< YAML::EndMap;
+
+		file << out.c_str();
+		file.close();
+		return true;
+	}
+
+	Ref<Model3D> AssetManager::Read3DModel(const std::filesystem::path& filepath, const std::filesystem::path& metaFilepath)
+	{
+		std::ifstream file(metaFilepath);
+		if (file.is_open())
+		{
+			YAML::Node metadataNode = YAML::Load(file);
+			file.close();
+
+			if (metadataNode)
+			{
+				uint64_t uuid = metadataNode["UUID"].as<uint64_t>();
+				return Model3D::Create(filepath, uuid);
 			}
 		}
 

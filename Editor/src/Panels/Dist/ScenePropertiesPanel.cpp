@@ -5,7 +5,7 @@
 #include "GBC/IO/FileDialog.h"
 #include "GBC/Scene/Components/CameraComponent.h"
 #include "GBC/Scene/Components/CircleRendererComponent.h"
-#include "GBC/Scene/Components/Mesh3DComponent.h"
+#include "GBC/Scene/Components/Model3DComponent.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
 #include "GBC/Scene/Components/TransformComponent.h"
@@ -213,21 +213,18 @@ namespace gbc
 					ImGuiHelper::ColorEdit4("Color", &component.color.r);
 				});
 
-				DrawComponent<Mesh3DComponent>("3D Mesh", selectedEntity, true, [](Mesh3DComponent& component)
+				DrawComponent<Model3DComponent>("3D Model", selectedEntity, true, [](Model3DComponent& component)
 				{
 					std::string buttonText = "Null";
-					if (component.mesh)
-						buttonText = component.mesh->filepath.string();
+					if (component.model)
+						buttonText = component.model->GetFilepath().string();
 
-					if (const ImGuiPayload* payload = ImGuiHelper::ButtonDragDropTarget("Mesh", buttonText.c_str(), "CONTENT_BROWSER_ITEM",
+					if (const ImGuiPayload* payload = ImGuiHelper::ButtonDragDropTarget("Model", buttonText.c_str(), "CONTENT_BROWSER_ITEM",
 						[](void* payloadData) { return Is3DModelFile(static_cast<const wchar_t*>(payloadData)); }))
 					{
-						//std::filesystem::path filepath = static_cast<const wchar_t*>(payload->Data);
-						//component.mesh = Application::Get().GetAssetManager().GetOrLoad3DModel(filepath);
+						std::filesystem::path filepath = static_cast<const wchar_t*>(payload->Data);
+						component.model = Application::Get().GetAssetManager().GetOrLoad3DModel(filepath);
 					}
-					ImGuiHelper::NextTableColumn();
-
-					TextureButton(component.texture);
 				});
 
 				DrawComponent<SpriteRendererComponent>("Sprite Renderer", selectedEntity, true, [](SpriteRendererComponent& component)
@@ -281,7 +278,7 @@ namespace gbc
 				{
 					DrawAdd<CameraComponent>("Camera", selectedEntity);
 					DrawAdd<CircleRendererComponent>("Circle Renderer", selectedEntity);
-					DrawAdd<Mesh3DComponent>("Mesh 3D", selectedEntity);
+					DrawAdd<Model3DComponent>("Model 3D", selectedEntity);
 					DrawAdd<SpriteRendererComponent>("Sprite Renderer", selectedEntity);
 					DrawAdd<BoxCollider2DComponent>("Box Collider", selectedEntity);
 					DrawAdd<Rigidbody2DComponent>("Rigidbody 2D", selectedEntity);

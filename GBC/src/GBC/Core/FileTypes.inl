@@ -113,7 +113,7 @@ namespace gbc
 
 	// Generic extensions
 	FILE_EXTENSION_DECLARATION(Texture, FileType::textures);
-	FILE_EXTENSION_DECLARATION(3DModel, FileType::model3D);
+	FILE_EXTENSION_DECLARATION(3DModel, FileType::model3Ds);
 
 	// GBC extensions
 	FILE_EXTENSION_DECLARATION(Scene, FileType::scene);

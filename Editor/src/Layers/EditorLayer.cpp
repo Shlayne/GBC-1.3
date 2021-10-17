@@ -75,7 +75,7 @@ namespace gbc
 		bool viewportFocused = sceneViewportPanel->IsFocused();
 		bool viewportHovered = sceneViewportPanel->IsHovered();
 
-		editorCamera.SetBlocked(ImGuizmo::IsUsing());
+		editorCamera.SetBlocked(ImGuizmo::IsUsing(), viewportHovered);
 		Application::Get().GetImGuiWrapper().SetBlockEvents(!viewportFocused && !viewportHovered);
 
 		if (sceneViewportPanel->HasSizeChanged())

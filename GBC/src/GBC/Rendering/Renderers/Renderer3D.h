@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GBC/Model/Mesh3D.h"
+#include "GBC/Model/Model3D.h"
 #include "GBC/Rendering/Camera.h"
 #include "GBC/Rendering/EditorCamera.h"
 #include "GBC/Rendering/Texture.h"
@@ -13,6 +13,7 @@ namespace gbc
 		static void BeginScene(const glm::mat4& viewProjection);
 		static void EndScene();
 	public:
+		static void Submit(const Ref<Model3D>& model, const glm::mat4& transform);
 		static void Submit(const Ref<Mesh3D>& mesh, const glm::mat4& transform, const Ref<Texture2D>& texture = nullptr);
 	private:
 		static void Reset();

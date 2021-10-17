@@ -7,7 +7,7 @@
 #include "GBC/Scene/Entity.h"
 #include "GBC/Scene/Components/CameraComponent.h"
 #include "GBC/Scene/Components/CircleRendererComponent.h"
-#include "GBC/Scene/Components/Mesh3DComponent.h"
+#include "GBC/Scene/Components/Model3DComponent.h"
 #include "GBC/Scene/Components/NativeScriptComponent.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"
@@ -91,18 +91,12 @@ namespace gbc
 			out << YAML::Key << "Thickness" << YAML::Value << component.thickness
 				<< YAML::Key << "Color" << YAML::Value << component.color;
 		});
-		Serialize<Mesh3DComponent>(out, entity, "Mesh3DComponent", [](YAML::Emitter& out, Mesh3DComponent& component)
+		Serialize<Model3DComponent>(out, entity, "Model3DComponent", [](YAML::Emitter& out, Model3DComponent& component)
 		{
-			if (component.mesh && !component.mesh->filepath.empty())
+			if (component.model && !component.model->GetFilepath().empty())
 			{
-				std::string filepath = component.mesh->filepath.string();
-				out << YAML::Key << "Mesh" << YAML::Value << filepath;
-			}
-
-			if (component.texture && component.texture->GetTexture())
-			{
-				std::string filepath = component.texture->GetTexture()->GetFilepath().string();
-				out << YAML::Key << "Texture" << YAML::Value << filepath.c_str();
+				std::string filepath = component.model->GetFilepath().string();
+				out << YAML::Key << "Model" << YAML::Value << filepath;
 			}
 		});
 		// TODO: how do this ???
@@ -253,22 +247,17 @@ namespace gbc
 					circleRendererComponent.thickness = circleRendererComponentNode["Thickness"].as<float>();
 					circleRendererComponent.color = circleRendererComponentNode["Color"].as<glm::vec4>();
 				}
-				if (auto mesh3DComponentNode = entityNode["Mesh3DComponent"])
+				if (auto model3DComponentNode = entityNode["Model3DComponent"])
 				{
-					auto& mesh3DComponent = entity.Add<Mesh3DComponent>();
+					auto& model3DComponent = entity.Add<Model3DComponent>();
 
-					if (auto meshNode = mesh3DComponentNode["Mesh"])
+					if (auto modelNode = model3DComponentNode["Model"])
 					{
-						std::filesystem::path filepath = meshNode.as<std::string>();
+						std::filesystem::path filepath = modelNode.as<std::string>();
 						if (filepath.native().starts_with(L"GBC:"))
-							mesh3DComponent.mesh = MeshFactory3D::CreateFromID(filepath.native());
-						//else
-						//	mesh3DComponent.texture = assetManager.GetOrLoad3DModel(filepath);
-					}
-
-					if (auto textureNode = mesh3DComponentNode["Texture"])
-					{
-						mesh3DComponent.texture = assetManager.GetOrLoadTexture(textureNode.as<std::string>());
+							model3DComponent.model = Model3D::Create(MeshFactory3D::CreateFromID(filepath.native()), filepath);
+						else
+							model3DComponent.model = assetManager.GetOrLoad3DModel(filepath);
 					}
 				}
 				if (auto relationshipComponentNode = entityNode["RelationshipComponent"])

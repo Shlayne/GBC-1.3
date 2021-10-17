@@ -100,8 +100,11 @@ namespace gbc
 
 	bool EditorCamera::OnMouseScrollEvent(MouseScrollEvent& event)
 	{
-		MouseZoom(event.GetOffsetY() * 0.1f);
-		RecalculateView();
+		if (IsUsing() && hovered)
+		{
+			MouseZoom(event.GetOffsetY() * 0.1f);
+			RecalculateView();
+		}
 		return false;
 	}
 

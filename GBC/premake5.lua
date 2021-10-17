@@ -25,6 +25,7 @@ project "GBC"
 	includedirs {
 		"src",
 
+		"%{includedir.assimp}",
 		"%{includedir.box2d}",
 		"%{includedir.glad}",
 		"%{includedir.glfw}",
@@ -42,6 +43,7 @@ project "GBC"
 	}
 
 	links {
+		"assimp",
 		"box2d",
 		"glad",
 		"glfw",

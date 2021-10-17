@@ -3,7 +3,7 @@
 #include "CameraComponent.h"
 #include "CircleRendererComponent.h"
 #include "IDComponent.h"
-#include "Mesh3DComponent.h"
+#include "Model3DComponent.h"
 #include "NativeScriptComponent.h"
 #include "RelationshipComponent.h"
 #include "SpriteRendererComponent.h"
@@ -22,7 +22,7 @@ namespace gbc
 	<
 		CameraComponent,
 		CircleRendererComponent,
-		Mesh3DComponent,
+		Model3DComponent,
 		NativeScriptComponent,
 		SpriteRendererComponent,
 		TransformComponent,
@@ -35,7 +35,7 @@ namespace gbc
 		CameraComponent,
 		CircleRendererComponent,
 		IDComponent,
-		Mesh3DComponent,
+		Model3DComponent,
 		NativeScriptComponent,
 		RelationshipComponent,
 		SpriteRendererComponent,

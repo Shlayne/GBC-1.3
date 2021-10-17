@@ -63,27 +63,27 @@ namespace gbc
 						selectedEntity = context->CreateEntity("Circle");
 						selectedEntity.Add<CircleRendererComponent>();
 					}
-					if (ImGui::BeginMenu("3D Mesh"))
+					if (ImGui::BeginMenu("3D Model"))
 					{
 						if (ImGui::MenuItem("Empty"))
 						{
-							selectedEntity = context->CreateEntity("Empty 3D Mesh");
-							selectedEntity.Add<Mesh3DComponent>();
+							selectedEntity = context->CreateEntity("Empty 3D Model");
+							selectedEntity.Add<Model3DComponent>();
 						}
 						if (ImGui::MenuItem("Cube"))
 						{
 							selectedEntity = context->CreateEntity("Cube");
-							selectedEntity.Add<Mesh3DComponent>().mesh = MeshFactory3D::CreateCube();
+							selectedEntity.Add<Model3DComponent>().model = Model3D::Create(MeshFactory3D::CreateCube(), MeshFactory3D::cubeID);
 						}
 						if (ImGui::MenuItem("Sphere"))
 						{
 							selectedEntity = context->CreateEntity("Sphere");
-							selectedEntity.Add<Mesh3DComponent>().mesh = MeshFactory3D::CreateSphere();
+							selectedEntity.Add<Model3DComponent>().model = Model3D::Create(MeshFactory3D::CreateSphere(), MeshFactory3D::sphereID);
 						}
 						if (ImGui::MenuItem("Plane"))
 						{
 							selectedEntity = context->CreateEntity("Plane");
-							selectedEntity.Add<Mesh3DComponent>().mesh = MeshFactory3D::CreatePlane();
+							selectedEntity.Add<Model3DComponent>().model = Model3D::Create(MeshFactory3D::CreatePlane(), MeshFactory3D::planeID);
 						}
 						ImGui::EndMenu();
 					}

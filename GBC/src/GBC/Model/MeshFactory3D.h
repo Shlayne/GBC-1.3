@@ -8,6 +8,10 @@ namespace gbc
 	class MeshFactory3D
 	{
 	public:
+		static constexpr std::wstring_view cubeID = L"GBC:Cube";
+		static constexpr std::wstring_view sphereID = L"GBC:Sphere";
+		static constexpr std::wstring_view planeID = L"GBC:Plane";
+	public:
 		// Creates a cube
 		static Ref<Mesh3D> CreateCube();
 		// Creates an icosphere

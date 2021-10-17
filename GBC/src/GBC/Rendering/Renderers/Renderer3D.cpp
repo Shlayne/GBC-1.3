@@ -52,8 +52,8 @@ namespace gbc
 		data.textures = new Ref<Texture2D>[data.maxTextures];
 
 		// Setup local buffers
-		data.maxVertices = 900000; // TODO: query drivers
-		data.maxIndices  = 600000; // TODO: query drivers
+		data.maxVertices = 9000000; // TODO: query drivers
+		data.maxIndices  = 6000000; // TODO: query drivers
 		data.localVertexBufferStart = new QuadVertex[data.maxVertices];
 		data.localVertexBufferCurrent = data.localVertexBufferStart;
 		data.localIndexBufferStart = new uint32_t[data.maxIndices];
@@ -162,6 +162,13 @@ namespace gbc
 			EndScene();
 	}
 
+	void Renderer3D::Submit(const Ref<Model3D>& model, const glm::mat4& transform)
+	{
+		// TODO: material textures and local mesh transforms
+		for (auto& mesh : model->GetMeshes())
+			Submit(mesh, transform, nullptr);
+	}
+
 	void Renderer3D::Submit(const Ref<Mesh3D>& mesh, const glm::mat4& transform, const Ref<Texture2D>& texture)
 	{
 		// Handle texture
@@ -179,27 +186,12 @@ namespace gbc
 		}
 
 		// Handle vertices
-		if (RendererAPI::GetAPI() == RendererAPI::API::OpenGL)
+		for (uint32_t i = 0; i < vertexCount; i++, data.localVertexBufferCurrent++)
 		{
-			for (uint32_t i = 0; i < vertexCount; i++, data.localVertexBufferCurrent++)
-			{
-				data.localVertexBufferCurrent->position = transform * glm::vec4(mesh->vertices[i].position, 1.0f);
-				data.localVertexBufferCurrent->normal = mesh->vertices[i].normal;
-				glm::vec2 texCoord = mesh->vertices[i].texCoord;
-				texCoord.y = 1.0f - texCoord.y;
-				data.localVertexBufferCurrent->texCoord = texCoord;
-				data.localVertexBufferCurrent->texIndex = texIndex;
-			}
-		}
-		else
-		{
-			for (uint32_t i = 0; i < vertexCount; i++, data.localVertexBufferCurrent++)
-			{
-				data.localVertexBufferCurrent->position = transform * glm::vec4(mesh->vertices[i].position, 1.0f);
-				data.localVertexBufferCurrent->normal = mesh->vertices[i].normal;
-				data.localVertexBufferCurrent->texCoord = mesh->vertices[i].texCoord;
-				data.localVertexBufferCurrent->texIndex = texIndex;
-			}
+			data.localVertexBufferCurrent->position = transform * glm::vec4(mesh->vertices[i].position, 1.0f);
+			data.localVertexBufferCurrent->normal = mesh->vertices[i].normal;
+			data.localVertexBufferCurrent->texCoord = mesh->vertices[i].texCoord;
+			data.localVertexBufferCurrent->texIndex = texIndex;
 		}
 
 		// Handle indices

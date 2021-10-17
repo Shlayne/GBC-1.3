@@ -16,7 +16,7 @@ namespace gbc
 	{
 		// Generic filters
 		CreateFilter(L"Texture", FileType::textures);
-		CreateFilter(L"3D Model", FileType::model3D);
+		CreateFilter(L"3D Model", FileType::model3Ds);
 
 		// GBC filters
 		CreateFilter(L"GBC Scene", FileType::scene);
@@ -81,7 +81,7 @@ namespace gbc
 
 	// Generic extensions
 	FILE_EXTENSION_DEFINITION(Texture, FileType::textures);
-	FILE_EXTENSION_DEFINITION(3DModel, FileType::model3D);
+	FILE_EXTENSION_DEFINITION(3DModel, FileType::model3Ds);
 
 	// GBC extensions
 	FILE_EXTENSION_DEFINITION(Scene, FileType::scene);

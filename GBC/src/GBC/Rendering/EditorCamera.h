@@ -34,7 +34,7 @@ namespace gbc
 		inline float GetYaw() const noexcept { return yaw; }
 
 		bool IsUsing() const;
-		inline void SetBlocked(bool blocked) noexcept { this->blocked = blocked; }
+		inline void SetBlocked(bool blocked, bool hovered) noexcept { this->blocked = blocked; this->hovered = hovered; }
 	private:
 		void RecalculateProjection();
 		void RecalculateView();
@@ -75,6 +75,7 @@ namespace gbc
 		float yaw = 0.0f;
 
 		bool blocked = false;
+		bool hovered = false;
 		bool activatorKeyPressed = false;
 		bool middleMouseButtonPressed = false;
 		bool leftMouseButtonPressed = false;

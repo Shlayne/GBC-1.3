@@ -26,6 +26,7 @@ workspace "GBC-1.3"
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 group "Dependencies"
+	include "GBC/vendor/assimp"
 	include "GBC/vendor/box2d"
 	include "GBC/vendor/glad"
 	include "GBC/vendor/glfw"

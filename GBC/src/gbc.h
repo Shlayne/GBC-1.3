@@ -60,7 +60,7 @@
 #include "GBC/Scene/ScriptableEntity.h"
 #include "GBC/Scene/Components/CameraComponent.h"
 #include "GBC/Scene/Components/IDComponent.h"
-#include "GBC/Scene/Components/Mesh3DComponent.h"
+#include "GBC/Scene/Components/Model3DComponent.h"
 #include "GBC/Scene/Components/NativeScriptComponent.h"
 #include "GBC/Scene/Components/SpriteRendererComponent.h"
 #include "GBC/Scene/Components/TagComponent.h"

@@ -4,10 +4,6 @@
 
 namespace gbc
 {
-	static constexpr std::wstring_view cubeID = L"GBC:Cube";
-	static constexpr std::wstring_view sphereID = L"GBC:Sphere";
-	static constexpr std::wstring_view planeID = L"GBC:Plane";
-
 	std::unordered_map<std::wstring_view, Ref<Mesh3D>> meshes;
 
 	Ref<Mesh3D> MeshFactory3D::CreateCube()
@@ -18,7 +14,6 @@ namespace gbc
 		Ref<Mesh3D> mesh = CreateRef<Mesh3D>();
 		auto& vertices = mesh->vertices;
 		auto& indices = mesh->indices;
-		mesh->filepath = cubeID;
 
 		auto AddFaceIndices = [&vertices, &indices]()
 		{
@@ -47,10 +42,15 @@ namespace gbc
 		static constexpr glm::vec3 normalBack  {  0.0f,  0.0f, -1.0f };
 		static constexpr glm::vec3 normalFront {  0.0f,  0.0f,  1.0f };
 
-		static constexpr glm::vec2 texCoordLeftBottom { 0.0f, 1.0f };
-		static constexpr glm::vec2 texCoordRightBottom{ 1.0f, 1.0f };
-		static constexpr glm::vec2 texCoordLeftTop	  { 0.0f, 0.0f };
-		static constexpr glm::vec2 texCoordRightTop	  { 1.0f, 0.0f };
+		glm::vec2 texCoordLeftBottom { 0.0f, 1.0f };
+		glm::vec2 texCoordRightBottom{ 1.0f, 1.0f };
+		glm::vec2 texCoordLeftTop	 { 0.0f, 0.0f };
+		glm::vec2 texCoordRightTop	 { 1.0f, 0.0f };
+		if (RendererAPI::GetAPI() == RendererAPI::API::OpenGL)
+		{
+			std::swap(texCoordLeftBottom, texCoordLeftTop);
+			std::swap(texCoordRightBottom, texCoordRightTop);
+		}
 
 		// Left face
 		AddFaceIndices();
@@ -132,7 +132,6 @@ namespace gbc
 		Ref<Mesh3D> mesh = CreateRef<Mesh3D>();
 		auto& vertices = mesh->vertices;
 		auto& indices = mesh->indices;
-		mesh->filepath = sphereID;
 
 		// https://www.opengl.org.ru/docs/pg/0208.html
 
@@ -197,7 +196,7 @@ namespace gbc
 		Ref<Mesh3D> mesh = CreateRef<Mesh3D>();
 		auto& vertices = mesh->vertices;
 		auto& indices = mesh->indices;
-		mesh->filepath = planeID;
+		//mesh->filepath = planeID;
 
 		static constexpr glm::vec3 positionLeftBottom { -0.5f, 0.0f,  0.5f };
 		static constexpr glm::vec3 positionRightBottom{  0.5f, 0.0f,  0.5f };
@@ -206,10 +205,15 @@ namespace gbc
 
 		static constexpr glm::vec3 normal{ 0.0f, 1.0f, 0.0f };
 
-		static constexpr glm::vec2 texCoordLeftBottom { 0.0f, 1.0f };
-		static constexpr glm::vec2 texCoordRightBottom{ 1.0f, 1.0f };
-		static constexpr glm::vec2 texCoordLeftTop    { 0.0f, 0.0f };
-		static constexpr glm::vec2 texCoordRightTop   { 1.0f, 0.0f };
+		glm::vec2 texCoordLeftBottom { 0.0f, 1.0f };
+		glm::vec2 texCoordRightBottom{ 1.0f, 1.0f };
+		glm::vec2 texCoordLeftTop    { 0.0f, 0.0f };
+		glm::vec2 texCoordRightTop   { 1.0f, 0.0f };
+		if (RendererAPI::GetAPI() == RendererAPI::API::OpenGL)
+		{
+			std::swap(texCoordLeftBottom, texCoordLeftTop);
+			std::swap(texCoordRightBottom, texCoordRightTop);
+		}
 
 		vertices.emplace_back(positionLeftBottom,  normal, texCoordLeftBottom);
 		vertices.emplace_back(positionRightBottom, normal, texCoordRightBottom);
