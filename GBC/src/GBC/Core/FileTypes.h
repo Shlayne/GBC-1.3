@@ -19,9 +19,11 @@ namespace gbc
 		static constexpr auto model3Ds = WideCharsToWideStringViews({ L"3d", L"3ds", L"3mf", L"ac", L"ac3d", L"acc", L"amf", L"ase", L"ask", L"b3d", L"blend", L"bsp", L"bvh", L"cob", L"csm", L"dae", L"dxf", L"enff", L"fbx", L"glb", L"gltf", L"hmp", L"ifc", L"ifczip", L"irr", L"irrmesh", L"lwo", L"lxo", L"lws", L"md2", L"md3", L"md5anim", L"md5camera", L"md5mesh", L"mdc", L"mdl", L"mesh", L"mot", L"ms3d", L"ndo", L"nff", L"obj", L"off", L"ogex", L"pk3", L"ply", L"prj", L"pmx", L"q3o", L"q3s", L"raw", L"scn", L"sib", L"smd", L"stl", L"step", L"stp", L"ter", L"uc", L"vta", L"x", L"x3d", L"x3db", L"xgl", L"zae", L"zgl" });
 
 		// GBC extensions
-		static constexpr std::wstring_view scene = L".gscene";
-		static constexpr std::wstring_view metadata = L".gmeta";
-		static constexpr std::wstring_view model4D = L".gobj4";
+		static constexpr std::wstring_view gProject = L".gproj";
+		static constexpr std::wstring_view gScene = L".gscene";
+		static constexpr std::wstring_view gModel3D = L".gobj3";
+		static constexpr std::wstring_view gModel4D = L".gobj4";
+		static constexpr std::wstring_view gTexture = L".gtex";
 	}
 
 	const wchar_t* GetFilter(std::wstring_view extension) noexcept;

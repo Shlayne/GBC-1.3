@@ -90,7 +90,7 @@ namespace gbc
 			[](void* payloadData) { return IsTextureFile(static_cast<const wchar_t*>(payloadData)); }))
 		{
 			std::filesystem::path filepath = static_cast<const wchar_t*>(payload->Data);
-			texture = Application::Get().GetAssetManager().GetOrLoadTexture(filepath);
+			texture = Application::Get().GetAssetManager().GetOrLoad<Texture2D>(filepath);
 		}
 	}
 
@@ -223,7 +223,7 @@ namespace gbc
 						[](void* payloadData) { return Is3DModelFile(static_cast<const wchar_t*>(payloadData)); }))
 					{
 						std::filesystem::path filepath = static_cast<const wchar_t*>(payload->Data);
-						component.model = Application::Get().GetAssetManager().GetOrLoad3DModel(filepath);
+						component.model = Application::Get().GetAssetManager().GetOrLoad<Model3D>(filepath);
 					}
 				});
 

@@ -12,7 +12,6 @@ namespace gbc
 		OpenGLTexture(const Ref<Framebuffer>& framebuffer, int32_t attachmentIndex);
 		virtual ~OpenGLTexture();
 
-		// TODO: Change this???
 		virtual void ChangeSampling(const TextureSpecification& specification) override;
 
 		virtual void Bind(uint32_t slot = 0) const override;
@@ -21,7 +20,9 @@ namespace gbc
 		virtual RendererID GetRendererID() const override { return rendererID; }
 		virtual const Ref<LocalTexture2D>& GetTexture() const override { return specification.texture; }
 		virtual const TextureSpecification& GetSpecification() const override { return specification; }
+
 		virtual UUID GetUUID() const override { return uuid; }
+		virtual const std::filesystem::path& GetFilepath() const override { return specification.texture->GetFilepath(); }
 
 		virtual void Update() override;
 		virtual bool IsFramebufferTexture() const override { return !ownsRendererID; }

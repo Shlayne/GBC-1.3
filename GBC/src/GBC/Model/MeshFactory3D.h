@@ -1,24 +1,20 @@
 #pragma once
 
 #include "GBC/Core/Core.h"
-#include "GBC/Model/Mesh3D.h"
+#include "GBC/Model/Model3D.h"
 
 namespace gbc
 {
 	class MeshFactory3D
 	{
 	public:
-		static constexpr std::wstring_view cubeID = L"GBC:Cube";
-		static constexpr std::wstring_view sphereID = L"GBC:Sphere";
-		static constexpr std::wstring_view planeID = L"GBC:Plane";
-	public:
-		// Creates a cube
-		static Ref<Mesh3D> CreateCube();
-		// Creates an icosphere
-		static Ref<Mesh3D> CreateSphere();
-		// Creates a plane
-		static Ref<Mesh3D> CreatePlane();
-		static Ref<Mesh3D> CreateFromID(std::wstring_view id);
+		static Ref<Model3D> CreateCapsule();
+		static Ref<Model3D> CreateCone();
+		static Ref<Model3D> CreateCube();
+		static Ref<Model3D> CreateCylinder();
+		static Ref<Model3D> CreatePlane();
+		static Ref<Model3D> CreateSphere();
+		static Ref<Model3D> CreateTorus();
 	private:
 		MeshFactory3D() = delete;
 		MeshFactory3D(const MeshFactory3D&) = delete;

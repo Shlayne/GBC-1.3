@@ -41,7 +41,7 @@ namespace gbc
 		void RefreshDirectory(Directory& subdirectory);
 	private:
 		void ShowDeleteConfirmationMessage();
-		void DeleteFileAndMedatata(const std::filesystem::path& filepath, bool isUnemptyDirectory);
+		void DeleteFileOrDirectory(const std::filesystem::path& filepath, bool isUnemptyDirectory);
 		void MakeCurrentItemDragDropSource(const std::filesystem::path& sourcePath);
 		void MakeCurrentItemDragDropTarget(const std::filesystem::path& targetPath);
 	private:

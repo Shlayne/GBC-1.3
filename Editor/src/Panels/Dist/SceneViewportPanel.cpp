@@ -44,7 +44,7 @@ namespace gbc
 			if (ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGuiHelper::AcceptDragDropPayload("CONTENT_BROWSER_ITEM",
-					[](void* payloadData) { return IsSceneFile(static_cast<const wchar_t*>(payloadData)); }))
+					[](void* payloadData) { return IsGSceneFile(static_cast<const wchar_t*>(payloadData)); }))
 				{
 					// TODO: calling this openScene method can caused unsaved work to be lost!
 					editorLayer->OpenSceneFile(static_cast<const wchar_t*>(payload->Data));

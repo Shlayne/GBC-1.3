@@ -27,7 +27,7 @@ namespace gbc
 
 		constexpr bool Has(Mods_ mods) const noexcept { return this->mods & mods; }
 		constexpr bool Has(uint8_t mods) const noexcept { return Has(static_cast<Mods_>(mods)); }
-		constexpr bool Are(Mods_ mods) const noexcept { return (this->mods & mods) == mods; }
+		constexpr bool Are(Mods_ mods) const noexcept { return (this->mods & mods) == this->mods; }
 		constexpr bool Are(uint8_t mods) const noexcept { return Are(static_cast<Mods_>(mods)); }
 
 		constexpr operator uint8_t() const noexcept { return mods; }

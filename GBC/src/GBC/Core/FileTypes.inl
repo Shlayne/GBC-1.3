@@ -116,9 +116,11 @@ namespace gbc
 	FILE_EXTENSION_DECLARATION(3DModel, FileType::model3Ds);
 
 	// GBC extensions
-	FILE_EXTENSION_DECLARATION(Scene, FileType::scene);
-	FILE_EXTENSION_DECLARATION(Metadata, FileType::metadata);
-	FILE_EXTENSION_DECLARATION(4DModel, FileType::model4D);
+	FILE_EXTENSION_DECLARATION(GProject, FileType::gProject);
+	FILE_EXTENSION_DECLARATION(GScene, FileType::gScene);
+	FILE_EXTENSION_DECLARATION(G3DModel, FileType::gModel3D);
+	FILE_EXTENSION_DECLARATION(G4DModel, FileType::gModel4D);
+	FILE_EXTENSION_DECLARATION(GTexture, FileType::gTexture);
 
 #undef FILE_EXTENSION_DECLARATION
 }

@@ -127,7 +127,7 @@ namespace gbc
 
 	void OpenGLTexture::Update()
 	{
-		if (ownsRendererID)
-			glTextureSubImage2D(rendererID, 0, 0, 0, specification.texture->GetWidth(), specification.texture->GetHeight(), format, type, specification.texture->GetData());
+		GBC_CORE_ASSERT(ownsRendererID, "A Texture2D must have a local texture to update!");
+		glTextureSubImage2D(rendererID, 0, 0, 0, specification.texture->GetWidth(), specification.texture->GetHeight(), format, type, specification.texture->GetData());
 	}
 }

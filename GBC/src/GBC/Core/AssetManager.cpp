@@ -1,62 +1,79 @@
 #include "gbcpch.h"
 #include "AssetManager.h"
+#include "GBC/Core/Core.h"
 #include "GBC/Core/FileTypes.h"
 #include "GBC/IO/CommonYAML.h"
 #include <yaml-cpp/yaml.h>
 
 namespace gbc
 {
+	// TODO: same as Assets directory
+	static const std::filesystem::path& projectFilepath = L"Projects/ProjectTEMP.gproj";
+
+	AssetManager::AssetManager()
+	{
+		// This is simply DeserializeProject
+		std::ifstream file(projectFilepath);
+		if (!file.is_open())
+			return;
+		YAML::Node data = YAML::Load(file);
+		file.close();
+
+		YAML::Node assetsNode = data["Assets"];
+		for (auto asset : assetsNode)
+		{
+			UUID uuid = asset.begin()->as<uint64_t>();
+			std::filesystem::path filepath = (++asset.begin())->as<std::string>();
+
+			//if ()
+			//assets
+		}
+	}
+
 	AssetManager::~AssetManager()
 	{
-		for (auto& [uuid, texture] : textures)
-			if (texture.second)
-				WriteTextureMeta(texture.first, AppendMetadataType(texture.first->GetTexture()->GetFilepath()));
+		// This is simply SerializeProject
+		std::ofstream file(projectFilepath);
+		if (!file.is_open())
+			return;
 
-		for (auto& [uuid, model] : model3Ds)
-			if (model.second)
-				Write3DModelMeta(model.first, AppendMetadataType(model.first->GetFilepath()));
+		YAML::Emitter out;
+		out << YAML::BeginMap << "Assets" << YAML::BeginSeq;
+		for (auto& [id, asset] : assets)
+			out << YAML::BeginSeq << id << asset->GetFilepath().string() << YAML::EndSeq;
+		out << YAML::EndSeq << YAML::EndMap;
+
+		file << out.c_str();
+		file.close();
 	}
 
-	Ref<Texture2D> AssetManager::GetOrLoadTexture(const std::filesystem::path& filepath)
+	template<typename T> Ref<T> GetOrLoad(UUID uuid) { /*static_assert(false);*/ return nullptr; }
+	template<typename T> Ref<T> GetOrLoad(const std::filesystem::path& filepath) { /*static_assert(false);*/ return nullptr; }
+
+	template<> Ref<Texture2D> AssetManager::GetOrLoad(UUID uuid) { return Ref<Texture2D>(static_cast<Texture2D*>(GetOrLoadImpl(uuid))); }
+	template<> Ref<Model3D> AssetManager::GetOrLoad(UUID uuid) { return Ref<Model3D>(static_cast<Model3D*>(GetOrLoadImpl(uuid))); }
+
+	template<> Ref<Texture2D> AssetManager::GetOrLoad(const std::filesystem::path& filepath) { return Ref<Texture2D>(static_cast<Texture2D*>(GetOrLoadImpl(filepath))); }
+	template<> Ref<Model3D> AssetManager::GetOrLoad(const std::filesystem::path& filepath) { return Ref<Model3D>(static_cast<Model3D*>(GetOrLoadImpl(filepath))); }
+
+	void* AssetManager::GetOrLoadImpl(UUID uuid)
 	{
-		if (auto it = textureFilepaths.find(filepath); it != textureFilepaths.end())
-			return textures.at(it->second).first;
-
-		if (!std::filesystem::exists(filepath))
-			return nullptr;
-
-		std::filesystem::path metaFilepath = AppendMetadataType(filepath);
-		if (!std::filesystem::exists(metaFilepath))
-			CreateDefaultTextureMeta(metaFilepath);
-
-		Ref<Texture2D> texture = ReadTexture(filepath, metaFilepath);
-		if (texture)
-		{
-			UUID uuid = texture->GetUUID();
-			textureFilepaths[filepath] = uuid;
-			textures[uuid] = { texture, false };
-		}
-		return texture;
+		auto it = assets.find(uuid);
+		return it != assets.end() ? it->second.get() : nullptr;
 	}
 
-	Ref<Texture2D> AssetManager::GetExistingTexture(UUID uuid)
+	void* AssetManager::GetOrLoadImpl(const std::filesystem::path& filepath)
 	{
-		auto it = textures.find(uuid);
-		return it != textures.end() ? it->second.first : nullptr;
+		// this really needs projects to be implemented first, but since I haven't
+		// done that yet, I'm going to temporarily store this in the scene file and
+		// clear the asset manager upon loading a scene
+
+
+
+		return nullptr;
 	}
 
-	bool AssetManager::UpdateSpecifications(UUID uuid, const TextureSpecification& specs)
-	{
-		if (auto it = textures.find(uuid); it != textures.end())
-		{
-			it->second.second = true;
-			it->second.first->ChangeSampling(specs);
-			return true;
-		}
-
-		return false;
-	}
-
+	/*
 	bool AssetManager::CreateDefaultTextureMeta(const std::filesystem::path& metaFilepath)
 	{
 		std::ofstream file(metaFilepath);
@@ -76,7 +93,8 @@ namespace gbc
 		file.close();
 		return true;
 	}
-
+	*/
+	/*
 	bool AssetManager::WriteTextureMeta(const Ref<Texture2D>& texture, const std::filesystem::path& metaFilepath)
 	{
 		std::ofstream file(metaFilepath);
@@ -98,7 +116,8 @@ namespace gbc
 		file.close();
 		return true;
 	}
-
+	*/
+	/*
 	Ref<Texture2D> AssetManager::ReadTexture(const std::filesystem::path& filepath, const std::filesystem::path& metaFilepath)
 	{
 		std::ifstream file(metaFilepath);
@@ -124,35 +143,8 @@ namespace gbc
 
 		return nullptr;
 	}
-
-	Ref<Model3D> AssetManager::GetOrLoad3DModel(const std::filesystem::path& filepath)
-	{
-		if (auto it = model3DFilepaths.find(filepath); it != model3DFilepaths.end())
-			return model3Ds.at(it->second).first;
-
-		if (!std::filesystem::exists(filepath))
-			return nullptr;
-
-		std::filesystem::path metaFilepath = AppendMetadataType(filepath);
-		if (!std::filesystem::exists(metaFilepath))
-			CreateDefault3DModelMeta(metaFilepath);
-
-		Ref<Model3D> model3D = Read3DModel(filepath, metaFilepath);
-		if (model3D)
-		{
-			UUID uuid = model3D->GetUUID();
-			textureFilepaths[filepath] = uuid;
-			model3Ds[uuid] = { model3D, false };
-		}
-		return model3D;
-	}
-
-	Ref<Model3D> AssetManager::GetExisting3DModel(UUID uuid)
-	{
-		auto it = model3Ds.find(uuid);
-		return it != model3Ds.end() ? it->second.first : nullptr;
-	}
-
+	*/
+	/*
 	bool AssetManager::CreateDefault3DModelMeta(const std::filesystem::path& metaFilepath)
 	{
 		std::ofstream file(metaFilepath);
@@ -168,7 +160,8 @@ namespace gbc
 		file.close();
 		return true;
 	}
-
+	*/
+	/*
 	bool AssetManager::Write3DModelMeta(const Ref<Model3D>& model3D, const std::filesystem::path& metaFilepath)
 	{
 		std::ofstream file(metaFilepath);
@@ -184,7 +177,8 @@ namespace gbc
 		file.close();
 		return true;
 	}
-
+	*/
+	/*
 	Ref<Model3D> AssetManager::Read3DModel(const std::filesystem::path& filepath, const std::filesystem::path& metaFilepath)
 	{
 		std::ifstream file(metaFilepath);
@@ -202,4 +196,5 @@ namespace gbc
 
 		return nullptr;
 	}
+	*/
 }

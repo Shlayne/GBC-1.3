@@ -19,9 +19,11 @@ namespace gbc
 		CreateFilter(L"3D Model", FileType::model3Ds);
 
 		// GBC filters
-		CreateFilter(L"GBC Scene", FileType::scene);
-		CreateFilter(L"GBC Metadata", FileType::metadata);
-		CreateFilter(L"GBC 4D Model", FileType::model4D);
+		CreateFilter(L"GBC Project", FileType::gProject);
+		CreateFilter(L"GBC Scene", FileType::gScene);
+		CreateFilter(L"GBC 3D Model", FileType::gModel3D);
+		CreateFilter(L"GBC 4D Model", FileType::gModel4D);
+		CreateFilter(L"GBC Texture", FileType::gTexture);
 	}
 
 	FilterGenerator::~FilterGenerator()
@@ -68,7 +70,7 @@ namespace gbc
 		return filepath.native() + extension.data();
 	}
 
-	std::filesystem::path& AppendTypeTo(std::filesystem::path & filepath, std::wstring_view extension)
+	std::filesystem::path& AppendTypeTo(std::filesystem::path& filepath, std::wstring_view extension)
 	{
 		return filepath = filepath.native() + extension.data();
 	}
@@ -84,7 +86,9 @@ namespace gbc
 	FILE_EXTENSION_DEFINITION(3DModel, FileType::model3Ds);
 
 	// GBC extensions
-	FILE_EXTENSION_DEFINITION(Scene, FileType::scene);
-	FILE_EXTENSION_DEFINITION(Metadata, FileType::metadata);
-	FILE_EXTENSION_DEFINITION(4DModel, FileType::model4D);
+	FILE_EXTENSION_DEFINITION(GProject, FileType::gProject);
+	FILE_EXTENSION_DEFINITION(GScene, FileType::gScene);
+	FILE_EXTENSION_DEFINITION(G3DModel, FileType::gModel3D);
+	FILE_EXTENSION_DEFINITION(G4DModel, FileType::gModel4D);
+	FILE_EXTENSION_DEFINITION(GTexture, FileType::gTexture);
 }

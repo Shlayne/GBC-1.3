@@ -426,7 +426,7 @@ namespace gbc
 	}
 
 	// OnComponentAdded
-	template<typename T> void Scene::OnComponentAdded(Entity entity, T& component) { static_assert(false); }
+	template<typename T> void Scene::OnComponentAdded(Entity entity, T& component) { /*static_assert(false);*/ }
 
 	template<> void Scene::OnComponentAdded<CircleRendererComponent>(Entity entity, CircleRendererComponent& component) {}
 	template<> void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
@@ -462,7 +462,7 @@ namespace gbc
 	}
 
 	// OnComponentRemoved
-	template<typename T> void Scene::OnComponentRemoved(Entity entity, T& component) { static_assert(false); }
+	template<typename T> void Scene::OnComponentRemoved(Entity entity, T& component) { /*static_assert(false);*/ }
 
 	template<> void Scene::OnComponentRemoved<CircleRendererComponent>(Entity entity, CircleRendererComponent& component) {}
 	template<> void Scene::OnComponentRemoved<CameraComponent>(Entity entity, CameraComponent& component) {}

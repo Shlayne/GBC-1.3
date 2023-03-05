@@ -1,5 +1,5 @@
 #include "gbcpch.h"
-#include "Model3D.h"
+#include "AssimpModelLoader3D.h"
 #include "GBC/Rendering/RendererAPI.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -7,29 +7,7 @@
 
 namespace gbc
 {
-	Model3D::Model3D(const Ref<Mesh3D>& mesh, const std::filesystem::path& id)
-		: filepath(id), meshes{ mesh } {}
-
-	Model3D::Model3D(const std::filesystem::path& filepath, UUID uuid)
-		: filepath(filepath), uuid(uuid)
-	{
-		Load();
-	}
-
-	Ref<Model3D> Model3D::Create(const Ref<Mesh3D>& mesh, const std::filesystem::path& id)
-	{
-		return CreateRef<Model3D>(mesh, id);
-	}
-
-	Ref<Model3D> Model3D::Create(const std::filesystem::path& filepath, UUID uuid)
-	{
-		auto model3D = CreateRef<Model3D>(filepath, uuid);
-		if (model3D->meshes.empty())
-			return nullptr;
-		return model3D;
-	}
-
-	void Model3D::Load()
+	Ref<Model3D> AssimpModelLoader3D::LoadModel(const std::filesystem::path& filepath)
 	{
 		Assimp::Importer importer;
 
@@ -40,27 +18,33 @@ namespace gbc
 		const aiScene* scene = importer.ReadFile(filepathString, flags);
 
 		if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-			return;
+			return nullptr;
 
-		ProcessNode(scene->mRootNode, scene);
+		Ref<Model3D> model3D;
+		ProcessNode(model3D, scene, scene->mRootNode);
+		return model3D;
 	}
 
-	void Model3D::ProcessNode(aiNode* node, const aiScene* scene)
+	void AssimpModelLoader3D::ProcessNode(Ref<Model3D>& model3D, const aiScene* scene, aiNode* node)
 	{
+		auto& meshes = model3D->GetMeshes();
+
+		// Process this node's mesh
 		for (uint32_t i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			meshes.push_back(CreateRef<Mesh3D>(ProcessMesh(mesh, scene)));
+			meshes.push_back(ProcessMesh(model3D, scene, mesh));
 		}
 
+		// Process this node's children's meshes
 		for (uint32_t i = 0; i < node->mNumChildren; i++)
-			ProcessNode(node->mChildren[i], scene);
+			ProcessNode(model3D, scene, node->mChildren[i]);
 	}
 
 	static constexpr glm::vec3 ToVec3(const aiVector3t<ai_real>& v) noexcept { return { v.x, v.y, v.z }; }
 	static constexpr glm::vec2 ToVec2(const aiVector3t<ai_real>& v) noexcept { return { v.x, v.y }; }
 
-	Mesh3D Model3D::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+	Mesh3D AssimpModelLoader3D::ProcessMesh(Ref<Model3D>& model3D, const aiScene* scene, aiMesh* mesh)
 	{
 		Mesh3D mesh3D;
 

@@ -165,15 +165,15 @@ namespace gbc
 	void Renderer3D::Submit(const Ref<Model3D>& model, const glm::mat4& transform)
 	{
 		// TODO: material textures and local mesh transforms
-		for (auto& mesh : model->GetMeshes())
+		for (const auto& mesh : model->GetMeshes())
 			Submit(mesh, transform, nullptr);
 	}
 
-	void Renderer3D::Submit(const Ref<Mesh3D>& mesh, const glm::mat4& transform, const Ref<Texture2D>& texture)
+	void Renderer3D::Submit(const Mesh3D& mesh, const glm::mat4& transform, const Ref<Texture2D>& texture)
 	{
 		// Handle texture
-		uint32_t vertexCount = static_cast<uint32_t>(mesh->vertices.size());
-		uint32_t indexCount = static_cast<uint32_t>(mesh->indices.size());
+		uint32_t vertexCount = static_cast<uint32_t>(mesh.vertices.size());
+		uint32_t indexCount = static_cast<uint32_t>(mesh.indices.size());
 		uint32_t texIndex = GetTexIndex(texture);
 
 		EnsureBatch(vertexCount, indexCount, texIndex);
@@ -188,15 +188,15 @@ namespace gbc
 		// Handle vertices
 		for (uint32_t i = 0; i < vertexCount; i++, data.localVertexBufferCurrent++)
 		{
-			data.localVertexBufferCurrent->position = transform * glm::vec4(mesh->vertices[i].position, 1.0f);
-			data.localVertexBufferCurrent->normal = mesh->vertices[i].normal;
-			data.localVertexBufferCurrent->texCoord = mesh->vertices[i].texCoord;
+			data.localVertexBufferCurrent->position = transform * glm::vec4(mesh.vertices[i].position, 1.0f);
+			data.localVertexBufferCurrent->normal = mesh.vertices[i].normal;
+			data.localVertexBufferCurrent->texCoord = mesh.vertices[i].texCoord;
 			data.localVertexBufferCurrent->texIndex = texIndex;
 		}
 
 		// Handle indices
 		for (uint32_t i = 0; i < indexCount; i++, data.localIndexBufferCurrent++)
-			*data.localIndexBufferCurrent = data.localVertexCount + mesh->indices[i];
+			*data.localIndexBufferCurrent = data.localVertexCount + mesh.indices[i];
 
 		// Update local counts
 		data.localVertexCount += vertexCount;

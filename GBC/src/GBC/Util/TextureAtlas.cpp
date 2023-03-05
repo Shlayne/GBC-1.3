@@ -25,7 +25,7 @@ namespace gbc
 			if (node != nullptr)
 				return node->position;
 			else
-				atlasTextureSize << 1; // Keep the texture size a power of 2
+				atlasTextureSize <<= 1; // Keep the texture size a power of 2
 		}
 
 		// If this happens, the texture can not fit on the GPU, this is very bad, but also very unlikely

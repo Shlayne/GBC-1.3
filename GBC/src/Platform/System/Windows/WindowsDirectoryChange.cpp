@@ -31,6 +31,8 @@ namespace gbc::DirectoryChange
 	{
 		if (this != &notifier)
 		{
+			Remove();
+
 			thread = std::move(notifier.thread);
 			closeHandle = notifier.closeHandle;
 			notifier.closeHandle = nullptr;

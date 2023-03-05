@@ -9,14 +9,17 @@
 *.inl text
 *.lua text
 *.bat text
-*.obj text
 
 *.exe binary
+
 *.png binary
 *.jpg binary
 *.jpeg binary
 *.jpe binary
 *.jfif binary
+
+*.obj text
+*.fbx binary
 
 *.gmeta text
 *.gscene text

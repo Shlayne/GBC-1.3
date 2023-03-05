@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GBC/Core/UUID.h"
+#include "GBC/Core/Asset.h"
 #include "GBC/Rendering/Framebuffer.h"
 #include "GBC/Rendering/LocalTexture2D.h"
 
@@ -59,7 +60,6 @@ namespace gbc
 		virtual RendererID GetRendererID() const = 0;
 		virtual const Ref<LocalTexture2D>& GetTexture() const = 0;
 		virtual const TextureSpecification& GetSpecification() const = 0;
-		virtual UUID GetUUID() const = 0;
 
 		// Call this when you want to update the internal
 		// texture after the the local texture has updated.
@@ -70,7 +70,7 @@ namespace gbc
 		virtual bool IsFramebufferTexture() const = 0;
 	};
 
-	class Texture2D : public Texture
+	class Texture2D : public Texture, public Asset
 	{
 	public:
 		static Ref<Texture2D> Create(const TextureSpecification& specification);

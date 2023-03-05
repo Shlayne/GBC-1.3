@@ -47,19 +47,12 @@ namespace gbc
 			{  0.5f,  0.5f, 0.0f, 1.0f },
 			{ -0.5f,  0.5f, 0.0f, 1.0f }
 		};
+		glm::vec2 quadVertexTexCoords[4]; // Don't initialize here
 
 		// Textures
 		Ref<Texture2D>* textures = nullptr;
 		uint32_t textureCount = 1;
 		uint32_t maxTextures = 0;
-
-		static constexpr glm::vec2 quadVertexTexCoords[4]
-		{
-			{ 0.0f, 1.0f },
-			{ 1.0f, 1.0f },
-			{ 1.0f, 0.0f },
-			{ 0.0f, 0.0f }
-		};
 
 		// Circles
 		Ref<Shader> circleShader;
@@ -139,6 +132,22 @@ namespace gbc
 		auto whiteTexture = LocalTexture2D::Create(1, 1, 4);
 		*(uint32_t*)whiteTexture->GetData() = 0xFFFFFFFF;
 		data.textures[0] = Texture2D::Create(whiteTexture);
+
+		// Setup vertex positions
+		if (RendererAPI::GetAPI() == RendererAPI::API::OpenGL)
+		{
+			data.quadVertexTexCoords[0] = { 0.0f, 0.0f };
+			data.quadVertexTexCoords[1] = { 1.0f, 0.0f };
+			data.quadVertexTexCoords[2] = { 1.0f, 1.0f };
+			data.quadVertexTexCoords[3] = { 0.0f, 1.0f };
+		}
+		else
+		{
+			data.quadVertexTexCoords[0] = { 0.0f, 1.0f };
+			data.quadVertexTexCoords[1] = { 1.0f, 1.0f };
+			data.quadVertexTexCoords[2] = { 1.0f, 0.0f };
+			data.quadVertexTexCoords[3] = { 0.0f, 0.0f };
+		}
 	}
 
 	void Renderer2D::Shutdown()
@@ -313,29 +322,13 @@ namespace gbc
 		}
 
 		// Handle vertices
-		if (RendererAPI::GetAPI() == RendererAPI::API::OpenGL)
+		for (uint32_t i = 0; i < data.quadVertexCount; i++, data.localQuadVertexBufferCurrent++)
 		{
-			for (uint32_t i = 0; i < data.quadVertexCount; i++, data.localQuadVertexBufferCurrent++)
-			{
-				data.localQuadVertexBufferCurrent->position = transform * data.quadVertexPositions[i];
-				data.localQuadVertexBufferCurrent->tintColor = color;
-				glm::vec2 texCoord = data.quadVertexTexCoords[i];
-				texCoord.y = 1.0f - texCoord.y;
-				data.localQuadVertexBufferCurrent->texCoord = texCoord;
-				data.localQuadVertexBufferCurrent->texIndex = texIndex;
-				data.localQuadVertexBufferCurrent->tilingFactor = tilingFactor;
-			}
-		}
-		else
-		{
-			for (uint32_t i = 0; i < data.quadVertexCount; i++, data.localQuadVertexBufferCurrent++)
-			{
-				data.localQuadVertexBufferCurrent->position = transform * data.quadVertexPositions[i];
-				data.localQuadVertexBufferCurrent->tintColor = color;
-				data.localQuadVertexBufferCurrent->texCoord = data.quadVertexTexCoords[i];
-				data.localQuadVertexBufferCurrent->texIndex = texIndex;
-				data.localQuadVertexBufferCurrent->tilingFactor = tilingFactor;
-			}
+			data.localQuadVertexBufferCurrent->position = transform * data.quadVertexPositions[i];
+			data.localQuadVertexBufferCurrent->tintColor = color;
+			data.localQuadVertexBufferCurrent->texCoord = data.quadVertexTexCoords[i];
+			data.localQuadVertexBufferCurrent->texIndex = texIndex;
+			data.localQuadVertexBufferCurrent->tilingFactor = tilingFactor;
 		}
 
 		// Update counts

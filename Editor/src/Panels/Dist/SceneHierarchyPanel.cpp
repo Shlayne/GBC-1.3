@@ -70,21 +70,22 @@ namespace gbc
 							selectedEntity = context->CreateEntity("Empty 3D Model");
 							selectedEntity.Add<Model3DComponent>();
 						}
-						if (ImGui::MenuItem("Cube"))
-						{
-							selectedEntity = context->CreateEntity("Cube");
-							selectedEntity.Add<Model3DComponent>().model = Model3D::Create(MeshFactory3D::CreateCube(), MeshFactory3D::cubeID);
-						}
-						if (ImGui::MenuItem("Sphere"))
-						{
-							selectedEntity = context->CreateEntity("Sphere");
-							selectedEntity.Add<Model3DComponent>().model = Model3D::Create(MeshFactory3D::CreateSphere(), MeshFactory3D::sphereID);
-						}
-						if (ImGui::MenuItem("Plane"))
-						{
-							selectedEntity = context->CreateEntity("Plane");
-							selectedEntity.Add<Model3DComponent>().model = Model3D::Create(MeshFactory3D::CreatePlane(), MeshFactory3D::planeID);
-						}
+
+						#define DEFAULT_MESH(name) do \
+							{ \
+								if (ImGui::MenuItem(#name)) \
+								{ \
+									selectedEntity = context->CreateEntity(#name); \
+									selectedEntity.Add<Model3DComponent>().model = MeshFactory3D::Create##name(); \
+								} \
+							} while (false)
+						DEFAULT_MESH(Capsule);
+						DEFAULT_MESH(Cone);
+						DEFAULT_MESH(Cube);
+						DEFAULT_MESH(Cylinder);
+						DEFAULT_MESH(Plane);
+						DEFAULT_MESH(Sphere);
+						DEFAULT_MESH(Torus);
 						ImGui::EndMenu();
 					}
 					if (ImGui::BeginMenu("2D Physics"))

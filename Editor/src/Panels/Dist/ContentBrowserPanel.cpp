@@ -24,8 +24,10 @@ namespace gbc
 		currentCachedDirectory = cachedDirectories.begin();
 
 		auto& assetManager = Application::Get().GetAssetManager();
-		directoryTexture = assetManager.GetOrLoadTexture(L"Resources/Icons/ContentBrowserPanel/DirectoryIcon.png");
-		fileTexture = assetManager.GetOrLoadTexture(L"Resources/Icons/ContentBrowserPanel/FileIcon.png");
+		directoryTexture = assetManager.GetOrLoad<Texture2D>(L"Resources/Icons/ContentBrowserPanel/DirectoryIcon.png");
+		fileTexture = assetManager.GetOrLoad<Texture2D>(L"Resources/Icons/ContentBrowserPanel/FileIcon.png");
+		directoryTexture = Texture2D::Create(LocalTexture2D::Create(L"Resources/Icons/ContentBrowserPanel/DirectoryIcon.png", 4));
+		fileTexture = Texture2D::Create(LocalTexture2D::Create(L"Resources/Icons/ContentBrowserPanel/FileIcon.png", 4));
 	}
 
 	void ContentBrowserPanel::OnImGuiRender()
@@ -587,10 +589,6 @@ namespace gbc
 		std::error_code error;
 		for (const auto& entry : std::filesystem::directory_iterator(*currentCachedDirectory, error))
 		{
-			// Hide the metadata
-			if (IsMetadataFilepath(entry.path()))
-				continue;
-
 			bool isDirectory = entry.is_directory();
 
 			if (isDirectory)
@@ -649,10 +647,10 @@ namespace gbc
 					{
 						for (const auto& file : files)
 							if (file.selected)
-								DeleteFileAndMedatata(file.path, isUnemptyDirectory);
+								DeleteFileOrDirectory(file.path, isUnemptyDirectory);
 					}
 					else
-						DeleteFileAndMedatata(tempFile.path, isUnemptyDirectory);
+						DeleteFileOrDirectory(tempFile.path, isUnemptyDirectory);
 				}
 #if GBC_ENABLE_LOGGING
 				catch (std::filesystem::filesystem_error& error)
@@ -674,16 +672,12 @@ namespace gbc
 		}
 	}
 
-	void ContentBrowserPanel::DeleteFileAndMedatata(const std::filesystem::path& filepath, bool isUnemptyDirectory)
+	void ContentBrowserPanel::DeleteFileOrDirectory(const std::filesystem::path& filepath, bool isUnemptyDirectory)
 	{
 		if (isUnemptyDirectory)
 			std::filesystem::remove_all(filepath);
 		else
 			std::filesystem::remove(filepath);
-
-		std::filesystem::path metaFilepath = AppendMetadataType(filepath);
-		if (std::filesystem::exists(metaFilepath))
-			std::filesystem::remove(metaFilepath);
 	}
 
 	void ContentBrowserPanel::MakeCurrentItemDragDropSource(const std::filesystem::path& sourcePath)

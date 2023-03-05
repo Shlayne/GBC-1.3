@@ -48,7 +48,7 @@ namespace gbc
 				if (!selectedFilepaths.empty() && ImGuiHelper::BeginTable("TextureProperties", 2))
 				{
 					auto& assetManager = Application::Get().GetAssetManager();
-					Ref<Texture2D> texture = assetManager.GetOrLoadTexture(*selectedFilepaths[lastSelectedFilepathIndex]);
+					Ref<Texture2D> texture = assetManager.GetOrLoad<Texture2D>(*selectedFilepaths[lastSelectedFilepathIndex]);
 					TextureSpecification specs = texture->GetSpecification();
 					bool changed = false;
 
@@ -86,9 +86,10 @@ namespace gbc
 						changed = true;
 					}
 
-					if (changed)
-						for (const auto& selectedFilepath : selectedFilepaths)
-							assetManager.UpdateSpecifications(assetManager.GetOrLoadTexture(*selectedFilepath)->GetUUID(), specs);
+					// TODO: reimplement this (the WHOLE FILE, not just this section)
+					//if (changed)
+					//	for (const auto& selectedFilepath : selectedFilepaths)
+					//		assetManager.UpdateSpecifications(assetManager.GetOrLoad<Texture2D>(*selectedFilepath)->GetUUID(), specs);
 
 					ImGuiHelper::EndTable();
 				}

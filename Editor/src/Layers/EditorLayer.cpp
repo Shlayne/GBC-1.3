@@ -8,6 +8,9 @@
 #include "Panels/Dist/ScenePropertiesPanel.h"
 #include "Panels/Dist/SceneViewportPanel.h"
 #include "Panels/Dist/TexturePropertiesPanel.h"
+#if !GBC_CONFIG_DIST
+	#include "Panels/Release/AssetManagerPanel.h"
+#endif
 #if GBC_ENABLE_STATS
 	#include "Panels/Release/RendererInfoPanel.h"
 	#include "Panels/Release/StasticsPanel.h"
@@ -29,8 +32,10 @@ namespace gbc
 		auto& window = application.GetWindow();
 		auto& assetManager = application.GetAssetManager();
 
-		playButtonTexture = assetManager.GetOrLoadTexture(L"Resources/Icons/PlayButton.png");
-		stopButtonTexture = assetManager.GetOrLoadTexture(L"Resources/Icons/StopButton.png");
+		//playButtonTexture = assetManager.GetOrLoad<Texture2D>(L"Resources/Icons/PlayButton.png");
+		//stopButtonTexture = assetManager.GetOrLoad<Texture2D>(L"Resources/Icons/StopButton.png");
+		playButtonTexture = Texture2D::Create(LocalTexture2D::Create(L"Resources/Icons/PlayButton.png", 4));
+		stopButtonTexture = Texture2D::Create(LocalTexture2D::Create(L"Resources/Icons/StopButton.png", 4));
 
 		FramebufferSpecification framebufferSpecification;
 		framebufferSpecification.width = window.GetWidth();
@@ -48,8 +53,11 @@ namespace gbc
 #if GBC_ENABLE_PROFILE_RUNTIME
 		AddPanel<ProfilingPanel>("Profiling");
 #endif
-#if GBC_ENABLE_STATS
+#if !GBC_CONFIG_DIST
+		AddPanel<AssetManagerPanel>("Asset Manager");
 		AddPanel<RendererInfoPanel>("Renderer Info");
+#endif
+#if GBC_ENABLE_STATS
 		AddPanel<StatisticsPanel>("Statistics");
 #endif
 		contentBrowserPanel = AddPanel<ContentBrowserPanel>("Content Browser");
@@ -410,7 +418,7 @@ namespace gbc
 
 		if (allowedDiscard)
 		{
-			auto filepath = FileDialog::OpenFile(GetFilter(FileType::scene), projectAssetDirectory);
+			auto filepath = FileDialog::OpenFile(GetGSceneFilter(), projectAssetDirectory);
 			if (!filepath.empty())
 				OpenSceneFile(filepath);
 		}
@@ -450,12 +458,13 @@ namespace gbc
 
 	void EditorLayer::SaveSceneAs()
 	{
-		auto filepath = FileDialog::SaveFile(GetFilter(FileType::scene), projectAssetDirectory);
+		auto filepath = FileDialog::SaveFile(GetGSceneFilter(), projectAssetDirectory);
 		if (!filepath.empty())
 		{
+			// TODO: "abstract" this into FileTypes
 			// Add extension to extensionless path
-			if (!IsSceneFilepath(filepath))
-				AppendSceneTypeTo(filepath);
+			if (!IsGSceneFilepath(filepath))
+				AppendGSceneTypeTo(filepath);
 
 			sceneFilepath = filepath;
 			SaveScene();

@@ -42,9 +42,9 @@ namespace gbc
 		{
 			GBC_PROFILE_SCOPE("glfwInit");
 
+			glfwSetErrorCallback(glfwErrorCallback);
 			int32_t initState = glfwInit();
 			GBC_CORE_ASSERT(initState == GLFW_TRUE, "Failed to initialize GLFW!");
-			glfwSetErrorCallback(glfwErrorCallback);
 		}
 
 		state.current.size = { specification.width, specification.height };

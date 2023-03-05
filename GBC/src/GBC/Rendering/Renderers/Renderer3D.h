@@ -14,7 +14,8 @@ namespace gbc
 		static void EndScene();
 	public:
 		static void Submit(const Ref<Model3D>& model, const glm::mat4& transform);
-		static void Submit(const Ref<Mesh3D>& mesh, const glm::mat4& transform, const Ref<Texture2D>& texture = nullptr);
+	private:
+		static void Submit(const Mesh3D& mesh, const glm::mat4& transform, const Ref<Texture2D>& texture);
 	private:
 		static void Reset();
 

@@ -93,11 +93,7 @@ namespace gbc
 		});
 		Serialize<Model3DComponent>(out, entity, "Model3DComponent", [](YAML::Emitter& out, Model3DComponent& component)
 		{
-			if (component.model && !component.model->GetFilepath().empty())
-			{
-				std::string filepath = component.model->GetFilepath().string();
-				out << YAML::Key << "Model" << YAML::Value << filepath;
-			}
+			out << YAML::Key << "Model" << YAML::Value << (component.model ? component.model->GetUUID() : UUID(0));
 		});
 		// TODO: how do this ???
 		//Serialize<NativeScriptComponent>(out, entity, "NativeScriptComponent", [](YAML::Emitter& out, NativeScriptComponent& component) {});
@@ -119,13 +115,11 @@ namespace gbc
 		Serialize<SpriteRendererComponent>(out, entity, "SpriteRendererComponent", [](YAML::Emitter& out, SpriteRendererComponent& component)
 		{
 			out << YAML::Key << "TintColor" << YAML::Value << component.color
-				<< YAML::Key << "TilingFactor" << YAML::Value << component.tilingFactor;
-
-			if (component.texture && component.texture->GetTexture())
-			{
-				std::string filepath = component.texture->GetTexture()->GetFilepath().string();
-				out << YAML::Key << "Texture" << YAML::Value << filepath.c_str();
-			}
+				<< YAML::Key << "TilingFactor" << YAML::Value << component.tilingFactor
+				//<< YAML::Key << "Texture" << YAML::Value << (component.texture ? component.texture->GetUUID() : UUID(0));
+				;
+			if (component.texture)
+				out << YAML::Key << "Texture" << YAML::Value << component.texture->GetFilepath().string();
 		});
 
 		Serialize<BoxCollider2DComponent>(out, entity, "BoxCollider2DComponent", [](YAML::Emitter& out, BoxCollider2DComponent& component)
@@ -172,7 +166,7 @@ namespace gbc
 
 		file << out.c_str();
 		file.close();
-		return true;
+		return !file.fail();
 	}
 
 	bool SceneSerializer::SerializeRuntime(const std::filesystem::path& filepath)
@@ -252,13 +246,8 @@ namespace gbc
 					auto& model3DComponent = entity.Add<Model3DComponent>();
 
 					if (auto modelNode = model3DComponentNode["Model"])
-					{
-						std::filesystem::path filepath = modelNode.as<std::string>();
-						if (filepath.native().starts_with(L"GBC:"))
-							model3DComponent.model = Model3D::Create(MeshFactory3D::CreateFromID(filepath.native()), filepath);
-						else
-							model3DComponent.model = assetManager.GetOrLoad3DModel(filepath);
-					}
+						if (UUID modelUUID = modelNode.as<std::uint64_t>())
+							model3DComponent.model = assetManager.GetOrLoad<Model3D>(modelUUID);
 				}
 				if (auto relationshipComponentNode = entityNode["RelationshipComponent"])
 				{
@@ -284,7 +273,12 @@ namespace gbc
 					spriteRendererComponent.tilingFactor = spriteRendererComponentNode["TilingFactor"].as<glm::vec2>();
 
 					if (auto textureNode = spriteRendererComponentNode["Texture"])
-						spriteRendererComponent.texture = assetManager.GetOrLoadTexture(textureNode.as<std::string>());
+					{
+						//if (UUID textureUUID = textureNode.as<uint64_t>())
+						//	spriteRendererComponent.texture = assetManager.GetOrLoad<Texture2D>(textureUUID);
+						std::string filepath = textureNode.as<std::string>();
+						spriteRendererComponent.texture = Texture2D::Create(LocalTexture2D::Create(filepath, 4));
+					}
 				}
 
 				if (auto boxCollider2DComponentNode = entityNode["BoxCollider2DComponent"])
@@ -307,7 +301,7 @@ namespace gbc
 		}
 
 		file.close();
-		return true;
+		return !file.fail();
 	}
 
 	bool SceneSerializer::DeserializeRuntime(const std::filesystem::path& filepath)
